@@ -1,11 +1,11 @@
-import type { RoomClosureReasonInterface } from 'src/interfaces/RoomClosureReasonInterface';
+import type { RoomClosureReasonInterface } from '@/interfaces/RoomClosureReasonInterface';
 import type { MutationTree } from 'vuex';
 import type { RoomClosureReasonsStateInterface } from '.';
 
 const mutation: MutationTree<RoomClosureReasonsStateInterface> = {
   SET_ROOM_CLOSURE_REASONS(
     state: RoomClosureReasonsStateInterface,
-    roomClosureReasons: RoomClosureReasonInterface[],
+    roomClosureReasons: RoomClosureReasonInterface[]
   ) {
     state.roomClosureReasons = roomClosureReasons;
   },

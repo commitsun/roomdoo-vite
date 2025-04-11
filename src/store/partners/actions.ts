@@ -1,11 +1,11 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
-import type { PartnerInterface } from 'src/interfaces/PartnerInterface';
+import type { PartnerInterface } from '@/interfaces/PartnerInterface';
 import axios, { type AxiosResponse } from 'axios';
-import type { TransactionInterface } from 'src/interfaces/TransactionInterface';
-import type { InvoiceInterface } from 'src/interfaces/InvoiceInterface';
-import type { PayloadPartnerRequestInterface } from 'src/interfaces/PayloadPartnerRequestInterface';
-import type { PartnerResultInterface } from 'src/interfaces/PartnerResultInterface';
+import type { TransactionInterface } from '@/interfaces/TransactionInterface';
+import type { InvoiceInterface } from '@/interfaces/InvoiceInterface';
+import type { PayloadPartnerRequestInterface } from '@/interfaces/PayloadPartnerRequestInterface';
+import type { PartnerResultInterface } from '@/interfaces/PartnerResultInterface';
 import type { StateInterface } from '../index';
 import type { PartnerStateInterface } from '.';
 
@@ -23,10 +23,19 @@ const actions: ActionTree<PartnerStateInterface, StateInterface> = {
     let birthdate = '';
     let documentExpeditionDate = '';
     if (payload.birthdate) {
-      birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(payload.birthdate.getMonth() + 1).toString().padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
+      birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(
+        payload.birthdate.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
     }
     if (payload.documentExpeditionDate) {
-      documentExpeditionDate = `${payload.documentExpeditionDate.getDate().toString().padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1).toString().padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
+      documentExpeditionDate = `${payload.documentExpeditionDate
+        .getDate()
+        .toString()
+        .padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
     }
     const send = {
       ...payload,
@@ -48,10 +57,19 @@ const actions: ActionTree<PartnerStateInterface, StateInterface> = {
     let birthdate = '';
     let documentExpeditionDate = '';
     if (payload.birthdate) {
-      birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(payload.birthdate.getMonth() + 1).toString().padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
+      birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(
+        payload.birthdate.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
     }
     if (payload.documentExpeditionDate) {
-      documentExpeditionDate = `${payload.documentExpeditionDate.getDate().toString().padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1).toString().padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
+      documentExpeditionDate = `${payload.documentExpeditionDate
+        .getDate()
+        .toString()
+        .padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
     }
     const send = {
       ...payload,
@@ -83,8 +101,8 @@ const actions: ActionTree<PartnerStateInterface, StateInterface> = {
       const filterByType = payload.isAgency
         ? 'agency'
         : payload.isCompany
-          ? 'company'
-          : 'individual';
+        ? 'company'
+        : 'individual';
       params += `&filterByType=${filterByType}`;
     }
 
@@ -141,10 +159,10 @@ const actions: ActionTree<PartnerStateInterface, StateInterface> = {
   },
   async checkDocumentNumber(
     context,
-    payload: { documentType: number; documentNumber: string; documentCountryId: number },
+    payload: { documentType: number; documentNumber: string; documentCountryId: number }
   ) {
     return api.get(
-      `/partners/check-doc-number/${payload.documentNumber}/${payload.documentType}/${payload.documentCountryId}`,
+      `/partners/check-doc-number/${payload.documentNumber}/${payload.documentType}/${payload.documentCountryId}`
     );
   },
 

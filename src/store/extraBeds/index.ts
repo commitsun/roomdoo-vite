@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { ExtraBedInterface } from 'src/interfaces/ExtraBedInterface';
+import type { ExtraBedInterface } from '@/interfaces/ExtraBedInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

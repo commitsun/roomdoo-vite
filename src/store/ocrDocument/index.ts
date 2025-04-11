@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { CheckinPartnerOcrInterface } from 'src/interfaces/CheckinPartnerOcrInterface';
+import type { CheckinPartnerOcrInterface } from '@/interfaces/CheckinPartnerOcrInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

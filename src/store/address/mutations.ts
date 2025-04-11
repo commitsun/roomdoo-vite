@@ -1,4 +1,4 @@
-import type { AddressInterface } from 'src/interfaces/AddressInterface';
+import type { AddressInterface } from '@/interfaces/AddressInterface';
 import type { MutationTree } from 'vuex';
 import type { AddressStateInterface } from '.';
 

@@ -1,4 +1,4 @@
-import type { RoomInterface } from 'src/interfaces/RoomInterfaces';
+import type { RoomInterface } from '@/interfaces/RoomInterfaces';
 import type { MutationTree } from 'vuex';
 import type { RoomsStateInterface } from '.';
 

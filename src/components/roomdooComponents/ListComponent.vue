@@ -73,7 +73,7 @@
 </template>
 
 <script lang="ts">
-import { type SchemaInterface } from 'src/interfaces/Lists';
+import { type SchemaInterface } from '@/interfaces/Lists';
 import { defineComponent, type Ref, onMounted, ref, watch } from 'vue';
 import ItemComponent from '@/components/roomdooComponents/ItemComponent.vue';
 import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';

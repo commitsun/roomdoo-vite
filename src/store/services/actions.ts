@@ -1,8 +1,8 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { ServiceInterface } from 'src/interfaces/ServiceInterface';
-import type { ServiceLineInterface } from 'src/interfaces/ServiceLineInterface';
-import type { PayloadTransactionReport } from 'src/interfaces/PayloadTransactionReport';
+import type { ServiceInterface } from '@/interfaces/ServiceInterface';
+import type { ServiceLineInterface } from '@/interfaces/ServiceLineInterface';
+import type { PayloadTransactionReport } from '@/interfaces/PayloadTransactionReport';
 import { api } from '@/plugins/axios';
 
 import type { StateInterface } from '../index';
@@ -44,7 +44,9 @@ const actions: ActionTree<ServiceStateInterface, StateInterface> = {
     return api.post(`/reservations/${service.reservationId}/services`, {
       productId: service.productId,
       serviceLines: service.serviceLines.map((el) => ({
-        date: `${(el.date as Date).getFullYear()}-${((el.date as Date).getMonth() + 1).toString().padStart(2, '0')}-${(el.date as Date).getDate().toString().padStart(2, '0')}`,
+        date: `${(el.date as Date).getFullYear()}-${((el.date as Date).getMonth() + 1)
+          .toString()
+          .padStart(2, '0')}-${(el.date as Date).getDate().toString().padStart(2, '0')}`,
         discount: el.discount,
         priceUnit: el.priceUnit,
         quantity: el.quantity,
@@ -57,7 +59,11 @@ const actions: ActionTree<ServiceStateInterface, StateInterface> = {
       serviceId: service.serviceId,
       serviceLines: service.serviceLines.map((el) => ({
         id: el.id,
-        date: `${new Date(el.date as Date).getFullYear()}-${(new Date(el.date as Date).getMonth() + 1).toString().padStart(2, '0')}-${new Date(el.date as Date).getDate().toString().padStart(2, '0')}`,
+        date: `${new Date(el.date as Date).getFullYear()}-${(
+          new Date(el.date as Date).getMonth() + 1
+        )
+          .toString()
+          .padStart(2, '0')}-${new Date(el.date as Date).getDate().toString().padStart(2, '0')}`,
         discount: el.discount,
         priceUnit: el.priceUnit,
         quantity: el.quantity,
@@ -72,8 +78,12 @@ const actions: ActionTree<ServiceStateInterface, StateInterface> = {
       params += `?pmsPropertyId=${payload.pmsPropertyId}`;
     }
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
     return api.get(`services/services-report${params}`);

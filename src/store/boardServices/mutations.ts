@@ -1,4 +1,4 @@
-import type { BoardServiceInterface } from 'src/interfaces/BoardServiceInterface';
+import type { BoardServiceInterface } from '@/interfaces/BoardServiceInterface';
 import type { MutationTree } from 'vuex';
 import type { BoardServicesStateInterface } from '.';
 

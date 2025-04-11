@@ -1,4 +1,4 @@
-import type { ExtraBedInterface } from 'src/interfaces/ExtraBedInterface';
+import type { ExtraBedInterface } from '@/interfaces/ExtraBedInterface';
 import type { MutationTree } from 'vuex';
 import type { ExtraBedsStateInterface } from '.';
 

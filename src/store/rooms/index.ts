@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { RoomInterface } from 'src/interfaces/RoomInterfaces';
+import type { RoomInterface } from '@/interfaces/RoomInterfaces';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

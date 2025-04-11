@@ -1,9 +1,9 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
-import type { CredentialsInterface } from 'src/interfaces/UserInterfaces';
+import type { CredentialsInterface } from '@/interfaces/UserInterfaces';
 import type { AxiosResponse } from 'axios';
-import type { ApiRestErrorInterface } from 'src/interfaces/ApiRestErrorInterface';
-import type { UserInfoInterface, UserNameInfoInterface } from 'src/interfaces/UserInfoInterface';
+import type { ApiRestErrorInterface } from '@/interfaces/ApiRestErrorInterface';
+import type { UserInfoInterface, UserNameInfoInterface } from '@/interfaces/UserInfoInterface';
 import type { StateInterface } from '../index';
 import type { UserStateInterface } from '.';
 import { dialogService } from '@/services/DialogService';
@@ -32,7 +32,7 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
             setCookie('userPhone', response.data.userPhone);
             setCookie(
               'availabilityRuleFields',
-              JSON.stringify(response.data.availabilityRuleFields),
+              JSON.stringify(response.data.availabilityRuleFields)
             );
             setCookie('userImageUrl', response.data.userImageUrl);
             localStorage.setItem('userImageBase64', response.data.userImageBase64 || '');
@@ -155,7 +155,7 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
 
   async changePassword(
     context,
-    payload: { userId: number; password: string; newPassword: string },
+    payload: { userId: number; password: string; newPassword: string }
   ) {
     return api
       .patch(`/users/p/${payload.userId}/change-password`, payload)
@@ -168,7 +168,7 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
               email: response.data.login,
               password: payload.newPassword,
             },
-            { root: true },
+            { root: true }
           );
         }
       });

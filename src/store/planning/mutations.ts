@@ -1,10 +1,10 @@
 import type { MutationTree } from 'vuex';
 
-import type { DailyBillingInterface } from 'src/interfaces/DailyBillingInterface';
-import type { DailyFreeRoomsInterface } from 'src/interfaces/DailyFreeRoomsInterface';
-import type { AlertsPerDayInterface } from 'src/interfaces/AlertsPerDayInterface';
-import type { PayloadReservationLineChangeInterface } from 'src/interfaces/PayloadReservationLineChangeInterface';
-import type { PlanningReservationLineInterface } from 'src/interfaces/PlanningReservationLineInterface';
+import type { DailyBillingInterface } from '@/interfaces/DailyBillingInterface';
+import type { DailyFreeRoomsInterface } from '@/interfaces/DailyFreeRoomsInterface';
+import type { AlertsPerDayInterface } from '@/interfaces/AlertsPerDayInterface';
+import type { PayloadReservationLineChangeInterface } from '@/interfaces/PayloadReservationLineChangeInterface';
+import type { PlanningReservationLineInterface } from '@/interfaces/PlanningReservationLineInterface';
 import type {
   PlanningHeaderInterface,
   PlanningInterface,
@@ -27,7 +27,7 @@ const mutation: MutationTree<PlanningStateInterface> = {
 
   SET_PLANNING_PRICES_RULES(
     state: PlanningStateInterface,
-    planningPricesRules: PlanningPricesRulesInterface[],
+    planningPricesRules: PlanningPricesRulesInterface[]
   ) {
     planningPricesRules.forEach((planningRow: PlanningPricesRulesInterface) => {
       planningRow.dates.forEach((date) => {
@@ -76,7 +76,7 @@ const mutation: MutationTree<PlanningStateInterface> = {
 
   SET_RESERVATION_LINES(
     state: PlanningStateInterface,
-    payload: PayloadReservationLineChangeInterface,
+    payload: PayloadReservationLineChangeInterface
   ) {
     // get lines to move
     const newOnes = payload.reservationLines.map((obj: PlanningReservationLineInterface) => ({
@@ -90,7 +90,7 @@ const mutation: MutationTree<PlanningStateInterface> = {
       // and the roomId equal to the target
       const indexOldOne = state.reservationLines.findIndex(
         (el: PlanningReservationLineInterface) =>
-          el.roomId === payload.roomIdTarget && el.date === newOne.date,
+          el.roomId === payload.roomIdTarget && el.date === newOne.date
       );
       let tempDate;
       // if the movement requires to adjust old lines
@@ -117,10 +117,10 @@ const mutation: MutationTree<PlanningStateInterface> = {
     payload: {
       reservationLineId: number;
       state: string;
-    },
+    }
   ) {
     const indexToModify = state.reservationLines.findIndex(
-      (el) => el.id === payload.reservationLineId,
+      (el) => el.id === payload.reservationLineId
     );
     if (indexToModify !== -1) {
       state.reservationLines[indexToModify].state = payload.state;
@@ -132,7 +132,7 @@ const mutation: MutationTree<PlanningStateInterface> = {
     payload: {
       folioId: number;
       pendingPayment: number;
-    },
+    }
   ) {
     const indexToModify = state.reservationLines.findIndex((el) => el.folioId === payload.folioId);
     if (indexToModify !== -1) {

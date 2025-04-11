@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { AgencyInterface } from 'src/interfaces/AgencyInterface';
+import type { AgencyInterface } from '@/interfaces/AgencyInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

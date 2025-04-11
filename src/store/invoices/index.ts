@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { InvoiceInterface } from 'src/interfaces/InvoiceInterface';
+import type { InvoiceInterface } from '@/interfaces/InvoiceInterface';
 import type { StateInterface } from '..';
 import state from './state';
 import actions from './actions';

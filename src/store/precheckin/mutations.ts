@@ -1,6 +1,6 @@
 import type { MutationTree } from 'vuex';
-import type { FolioPrecheckinInterface } from 'src/interfaces/FolioPrecheckinInterface';
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
+import type { FolioPrecheckinInterface } from '@/interfaces/FolioPrecheckinInterface';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 import type { PrecheckinStateInterface } from '.';
 
 const mutation: MutationTree<PrecheckinStateInterface> = {
@@ -14,13 +14,13 @@ const mutation: MutationTree<PrecheckinStateInterface> = {
   },
   SET_EXISTING_CHECKIN_PARTNER(
     state: PrecheckinStateInterface,
-    checkinPartner: CheckinPartnerInterface,
+    checkinPartner: CheckinPartnerInterface
   ) {
     state.existingCheckinPartner = checkinPartner;
 
     if (checkinPartner?.documentExpeditionDate) {
       state.existingCheckinPartner.documentExpeditionDate = new Date(
-        checkinPartner.documentExpeditionDate,
+        checkinPartner.documentExpeditionDate
       );
     }
     if (checkinPartner?.birthdate) {

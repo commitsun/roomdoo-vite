@@ -1,15 +1,15 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
 import axios from 'axios';
-import type { FolioApiInterface, FolioInterface } from 'src/interfaces/FolioInterface';
-import type { PayloadFolioInterface } from 'src/interfaces/PayloadFolioInterface';
-import type { TransactionInterface } from 'src/interfaces/TransactionInterface';
+import type { FolioApiInterface, FolioInterface } from '@/interfaces/FolioInterface';
+import type { PayloadFolioInterface } from '@/interfaces/PayloadFolioInterface';
+import type { TransactionInterface } from '@/interfaces/TransactionInterface';
 import type {
   PayloadAccountMoveInterface,
   PayloadInvoiceInterface,
   PayloadMailFolioInterface,
   PayloadMailInvoiceInterface,
-} from 'src/interfaces/PayloadAccountMoveInterface';
+} from '@/interfaces/PayloadAccountMoveInterface';
 import type { StateInterface } from '../index';
 import type { FoliosStateInterface } from '.';
 
@@ -21,8 +21,12 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
     let from = '';
     let params = `?pmsPropertyId=${payload.propertyId}`;
     if (payload?.dateStart && payload.dateEnd) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
     if (payload.filter || payload.filterByState) {
@@ -128,7 +132,11 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
     payload.reservations.forEach((reservation) => {
       reservation.services?.forEach((service) => {
         service.serviceLines.forEach((serviceLine) => {
-          const dateStr = `${(serviceLine.date as Date).getFullYear()}-${((serviceLine.date as Date).getMonth() + 1).toString().padStart(2, '0')}-${(serviceLine.date as Date).getDate().toString().padStart(2, '0')}`;
+          const dateStr = `${(serviceLine.date as Date).getFullYear()}-${(
+            (serviceLine.date as Date).getMonth() + 1
+          )
+            .toString()
+            .padStart(2, '0')}-${(serviceLine.date as Date).getDate().toString().padStart(2, '0')}`;
           serviceLine.date = dateStr;
         });
       });
@@ -149,7 +157,7 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
       partnerEmail: string;
       partnerPhone: string;
       partnerId: number;
-    },
+    }
   ) {
     return api.patch(`/folios/p/${payload.folioId}`, payload);
   },
@@ -170,13 +178,13 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
   },
   async cancelFolioReservations(
     context,
-    payload: { folioId: number; cancelReservations: boolean },
+    payload: { folioId: number; cancelReservations: boolean }
   ) {
     return api.patch(`/folios/p/${payload.folioId}`, payload);
   },
   async confirmFolioReservations(
     context,
-    payload: { folioId: number; confirmReservations: boolean },
+    payload: { folioId: number; confirmReservations: boolean }
   ) {
     return api.patch(`/folios/p/${payload.folioId}`, payload);
   },

@@ -1,4 +1,4 @@
-import type { AmenityInterface } from 'src/interfaces/AmenityInterface';
+import type { AmenityInterface } from '@/interfaces/AmenityInterface';
 import type { MutationTree } from 'vuex';
 import type { AmenitiesStateInterface } from '.';
 

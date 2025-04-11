@@ -1,7 +1,7 @@
 import type { Module } from 'vuex';
-import type { PartnerInterface } from 'src/interfaces/PartnerInterface';
-import type { TransactionInterface } from 'src/interfaces/TransactionInterface';
-import type { InvoiceInterface } from 'src/interfaces/InvoiceInterface';
+import type { PartnerInterface } from '@/interfaces/PartnerInterface';
+import type { TransactionInterface } from '@/interfaces/TransactionInterface';
+import type { InvoiceInterface } from '@/interfaces/InvoiceInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

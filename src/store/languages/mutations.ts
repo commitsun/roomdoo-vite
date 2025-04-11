@@ -1,4 +1,4 @@
-import type { LanguageInterface } from 'src/interfaces/LanguageInterface';
+import type { LanguageInterface } from '@/interfaces/LanguageInterface';
 
 import type { MutationTree } from 'vuex';
 import type { LanguageStateInterface } from '.';

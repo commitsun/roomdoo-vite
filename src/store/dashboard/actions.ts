@@ -1,15 +1,15 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { DashboardReservationsInterface } from 'src/interfaces/DashboardReservationsInterface';
-import type { PayloadDashboardRangeDatesInterface } from 'src/interfaces/PayloadDashboardRangeDatesInterface';
-import type { PayloadDashboardInterface } from 'src/interfaces/PayloadDashboardInterface';
-import type { DashboardNumericResponseInterface } from 'src/interfaces/DashboardNumericResponseInterface';
+import type { DashboardReservationsInterface } from '@/interfaces/DashboardReservationsInterface';
+import type { PayloadDashboardRangeDatesInterface } from '@/interfaces/PayloadDashboardRangeDatesInterface';
+import type { PayloadDashboardInterface } from '@/interfaces/PayloadDashboardInterface';
+import type { DashboardNumericResponseInterface } from '@/interfaces/DashboardNumericResponseInterface';
 import utils from '@/utils/dates';
-import type { DashboardStateRoomsInterface } from 'src/interfaces/DashboardStateRoomsInterface';
-import type { DashboardOccupiedRoomsInterface } from 'src/interfaces/DashboardOccupiedRoomsInterface';
-import type { DashboardDailyBillingsInterface } from 'src/interfaces/DashboardDailyBillingsInterface';
-import type { DashboardRssPostInterface } from 'src/interfaces/DashboardRssPostInterface';
-import type { FolioInterface } from 'src/interfaces/FolioInterface';
+import type { DashboardStateRoomsInterface } from '@/interfaces/DashboardStateRoomsInterface';
+import type { DashboardOccupiedRoomsInterface } from '@/interfaces/DashboardOccupiedRoomsInterface';
+import type { DashboardDailyBillingsInterface } from '@/interfaces/DashboardDailyBillingsInterface';
+import type { DashboardRssPostInterface } from '@/interfaces/DashboardRssPostInterface';
+import type { FolioInterface } from '@/interfaces/FolioInterface';
 import { api } from '@/plugins/axios';
 
 import type { StateInterface } from '../index';
@@ -18,8 +18,12 @@ import type { DashboardStateInterface } from '.';
 const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   async fetchPendingReservations(context, payload: PayloadDashboardRangeDatesInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
-    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
     params += `&dateFrom=${from}&dateTo=${to}`;
     return api
       .get(`/dashboard/pending-reservations${params}`)
@@ -29,8 +33,12 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   },
   async fetchStateRooms(context, payload: PayloadDashboardRangeDatesInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
-    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
     params += `&dateFrom=${from}&dateTo=${to}`;
     return api
       .get(`/dashboard/state-rooms${params}`)
@@ -40,8 +48,12 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   },
   async fetchOccupiedRooms(context, payload: PayloadDashboardRangeDatesInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
-    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
     params += `&dateFrom=${from}&dateTo=${to}`;
     return api
       .get(`/dashboard/occupied-rooms${params}`)
@@ -51,8 +63,12 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   },
   async fetchOccupiedRoomsComparative(context, payload: PayloadDashboardRangeDatesInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
-    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
     params += `&dateFrom=${from}&dateTo=${to}`;
     return api
       .get(`/dashboard/occupied-rooms${params}`)
@@ -62,8 +78,12 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   },
   async fetchDailyBillings(context, payload: PayloadDashboardRangeDatesInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
-    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
     params += `&dateFrom=${from}&dateTo=${to}`;
     return api
       .get(`/dashboard/daily-billings${params}`)
@@ -73,8 +93,12 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   },
   async fetchDailyBillingsComparative(context, payload: PayloadDashboardRangeDatesInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
-    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
     params += `&dateFrom=${from}&dateTo=${to}`;
     return api
       .get(`/dashboard/daily-billings${params}`)
@@ -84,8 +108,12 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   },
   async fetchReservationsBySaleChannel(context, payload: PayloadDashboardRangeDatesInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
-    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
     params += `&dateFrom=${from}&dateTo=${to}`;
     return api
       .get(`/dashboard/reservations-by-sale-channel${params}`)
@@ -98,9 +126,15 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
     const dateLastWeek = new Date(payload.date);
     const dateLastYear = utils.lastYearCorrespondingDate(payload.date);
     dateLastWeek.setDate(dateLastWeek.getDate() - 7);
-    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1).toString().padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
-    const dateLastWeekString = `${dateLastWeek.getFullYear()}-${(dateLastWeek.getMonth() + 1).toString().padStart(2, '0')}-${dateLastWeek.getDate().toString().padStart(2, '0')}`;
-    const dateLastYearString = `${dateLastYear.getFullYear()}-${(dateLastYear.getMonth() + 1).toString().padStart(2, '0')}-${dateLastYear.getDate().toString().padStart(2, '0')}`;
+    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
+    const dateLastWeekString = `${dateLastWeek.getFullYear()}-${(dateLastWeek.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastWeek.getDate().toString().padStart(2, '0')}`;
+    const dateLastYearString = `${dateLastYear.getFullYear()}-${(dateLastYear.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastYear.getDate().toString().padStart(2, '0')}`;
 
     return Promise.all([
       api
@@ -125,9 +159,15 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
     const dateLastWeek = new Date(payload.date);
     const dateLastYear = utils.lastYearCorrespondingDate(payload.date);
     dateLastWeek.setDate(dateLastWeek.getDate() - 7);
-    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1).toString().padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
-    const dateLastWeekString = `${dateLastWeek.getFullYear()}-${(dateLastWeek.getMonth() + 1).toString().padStart(2, '0')}-${dateLastWeek.getDate().toString().padStart(2, '0')}`;
-    const dateLastYearString = `${dateLastYear.getFullYear()}-${(dateLastYear.getMonth() + 1).toString().padStart(2, '0')}-${dateLastYear.getDate().toString().padStart(2, '0')}`;
+    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
+    const dateLastWeekString = `${dateLastWeek.getFullYear()}-${(dateLastWeek.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastWeek.getDate().toString().padStart(2, '0')}`;
+    const dateLastYearString = `${dateLastYear.getFullYear()}-${(dateLastYear.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastYear.getDate().toString().padStart(2, '0')}`;
 
     return Promise.all([
       api
@@ -157,14 +197,30 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
     const dateLastYearFrom = new Date(payload.dateFrom.getFullYear() - 1, 0, 1);
     const dateLastYearTo = new Date(payload.dateTo.getFullYear() - 1, 11, 31);
 
-    const dateFromString = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const dateToString = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const dateFromString = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const dateToString = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
 
-    const dateLastWeekFromString = `${dateLastWeekFrom.getFullYear()}-${(dateLastWeekFrom.getMonth() + 1).toString().padStart(2, '0')}-${dateLastWeekFrom.getDate().toString().padStart(2, '0')}`;
-    const dateLastWeekToString = `${dateLastWeekTo.getFullYear()}-${(dateLastWeekTo.getMonth() + 1).toString().padStart(2, '0')}-${dateLastWeekTo.getDate().toString().padStart(2, '0')}`;
+    const dateLastWeekFromString = `${dateLastWeekFrom.getFullYear()}-${(
+      dateLastWeekFrom.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${dateLastWeekFrom.getDate().toString().padStart(2, '0')}`;
+    const dateLastWeekToString = `${dateLastWeekTo.getFullYear()}-${(dateLastWeekTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastWeekTo.getDate().toString().padStart(2, '0')}`;
 
-    const dateLastYearFromString = `${dateLastYearFrom.getFullYear()}-${(dateLastYearFrom.getMonth() + 1).toString().padStart(2, '0')}-${dateLastYearFrom.getDate().toString().padStart(2, '0')}`;
-    const dateLastYearToString = `${dateLastYearTo.getFullYear()}-${(dateLastYearTo.getMonth() + 1).toString().padStart(2, '0')}-${dateLastYearTo.getDate().toString().padStart(2, '0')}`;
+    const dateLastYearFromString = `${dateLastYearFrom.getFullYear()}-${(
+      dateLastYearFrom.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${dateLastYearFrom.getDate().toString().padStart(2, '0')}`;
+    const dateLastYearToString = `${dateLastYearTo.getFullYear()}-${(dateLastYearTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastYearTo.getDate().toString().padStart(2, '0')}`;
 
     return Promise.all([
       api
@@ -174,14 +230,14 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
         }),
       api
         .get(
-          `/dashboard/adr${params}&dateFrom=${dateLastWeekFromString}&dateTo=${dateLastWeekToString}`,
+          `/dashboard/adr${params}&dateFrom=${dateLastWeekFromString}&dateTo=${dateLastWeekToString}`
         )
         .then((response: AxiosResponse<DashboardNumericResponseInterface>) => {
           context.commit('SET_DASHBOARD_ADR_LAST_WEEK', response.data.value);
         }),
       api
         .get(
-          `/dashboard/adr${params}&dateFrom=${dateLastYearFromString}&dateTo=${dateLastYearToString}`,
+          `/dashboard/adr${params}&dateFrom=${dateLastYearFromString}&dateTo=${dateLastYearToString}`
         )
         .then((response: AxiosResponse<DashboardNumericResponseInterface>) => {
           context.commit('SET_DASHBOARD_ADR_LAST_YEAR', response.data.value);
@@ -198,14 +254,30 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
     const dateLastYearFrom = new Date(payload.dateFrom.getFullYear() - 1, 0, 1);
     const dateLastYearTo = new Date(payload.dateTo.getFullYear() - 1, 11, 31);
 
-    const dateFromString = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const dateToString = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const dateFromString = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const dateToString = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
 
-    const dateLastWeekFromString = `${dateLastWeekFrom.getFullYear()}-${(dateLastWeekFrom.getMonth() + 1).toString().padStart(2, '0')}-${dateLastWeekFrom.getDate().toString().padStart(2, '0')}`;
-    const dateLastWeekToString = `${dateLastWeekTo.getFullYear()}-${(dateLastWeekTo.getMonth() + 1).toString().padStart(2, '0')}-${dateLastWeekTo.getDate().toString().padStart(2, '0')}`;
+    const dateLastWeekFromString = `${dateLastWeekFrom.getFullYear()}-${(
+      dateLastWeekFrom.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${dateLastWeekFrom.getDate().toString().padStart(2, '0')}`;
+    const dateLastWeekToString = `${dateLastWeekTo.getFullYear()}-${(dateLastWeekTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastWeekTo.getDate().toString().padStart(2, '0')}`;
 
-    const dateLastYearFromString = `${dateLastYearFrom.getFullYear()}-${(dateLastYearFrom.getMonth() + 1).toString().padStart(2, '0')}-${dateLastYearFrom.getDate().toString().padStart(2, '0')}`;
-    const dateLastYearToString = `${dateLastYearTo.getFullYear()}-${(dateLastYearTo.getMonth() + 1).toString().padStart(2, '0')}-${dateLastYearTo.getDate().toString().padStart(2, '0')}`;
+    const dateLastYearFromString = `${dateLastYearFrom.getFullYear()}-${(
+      dateLastYearFrom.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${dateLastYearFrom.getDate().toString().padStart(2, '0')}`;
+    const dateLastYearToString = `${dateLastYearTo.getFullYear()}-${(dateLastYearTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastYearTo.getDate().toString().padStart(2, '0')}`;
 
     return Promise.all([
       api
@@ -215,14 +287,14 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
         }),
       api
         .get(
-          `/dashboard/revpar${params}&dateFrom=${dateLastWeekFromString}&dateTo=${dateLastWeekToString}`,
+          `/dashboard/revpar${params}&dateFrom=${dateLastWeekFromString}&dateTo=${dateLastWeekToString}`
         )
         .then((response: AxiosResponse<DashboardNumericResponseInterface>) => {
           context.commit('SET_DASHBOARD_REVPAR_LAST_WEEK', response.data.value);
         }),
       api
         .get(
-          `/dashboard/revpar${params}&dateFrom=${dateLastYearFromString}&dateTo=${dateLastYearToString}`,
+          `/dashboard/revpar${params}&dateFrom=${dateLastYearFromString}&dateTo=${dateLastYearToString}`
         )
         .then((response: AxiosResponse<DashboardNumericResponseInterface>) => {
           context.commit('SET_DASHBOARD_REVPAR_LAST_YEAR', response.data.value);
@@ -234,9 +306,15 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
     const dateLastWeek = new Date(payload.date);
     const dateLastYear = utils.lastYearCorrespondingDate(payload.date);
     dateLastWeek.setDate(dateLastWeek.getDate() - 7);
-    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1).toString().padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
-    const dateLastWeekString = `${dateLastWeek.getFullYear()}-${(dateLastWeek.getMonth() + 1).toString().padStart(2, '0')}-${dateLastWeek.getDate().toString().padStart(2, '0')}`;
-    const dateLastYearString = `${dateLastYear.getFullYear()}-${(dateLastYear.getMonth() + 1).toString().padStart(2, '0')}-${dateLastYear.getDate().toString().padStart(2, '0')}`;
+    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
+    const dateLastWeekString = `${dateLastWeek.getFullYear()}-${(dateLastWeek.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastWeek.getDate().toString().padStart(2, '0')}`;
+    const dateLastYearString = `${dateLastYear.getFullYear()}-${(dateLastYear.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${dateLastYear.getDate().toString().padStart(2, '0')}`;
 
     return Promise.all([
       api
@@ -259,7 +337,9 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   async fetchOvernights(context, payload: PayloadDashboardInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
 
-    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1).toString().padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
+    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
     params += `&date=${dateToday}`;
     return api
       .get(`/dashboard/overnights${params}`)
@@ -270,7 +350,9 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   async fetchCancelledOvernights(context, payload: PayloadDashboardInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
 
-    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1).toString().padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
+    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
     params += `&date=${dateToday}`;
     return api
       .get(`/dashboard/cancelled-overnights${params}`)
@@ -281,7 +363,9 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   async fetchOverbookings(context, payload: PayloadDashboardInterface) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
 
-    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1).toString().padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
+    const dateToday = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
     params += `&date=${dateToday}`;
     return api
       .get(`/dashboard/overbookings${params}`)
@@ -296,11 +380,11 @@ const actions: ActionTree<DashboardStateInterface, StateInterface> = {
   },
   async fetchLastReceivedFolios(
     context,
-    payload: { pmsPropertyId: number; limit: number; offset: number },
+    payload: { pmsPropertyId: number; limit: number; offset: number }
   ) {
     return api
       .get(
-        `/dashboard/last-received-folios?pmsPropertyId=${payload.pmsPropertyId}&limit=${payload.limit}&offset=${payload.offset}`,
+        `/dashboard/last-received-folios?pmsPropertyId=${payload.pmsPropertyId}&limit=${payload.limit}&offset=${payload.offset}`
       )
       .then((response: AxiosResponse<FolioInterface[]>) => {
         context.commit('SET_DASHBOARD_LAST_RECEIVED_FOLIOS', response.data);

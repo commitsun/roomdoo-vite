@@ -1,4 +1,4 @@
-import type { UbicationInterface } from 'src/interfaces/UbicationInterface';
+import type { UbicationInterface } from '@/interfaces/UbicationInterface';
 import type { MutationTree } from 'vuex';
 import type { UbicationStateInterface } from '.';
 

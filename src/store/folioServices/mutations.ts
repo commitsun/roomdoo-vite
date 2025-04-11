@@ -1,4 +1,4 @@
-import type { ServiceInterface } from 'src/interfaces/ServiceInterface';
+import type { ServiceInterface } from '@/interfaces/ServiceInterface';
 import type { MutationTree } from 'vuex';
 import type { FolioServicesStateInterface } from '.';
 

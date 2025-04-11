@@ -120,7 +120,7 @@ import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 
-import { type TransactionInterface } from 'src/interfaces/TransactionInterface';
+import { type TransactionInterface } from '@/interfaces/TransactionInterface';
 
 import { useStore } from '@/store';
 import { dialogService } from '@/services/DialogService';

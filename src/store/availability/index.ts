@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { AvailabilityInterface } from 'src/interfaces/AvailabilityInterface';
+import type { AvailabilityInterface } from '@/interfaces/AvailabilityInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

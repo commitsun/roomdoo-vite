@@ -84,6 +84,7 @@ export default defineComponent({
           children: numberChildren.value,
         });
         await Promise.all([
+          // store.dispatch('folios/')
           store.dispatch('reservations/fetchReservation', reservation.value?.id),
           store.dispatch('checkinPartners/fetchCheckinPartners', reservation.value?.id),
         ]);

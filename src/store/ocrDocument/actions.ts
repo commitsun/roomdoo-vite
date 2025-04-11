@@ -1,7 +1,7 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
 import type { AxiosResponse } from 'axios';
-import type { CheckinPartnerOcrInterface } from 'src/interfaces/CheckinPartnerOcrInterface';
+import type { CheckinPartnerOcrInterface } from '@/interfaces/CheckinPartnerOcrInterface';
 import type { StateInterface } from '../index';
 import type { OcrDocumentStateInterface } from '.';
 
@@ -26,7 +26,7 @@ const actions: ActionTree<OcrDocumentStateInterface, StateInterface> = {
       return api
         .post(
           `/ocr-document/${payload.reservationId}/precheckin-reservation/${payload.token}`,
-          payload,
+          payload
         )
         .then((response: AxiosResponse<CheckinPartnerOcrInterface>) => {
           context.commit('SET_DOCUMENT_DATA', response.data);

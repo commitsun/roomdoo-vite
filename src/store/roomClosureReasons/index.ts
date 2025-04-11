@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { RoomClosureReasonInterface } from 'src/interfaces/RoomClosureReasonInterface';
+import type { RoomClosureReasonInterface } from '@/interfaces/RoomClosureReasonInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

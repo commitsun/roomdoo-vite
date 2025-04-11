@@ -1,11 +1,11 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
 
-import type { DailyBillingInterface } from 'src/interfaces/DailyBillingInterface';
-import type { AlertsPerDayInterface } from 'src/interfaces/AlertsPerDayInterface';
-import type { PayloadReservationLineChangeInterface } from 'src/interfaces/PayloadReservationLineChangeInterface';
-import type { PayloadReservationFragmentSwap } from 'src/interfaces/PayloadReservationFragmentSwap';
-import type { DateRangeInterface } from 'src/interfaces/DateRangeInterface';
+import type { DailyBillingInterface } from '@/interfaces/DailyBillingInterface';
+import type { AlertsPerDayInterface } from '@/interfaces/AlertsPerDayInterface';
+import type { PayloadReservationLineChangeInterface } from '@/interfaces/PayloadReservationLineChangeInterface';
+import type { PayloadReservationFragmentSwap } from '@/interfaces/PayloadReservationFragmentSwap';
+import type { DateRangeInterface } from '@/interfaces/DateRangeInterface';
 import { api } from '@/plugins/axios';
 import { ONE_DAY_IN_MS } from '../../utils/dates';
 
@@ -19,8 +19,12 @@ const actions: ActionTree<PlanningStateInterface, StateInterface> = {
     let params = '';
 
     if (payload.dateStart && payload.dateEnd && payload.propertyId && payload.availabilityPlanId) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params = `?dateFrom=${from}&dateTo=${to}&pmsPropertyId=${payload.propertyId}&availabilityPlanId=${payload.availabilityPlanId}`;
     }
     return api.get(`/calendar${params}`).then((response: AxiosResponse<PlanningInterface[]>) => {
@@ -33,8 +37,12 @@ const actions: ActionTree<PlanningStateInterface, StateInterface> = {
     let from = '';
     let params = '';
     if (payload.dateStart && payload.dateEnd && payload.roomIds && payload.propertyId) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params = `?dateFrom=${from}&dateTo=${to}&pmsPropertyId=${payload.propertyId}`;
       payload.roomIds.forEach((roomId) => {
         params += `&roomIds[]=${roomId}`;
@@ -59,8 +67,12 @@ const actions: ActionTree<PlanningStateInterface, StateInterface> = {
       payload.availabilityPlanId &&
       payload.pricelistId
     ) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params = `?dateFrom=${from}&dateTo=${to}&pmsPropertyId=${payload.propertyId}&availabilityPlanId=${payload.availabilityPlanId}&pricelistId=${payload.pricelistId}`;
     }
     return api
@@ -114,7 +126,9 @@ const actions: ActionTree<PlanningStateInterface, StateInterface> = {
       line.date = new Date(line.date);
       // build the api payload for updating all lines in block
       apiPayload.push({
-        date: `${line.date.getFullYear()}-${(line.date.getMonth() + 1).toString().padStart(2, '0')}-${line.date.getDate().toString().padStart(2, '0')}`,
+        date: `${line.date.getFullYear()}-${(line.date.getMonth() + 1)
+          .toString()
+          .padStart(2, '0')}-${line.date.getDate().toString().padStart(2, '0')}`,
         roomId: line.roomId,
         reservationLineId: line.id,
       });
@@ -150,7 +164,9 @@ const actions: ActionTree<PlanningStateInterface, StateInterface> = {
   },
 
   async swapReservationLines(context, payload: PayloadReservationFragmentSwap) {
-    const date = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1).toString().padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
+    const date = `${payload.date.getFullYear()}-${(payload.date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.date.getDate().toString().padStart(2, '0')}`;
 
     const { roomId, pmsPropertyId, targetReservationLineIds } = payload;
 
@@ -186,8 +202,12 @@ const actions: ActionTree<PlanningStateInterface, StateInterface> = {
     let params = '';
 
     if (payload.dateStart && payload.dateEnd) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params = `?dateFrom=${from}&dateTo=${to}&pmsPropertyId=${payload.propertyId}`;
     }
     return api
@@ -203,8 +223,12 @@ const actions: ActionTree<PlanningStateInterface, StateInterface> = {
     let params = '';
 
     if (payload.dateStart && payload.dateEnd) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params = `?dateFrom=${from}&dateTo=${to}&pmsPropertyId=${payload.propertyId}`;
     }
     return api
@@ -220,8 +244,12 @@ const actions: ActionTree<PlanningStateInterface, StateInterface> = {
     let params = '';
 
     if (payload.dateStart && payload.dateEnd) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params = `?dateFrom=${from}&dateTo=${to}&pmsPropertyId=${payload.propertyId}`;
     }
     return api

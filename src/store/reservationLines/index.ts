@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { ReservationLineInterface } from 'src/interfaces/ReservationLineInterface';
+import type { ReservationLineInterface } from '@/interfaces/ReservationLineInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

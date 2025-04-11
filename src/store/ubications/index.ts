@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { UbicationInterface } from 'src/interfaces/UbicationInterface';
+import type { UbicationInterface } from '@/interfaces/UbicationInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

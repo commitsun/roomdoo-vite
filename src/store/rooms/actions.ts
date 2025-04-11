@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
-import type { PayloadAvailabilityRoomsInterface } from 'src/interfaces/PayloadAvailabilityRooms';
+import type { PayloadAvailabilityRoomsInterface } from '@/interfaces/PayloadAvailabilityRooms';
 import type { StateInterface } from '../index';
 import type { RoomsStateInterface } from '.';
 
@@ -12,8 +12,14 @@ const actions: ActionTree<RoomsStateInterface, StateInterface> = {
   },
 
   async fetchRoomsByAvailability(context, payload: PayloadAvailabilityRoomsInterface) {
-    const from = `${payload.availabilityFrom.getFullYear()}-${(payload.availabilityFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.availabilityFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.availabilityTo.getFullYear()}-${(payload.availabilityTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.availabilityTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.availabilityFrom.getFullYear()}-${(
+      payload.availabilityFrom.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${payload.availabilityFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.availabilityTo.getFullYear()}-${(payload.availabilityTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.availabilityTo.getDate().toString().padStart(2, '0')}`;
     let currentLines = '';
     if (payload.currentLines) {
       payload.currentLines.forEach((el) => {

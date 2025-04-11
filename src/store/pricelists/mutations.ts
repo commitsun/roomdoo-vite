@@ -1,5 +1,5 @@
-import type { PricelistInterface } from 'src/interfaces/PricelistInterface';
-import type { PricelistItemInterface } from 'src/interfaces/PricelistItemInterface';
+import type { PricelistInterface } from '@/interfaces/PricelistInterface';
+import type { PricelistItemInterface } from '@/interfaces/PricelistItemInterface';
 
 import type { MutationTree } from 'vuex';
 import type { PricelistStateInterface } from '.';

@@ -1,5 +1,5 @@
-import type { ReservationInterface } from 'src/interfaces/ReservationInterface';
-import type { ReservationWizardStateInterface } from 'src/interfaces/ReservationWizardStateInterface';
+import type { ReservationInterface } from '@/interfaces/ReservationInterface';
+import type { ReservationWizardStateInterface } from '@/interfaces/ReservationWizardStateInterface';
 
 import type { MutationTree } from 'vuex';
 import type { ReservationStateInterface } from '.';
@@ -30,25 +30,25 @@ const mutation: MutationTree<ReservationStateInterface> = {
   },
   SET_PARTNER_RESERVATIONS_AS_HOST(
     state: ReservationStateInterface,
-    reservations: ReservationInterface[],
+    reservations: ReservationInterface[]
   ) {
     state.reservationsForPartnerAsHost = reservations;
   },
   SET_PARTNER_RESERVATIONS_AS_CUSTOMER(
     state: ReservationStateInterface,
-    reservations: ReservationInterface[],
+    reservations: ReservationInterface[]
   ) {
     state.reservationsForPartnerAsCustomer = reservations;
   },
   SET_TO_ASSIGN_RESERVATIONS(
     state: ReservationStateInterface,
-    reservations: ReservationInterface[],
+    reservations: ReservationInterface[]
   ) {
     state.reservationsToAssign = reservations;
   },
   SET_RESERVATION_WIZARD_STATE(
     state: ReservationStateInterface,
-    wizardState: ReservationWizardStateInterface,
+    wizardState: ReservationWizardStateInterface
   ) {
     state.reservationsWizardState = wizardState;
   },

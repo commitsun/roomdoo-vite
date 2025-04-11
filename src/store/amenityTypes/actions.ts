@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { AmenityTypeInterface } from 'src/interfaces/AmenityTypeInterface';
+import type { AmenityTypeInterface } from '@/interfaces/AmenityTypeInterface';
 import { api } from '@/plugins/axios';
 
 import type { StateInterface } from '../index';

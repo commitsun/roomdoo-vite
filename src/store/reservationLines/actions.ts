@@ -1,9 +1,9 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { ReservationLineInterface } from 'src/interfaces/ReservationLineInterface';
-import type { PayloadReservationDeletion } from 'src/interfaces/PayloadReservationDeletion';
-import type { PayloadReservationCreation } from 'src/interfaces/PayloadReservationCreation';
-import type { ReservationInterface } from 'src/interfaces/ReservationInterface';
+import type { ReservationLineInterface } from '@/interfaces/ReservationLineInterface';
+import type { PayloadReservationDeletion } from '@/interfaces/PayloadReservationDeletion';
+import type { PayloadReservationCreation } from '@/interfaces/PayloadReservationCreation';
+import type { ReservationInterface } from '@/interfaces/ReservationInterface';
 import { api } from '@/plugins/axios';
 
 import type { StateInterface } from '../index';
@@ -28,12 +28,12 @@ const actions: ActionTree<ReservationLinesStateInterface, StateInterface> = {
             context.commit('ADD_RESERVATION_LINES', response.data);
           });
       },
-      undefined as unknown,
+      undefined as unknown
     );
   },
   async deleteReservationLine(context, payload: PayloadReservationDeletion) {
     return api.delete(
-      `/reservations/${payload.reservationId}/reservation-lines/${payload.reservationLineId}`,
+      `/reservations/${payload.reservationId}/reservation-lines/${payload.reservationLineId}`
     );
   },
   async createReservationLine(context, payload: PayloadReservationCreation) {
@@ -41,7 +41,7 @@ const actions: ActionTree<ReservationLinesStateInterface, StateInterface> = {
   },
   async updateReservationLine(
     context,
-    payload: { reservationLineId: number; isReselling: boolean },
+    payload: { reservationLineId: number; isReselling: boolean }
   ) {
     return api.patch(`reservation-lines/p/${payload.reservationLineId}`, payload);
   },

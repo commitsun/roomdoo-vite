@@ -1,4 +1,4 @@
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 import type { AxiosResponse } from 'axios';
 import { isNIF } from 'better-dni';
 import { useRouter } from 'vue-router';

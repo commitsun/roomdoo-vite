@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { AmenityTypeInterface } from 'src/interfaces/AmenityTypeInterface';
+import type { AmenityTypeInterface } from '@/interfaces/AmenityTypeInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

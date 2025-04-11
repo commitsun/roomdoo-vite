@@ -1,6 +1,6 @@
 import type { Module } from 'vuex';
-import type { AvailabilityPlanInterface } from 'src/interfaces/AvailabilityPlanInterface';
-import type { AvailabilityPlanRuleInterface } from 'src/interfaces/AvailabilityPlanRuleInterface';
+import type { AvailabilityPlanInterface } from '@/interfaces/AvailabilityPlanInterface';
+import type { AvailabilityPlanRuleInterface } from '@/interfaces/AvailabilityPlanRuleInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

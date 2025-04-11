@@ -1,10 +1,10 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
 import type { AxiosResponse } from 'axios';
-import type { TransactionResultInterface } from 'src/interfaces/TransactionResultInterface';
-import type { PayloadTransactionRequestInterface } from 'src/interfaces/PayloadTransactionRequestInterface';
-import type { PayloadTransactionReport } from 'src/interfaces/PayloadTransactionReport';
-import type { TransactionInterface } from 'src/interfaces/TransactionInterface';
+import type { TransactionResultInterface } from '@/interfaces/TransactionResultInterface';
+import type { PayloadTransactionRequestInterface } from '@/interfaces/PayloadTransactionRequestInterface';
+import type { PayloadTransactionReport } from '@/interfaces/PayloadTransactionReport';
+import type { TransactionInterface } from '@/interfaces/TransactionInterface';
 import type { StateInterface } from '../index';
 import type { TransactionsStateInterface } from '.';
 
@@ -17,8 +17,12 @@ const actions: ActionTree<TransactionsStateInterface, StateInterface> = {
       params += `?pmsPropertyId=${payload.pmsPropertyId}`;
     }
     if (payload.dateStart && payload.dateEnd) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params += `&dateStart=${from}&dateEnd=${to}`;
     }
     if (payload.limit) {
@@ -49,7 +53,7 @@ const actions: ActionTree<TransactionsStateInterface, StateInterface> = {
       };
 
       const mappedTransactionTypeArray: string[] = payload.transactionType.map(
-        (element: number) => mappedTransactionType[element] || '',
+        (element: number) => mappedTransactionType[element] || ''
       );
 
       const transactionTypeString: string = mappedTransactionTypeArray.join(',');
@@ -94,8 +98,12 @@ const actions: ActionTree<TransactionsStateInterface, StateInterface> = {
       params += `?pmsPropertyId=${payload.pmsPropertyId}`;
     }
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
     return api.get(`transactions/transactions-report${params}`);
@@ -105,7 +113,7 @@ const actions: ActionTree<TransactionsStateInterface, StateInterface> = {
     payload: {
       originDownPaymentId: number;
       partnerId: number;
-    },
+    }
   ) {
     return api.post('/invoices', payload);
   },

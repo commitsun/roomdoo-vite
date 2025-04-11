@@ -16,7 +16,7 @@ const routes: RouteRecordRaw[] = [
   // {
   //   path: '/reset-password/:token([^/]+)?',
   //   component: () => import('layouts/LoginLayout.vue'),
-  //   children: [{ name: 'resetPassword', path: '', component: () => import('src/pages/ResetPasswordPage.vue') },
+  //   children: [{ name: 'resetPassword', path: '', component: () => import('@/pages/ResetPasswordPage.vue') },
   //   ],
   // },
   // // -----------------------------------------
@@ -90,10 +90,10 @@ const routes: RouteRecordRaw[] = [
     children: [{ name: 'test', path: '', component: () => import('@/pages/TestPage.vue') }],
   },
   // // 404
-  // { path: '/404', component: () => import('src/pages/Error404Page.vue') },
+  // { path: '/404', component: () => import('@/pages/Error404Page.vue') },
   // // Always leave this as last one,
   // // but you can also remove it
-  // { path: '/:catchAll(.*)*', component: () => import('src/pages/Error404Page.vue') },
+  // { path: '/:catchAll(.*)*', component: () => import('@/pages/Error404Page.vue') },
 ];
 
 export default routes;

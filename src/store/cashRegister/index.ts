@@ -1,6 +1,6 @@
 import type { Module } from 'vuex';
-import type { CashRegisterInterface } from 'src/interfaces/CashRegisterInterface';
-import type { CashRegisterResultInterface } from 'src/interfaces/CashRegisterResultInterface';
+import type { CashRegisterInterface } from '@/interfaces/CashRegisterInterface';
+import type { CashRegisterResultInterface } from '@/interfaces/CashRegisterResultInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

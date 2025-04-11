@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { CategoryInterface } from 'src/interfaces/CategoryInterface';
+import type { CategoryInterface } from '@/interfaces/CategoryInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

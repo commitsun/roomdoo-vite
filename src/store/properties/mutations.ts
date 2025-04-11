@@ -1,4 +1,4 @@
-import type { PropertyInterface } from 'src/interfaces/PropertyInterface';
+import type { PropertyInterface } from '@/interfaces/PropertyInterface';
 
 import type { MutationTree } from 'vuex';
 import type { PropertyStateInterface } from '.';

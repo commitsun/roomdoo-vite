@@ -1,17 +1,17 @@
 import type { MutationTree } from 'vuex';
-import type { DashboardReservationsInterface } from 'src/interfaces/DashboardReservationsInterface';
-import type { DashboardStateRoomsInterface } from 'src/interfaces/DashboardStateRoomsInterface';
-import type { DashboardReservationsBySaleChannelInterface } from 'src/interfaces/DashboardReservationsBySaleChannelInterface';
-import type { DashboardOccupiedRoomsInterface } from 'src/interfaces/DashboardOccupiedRoomsInterface';
-import type { DashboardDailyBillingsInterface } from 'src/interfaces/DashboardDailyBillingsInterface';
-import type { DashboardRssPostInterface } from 'src/interfaces/DashboardRssPostInterface';
-import type { FolioInterface } from 'src/interfaces/FolioInterface';
+import type { DashboardReservationsInterface } from '@/interfaces/DashboardReservationsInterface';
+import type { DashboardStateRoomsInterface } from '@/interfaces/DashboardStateRoomsInterface';
+import type { DashboardReservationsBySaleChannelInterface } from '@/interfaces/DashboardReservationsBySaleChannelInterface';
+import type { DashboardOccupiedRoomsInterface } from '@/interfaces/DashboardOccupiedRoomsInterface';
+import type { DashboardDailyBillingsInterface } from '@/interfaces/DashboardDailyBillingsInterface';
+import type { DashboardRssPostInterface } from '@/interfaces/DashboardRssPostInterface';
+import type { FolioInterface } from '@/interfaces/FolioInterface';
 import type { DashboardStateInterface } from '.';
 
 const mutation: MutationTree<DashboardStateInterface> = {
   SET_DASHBOARD_PENDING_RESERVATIONS(
     state: DashboardStateInterface,
-    reservations: DashboardReservationsInterface[],
+    reservations: DashboardReservationsInterface[]
   ) {
     reservations.forEach((reservation: DashboardReservationsInterface) => {
       reservation.date = new Date(reservation.date);
@@ -25,7 +25,7 @@ const mutation: MutationTree<DashboardStateInterface> = {
   },
   SET_DASHBOARD_STATE_ROOMS(
     state: DashboardStateInterface,
-    stateRooms: DashboardStateRoomsInterface[],
+    stateRooms: DashboardStateRoomsInterface[]
   ) {
     stateRooms.forEach((stateRoom: DashboardStateRoomsInterface) => {
       stateRoom.date = new Date(stateRoom.date);
@@ -39,7 +39,7 @@ const mutation: MutationTree<DashboardStateInterface> = {
   },
   SET_DASHBOARD_OCCUPIED_ROOMS(
     state: DashboardStateInterface,
-    occupiedRooms: DashboardOccupiedRoomsInterface[],
+    occupiedRooms: DashboardOccupiedRoomsInterface[]
   ) {
     occupiedRooms.forEach((occupiedRoom: DashboardOccupiedRoomsInterface) => {
       occupiedRoom.date = new Date(occupiedRoom.date);
@@ -53,7 +53,7 @@ const mutation: MutationTree<DashboardStateInterface> = {
   },
   SET_DASHBOARD_OCCUPIED_ROOMS_COMPARATIVE(
     state: DashboardStateInterface,
-    occupiedRooms: DashboardOccupiedRoomsInterface[],
+    occupiedRooms: DashboardOccupiedRoomsInterface[]
   ) {
     occupiedRooms.forEach((occupiedRoom: DashboardOccupiedRoomsInterface) => {
       occupiedRoom.date = new Date(occupiedRoom.date);
@@ -67,7 +67,7 @@ const mutation: MutationTree<DashboardStateInterface> = {
   },
   SET_DASHBOARD_DAILY_BILLINGS(
     state: DashboardStateInterface,
-    dailyBillings: DashboardDailyBillingsInterface[],
+    dailyBillings: DashboardDailyBillingsInterface[]
   ) {
     dailyBillings.forEach((dailyBilling: DashboardDailyBillingsInterface) => {
       dailyBilling.date = new Date(dailyBilling.date);
@@ -81,7 +81,7 @@ const mutation: MutationTree<DashboardStateInterface> = {
   },
   SET_DASHBOARD_DAILY_BILLINGS_COMPARATIVE(
     state: DashboardStateInterface,
-    dailyBillings: DashboardDailyBillingsInterface[],
+    dailyBillings: DashboardDailyBillingsInterface[]
   ) {
     dailyBillings.forEach((dailyBilling: DashboardDailyBillingsInterface) => {
       dailyBilling.date = new Date(dailyBilling.date);
@@ -95,7 +95,7 @@ const mutation: MutationTree<DashboardStateInterface> = {
   },
   SET_DASHBOARD_RESERVATIONS_BY_SALE_CHANNEL(
     state: DashboardStateInterface,
-    reservationsBySaleChannel: DashboardReservationsBySaleChannelInterface[],
+    reservationsBySaleChannel: DashboardReservationsBySaleChannelInterface[]
   ) {
     state.reservationsBySaleChannel = reservationsBySaleChannel;
   },
@@ -149,7 +149,7 @@ const mutation: MutationTree<DashboardStateInterface> = {
   },
   SET_DASHBOARD_CANCELLED_OVERNIGHTS_TODAY(
     state: DashboardStateInterface,
-    cancelledOvernightsToday: number,
+    cancelledOvernightsToday: number
   ) {
     state.cancelledOvernights = cancelledOvernightsToday;
   },

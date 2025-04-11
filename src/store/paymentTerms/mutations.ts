@@ -1,4 +1,4 @@
-import type { PaymentTermInterface } from 'src/interfaces/PaymentTermInterface';
+import type { PaymentTermInterface } from '@/interfaces/PaymentTermInterface';
 import type { MutationTree } from 'vuex';
 import type { PaymentTermStateInterface } from '.';
 

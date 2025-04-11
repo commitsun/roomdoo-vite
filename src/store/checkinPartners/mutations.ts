@@ -1,4 +1,4 @@
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 
 import type { MutationTree } from 'vuex';
 import type { CheckinPartnerStateInterface } from '.';
@@ -6,7 +6,7 @@ import type { CheckinPartnerStateInterface } from '.';
 const mutation: MutationTree<CheckinPartnerStateInterface> = {
   SET_CHECKIN_PARTNERS(
     state: CheckinPartnerStateInterface,
-    checkinpartners: CheckinPartnerInterface[],
+    checkinpartners: CheckinPartnerInterface[]
   ) {
     checkinpartners.forEach((checkinPartner) => {
       if (checkinPartner.birthdate) {
@@ -27,7 +27,7 @@ const mutation: MutationTree<CheckinPartnerStateInterface> = {
 
   SET_FOLIO_CHECKIN_PARTNERS(
     state: CheckinPartnerStateInterface,
-    folioCheckinPartners: CheckinPartnerInterface[],
+    folioCheckinPartners: CheckinPartnerInterface[]
   ) {
     folioCheckinPartners.forEach((checkinPartner) => {
       if (checkinPartner.birthdate) {
@@ -48,7 +48,7 @@ const mutation: MutationTree<CheckinPartnerStateInterface> = {
 
   SET_CHECKIN_PARTNER_BY_DOC_NUMBER(
     state: CheckinPartnerStateInterface,
-    checkinPartner: CheckinPartnerInterface,
+    checkinPartner: CheckinPartnerInterface
   ) {
     if (checkinPartner) {
       if (checkinPartner.birthdate) {

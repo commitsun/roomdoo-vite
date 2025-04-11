@@ -1,6 +1,6 @@
 import type { Module } from 'vuex';
-import type { PricelistInterface } from 'src/interfaces/PricelistInterface';
-import type { PricelistItemInterface } from 'src/interfaces/PricelistItemInterface';
+import type { PricelistInterface } from '@/interfaces/PricelistInterface';
+import type { PricelistItemInterface } from '@/interfaces/PricelistItemInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { CancelationRuleInterface } from 'src/interfaces/CancelationRuleInterface';
+import type { CancelationRuleInterface } from '@/interfaces/CancelationRuleInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

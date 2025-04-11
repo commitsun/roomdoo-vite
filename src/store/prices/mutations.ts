@@ -1,4 +1,4 @@
-import type { PriceInterface } from 'src/interfaces/PriceInterface';
+import type { PriceInterface } from '@/interfaces/PriceInterface';
 import type { MutationTree } from 'vuex';
 import type { PricesStateInterface } from '.';
 

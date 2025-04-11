@@ -1,9 +1,9 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
 import { api } from '@/plugins/axios';
-import type { PricelistInterface } from 'src/interfaces/PricelistInterface';
-import type { PayloadPricelistItemsInterface } from 'src/interfaces/PayloadPricelistItemsInterface';
-import type { PricelistItemInterface } from 'src/interfaces/PricelistItemInterface';
+import type { PricelistInterface } from '@/interfaces/PricelistInterface';
+import type { PayloadPricelistItemsInterface } from '@/interfaces/PayloadPricelistItemsInterface';
+import type { PricelistItemInterface } from '@/interfaces/PricelistItemInterface';
 import type { StateInterface } from '../index';
 import type { PricelistStateInterface } from '.';
 
@@ -13,7 +13,7 @@ const actions: ActionTree<PricelistStateInterface, StateInterface> = {
     payload: {
       pmsPropertyId: number;
       saleChannelId?: number;
-    },
+    }
   ) {
     let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
     if (payload.saleChannelId) {
@@ -28,7 +28,7 @@ const actions: ActionTree<PricelistStateInterface, StateInterface> = {
     context,
     payload: {
       pmsPropertyId: number;
-    },
+    }
   ) {
     const params = `?pmsPropertyId=${payload.pmsPropertyId}&daily=true`;
     return api.get(`/pricelists${params}`).then((response) => {
@@ -45,8 +45,12 @@ const actions: ActionTree<PricelistStateInterface, StateInterface> = {
     let from = '';
     let params = '';
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params = `?dateFrom=${from}&dateTo=${to}&pmsPropertyId=${payload.propertyId}`;
     }
     return api
@@ -67,7 +71,7 @@ const actions: ActionTree<PricelistStateInterface, StateInterface> = {
   },
   async createOrUpdatePricelistItems(
     _context,
-    payload: { pricelistId: number; pricelistItems: PricelistItemInterface[] },
+    payload: { pricelistId: number; pricelistItems: PricelistItemInterface[] }
   ) {
     return api.patch(`/pricelists/p/${payload.pricelistId}/pricelist-items`, payload);
   },
@@ -76,7 +80,7 @@ const actions: ActionTree<PricelistStateInterface, StateInterface> = {
     _context,
     payload: {
       pricelistItems: PricelistItemInterface[];
-    },
+    }
   ) {
     return api.post('/pricelists/batch-changes', payload);
   },

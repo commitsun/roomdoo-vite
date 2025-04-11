@@ -1,4 +1,4 @@
-import type { AvailabilityInterface } from 'src/interfaces/AvailabilityInterface';
+import type { AvailabilityInterface } from '@/interfaces/AvailabilityInterface';
 import type { MutationTree } from 'vuex';
 import type { AvailabilityStateInterface } from '.';
 

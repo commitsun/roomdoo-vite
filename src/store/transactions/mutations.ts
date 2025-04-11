@@ -1,30 +1,30 @@
-import type { TransactionInterface } from 'src/interfaces/TransactionInterface'
-import type { MutationTree } from 'vuex'
-import type { TransactionsStateInterface } from '.'
+import type { TransactionInterface } from '@/interfaces/TransactionInterface';
+import type { MutationTree } from 'vuex';
+import type { TransactionsStateInterface } from '.';
 
 const mutation: MutationTree<TransactionsStateInterface> = {
   SET_TRANSACTIONS(state: TransactionsStateInterface, transactions: TransactionInterface[]) {
-    state.transactions = transactions
+    state.transactions = transactions;
   },
   PUSH_TRANSACTIONS(state: TransactionsStateInterface, transactions: TransactionInterface[]) {
-    state.transactions.push(...transactions)
+    state.transactions.push(...transactions);
   },
   SET_TOTAL_AMOUNT(state: TransactionsStateInterface, total: number) {
-    state.total = total
+    state.total = total;
   },
   SET_TOTAL_TRANSACTIONS(state: TransactionsStateInterface, totalTransactions: number) {
-    state.totalTransactions = totalTransactions
+    state.totalTransactions = totalTransactions;
   },
 
   SET_CURRENT_TRANSACTION(state: TransactionsStateInterface, transaction: TransactionInterface) {
-    state.currentTransaction = transaction
+    state.currentTransaction = transaction;
   },
   REMOVE_CURRENT_TRANSACTION(state: TransactionsStateInterface) {
-    state.currentTransaction = null
+    state.currentTransaction = null;
   },
   REMOVE_TRANSACTIONS(state: TransactionsStateInterface) {
-    state.transactions = []
+    state.transactions = [];
   },
-}
+};
 
-export default mutation
+export default mutation;

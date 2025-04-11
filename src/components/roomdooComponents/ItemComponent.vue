@@ -118,8 +118,8 @@
 </template>
 
 <script lang="ts">
-import { type SchemaInterface } from 'src/interfaces/Lists';
 import { defineComponent, type Ref, ref, watch, computed } from 'vue';
+import { type SchemaInterface } from '@/interfaces/Lists';
 import Avatar from '@/components/roomdooComponents/Avatar.vue';
 import CheckboxComponent from '@/components/roomdooComponents/CheckboxComponent.vue';
 

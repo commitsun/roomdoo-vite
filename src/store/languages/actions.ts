@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
-import type { LanguageInterface } from 'src/interfaces/LanguageInterface';
+import type { LanguageInterface } from '@/interfaces/LanguageInterface';
 import type { AxiosResponse } from 'axios';
 import type { StateInterface } from '../index';
 import type { LanguageStateInterface } from '.';

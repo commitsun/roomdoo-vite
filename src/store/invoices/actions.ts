@@ -1,7 +1,7 @@
 import axios, { type AxiosResponse } from 'axios';
 import { api } from '@/plugins/axios';
-import type { InvoiceResultInterface } from 'src/interfaces/InvoiceResultInterface';
-import type { PayloadInvoiceRequestInterface } from 'src/interfaces/PayloadInvoiceRequestInterface';
+import type { InvoiceResultInterface } from '@/interfaces/InvoiceResultInterface';
+import type { PayloadInvoiceRequestInterface } from '@/interfaces/PayloadInvoiceRequestInterface';
 import type { ActionTree } from 'vuex';
 import type { InvoicesStateInterface } from '.';
 import type { StateInterface } from '..';
@@ -36,8 +36,12 @@ const actions: ActionTree<InvoicesStateInterface, StateInterface> = {
       params += `&paymentState=${payload.paymentState}`;
     }
     if (payload.dateStart && payload.dateEnd) {
-      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateStart.getFullYear()}-${(payload.dateStart.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateStart.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateEnd.getFullYear()}-${(payload.dateEnd.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params += `&dateStart=${from}&dateEnd=${to}`;
     }
     if (payload.originAgencyId) {
@@ -82,7 +86,7 @@ const actions: ActionTree<InvoicesStateInterface, StateInterface> = {
       emailAddresses: string[];
       isEmail: boolean;
       isPrint: boolean;
-    },
+    }
   ) {
     return api.post('/invoices/send-mail-print-invoices', payload);
   },

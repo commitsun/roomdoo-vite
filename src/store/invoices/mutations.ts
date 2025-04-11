@@ -1,4 +1,4 @@
-import type { InvoiceInterface } from 'src/interfaces/InvoiceInterface';
+import type { InvoiceInterface } from '@/interfaces/InvoiceInterface';
 import type { MutationTree } from 'vuex';
 import type { InvoicesStateInterface } from '.';
 

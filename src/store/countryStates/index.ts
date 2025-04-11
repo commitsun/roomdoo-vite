@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { CountryStatesInterface } from 'src/interfaces/CountryStatesInterface';
+import type { CountryStatesInterface } from '@/interfaces/CountryStatesInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

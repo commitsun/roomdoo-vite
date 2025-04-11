@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { PropertyInterface } from 'src/interfaces/PropertyInterface';
+import type { PropertyInterface } from '@/interfaces/PropertyInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

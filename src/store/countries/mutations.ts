@@ -1,4 +1,4 @@
-import type { CountryInterface } from 'src/interfaces/CountryInterface';
+import type { CountryInterface } from '@/interfaces/CountryInterface';
 
 import type { MutationTree } from 'vuex';
 import type { CountryStateInterface } from '.';

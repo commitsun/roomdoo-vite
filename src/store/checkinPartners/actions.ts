@@ -1,7 +1,7 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
-import type { PayLoadCheckinPartnerInterface } from 'src/interfaces/PayLoadCheckinPartnerInterface';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
+import type { PayLoadCheckinPartnerInterface } from '@/interfaces/PayLoadCheckinPartnerInterface';
 import type { AxiosResponse } from 'axios';
 import type { StateInterface } from '../index';
 import type { CheckinPartnerStateInterface } from '.';
@@ -34,10 +34,19 @@ const actions: ActionTree<CheckinPartnerStateInterface, StateInterface> = {
     let birthdate = '';
     let documentExpeditionDate = '';
     if (payload.birthdate) {
-      birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(payload.birthdate.getMonth() + 1).toString().padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
+      birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(
+        payload.birthdate.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
     }
     if (payload.documentExpeditionDate) {
-      documentExpeditionDate = `${payload.documentExpeditionDate.getDate().toString().padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1).toString().padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
+      documentExpeditionDate = `${payload.documentExpeditionDate
+        .getDate()
+        .toString()
+        .padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
     }
 
     const send = {
@@ -59,25 +68,25 @@ const actions: ActionTree<CheckinPartnerStateInterface, StateInterface> = {
 
   async onBoardCheckinPartner(
     context,
-    payload: { reservationId: number; checkinPartnerId: number },
+    payload: { reservationId: number; checkinPartnerId: number }
   ) {
     return api.patch(
-      `/reservations/p/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}?actionOnBoard=true`,
+      `/reservations/p/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}?actionOnBoard=true`
     );
   },
 
   async deleteCheckinPartner(
     context,
-    payload: { reservationId: number; checkinPartnerId: number },
+    payload: { reservationId: number; checkinPartnerId: number }
   ) {
     return api.delete(
-      `/reservations/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}`,
+      `/reservations/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}`
     );
   },
 
   async fetchPdfCheckin(context, payload: { reservationId: number; checkinPartnerId: number }) {
     return api.get(
-      `/reservations/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}/checkin-report`,
+      `/reservations/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}/checkin-report`
     );
   },
   async fetchPdfAllCheckins(context, reservationId: number) {

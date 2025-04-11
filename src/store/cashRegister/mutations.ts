@@ -1,5 +1,5 @@
-import type { CashRegisterInterface } from 'src/interfaces/CashRegisterInterface';
-import type { CashRegisterResultInterface } from 'src/interfaces/CashRegisterResultInterface';
+import type { CashRegisterInterface } from '@/interfaces/CashRegisterInterface';
+import type { CashRegisterResultInterface } from '@/interfaces/CashRegisterResultInterface';
 import type { MutationTree } from 'vuex';
 import type { CashRegisterStateInterface } from '.';
 

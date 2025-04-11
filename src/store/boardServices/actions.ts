@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { BoardServiceInterface } from 'src/interfaces/BoardServiceInterface';
+import type { BoardServiceInterface } from '@/interfaces/BoardServiceInterface';
 import { api } from '@/plugins/axios';
 import type { StateInterface } from '../index';
 import type { BoardServicesStateInterface } from '.';

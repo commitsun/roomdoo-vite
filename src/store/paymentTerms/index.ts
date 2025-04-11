@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { PaymentTermInterface } from 'src/interfaces/PaymentTermInterface';
+import type { PaymentTermInterface } from '@/interfaces/PaymentTermInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

@@ -1,6 +1,6 @@
 import type { Module } from 'vuex';
 
-import type { NotificationInterface } from 'src/interfaces/NotificationInterface';
+import type { NotificationInterface } from '@/interfaces/NotificationInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

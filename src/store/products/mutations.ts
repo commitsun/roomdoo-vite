@@ -1,4 +1,4 @@
-import type { ProductInterface } from 'src/interfaces/ProductInterface';
+import type { ProductInterface } from '@/interfaces/ProductInterface';
 import type { MutationTree } from 'vuex';
 import type { ProductsStateInterface } from '.';
 

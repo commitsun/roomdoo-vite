@@ -1,4 +1,4 @@
-import type { UsersInterface } from 'src/interfaces/UsersInterface';
+import type { UsersInterface } from '@/interfaces/UsersInterface';
 import type { MutationTree } from 'vuex';
 import type { UsersStateInterface } from '.';
 

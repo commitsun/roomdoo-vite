@@ -1,6 +1,6 @@
 import type { Module } from 'vuex';
-import type { ReservationInterface } from 'src/interfaces/ReservationInterface';
-import type { ReservationWizardStateInterface } from 'src/interfaces/ReservationWizardStateInterface';
+import type { ReservationInterface } from '@/interfaces/ReservationInterface';
+import type { ReservationWizardStateInterface } from '@/interfaces/ReservationWizardStateInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

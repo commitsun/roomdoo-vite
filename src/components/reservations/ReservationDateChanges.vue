@@ -309,21 +309,24 @@
   </div>
 </template>
 <script lang="ts">
-import type { ReservationLineInterface } from 'src/interfaces/ReservationLineInterface';
-import { useRoute } from 'vue-router';
 import { defineComponent, ref, onMounted, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
+
+import useVuelidate from '@vuelidate/core';
+import { required, decimal } from '@vuelidate/validators';
+
 import DatePicker from 'primevue/datepicker';
 import ToggleSwitch from 'primevue/toggleswitch';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 
-import useVuelidate from '@vuelidate/core';
-import { required, decimal } from '@vuelidate/validators';
-import { useStore } from '@/store';
+import type { ReservationLineInterface } from '@/interfaces/ReservationLineInterface';
+import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
+
 import utilsDates, { localeSpain, ONE_DAY_IN_MS } from '@/utils/dates';
 import { usePlanning } from '@/utils/usePlanning';
 import { dialogService } from '@/services/DialogService';
-import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
+import { useStore } from '@/store';
 
 interface CalendarChangeDatesInterface {
   date: Date;

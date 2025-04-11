@@ -1,12 +1,12 @@
-import type { FolioFilters } from 'src/interfaces/FolioFilters';
-import type { FolioInterface } from 'src/interfaces/FolioInterface';
-import type { MessageInterface } from 'src/interfaces/FolioMessageInterface';
-import type { FolioSaleLineInterface } from 'src/interfaces/FolioSaleLineInterface';
-import type { InvoiceInterface } from 'src/interfaces/InvoiceInterface';
-import type { TransactionInterface } from 'src/interfaces/TransactionInterface';
+import type { FolioFilters } from '@/interfaces/FolioFilters';
+import type { FolioInterface } from '@/interfaces/FolioInterface';
+import type { MessageInterface } from '@/interfaces/FolioMessageInterface';
+import type { FolioSaleLineInterface } from '@/interfaces/FolioSaleLineInterface';
+import type { InvoiceInterface } from '@/interfaces/InvoiceInterface';
+import type { TransactionInterface } from '@/interfaces/TransactionInterface';
 
 import type { MutationTree } from 'vuex';
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 import type { FoliosStateInterface } from '.';
 
 const mutation: MutationTree<FoliosStateInterface> = {

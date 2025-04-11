@@ -1,9 +1,9 @@
 import type { Module } from 'vuex';
-import type { DailyBillingInterface } from 'src/interfaces/DailyBillingInterface';
-import type { DailyFreeRoomsInterface } from 'src/interfaces/DailyFreeRoomsInterface';
-import type { AlertsPerDayInterface } from 'src/interfaces/AlertsPerDayInterface';
-import type { PlanningReservationLineInterface } from 'src/interfaces/PlanningReservationLineInterface';
-import type { AvailabilityPlanRuleInterface } from 'src/interfaces/AvailabilityPlanRuleInterface';
+import type { DailyBillingInterface } from '@/interfaces/DailyBillingInterface';
+import type { DailyFreeRoomsInterface } from '@/interfaces/DailyFreeRoomsInterface';
+import type { AlertsPerDayInterface } from '@/interfaces/AlertsPerDayInterface';
+import type { PlanningReservationLineInterface } from '@/interfaces/PlanningReservationLineInterface';
+import type { AvailabilityPlanRuleInterface } from '@/interfaces/AvailabilityPlanRuleInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

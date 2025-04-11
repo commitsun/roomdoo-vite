@@ -159,20 +159,22 @@
   </Transition>
 </template>
 <script lang="ts">
-import type { AxiosResponse } from 'axios';
 import { defineComponent, computed, onMounted, ref, type Ref, markRaw } from 'vue';
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
+import type { AxiosResponse } from 'axios';
 import { useRouter } from 'vue-router';
-import { useStore } from '@/store';
+
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
+
 import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
 import PrivateCheckinFlow from '@/components/checkinFlow/PrivateCheckinFlow.vue';
 import ReservationSegmentation from '@/components/reservations/ReservationSegmentation.vue';
-import { useCheckinPartner } from '@/utils/useCheckinPartner';
 import CheckinPartnerForm from '@/components/partners/PartnerForm.vue';
-import { dialogService } from '@/services/DialogService';
 import CheckinCardFlow from '@/components/checkinFlow/CheckinCardFlow.vue';
-import ReservationModifyAdultsAndChildren from '../ReservationModifyAdultsAndChildren.vue';
+import ReservationModifyAdultsAndChildren from '@/components/reservations/ReservationModifyAdultsAndChildren.vue';
 
+import { dialogService } from '@/services/DialogService';
+import { useCheckinPartner } from '@/utils/useCheckinPartner';
+import { useStore } from '@/store';
 export default defineComponent({
   components: {
     CustomIcon,

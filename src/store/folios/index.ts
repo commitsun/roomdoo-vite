@@ -1,12 +1,12 @@
 import type { Module } from 'vuex';
-import type { FolioInterface } from 'src/interfaces/FolioInterface';
-import type { TransactionInterface } from 'src/interfaces/TransactionInterface';
-import type { FolioSaleLineInterface } from 'src/interfaces/FolioSaleLineInterface';
-import type { InvoiceInterface } from 'src/interfaces/InvoiceInterface';
-import type { FolioFilters } from 'src/interfaces/FolioFilters';
-import type { FolioMessageInterface, MessageInterface } from 'src/interfaces/FolioMessageInterface';
+import type { FolioInterface } from '@/interfaces/FolioInterface';
+import type { TransactionInterface } from '@/interfaces/TransactionInterface';
+import type { FolioSaleLineInterface } from '@/interfaces/FolioSaleLineInterface';
+import type { InvoiceInterface } from '@/interfaces/InvoiceInterface';
+import type { FolioFilters } from '@/interfaces/FolioFilters';
+import type { FolioMessageInterface, MessageInterface } from '@/interfaces/FolioMessageInterface';
 
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

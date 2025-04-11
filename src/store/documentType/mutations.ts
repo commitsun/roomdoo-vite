@@ -1,4 +1,4 @@
-import type { DocumentTypeInterface } from 'src/interfaces/DocumentTypeInterface';
+import type { DocumentTypeInterface } from '@/interfaces/DocumentTypeInterface';
 
 import type { MutationTree } from 'vuex';
 import type { DocumentTypeStateInterface } from '.';

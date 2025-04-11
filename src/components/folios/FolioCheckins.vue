@@ -188,26 +188,6 @@
             isFromDrawer
           />
         </div>
-        <!-- <Modal
-          :show="showSegmentationModal[index]"
-          @close="showSegmentationModal[index] = false"
-          :headerColor="'#FFFFFF'"
-          class="segmentation-modal"
-        >
-          <template #header>
-            <div class="segmentation-modal-header">Segmentación {{ reservation?.name }}</div>
-          </template>
-          <template #body>
-            <div class="segmentation-modal-body">
-              <ReservationSegmentation
-                @close="showSegmentationModal[index] = false"
-                @closeAfterDoCheckin="showSegmentationModal[index] = false"
-                :parentName="'ReservationCheckinsTab'"
-                :checkinPartner="checkinPartnerSegmentation"
-              />
-            </div>
-          </template>
-        </Modal> -->
 
         <!-- <Modal
           :show="showAdultsModal[index]"
@@ -287,6 +267,7 @@ import CheckinPartnerForm from '@/components/checkinPartners/CheckinPartnerForm.
 import CheckinCardFlow from '@/components/checkinFlow/CheckinCardFlow.vue';
 import Reservation from '@/components/reservations/ReservationComponent.vue';
 import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
+import ReservationModifyAdultsAndChildren from '@/components/reservations/ReservationModifyAdultsAndChildren.vue';
 
 import { useCheckinPartner } from '@/utils/useCheckinPartner';
 import { useStore } from '@/store';
@@ -646,6 +627,24 @@ export default defineComponent({
       numberAdults.value = rsrvtion.adults ?? 0;
       numberChildren.value = rsrvtion.children ?? 0;
       showAdultsModal.value[index] = true;
+      if (store.state.reservations.reservations) {
+        void store.dispatch(
+          'reservations/setCurrentReservation',
+          store.state.reservations.reservations[index]
+        );
+      }
+      dialogService.open({
+        header: `Huéspedes ${reservation.value?.name}`,
+        content: markRaw(ReservationModifyAdultsAndChildren),
+        props: {
+          maxCapacity: store.state.rooms.rooms.find(
+            (el) => el.id === reservation.value?.preferredRoomId
+          )?.capacity,
+          isOpenFromGeneralTab: true,
+          adults: reservation.value?.adults,
+          children: reservation.value?.children,
+        },
+      });
     };
 
     const isForbiddenMoreAdults = (reservationRoomId: number) => {

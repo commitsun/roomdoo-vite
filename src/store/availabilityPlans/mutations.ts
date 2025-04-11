@@ -1,5 +1,5 @@
-import type { AvailabilityPlanInterface } from 'src/interfaces/AvailabilityPlanInterface';
-import type { AvailabilityPlanRuleInterface } from 'src/interfaces/AvailabilityPlanRuleInterface';
+import type { AvailabilityPlanInterface } from '@/interfaces/AvailabilityPlanInterface';
+import type { AvailabilityPlanRuleInterface } from '@/interfaces/AvailabilityPlanRuleInterface';
 
 import type { MutationTree } from 'vuex';
 import type { AvailabilityPlanStateInterface } from '.';
@@ -7,14 +7,14 @@ import type { AvailabilityPlanStateInterface } from '.';
 const mutation: MutationTree<AvailabilityPlanStateInterface> = {
   SET_AVAILABILITY_PLANS(
     state: AvailabilityPlanStateInterface,
-    availabilities: AvailabilityPlanInterface[],
+    availabilities: AvailabilityPlanInterface[]
   ) {
     state.availabilityPlans = availabilities;
   },
 
   SET_AVAILABILITY_PLAN_RULES(
     state: AvailabilityPlanStateInterface,
-    availabilityRules: AvailabilityPlanRuleInterface[],
+    availabilityRules: AvailabilityPlanRuleInterface[]
   ) {
     availabilityRules.forEach((line) => {
       line.date = new Date(line.date);
@@ -24,14 +24,14 @@ const mutation: MutationTree<AvailabilityPlanStateInterface> = {
 
   SET_ACTIVE_AVAILABILITY_PLAN(
     state: AvailabilityPlanStateInterface,
-    availabilityPlan: AvailabilityPlanInterface,
+    availabilityPlan: AvailabilityPlanInterface
   ) {
     state.activeAvailabilityPlan = availabilityPlan;
   },
 
   UPDATE_AVAIL_PLAN_RULE(
     state: AvailabilityPlanStateInterface,
-    availPlanRules: AvailabilityPlanRuleInterface,
+    availPlanRules: AvailabilityPlanRuleInterface
   ) {
     state.availabilityPlanRules.forEach((el) => {
       if (el.roomTypeId === availPlanRules.roomTypeId && el.date === availPlanRules.date) {

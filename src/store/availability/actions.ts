@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { AvailabilityInterface } from 'src/interfaces/AvailabilityInterface';
+import type { AvailabilityInterface } from '@/interfaces/AvailabilityInterface';
 import { api } from '@/plugins/axios';
 import type { StateInterface } from '../index';
 import type { AvailabilityStateInterface } from '.';
@@ -14,10 +14,14 @@ const actions: ActionTree<AvailabilityStateInterface, StateInterface> = {
       to: Date;
       currentLines: number[] | undefined;
       roomTypeId?: number;
-    },
+    }
   ) {
-    const from = `${payload.from.getFullYear()}-${(payload.from.getMonth() + 1).toString().padStart(2, '0')}-${payload.from.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.to.getFullYear()}-${(payload.to.getMonth() + 1).toString().padStart(2, '0')}-${payload.to.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.from.getFullYear()}-${(payload.from.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.from.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.to.getFullYear()}-${(payload.to.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.to.getDate().toString().padStart(2, '0')}`;
     let params = `?availabilityFrom=${from}&availabilityTo=${to}&pmsPropertyId=${payload.pmsPropertyId}`;
     if (payload.currentLines) {
       payload.currentLines.forEach((el) => {

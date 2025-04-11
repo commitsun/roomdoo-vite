@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { SaleChannelInterface } from 'src/interfaces/SaleChannelnterface';
+import type { SaleChannelInterface } from '@/interfaces/SaleChannelnterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

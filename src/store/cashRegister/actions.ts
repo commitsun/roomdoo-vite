@@ -1,9 +1,9 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
 import type { AxiosResponse } from 'axios';
-import type { CashRegisterInterface } from 'src/interfaces/CashRegisterInterface';
-import type { PayloadActionCash } from 'src/interfaces/PayloadActionCash';
-import type { CashRegisterResultInterface } from 'src/interfaces/CashRegisterResultInterface';
+import type { CashRegisterInterface } from '@/interfaces/CashRegisterInterface';
+import type { PayloadActionCash } from '@/interfaces/PayloadActionCash';
+import type { CashRegisterResultInterface } from '@/interfaces/CashRegisterResultInterface';
 import type { StateInterface } from '../index';
 import type { CashRegisterStateInterface } from '.';
 

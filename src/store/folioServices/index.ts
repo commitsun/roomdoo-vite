@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { ServiceInterface } from 'src/interfaces/ServiceInterface';
+import type { ServiceInterface } from '@/interfaces/ServiceInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

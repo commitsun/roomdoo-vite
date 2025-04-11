@@ -1,6 +1,6 @@
 import type { Module } from 'vuex';
-import type { FolioPrecheckinInterface } from 'src/interfaces/FolioPrecheckinInterface';
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
+import type { FolioPrecheckinInterface } from '@/interfaces/FolioPrecheckinInterface';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

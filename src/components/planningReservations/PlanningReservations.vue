@@ -486,20 +486,22 @@ import {
   type Ref,
   type ComponentPublicInstance,
 } from 'vue';
-// import { AvailabilityPlanRuleInterface } from 'src/interfaces/AvailabilityPlanRuleInterface';
-// import { PlanningReservationLineInterface } from 'src/interfaces/PlanningReservationLineInterface';
-// import { QPopupProxy } from 'quasar';
-import { useStore } from '../../store';
-import utilsDates, { localeSpain, ONE_DAY_IN_MS } from '../../utils/dates';
-import utils from '../../utils/utils';
-import TooltipRestriction from './TooltipRestriction.vue';
-import { usePlanning } from '../../utils/usePlanning';
-import CustomIcon from '../roomdooComponents/CustomIcon.vue';
-import { dialogService } from '@/services/DialogService';
+
+import DatePicker from 'primevue/datepicker';
+
 import type { PlanningReservationLineInterface } from '@/interfaces/PlanningReservationLineInterface';
 import type { AvailabilityPlanRuleInterface } from '@/interfaces/AvailabilityPlanRuleInterface';
-import DatePicker from 'primevue/datepicker';
 import type SplittedReservationBorderInterface from '@/interfaces/SplittedReservationBorderInterface';
+
+import TooltipRestriction from '@/components/planningReservations/TooltipRestriction.vue';
+import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
+
+import utilsDates, { localeSpain, ONE_DAY_IN_MS } from '@/utils/dates';
+import utils from '@/utils/utils';
+import { usePlanning } from '@/utils/usePlanning';
+
+import { dialogService } from '@/services/DialogService';
+import { useStore } from '@/store';
 
 export default defineComponent({
   components: {
@@ -560,12 +562,6 @@ export default defineComponent({
     const dateStartMonth = computed(
       () => localeValue.value.months[store.state.planning.dateStart.getMonth()]
     );
-
-    const hideQDateProxy = () => {
-      // if (qDateProxyPlanningReservations.value) {
-      //   qDateProxyPlanningReservations.value.hide();
-      // }
-    };
 
     const roomShortName = (roomId: number) => {
       const index = store.state.rooms.rooms.findIndex((el) => el.id === roomId);
@@ -1603,7 +1599,6 @@ export default defineComponent({
       outOfServiceTypeName,
       reservationColor,
       localeValue,
-      hideQDateProxy,
       openReservation,
       closeRightDrawer,
       onScreenResize,

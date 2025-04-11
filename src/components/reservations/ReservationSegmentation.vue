@@ -116,12 +116,12 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted, watch, type Ref } from 'vue';
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
-import { useStore } from '@/store';
-import { useCheckinPartner } from '@/utils/useCheckinPartner';
-import { dialogService } from '@/services/DialogService';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
 import CustomButton from '@/components/roomdooComponents/CustomButton.vue';
+import { useCheckinPartner } from '@/utils/useCheckinPartner';
+import { dialogService } from '@/services/DialogService';
+import { useStore } from '@/store';
 
 export default defineComponent({
   components: {

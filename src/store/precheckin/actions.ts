@@ -1,9 +1,9 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
 
-import type { PayloadFolioPrecheckinInterface } from 'src/interfaces/PayloadFolioPrecheckinInterface';
+import type { PayloadFolioPrecheckinInterface } from '@/interfaces/PayloadFolioPrecheckinInterface';
 import type { AxiosResponse } from 'axios';
-import type { CheckinPartnerInterface } from 'src/interfaces/CheckinPartnerInterface';
+import type { CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 import type { PrecheckinStateInterface } from '.';
 import type { StateInterface } from '../index';
 
@@ -29,13 +29,11 @@ const actions: ActionTree<PrecheckinStateInterface, StateInterface> = {
       documentNumber: string;
       token: string;
       reservationId: number;
-    },
+    }
   ) {
     return api
       .get(
-        `/reservations/${payload.reservationId}/precheckin-reservation/${payload.token}/partner/${
-          payload.documentType
-        }/${payload.documentNumber}`,
+        `/reservations/${payload.reservationId}/precheckin-reservation/${payload.token}/partner/${payload.documentType}/${payload.documentNumber}`
       )
       .then((response: AxiosResponse<CheckinPartnerInterface[]>) => {
         context.commit('SET_EXISTING_CHECKIN_PARTNER', response.data[0]);
@@ -47,7 +45,7 @@ const actions: ActionTree<PrecheckinStateInterface, StateInterface> = {
       reservationId: number;
       token: string;
       documentNumber?: string;
-    },
+    }
   ) {
     let params = '';
     if (payload.documentNumber) {
@@ -55,7 +53,7 @@ const actions: ActionTree<PrecheckinStateInterface, StateInterface> = {
     }
     return api
       .get(
-        `/reservations/${payload.reservationId}/precheckin/${payload.token}/folio-adults${params}`,
+        `/reservations/${payload.reservationId}/precheckin/${payload.token}/folio-adults${params}`
       )
       .then((response: AxiosResponse<boolean>) => {
         context.commit('SET_ANY_ADULTS_IN_FOLIO', response.data);
@@ -68,7 +66,7 @@ const actions: ActionTree<PrecheckinStateInterface, StateInterface> = {
       checkinPartner: CheckinPartnerInterface;
       token: string;
       reservationId: number;
-    },
+    }
   ) {
     const checkinPartner = {
       id: payload.checkinPartner.id,
@@ -209,7 +207,7 @@ const actions: ActionTree<PrecheckinStateInterface, StateInterface> = {
         `/reservations/${payload.reservationId}/precheckin-reservation/${
           payload.token
         }/checkin-partners/${payload.checkinPartner.id ?? ''}`,
-        checkinPartner,
+        checkinPartner
       )
       .then((response: AxiosResponse<CheckinPartnerInterface>) => {
         context.commit('SET_EXISTING_CHECKIN_PARTNER', response.data);

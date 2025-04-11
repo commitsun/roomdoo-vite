@@ -1,4 +1,4 @@
-import type { CategoryInterface } from 'src/interfaces/CategoryInterface';
+import type { CategoryInterface } from '@/interfaces/CategoryInterface';
 
 import type { MutationTree } from 'vuex';
 import type { CategoryStateInterface } from '.';

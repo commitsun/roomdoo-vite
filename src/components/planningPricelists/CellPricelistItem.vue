@@ -11,8 +11,8 @@
         validator.currentPrice.$error
           ? 'not-valid'
           : currentPrice !== oldPricelistItem?.price
-            ? 'modified'
-            : ''
+          ? 'modified'
+          : ''
       "
     >
       <div class="price">
@@ -30,7 +30,7 @@
                 pricelistItemId: pricelistItem.pricelistItemId,
                 price: currentPrice,
               },
-              ($event.target as HTMLInputElement).value,
+              ($event.target as HTMLInputElement).value
             )
           "
         />
@@ -53,8 +53,8 @@
         validator.currentQuota.$error
           ? 'not-valid'
           : currentQuota !== oldAvailabilityPlanRule?.quota
-            ? 'modified'
-            : ''
+          ? 'modified'
+          : ''
       "
       @click="($refs.inputQuota as HTMLInputElement).focus()"
     >
@@ -97,8 +97,8 @@
         validator.currentMaxAvailability.$error
           ? 'not-valid'
           : currentMaxAvailability !== oldAvailabilityPlanRule?.maxAvailability
-            ? 'modified'
-            : ''
+          ? 'modified'
+          : ''
       "
       @click="($refs.inputMaxAvail as HTMLInputElement).focus()"
     >
@@ -137,8 +137,8 @@
         validator.currentMinStay.$error
           ? 'not-valid'
           : currentMinStay !== oldAvailabilityPlanRule?.minStay
-            ? 'modified'
-            : ''
+          ? 'modified'
+          : ''
       "
       class="pricelist-avail-rule-item-row"
       @click="($refs.inputMinStay as HTMLInputElement).focus()"
@@ -178,8 +178,8 @@
         validator.currentMaxStay.$error
           ? 'not-valid'
           : currentMaxStay !== oldAvailabilityPlanRule?.maxStay
-            ? 'modified'
-            : ''
+          ? 'modified'
+          : ''
       "
       class="pricelist-avail-rule-item-row"
       @click="($refs.inputMaxStay as HTMLInputElement).focus()"
@@ -219,8 +219,8 @@
         validator.currentMaxStayArrival.$error
           ? 'not-valid'
           : currentMaxStayArrival !== oldAvailabilityPlanRule?.maxStayArrival
-            ? 'modified'
-            : ''
+          ? 'modified'
+          : ''
       "
       class="pricelist-avail-rule-item-row"
       @click="($refs.inputMaxStayArrival as HTMLInputElement).focus()"
@@ -260,8 +260,8 @@
         validator.currentMinStayArrival.$error
           ? 'not-valid'
           : currentMinStayArrival !== oldAvailabilityPlanRule?.minStayArrival
-            ? 'modified'
-            : ''
+          ? 'modified'
+          : ''
       "
       class="pricelist-avail-rule-item-row"
       @click="($refs.inputMinStayArrival as HTMLInputElement).focus()"
@@ -440,13 +440,13 @@
   </div>
 </template>
 <script lang="ts">
-import { type AvailabilityPlanRuleInterface } from 'src/interfaces/AvailabilityPlanRuleInterface';
-import { type PricelistItemInterface } from 'src/interfaces/PricelistItemInterface';
+import { type AvailabilityPlanRuleInterface } from '@/interfaces/AvailabilityPlanRuleInterface';
+import { type PricelistItemInterface } from '@/interfaces/PricelistItemInterface';
 import { defineComponent, ref, type Ref, computed, onMounted, watch } from 'vue';
 import useVuelidate from '@vuelidate/core';
 import { integer, required, decimal } from '@vuelidate/validators';
 import AdvancedPricelistItemEdit from './AdvancedPricelistItemEdit.vue';
-import { useStore } from '../../store';
+import { useStore } from '@/store';
 
 export default defineComponent({
   components: { AdvancedPricelistItemEdit },
@@ -503,7 +503,7 @@ export default defineComponent({
     const activePricelist = computed(() => store.state.pricelists.activePricelist);
 
     const activeAvailabilityPlan = computed(
-      () => store.state.availabilityPlans.activeAvailabilityPlan,
+      () => store.state.availabilityPlans.activeAvailabilityPlan
     );
 
     const numNotDefaultRules = computed(() => {
@@ -580,7 +580,7 @@ export default defineComponent({
     });
 
     const showAdvancedPricelistItem = computed(
-      () => store.state.layout.popUpOpen === currentPopUp.value,
+      () => store.state.layout.popUpOpen === currentPopUp.value
     );
 
     const notNegativeNumber = (numberValue: number) => {
@@ -744,7 +744,7 @@ export default defineComponent({
           oldPricelistItem.value = props.pricelistItem as PricelistItemInterface;
           currentPrice.value = oldPricelistItem.value.price ?? 0;
         }
-      },
+      }
     );
 
     watch(
@@ -763,7 +763,7 @@ export default defineComponent({
           currentMaxAvailability.value = oldAvailabilityPlanRule.value.maxAvailability ?? -1;
           currentQuota.value = oldAvailabilityPlanRule.value.quota ?? -1;
         }
-      },
+      }
     );
 
     watch(
@@ -771,7 +771,7 @@ export default defineComponent({
       () => {
         oldPricelistItem.value = props.pricelistItem as PricelistItemInterface;
         currentPrice.value = oldPricelistItem.value.price ?? 0;
-      },
+      }
     );
 
     watch(
@@ -787,7 +787,7 @@ export default defineComponent({
         currentClosedArrival.value = oldAvailabilityPlanRule.value.closedArrival ?? false;
         currentMaxAvailability.value = oldAvailabilityPlanRule.value.maxAvailability ?? -1;
         currentQuota.value = oldAvailabilityPlanRule.value.quota ?? -1;
-      },
+      }
     );
 
     onMounted(() => {

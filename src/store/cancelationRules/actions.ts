@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { CancelationRuleInterface } from 'src/interfaces/CancelationRuleInterface';
+import type { CancelationRuleInterface } from '@/interfaces/CancelationRuleInterface';
 import { api } from '@/plugins/axios';
 import type { StateInterface } from '../index';
 import type { CancelationRulesStateInterface } from '.';

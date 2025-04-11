@@ -1,11 +1,11 @@
-import type { ReservationLineInterface } from 'src/interfaces/ReservationLineInterface';
+import type { ReservationLineInterface } from '@/interfaces/ReservationLineInterface';
 import type { MutationTree } from 'vuex';
 import type { ReservationLinesStateInterface } from '.';
 
 const mutation: MutationTree<ReservationLinesStateInterface> = {
   SET_RESERVATION_LINES(
     state: ReservationLinesStateInterface,
-    reservationLines: ReservationLineInterface[],
+    reservationLines: ReservationLineInterface[]
   ) {
     reservationLines.forEach((line) => {
       line.date = new Date(line.date);
@@ -17,7 +17,7 @@ const mutation: MutationTree<ReservationLinesStateInterface> = {
   },
   ADD_RESERVATION_LINES(
     state: ReservationLinesStateInterface,
-    reservationLines: ReservationLineInterface[],
+    reservationLines: ReservationLineInterface[]
   ) {
     reservationLines.forEach((line) => {
       line.date = new Date(line.date);

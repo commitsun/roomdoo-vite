@@ -1,4 +1,4 @@
-import type { AgencyInterface } from 'src/interfaces/AgencyInterface';
+import type { AgencyInterface } from '@/interfaces/AgencyInterface';
 import type { MutationTree } from 'vuex';
 import type { AgenciesStateInterface } from '.';
 

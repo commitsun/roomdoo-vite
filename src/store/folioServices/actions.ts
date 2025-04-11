@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { ServiceInterface } from 'src/interfaces/ServiceInterface';
+import type { ServiceInterface } from '@/interfaces/ServiceInterface';
 import { api } from '@/plugins/axios';
 
 import type { StateInterface } from '../index';

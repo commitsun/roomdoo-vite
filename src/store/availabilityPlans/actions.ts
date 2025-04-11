@@ -1,10 +1,10 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
 import { api } from '@/plugins/axios';
-import type { AvailabilityPlanInterface } from 'src/interfaces/AvailabilityPlanInterface';
-import type { AvailabilityPlanRuleInterface } from 'src/interfaces/AvailabilityPlanRuleInterface';
+import type { AvailabilityPlanInterface } from '@/interfaces/AvailabilityPlanInterface';
+import type { AvailabilityPlanRuleInterface } from '@/interfaces/AvailabilityPlanRuleInterface';
 
-import type { PayloadAvailabilityPlanRuleInterface } from 'src/interfaces/PayloadAvailabilityPlanRuleInterface';
+import type { PayloadAvailabilityPlanRuleInterface } from '@/interfaces/PayloadAvailabilityPlanRuleInterface';
 import type { StateInterface } from '../index';
 import type { AvailabilityPlanStateInterface } from '.';
 
@@ -19,8 +19,12 @@ const actions: ActionTree<AvailabilityPlanStateInterface, StateInterface> = {
     let from = '';
     let params = '';
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params = `?dateFrom=${from}&dateTo=${to}&pmsPropertyId=${payload.propertyId}`;
     }
     return api
@@ -48,18 +52,18 @@ const actions: ActionTree<AvailabilityPlanStateInterface, StateInterface> = {
   },
   async createOrUpdateAvailabilityPlanRules(
     _context,
-    payload: { availabilityPlanId: number; availabilityPlanRules: AvailabilityPlanRuleInterface[] },
+    payload: { availabilityPlanId: number; availabilityPlanRules: AvailabilityPlanRuleInterface[] }
   ) {
     return api.patch(
       `/availability-plans/p/${payload.availabilityPlanId}/availability-plan-rules`,
-      payload,
+      payload
     );
   },
   async batchChangesAvailabilityPlanRules(
     _context,
     payload: {
       availabilityPlanRules: AvailabilityPlanRuleInterface[];
-    },
+    }
   ) {
     return api.post('/availability-plans/batch-changes', payload);
   },

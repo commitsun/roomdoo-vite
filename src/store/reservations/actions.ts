@@ -1,11 +1,11 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
 import type { AxiosResponse } from 'axios';
-import type { ReservationInterface } from 'src/interfaces/ReservationInterface';
-import type { PayloadChangeRoomInterface } from 'src/interfaces/PayloadChangeRoomInterface';
-import type { PayloadReservationChangeInterface } from 'src/interfaces/PayloadReservationChangeInterface';
-import type { PayloadTransactionReport } from 'src/interfaces/PayloadTransactionReport';
-import type { ReservationWizardStateInterface } from 'src/interfaces/ReservationWizardStateInterface';
+import type { ReservationInterface } from '@/interfaces/ReservationInterface';
+import type { PayloadChangeRoomInterface } from '@/interfaces/PayloadChangeRoomInterface';
+import type { PayloadReservationChangeInterface } from '@/interfaces/PayloadReservationChangeInterface';
+import type { PayloadTransactionReport } from '@/interfaces/PayloadTransactionReport';
+import type { ReservationWizardStateInterface } from '@/interfaces/ReservationWizardStateInterface';
 import type { StateInterface } from '../index';
 import type { ReservationStateInterface } from '.';
 
@@ -44,7 +44,7 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
       `/reservations/p/${payload.reservationId}/reservation-lines/${reservationLineId}`,
       {
         roomId: payload.roomId,
-      },
+      }
     );
   },
   async updateReservationRoom(context, payload: PayloadChangeRoomInterface) {
@@ -70,7 +70,9 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
   },
   async updateReservation(context, payload: PayloadReservationChangeInterface) {
     const reservationLines = payload.reservationLines?.map((el) => ({
-      date: `${el.date.getFullYear()}-${(el.date.getMonth() + 1).toString().padStart(2, '0')}-${el.date.getDate().toString().padStart(2, '0')}`,
+      date: `${el.date.getFullYear()}-${(el.date.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${el.date.getDate().toString().padStart(2, '0')}`,
       discount: el.discount,
       price: el.price,
       reservationId: el.reservationId,
@@ -90,7 +92,9 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
         boardServiceLineId: bs.boardServiceLineId,
         productId: bs.productId,
         serviceLines: bs.serviceLines.map((sl) => ({
-          date: `${(sl.date as Date).getFullYear()}-${((sl.date as Date).getMonth() + 1).toString().padStart(2, '0')}-${(sl.date as Date).getDate().toString().padStart(2, '0')}`,
+          date: `${(sl.date as Date).getFullYear()}-${((sl.date as Date).getMonth() + 1)
+            .toString()
+            .padStart(2, '0')}-${(sl.date as Date).getDate().toString().padStart(2, '0')}`,
           discount: sl.discount,
           priceUnit: sl.priceUnit,
           quantity: sl.quantity,
@@ -156,7 +160,7 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
 
   async updateReservationPartnerRequests(
     context,
-    payload: { reservationId: number; partnerRequests: string },
+    payload: { reservationId: number; partnerRequests: string }
   ) {
     return api.patch(`/reservations/p/${payload.reservationId}`, payload);
   },
@@ -192,8 +196,12 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
       params += `?pmsPropertyId=${payload.pmsPropertyId}`;
     }
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
     return api.get(`reservations/kelly-report${params}`);
@@ -206,8 +214,12 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
       params += `?pmsPropertyId=${payload.pmsPropertyId}`;
     }
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
     return api.get(`reservations/arrivals-report${params}`);
@@ -220,8 +232,12 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
       params += `?pmsPropertyId=${payload.pmsPropertyId}`;
     }
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
     return api.get(`reservations/departures-report${params}`);

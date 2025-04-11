@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { UsersInterface } from 'src/interfaces/UsersInterface';
+import type { UsersInterface } from '@/interfaces/UsersInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

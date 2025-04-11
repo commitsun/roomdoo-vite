@@ -1,8 +1,8 @@
 import type { ActionTree } from 'vuex';
 import { api } from '@/plugins/axios';
-import type { PropertyInterface } from 'src/interfaces/PropertyInterface';
+import type { PropertyInterface } from '@/interfaces/PropertyInterface';
 import type { AxiosResponse } from 'axios';
-import type { PayloadTransactionReport } from 'src/interfaces/PayloadTransactionReport';
+import type { PayloadTransactionReport } from '@/interfaces/PayloadTransactionReport';
 import type { StateInterface } from '../index';
 import type { PropertyStateInterface } from '.';
 import { deleteCookie } from '@/utils/cookies';
@@ -22,7 +22,7 @@ const actions: ActionTree<PropertyStateInterface, StateInterface> = {
     if (!activeProperty) {
       console.error(
         `Property with ID ${numericPropertyId} not found. Available properties:`,
-        properties,
+        properties
       );
       return;
     }
@@ -37,8 +37,12 @@ const actions: ActionTree<PropertyStateInterface, StateInterface> = {
       params += `?pmsPropertyId=${payload.pmsPropertyId}`;
     }
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
     return api.get(`properties/traveller-report${params}`);
@@ -57,8 +61,12 @@ const actions: ActionTree<PropertyStateInterface, StateInterface> = {
       params += `?pmsPropertyId=${payload.pmsPropertyId}`;
     }
     if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
     return api.get(`properties/ine-report${params}`);

@@ -1,7 +1,7 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import type { PriceInterface } from 'src/interfaces/PriceInterface';
-import type { PayloadPriceRequestInterface } from 'src/interfaces/PayloadPriceRequestInterface';
+import type { PriceInterface } from '@/interfaces/PriceInterface';
+import type { PayloadPriceRequestInterface } from '@/interfaces/PayloadPriceRequestInterface';
 import { api } from '@/plugins/axios';
 
 import type { StateInterface } from '../index';
@@ -9,8 +9,12 @@ import type { PricesStateInterface } from '.';
 
 const actions: ActionTree<PricesStateInterface, StateInterface> = {
   async fetchPrices(context, payload: PayloadPriceRequestInterface) {
-    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1).toString().padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
+    const from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
     let params = `?pmsPropertyId=${payload.pmsPropertyId}&pricelistId=${payload.pricelistId}`;
     if (payload.roomTypeId) {
       // room type

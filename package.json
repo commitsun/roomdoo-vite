@@ -1,5 +1,5 @@
 {
-  "name": "prueba1",
+  "name": "roomdoo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -17,13 +17,14 @@
     "@vueuse/head": "^2.0.0",
     "axios": "^1.8.1",
     "better-dni": "^4.4.2",
+    "maska": "^2.1.11",
+    "pinia": "^3.0.2",
     "primeicons": "^7.0.0",
     "primevue": "^4.3.1",
     "quill": "^2.0.3",
     "uuid": "^11.1.0",
     "vue": "^3.5.13",
     "vue-chart-3": "^3.1.8",
-    "maska": "^2.1.11",
     "vue-router": "^4.5.0",
     "vuelidate": "^0.7.7",
     "vuex": "^4.1.0"

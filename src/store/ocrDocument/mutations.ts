@@ -1,11 +1,11 @@
 import type { MutationTree } from 'vuex';
-import type { CheckinPartnerOcrInterface } from 'src/interfaces/CheckinPartnerOcrInterface';
+import type { CheckinPartnerOcrInterface } from '@/interfaces/CheckinPartnerOcrInterface';
 import type { OcrDocumentStateInterface } from '.';
 
 const mutation: MutationTree<OcrDocumentStateInterface> = {
   SET_DOCUMENT_DATA(
     state: OcrDocumentStateInterface,
-    checkinPartnerOcr: CheckinPartnerOcrInterface,
+    checkinPartnerOcr: CheckinPartnerOcrInterface
   ) {
     if (checkinPartnerOcr.birthdate) {
       checkinPartnerOcr.birthdate = new Date(checkinPartnerOcr.birthdate);

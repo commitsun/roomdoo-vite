@@ -1,11 +1,11 @@
 import type { Module } from 'vuex';
-import type { DashboardReservationsInterface } from 'src/interfaces/DashboardReservationsInterface';
-import type { DashboardStateRoomsInterface } from 'src/interfaces/DashboardStateRoomsInterface';
-import type { DashboardReservationsBySaleChannelInterface } from 'src/interfaces/DashboardReservationsBySaleChannelInterface';
-import type { DashboardOccupiedRoomsInterface } from 'src/interfaces/DashboardOccupiedRoomsInterface';
-import type { DashboardDailyBillingsInterface } from 'src/interfaces/DashboardDailyBillingsInterface';
-import type { DashboardRssPostInterface } from 'src/interfaces/DashboardRssPostInterface';
-import type { FolioInterface } from 'src/interfaces/FolioInterface';
+import type { DashboardReservationsInterface } from '@/interfaces/DashboardReservationsInterface';
+import type { DashboardStateRoomsInterface } from '@/interfaces/DashboardStateRoomsInterface';
+import type { DashboardReservationsBySaleChannelInterface } from '@/interfaces/DashboardReservationsBySaleChannelInterface';
+import type { DashboardOccupiedRoomsInterface } from '@/interfaces/DashboardOccupiedRoomsInterface';
+import type { DashboardDailyBillingsInterface } from '@/interfaces/DashboardDailyBillingsInterface';
+import type { DashboardRssPostInterface } from '@/interfaces/DashboardRssPostInterface';
+import type { FolioInterface } from '@/interfaces/FolioInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';

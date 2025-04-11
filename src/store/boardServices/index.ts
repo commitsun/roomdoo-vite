@@ -1,5 +1,5 @@
 import type { Module } from 'vuex';
-import type { BoardServiceInterface } from 'src/interfaces/BoardServiceInterface';
+import type { BoardServiceInterface } from '@/interfaces/BoardServiceInterface';
 import type { StateInterface } from '../index';
 import state from './state';
 import actions from './actions';
