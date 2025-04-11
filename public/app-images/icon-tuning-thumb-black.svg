@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="17" height="17" viewBox="0 0 17 17">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectángulo_2658" data-name="Rectángulo 2658" width="11.754" height="10.215"/>
+    </clipPath>
+  </defs>
+  <g id="atom_icon_navigation_bklight_filters" data-name="atom/icon/navigation/bklight/filters" transform="translate(0 0.147)">
+    <rect id="layer-background" width="17" height="17" transform="translate(0 -0.147)" fill="none"/>
+    <g id="Grupo_7115" data-name="Grupo 7115" transform="translate(2.463 3.131)">
+      <g id="Grupo_7114" data-name="Grupo 7114" clip-path="url(#clip-path)">
+        <path id="Trazado_4899" data-name="Trazado 4899" d="M9.588,1.772a2.3,2.3,0,0,0-4.473,0H0V2.827H5.116a2.3,2.3,0,0,0,4.473,0h2.166V1.772ZM7.352,3.544A1.244,1.244,0,1,1,8.6,2.3,1.246,1.246,0,0,1,7.352,3.544" transform="translate(0 0)"/>
+        <path id="Trazado_4900" data-name="Trazado 4900" d="M4.4,15.961a2.3,2.3,0,0,0-2.236,1.772H0v1.056H2.166a2.3,2.3,0,0,0,4.473,0h5.116V17.733H6.639A2.3,2.3,0,0,0,4.4,15.961m0,3.544a1.244,1.244,0,1,1,1.244-1.244A1.246,1.246,0,0,1,4.4,19.505" transform="translate(0 -10.345)"/>
+      </g>
+    </g>
+  </g>
+</svg>

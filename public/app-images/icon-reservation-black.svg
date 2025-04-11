@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="_3626671"
+   data-name="3626671"
+   width="25.564"
+   height="25.564"
+   viewBox="0 0 25.564 25.564"
+   version="1.1"
+   sodipodi:docname="icon-reservation-black.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <metadata
+     id="metadata1117">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs1115" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     id="namedview1113"
+     showgrid="false"
+     inkscape:zoom="32.780474"
+     inkscape:cx="12.782"
+     inkscape:cy="12.782"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="_3626671" />
+  <path
+     id="Trazado_2365"
+     data-name="Trazado 2365"
+     d="M24.815,10.65H23.84a5.856,5.856,0,0,0-4.567-7.987,4.611,4.611,0,0,0-7.863-.827H.749A.749.749,0,0,0,0,2.585,4.79,4.79,0,0,0,4.788,7.367H11.41a4.6,4.6,0,0,0,1.132,1.071c0,.006,0,.011,0,.017a5.815,5.815,0,0,0,.429,2.2h-.823a.749.749,0,0,0-.749.749V24.815a.749.749,0,0,0,.749.749H24.815a.749.749,0,0,0,.749-.749V11.4A.749.749,0,0,0,24.815,10.65ZM12.443,6.225a.749.749,0,0,0-.638-.356H4.788a3.3,3.3,0,0,1-3.2-2.535H11.806a.749.749,0,0,0,.638-.356,3.108,3.108,0,1,1,2.651,4.727,3.134,3.134,0,0,1-.959-.15,4.357,4.357,0,0,1,1.406-2.389.749.749,0,0,0-.982-1.131A5.855,5.855,0,0,0,12.81,6.709a3.163,3.163,0,0,1-.367-.484Zm1.645,2.869a4.667,4.667,0,0,0,1.006.11A4.61,4.61,0,0,0,19.7,4.6c0-.1,0-.208-.011-.311a4.355,4.355,0,0,1,2.553,6.239.756.756,0,0,0-.052.121H14.637a4.32,4.32,0,0,1-.55-1.557Zm9.979,14.973H12.9V12.148h.964a5.857,5.857,0,0,0,4.545,2.16.749.749,0,0,0,0-1.5,4.345,4.345,0,0,1-2.311-.662h7.971Z"
+     transform="translate(0 0)"
+     fill="#fff"
+     style="fill:#000000" />
+  <path
+     id="Trazado_2366"
+     data-name="Trazado 2366"
+     d="M320.4,307.421a.749.749,0,0,0-.749.749v2h-2.441v-2a.749.749,0,1,0-1.5,0v5.692a.749.749,0,0,0,1.5,0v-2.194h2.441v2.194a.749.749,0,1,0,1.5,0V308.17A.749.749,0,0,0,320.4,307.421Z"
+     transform="translate(-299.945 -292.071)"
+     fill="#fff"
+     style="fill:#000000" />
+</svg>

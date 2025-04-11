@@ -1,0 +1,129 @@
+@use '@/assets/variables' as *;
+
+.debug-box {
+  border: 2px solid red;
+}
+.debug-box-green {
+  border: 2px solid green;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Works on Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: $secondary;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: #{$scrollbar_width};
+  height: #{$scrollbar_height};
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: lightgray;
+  border-radius: 4px;
+}
+
+@font-face {
+  font-family: 'rethink-sans';
+  src: url(./fonts/rethink/RethinkSans-Regular.ttf);
+}
+
+body {
+  font-family: 'rethink-sans', sans-serif;
+  letter-spacing: 0.01px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.5;
+
+  button {
+    font-family: 'rethink-sans', sans-serif;
+    font: inherit;
+  }
+
+  p {
+    margin: 0;
+    font-size: inherit; /* Keeps inherited font size */
+  }
+}
+
+@media (min-width: 768px) and (min-resolution: 1.25dppx) {
+  #right-drawer,
+  #index-container,
+  .button-open-drawer,
+  .login-container,
+  #page-dashboard,
+  #partners-page,
+  #page-transactions,
+  #invoices-page {
+    zoom: 80%;
+  }
+
+  @media (min-width: 1024px) {
+    #full-screen-stepper {
+      height: 90% !important;
+    }
+  }
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/**
+  Custom styles for PrimeVue Datepicker Range
+*/
+
+// table {
+//   border-collapse: separate !important;
+//   border-spacing: 0 10px !important;
+// }
+
+// td {
+//   margin-bottom: 20px !important;
+// }
+
+// td {
+//   &:has(.p-datepicker-day-selected-range),
+//   &:has(.p-datepicker-day-selected[tabindex="-1"]),
+//   &:has(.p-datepicker-day-selected[tabindex="0"]) {
+//     background-color: $primary !important;
+
+//     span {
+//       background-color: $primary !important;
+//       color: white !important;
+//       font-weight: bold;
+
+//       &:hover {
+//         background-color: $primary !important;
+//         color: white !important;
+//       }
+//     }
+//   }
+// }
+// .p-dialog {
+//   background-color: white !important;
+//   color: black !important;
+//   border: 1px solid #ccc !important;
+//   padding: 20px !important;
+// }

@@ -1,0 +1,35 @@
+export interface PropertyInterface {
+  id: number | null;
+  name: string | null;
+  stateName: string | null;
+  colorOptionConfig: string | null;
+  outReservationColor: string | null;
+  paidReservationColor: string | null;
+  confirmedReservationColor: string | null;
+  preReservationColor: string | null;
+  pendingPaymentReservationColor: string | null;
+  paidCheckinReservationColor: string | null;
+  staffReservationColor: string | null;
+  toAssignReservationColor: string | null;
+  onBoardReservationColor: string | null;
+  overPaymentColor: string | null;
+  simpleOutColor: string | null;
+  simpleInColor: string | null;
+  simpleFutureColor: string | null;
+  defaultPricelistId: number | null;
+  defaultAvailabilityPlanId: number | null;
+  language: string;
+  hotelImageUrl: string | null;
+  isOCRAvailable: boolean;
+  isUsedRegula: boolean;
+  street: string | null;
+  street2: string | null;
+  zip: string | null;
+  city: string | null;
+  ineCategory: string | null;
+  cardexWarning: string | null;
+  companyPrivacyPolicy: string | null;
+  canDownloadIneReport: boolean;
+  companyName: string | null;
+  maxAmountSimplifiedInvoice: number | null;
+}

@@ -1,0 +1,42 @@
+{
+  "name": "prueba1",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@primeuix/themes": "^1.0.0",
+    "@primevue/themes": "^4.3.1",
+    "@selemondev/vue3-signature-pad": "^1.1.5",
+    "@vuelidate/core": "^2.0.3",
+    "@vuelidate/validators": "^2.0.4",
+    "@vueuse/head": "^2.0.0",
+    "axios": "^1.8.1",
+    "better-dni": "^4.4.2",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.3.1",
+    "quill": "^2.0.3",
+    "uuid": "^11.1.0",
+    "vue": "^3.5.13",
+    "vue-chart-3": "^3.1.8",
+    "maska": "^2.1.11",
+    "vue-router": "^4.5.0",
+    "vuelidate": "^0.7.7",
+    "vuex": "^4.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.9",
+    "@types/node": "^22.13.8",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "sass": "^1.85.1",
+    "tailwindcss": "^4.0.9",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0",
+    "vue-tsc": "^2.2.4"
+  }
+}

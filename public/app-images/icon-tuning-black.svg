@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="20.041"
+   height="19.206"
+   viewBox="0 0 20.041 19.206"
+   version="1.1"
+   id="svg1199"
+   sodipodi:docname="icon-tuning-black.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <metadata
+     id="metadata1205">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs1203" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     id="namedview1201"
+     showgrid="false"
+     inkscape:zoom="43.6322"
+     inkscape:cx="10.0205"
+     inkscape:cy="9.6029997"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1199" />
+  <g
+     id="_992668"
+     data-name="992668"
+     transform="translate(0 -10.667)"
+     style="fill:#000000">
+    <g
+       id="Grupo_3664"
+       data-name="Grupo 3664"
+       transform="translate(0 24.028)"
+       style="fill:#000000">
+      <g
+         id="Grupo_3663"
+         data-name="Grupo 3663"
+         style="fill:#000000">
+        <path
+           id="Trazado_2370"
+           data-name="Trazado 2370"
+           d="M19.206,354.088H16.982a2.9,2.9,0,0,0-5.573,0H.835a.835.835,0,0,0,0,1.67H11.409a2.9,2.9,0,0,0,5.573,0h2.224a.835.835,0,0,0,0-1.67Zm-5.01,2.088a1.253,1.253,0,1,1,1.253-1.253A1.254,1.254,0,0,1,14.2,356.175Z"
+           transform="translate(0 -352)"
+           fill="#fff"
+           style="fill:#000000" />
+      </g>
+    </g>
+    <g
+       id="Grupo_3666"
+       data-name="Grupo 3666"
+       transform="translate(0 10.667)"
+       style="fill:#000000">
+      <g
+         id="Grupo_3665"
+         data-name="Grupo 3665"
+         style="fill:#000000">
+        <path
+           id="Trazado_2371"
+           data-name="Trazado 2371"
+           d="M19.206,12.755H16.982a2.9,2.9,0,0,0-5.573,0H.835a.835.835,0,1,0,0,1.67H11.409a2.9,2.9,0,0,0,5.573,0h2.224a.835.835,0,0,0,0-1.67ZM14.2,14.842a1.253,1.253,0,1,1,1.253-1.253A1.254,1.254,0,0,1,14.2,14.842Z"
+           transform="translate(0 -10.667)"
+           fill="#fff"
+           style="fill:#000000" />
+      </g>
+    </g>
+    <g
+       id="Grupo_3668"
+       data-name="Grupo 3668"
+       transform="translate(0 17.347)"
+       style="fill:#000000">
+      <g
+         id="Grupo_3667"
+         data-name="Grupo 3667"
+         style="fill:#000000">
+        <path
+           id="Trazado_2372"
+           data-name="Trazado 2372"
+           d="M19.206,183.422H8.632a2.9,2.9,0,0,0-5.573,0H.835a.835.835,0,0,0,0,1.67H3.059a2.9,2.9,0,0,0,5.573,0H19.206a.835.835,0,0,0,0-1.67ZM5.845,185.509A1.253,1.253,0,1,1,7.1,184.257,1.254,1.254,0,0,1,5.845,185.509Z"
+           transform="translate(0 -181.334)"
+           fill="#fff"
+           style="fill:#000000" />
+      </g>
+    </g>
+  </g>
+</svg>

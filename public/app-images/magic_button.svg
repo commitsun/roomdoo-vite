@@ -1,0 +1,10 @@
+<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="magic_button">
+<mask id="mask0_3093_8690" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="17" height="17">
+<rect id="Bounding box" width="17" height="17" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_3093_8690)">
+<path id="magic_button_2" d="M7.08317 10.0406L7.7915 8.5L9.33213 7.79167L7.7915 7.08333L7.08317 5.54271L6.37484 7.08333L4.83421 7.79167L6.37484 8.5L7.08317 10.0406ZM7.08317 13.4583L5.31234 9.5625L1.4165 7.79167L5.31234 6.02083L7.08317 2.125L8.854 6.02083L12.7498 7.79167L8.854 9.5625L7.08317 13.4583ZM12.7498 14.875L11.8644 12.9271L9.9165 12.0417L11.8644 11.1562L12.7498 9.20833L13.6353 11.1562L15.5832 12.0417L13.6353 12.9271L12.7498 14.875Z" fill="#5594A4"/>
+</g>
+</g>
+</svg>
