@@ -34,7 +34,7 @@
           </span>
           <ToggleSwitch
             size="small"
-            :modelValue="reservation.autoAssignRoom"
+            :value="reservation.autoAssignRoom"
             @click="$emit('toggleReservationAutoAssignRoomChanged', reservation.id)"
           />
         </div>
@@ -612,6 +612,9 @@ export default defineComponent({
           user-select: none;
         }
       }
+      select {
+        min-width: 100%;
+      }
     }
   }
 
@@ -671,6 +674,7 @@ export default defineComponent({
           display: flex;
           align-items: space-between;
           flex: 1;
+          width: 100%;
           padding: 0.5rem 0.5rem 0.5rem 0;
           .btn {
             border-radius: 0 !important;

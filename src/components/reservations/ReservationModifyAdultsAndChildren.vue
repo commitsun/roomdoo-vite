@@ -74,7 +74,7 @@ export default defineComponent({
     const numberAdults = ref(0);
     const numberChildren = ref(0);
     const reservation = computed(() => store.state.reservations.currentReservation);
-
+    const currentFolioId = computed(() => store.state.folios.currentFolio?.id);
     const saveAdultsAndChildren = async () => {
       void store.dispatch('layout/showSpinner', true);
       try {
@@ -84,8 +84,9 @@ export default defineComponent({
           children: numberChildren.value,
         });
         await Promise.all([
-          // store.dispatch('folios/')
           store.dispatch('reservations/fetchReservation', reservation.value?.id),
+          store.dispatch('reservations/fetchReservations', currentFolioId.value),
+          store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolioId.value),
           store.dispatch('checkinPartners/fetchCheckinPartners', reservation.value?.id),
         ]);
       } catch {
