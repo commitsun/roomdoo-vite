@@ -617,9 +617,6 @@ export default defineComponent({
       position: absolute;
       left: 0;
       height: 90%;
-      // background: linear-gradient(45deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%);
-      // box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.2);
-      // border-radius: 45px;
       border-bottom: 1px solid $primary;
       z-index: 0;
       transition: all 0.3s linear;
@@ -688,8 +685,6 @@ export default defineComponent({
 
 @media (min-width: 1024px) {
   .menu {
-    // display: grid;
-    // justify-content: flex-start;
     grid-template-columns: repeat(5, 1fr);
     margin: 0 1.2rem;
     .menu-item {

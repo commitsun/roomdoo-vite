@@ -170,9 +170,9 @@ import { useRouter } from 'vue-router';
 import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
 import type { ReservationInterface } from '@/interfaces/ReservationInterface';
 import { reservationStateText } from '@/utils/reservation';
-import { useStore } from '../../store';
-import type { FolioInterface } from '../../interfaces/FolioInterface';
-import { usePlanning } from '../../utils/usePlanning';
+import { useStore } from '@/store';
+import type { FolioInterface } from '@/interfaces/FolioInterface';
+import { usePlanning } from '@/utils/usePlanning';
 import { dialogService } from '@/services/DialogService';
 import FolioOrReservationCancelBlocked from '@/components/alerts/FolioOrReservationCancelBlocked.vue';
 export default defineComponent({

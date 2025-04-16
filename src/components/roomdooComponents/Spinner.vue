@@ -1,7 +1,6 @@
 <template>
   <TransitionGroup name="fade-spinner">
-    <div v-if="show" class="overlay-spinner">
-    </div>
+    <div v-if="show" class="overlay-spinner"></div>
     <div v-if="show" class="spinner-container">
       <span class="loader"></span>
     </div>
@@ -28,7 +27,7 @@ export default {
   width: 100%;
   height: 100%;
   opacity: 0.4;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -55,20 +54,21 @@ export default {
   }
 }
 
-  @keyframes rotation {
+@keyframes rotation {
   0% {
-      transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   100% {
-      transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
-.fade-spinner-enter-active, .fade-spinner-leave-active {
+.fade-spinner-enter-active,
+.fade-spinner-leave-active {
   transition: opacity 0.5s;
 }
-.fade-spinner-enter-from, .fade-spinner-leave-to {
+.fade-spinner-enter-from,
+.fade-spinner-leave-to {
   opacity: 0;
 }
-
 </style>

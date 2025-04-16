@@ -63,8 +63,8 @@ export default defineComponent({
         isHovered.value && !props.disabled
           ? props.backgroundColorHover || props.backgroundColor
           : props.backgroundColor !== 'primary'
-            ? props.backgroundColor
-            : '',
+          ? props.backgroundColor
+          : '',
     }));
     return { isHovered, computedStyle };
   },

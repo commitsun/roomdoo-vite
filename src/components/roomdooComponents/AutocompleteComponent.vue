@@ -284,7 +284,7 @@ export default defineComponent({
             .normalize('NFKD')
             .replace(/[^\w]/g, '')
             .toLowerCase()
-            .indexOf(search.value.normalize('NFKD').replace(/[^\w]/g, '').toLowerCase()) > -1,
+            .indexOf(search.value.normalize('NFKD').replace(/[^\w]/g, '').toLowerCase()) > -1
       );
     };
 
@@ -404,7 +404,7 @@ export default defineComponent({
             search.value = '';
           }
         }
-      },
+      }
     );
 
     watch(
@@ -424,14 +424,14 @@ export default defineComponent({
         if (!props.keepResultAfterChoose) {
           search.value = '';
         }
-      },
+      }
     );
 
     watch(isOpen, () => {
       if (isOpen.value) {
         arrowCounter.value = 0;
         const indexSelectedCountry = results.value.findIndex(
-          (item) => item.value === props.modelValue,
+          (item) => item.value === props.modelValue
         );
         if (indexSelectedCountry !== -1) {
           arrowCounter.value = indexSelectedCountry;
@@ -501,9 +501,7 @@ export default defineComponent({
     height: 100%;
     background-color: white;
     border-radius: 10px;
-    transition:
-      color 0.3s ease-in-out,
-      border-color 0.3s ease-in-out;
+    transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 
     &.autocomplete-focused {
       border: 1px solid $primary;

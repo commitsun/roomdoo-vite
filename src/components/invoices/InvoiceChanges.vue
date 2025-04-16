@@ -115,9 +115,6 @@
           </div>
         </div>
       </div>
-      <!-- END PARTNER OPTIONS -->
-      <!-- ----------------------------------------------- -->
-      <!-- AUTOCOMPLETE PARTNER -->
       <div class="select-partner-autocomplete" v-else-if="!partnerToAdd && isSearchPartnerOpened">
         <div class="select-partner-autocomplete-back">
           <CustomIcon
@@ -148,9 +145,6 @@
           </template>
         </AutocompleteComponent>
       </div>
-      <!-- ENDAUTOCOMLETE PARTNER -->
-      <!-- ----------------------------------------------- -->
-      <!-- PARTNER DATA -->
       <div class="partner-date" v-else>
         <div
           class="partner"
@@ -1328,7 +1322,7 @@ export default defineComponent({
           font-size: 1rem;
           font-weight: bold;
           color: $primary;
-          flex-grow: 1; /* Asegura que ocupe el espacio restante */
+          flex-grow: 1;
         }
         .icon-wrapper {
           .icon-desktop {
@@ -1343,7 +1337,7 @@ export default defineComponent({
           width: 50px;
           height: 50px;
           background-color: #51b2dd;
-          clip-path: polygon(100% 0, 0 0, 100% 100%); /* Forma de triángulo */
+          clip-path: polygon(100% 0, 0 0, 100% 100%);
           display: flex;
           justify-content: center;
           align-items: center;
@@ -1351,7 +1345,7 @@ export default defineComponent({
             position: absolute;
             right: 5px;
             top: 5px;
-            width: 20px; /* Tamaño del ícono */
+            width: 20px;
             height: 20px;
           }
         }

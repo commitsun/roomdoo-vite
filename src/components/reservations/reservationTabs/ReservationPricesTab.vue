@@ -255,9 +255,6 @@
       </div>
     </Transition>
   </div>
-  <!-- <q-dialog persistent v-model="changePricesModal">
-    <PricesChanges :showNightsDetail="isShowingNightsDetail" />
-  </q-dialog> -->
 </template>
 <script lang="ts">
 import { computed, defineComponent, markRaw, onMounted, ref, watch } from 'vue';

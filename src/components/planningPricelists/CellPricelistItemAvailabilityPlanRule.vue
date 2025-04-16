@@ -314,10 +314,10 @@
 import { defineComponent, ref, computed, onMounted, watch } from 'vue';
 import useVuelidate from '@vuelidate/core';
 import { required, integer, decimal, minValue } from '@vuelidate/validators';
-import AdvancedPricelistItemEdit from './AdvancedPricelistItemEdit.vue';
+import AdvancedPricelistItemEdit from '@/components/planningPricelists/AdvancedPricelistItemEdit.vue';
 import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
 
-import { useStore } from '../../store';
+import { useStore } from '@/store';
 
 export default defineComponent({
   props: {
@@ -846,7 +846,6 @@ export default defineComponent({
     &.not-valid {
       .label {
         color: red;
-        // font-weight: bold;
       }
       input {
         color: red;

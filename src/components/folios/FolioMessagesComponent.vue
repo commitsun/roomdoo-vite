@@ -89,10 +89,6 @@
       </div>
     </div>
   </div>
-
-  <!-- <q-dialog v-model="mailDialog" persistent>
-    <MailDialog :template="template" :stateReservation="state" :defaultSubject="subject" />
-  </q-dialog> -->
 </template>
 
 <script lang="ts">
@@ -105,9 +101,6 @@ import type { MsgInterface } from '@/interfaces/MsgInterface';
 import MailComponent from '@/components/mails/MailComponent.vue';
 
 export default defineComponent({
-  components: {
-    // MailDialog,
-  },
   emits: ['goToReservationCard'],
   setup(props, context) {
     const store = useStore();
@@ -156,7 +149,7 @@ export default defineComponent({
       try {
         const response = (await store.dispatch(
           'folios/fetchFolioMailData',
-          payload,
+          payload
         )) as AxiosResponse<{ bodyMail: string; subject: string }>;
         if (response.data) {
           if (response.data.bodyMail) {
@@ -211,7 +204,7 @@ export default defineComponent({
     };
     const renderReservationName = (reservationId: number) => {
       const reservation = store.state.reservations.reservations?.find(
-        (el) => el.id === reservationId,
+        (el) => el.id === reservationId
       );
       if (reservation) {
         return reservation.name;

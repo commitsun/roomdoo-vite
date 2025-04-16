@@ -564,7 +564,7 @@ export default defineComponent({
                   .map((el) => el.roomId)
                   .filter((roomId): roomId is number => roomId !== undefined);
 
-                // Evitar duplicados al agregar al array
+                // avoid duplicates when adding to the array
                 newRoomIds.forEach((roomId) => {
                   if (!roomIds.value.includes(roomId)) {
                     roomIds.value.push(roomId);

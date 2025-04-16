@@ -188,59 +188,6 @@
             isFromDrawer
           />
         </div>
-
-        <!-- <Modal
-          :show="showAdultsModal[index]"
-          @close="showAdultsModal[index] = false"
-          :headerColor="'#FFFFFF'"
-          class="adults-modal"
-        >
-          <template #header>
-            <div class="adults-modal-header">
-              Huéspedes {{ reservation?.name }}
-              <button
-                class="btn-save"
-                @click="saveAdultsAndChildren(reservation.id, index)"
-                v-if="
-                  numberAdults !== reservation?.adults || numberChildren !== reservation.children
-                "
-              >
-                Guardar
-              </button>
-            </div>
-          </template>
-          <template #body>
-            <div class="adults-modal-body">
-              <span class="body-title"> Ajusta el número de huéspedes de la reserva </span>
-              <span class="body-subtitle">
-                El número total de personas no puede exceder la capacidad de la habitación.
-              </span>
-              <div class="persons">
-                <div class="adults">
-                  <span class="adults-label"> Adultos</span>
-                  <div class="buttons">
-                    <button @click="numberAdults--" :disabled="numberAdults === 1">-</button>
-                    <span class="number">{{ numberAdults }}</span>
-                    <button
-                      @click="numberAdults++"
-                      :disabled="isForbiddenMoreAdults(reservation?.preferredRoomId ?? 0)"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-                <div class="children">
-                  <span class="children-label"> Niños</span>
-                  <div class="buttons">
-                    <button @click="numberChildren--" :disabled="numberChildren === 0">-</button>
-                    <span class="number">{{ numberChildren }}</span>
-                    <button @click="numberChildren++" :disabled="numberChildren === 9">+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-        </Modal> -->
       </div>
       <div class="checkin-flow-overlay" v-if="isCheckinFlowStepperOpen" />
       <Transition name="checkin-flow-transition">
@@ -260,7 +207,6 @@ import { useRouter } from 'vue-router';
 import { type CheckinPartnerInterface } from '@/interfaces/CheckinPartnerInterface';
 import { type ReservationInterface } from '@/interfaces/ReservationInterface';
 
-// import Modal from '../roomdooComponents/Modal.vue';
 import PrivateCheckinFlow from '@/components/checkinFlow/PrivateCheckinFlow.vue';
 import ReservationSegmentation from '@/components/reservations/ReservationSegmentation.vue';
 import CheckinPartnerForm from '@/components/checkinPartners/CheckinPartnerForm.vue';
@@ -283,7 +229,6 @@ export default defineComponent({
   components: {
     Reservation,
     CustomIcon,
-    // Modal,
     PrivateCheckinFlow,
     CheckinPartnerForm,
     CheckinCardFlow,
@@ -850,22 +795,16 @@ export default defineComponent({
       } else {
         await doCheckin(checkinPartner);
       }
-      openEditModalCheckin.value.forEach(
-        // eslint-disable-next-line
-        (el) => {
-          el = false;
-        }
-      );
+      openEditModalCheckin.value.forEach((el) => {
+        el = false;
+      });
     };
 
     const performSaveCheckinPartner = async (checkinPartner: CheckinPartnerInterface) => {
       await saveCheckinPartner(checkinPartner);
-      openEditModalCheckin.value.forEach(
-        // eslint-disable-next-line
-        (el) => {
-          el = false;
-        }
-      );
+      openEditModalCheckin.value.forEach((el) => {
+        el = false;
+      });
     };
 
     const showSegmentation = async (reservationId: number, index: number) => {

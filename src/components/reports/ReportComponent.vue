@@ -10,25 +10,52 @@
           }}
         </div>
 
-        <DatePicker v-model="dateFrom" class="datepicker" showIcon inputClass="input-date-picker" dateFormat="dd/mm/yy"
-          placeholder="DD/MM/YYYY" />
+        <DatePicker
+          v-model="dateFrom"
+          class="datepicker"
+          showIcon
+          inputClass="input-date-picker"
+          dateFormat="dd/mm/yy"
+          placeholder="DD/MM/YYYY"
+        />
       </div>
-      <div class="to" v-if="reportType === 'services' || reportType === 'transactions' || reportType === 'INE'">
+      <div
+        class="to"
+        v-if="reportType === 'services' || reportType === 'transactions' || reportType === 'INE'"
+      >
         <div class="label">Hasta:</div>
-        <DatePicker v-model="dateTo" class="datepicker" showIcon inputClass="input-date-picker" dateFormat="dd/mm/yy"
-          placeholder="DD/MM/YYYY" />
+        <DatePicker
+          v-model="dateTo"
+          class="datepicker"
+          showIcon
+          inputClass="input-date-picker"
+          dateFormat="dd/mm/yy"
+          placeholder="DD/MM/YYYY"
+        />
       </div>
     </div>
     <div class="bottom">
-      <AppButton :label="'Cancelar'" raised size="small" severity="secondary" @click="$emit('close')" />
-      <AppButton class="ml-3" :label="'Generar informe'" raised size="small" @click="downloadReport()" />
+      <AppButton
+        :label="'Cancelar'"
+        raised
+        size="small"
+        severity="secondary"
+        @click="$emit('close')"
+      />
+      <AppButton
+        class="ml-3"
+        :label="'Generar informe'"
+        raised
+        size="small"
+        @click="downloadReport()"
+      />
     </div>
   </div>
 </template>
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
 import DatePicker from 'primevue/datepicker';
-import { useStore } from '../../store';
+import { useStore } from '@/store';
 import type { AxiosResponse } from 'axios';
 import { dialogService } from '@/services/DialogService';
 import Button from 'primevue/button';

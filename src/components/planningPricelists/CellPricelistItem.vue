@@ -58,7 +58,6 @@
       "
       @click="($refs.inputQuota as HTMLInputElement).focus()"
     >
-      <!-- :class="{'modified': currentQuota !== oldAvailabilityPlanRule?.quota}" -->
       <div class="label">Cupo</div>
       <div class="rule-value">
         <input

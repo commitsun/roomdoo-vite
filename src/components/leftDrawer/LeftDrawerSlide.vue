@@ -158,8 +158,8 @@
 import { defineComponent, computed, ref, markRaw } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ReportComponent from '@/components/reports/ReportComponent.vue';
-import { useStore } from '../../store';
-import { useSupport } from '../../utils/useSupport';
+import { useStore } from '@/store';
+import { useSupport } from '@/utils/useSupport';
 import { dialogService } from '@/services/DialogService';
 
 export default defineComponent({
@@ -176,7 +176,7 @@ export default defineComponent({
     const activeUser = computed(() => store.state.user.activeUser);
 
     const numReservationsToAssign = computed(
-      () => store.state.notifications.numReservationsToAssign,
+      () => store.state.notifications.numReservationsToAssign
     );
 
     const endPath = computed(() => {

@@ -10,14 +10,8 @@
         class="option"
         @click="updateControlValue(option.id, selected.includes(option.id))"
       >
-        <input
-          type="checkbox"
-          :name="option.name"
-          :checked="option.selected"
-          />
-        <label
-          :for="option.name"
-        >
+        <input type="checkbox" :name="option.name" :checked="option.selected" />
+        <label :for="option.name">
           {{ option.name }}
         </label>
       </div>
@@ -26,18 +20,16 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent, ref, computed, watch,
-} from 'vue';
+import { defineComponent, ref, computed, watch } from 'vue';
 
 export default defineComponent({
   props: {
     modelValue: {
-      type: Array as ()=> number[],
+      type: Array as () => number[],
       required: true,
     },
     options: {
-      type: Array as () => {id: number; name: string}[],
+      type: Array as () => { id: number; name: string }[],
       required: true,
     },
     title: {
@@ -48,11 +40,13 @@ export default defineComponent({
   setup(props, context) {
     const selected = ref([...props.modelValue] as number[]);
     const optionValues = computed(() => {
-      const rdo: {id: number, name: string, selected:boolean }[] = [];
+      const rdo: { id: number; name: string; selected: boolean }[] = [];
       props.options.forEach((option) => {
-        rdo.push(
-          { id: option.id, name: option.name, selected: props.modelValue.includes(option.id) },
-        );
+        rdo.push({
+          id: option.id,
+          name: option.name,
+          selected: props.modelValue.includes(option.id),
+        });
       });
       return rdo;
     });
@@ -66,9 +60,12 @@ export default defineComponent({
       }
       context.emit('update:modelValue', selected.value);
     };
-    watch(() => props.modelValue, () => {
-      selected.value = props.modelValue;
-    });
+    watch(
+      () => props.modelValue,
+      () => {
+        selected.value = props.modelValue;
+      }
+    );
     return {
       selected,
       updateControlValue,
@@ -79,23 +76,69 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.container {
+  padding: 1rem 0 1rem 1rem;
+  font-size: 16px;
+  .title {
+    font-weight: bold;
+  }
+  .options-group {
+    display: flex;
+    flex-direction: column;
+    align-items: baseline;
+    height: 100%;
+    padding: 0.5rem 0 0.5rem 1rem;
+    .option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.2rem;
+      width: 100%;
+      input {
+        height: 20px;
+        min-width: 20px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -o-appearance: none;
+        appearance: none;
+        border-radius: 4px;
+        outline: none;
+        transition-duration: 0.3s;
+        background-color: #e2e2e2;
+        cursor: pointer;
+        accent-color: white;
+        pointer-events: none;
+      }
 
-  .container {
-    padding: 1rem 0 1rem 1rem;
-    font-size: 16px;
-    .title {
-      font-weight: bold;
+      input:checked {
+        background-color: $primary;
+        background-image: url('/app-images/check-mark.svg');
+        background-position: center center;
+        background-size: 80%;
+        background-repeat: no-repeat;
+      }
+
+      label {
+        margin-left: 0.8rem;
+        cursor: pointer;
+      }
     }
+  }
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 1rem 0 1rem 0.5rem;
+    font-size: 14px;
     .options-group {
       display: flex;
       flex-direction: column;
       align-items: baseline;
       height: 100%;
-      padding: .5rem 0 .5rem 1rem;
+      padding: 0.5rem 0 0.5rem 0.5rem;
       .option {
         display: flex;
         align-items: center;
-        margin-bottom: .2rem;
+        margin-bottom: 0.2rem;
         width: 100%;
         input {
           height: 20px;
@@ -122,58 +165,11 @@ export default defineComponent({
         }
 
         label {
-          margin-left: .8rem;
+          margin-left: 0.8rem;
           cursor: pointer;
         }
       }
     }
   }
-
-  @media (max-width: 1024px) {
-    .container {
-      padding: 1rem 0 1rem .5rem;
-      font-size: 14px;
-      .options-group {
-        display: flex;
-        flex-direction: column;
-        align-items: baseline;
-        height: 100%;
-        padding: .5rem 0 .5rem .5rem;
-        .option {
-          display: flex;
-          align-items: center;
-          margin-bottom: .2rem;
-          width: 100%;
-          input {
-            height: 20px;
-            min-width: 20px;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            -o-appearance: none;
-            appearance: none;
-            border-radius: 4px;
-            outline: none;
-            transition-duration: 0.3s;
-            background-color: #e2e2e2;
-            cursor: pointer;
-            accent-color: white;
-            pointer-events: none;
-          }
-
-          input:checked {
-            background-color: $primary;
-            background-image: url('/app-images/check-mark.svg');
-            background-position: center center;
-            background-size: 80%;
-            background-repeat: no-repeat;
-          }
-
-          label {
-            margin-left: .8rem;
-            cursor: pointer;
-          }
-        }
-      }
-    }
-  }
+}
 </style>

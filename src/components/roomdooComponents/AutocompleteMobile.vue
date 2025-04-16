@@ -89,7 +89,7 @@ export default defineComponent({
     const search = ref('');
 
     const imageActiveProperty = computed(
-      () => store.state.properties.activeProperty?.hotelImageUrl,
+      () => store.state.properties.activeProperty?.hotelImageUrl
     );
 
     const styleInput = () => {
@@ -107,7 +107,7 @@ export default defineComponent({
             .normalize('NFKD')
             .replace(/[^\w]/g, '')
             .toLowerCase()
-            .indexOf(search.value.normalize('NFKD').replace(/[^\w]/g, '').toLowerCase()) > -1,
+            .indexOf(search.value.normalize('NFKD').replace(/[^\w]/g, '').toLowerCase()) > -1
       );
     };
 
@@ -160,7 +160,7 @@ export default defineComponent({
         if (newValue.length !== oldValue.length) {
           results.value = newValue;
         }
-      },
+      }
     );
 
     onMounted(() => {

@@ -1,4 +1,12 @@
 @import 'tailwindcss';
+@font-face {
+  font-family: 'rethink-sans';
+  src: url('/RethinkSans-Regular.ttf') format('truetype');
+}
 html {
   font-size: 14px !important;
+}
+
+body {
+  font-family: 'rethink-sans', sans-serif;
 }

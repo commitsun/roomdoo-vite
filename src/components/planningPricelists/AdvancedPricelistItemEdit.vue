@@ -678,29 +678,6 @@ export default defineComponent({
         margin-left: 10px;
       }
     }
-    // .btn-cancel-edit-items-dialog {
-    //   color: $primary;
-    //   background-color: white;
-    //   border-radius: 3px;
-    //   border: 1px solid #01b6e3;
-    //   font-weight: bold;
-    //   margin-left: 3rem;
-    //   margin-right: 0.5rem;
-    //   margin-top: 0.5rem;
-    //   &:hover {
-    //     background-color: $corduroy;
-    //   }
-    // }
-    // .btn-save-edit-items-dialog {
-    //   color: white;
-    //   background-color: $primary;
-    //   border-radius: 3px;
-    //   font-weight: bold;
-    //   margin-top: 0.5rem;
-    //   &:hover {
-    //     background-color: $corduroy;
-    //   }
-    // }
   }
 }
 </style>

@@ -182,12 +182,6 @@ import { type PartnerInterface } from '@/interfaces/PartnerInterface';
 import { defineComponent, computed, ref, type Ref, onMounted, markRaw } from 'vue';
 import { useStore } from '@/store';
 
-// import PartnerForm from '@/components/partners/PartnerForm.vue';
-// import AutocompleteComponent from '@/components/roomdooComponents/AutocompleteComponent.vue';
-// import InputText from '../roomdooComponents/InputText.vue';
-// import CustomSelect from '../roomdooComponents/CustomSelect.vue';
-// import CustomButton from '../roomdooComponents/CustomButton.vue';
-
 import { dialogService } from '@/services/DialogService';
 import { folioStateText } from '@/utils/folio';
 import utilsDates from '@/utils/dates';
@@ -195,13 +189,6 @@ import FolioPartnerContactData from '@/components/folios/FolioPartnerContactData
 import PartnerForm from '@/components/partners/PartnerForm.vue';
 
 export default defineComponent({
-  components: {
-    // PartnerForm,
-    // AutocompleteComponent,
-    // InputText,
-    // CustomSelect,
-    // CustomButton,
-  },
   emits: ['setTabValue'],
 
   setup() {
@@ -225,15 +212,14 @@ export default defineComponent({
     const languages = computed(() => store.state.languages.languages);
 
     const agencyName = computed(
-      () =>
-        store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.name,
+      () => store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.name
     );
 
     const saleChannelName = computed(
       () =>
         store.state.saleChannels.saleChannels.find(
-          (el) => el.id === currentFolio.value?.saleChannelId,
-        )?.name,
+          (el) => el.id === currentFolio.value?.saleChannelId
+        )?.name
     );
 
     const lengthStay = () => {
@@ -246,7 +232,7 @@ export default defineComponent({
             (currentReservations.value[0].checkin as Date).getTime() &&
           (currentReservations.value[0].checkout as Date).getTime() &&
           (el.checkout as Date).getTime() ===
-            (currentReservations.value[0].checkout as Date).getTime(),
+            (currentReservations.value[0].checkout as Date).getTime()
       );
 
       if (!sameDates) {
@@ -269,7 +255,11 @@ export default defineComponent({
       if (currentReservations.value) {
         const firstCheckin = new Date(currentReservations.value[0].checkin);
         const firstCheckout = new Date(currentReservations.value[0].checkout);
-        checkinCheckoutDatesValue = `${firstCheckin.getDate()}/${firstCheckin.getMonth() + 1}/${firstCheckin.getFullYear()} - ${firstCheckout.getDate()}/${firstCheckout.getMonth() + 1}/${firstCheckout.getFullYear()}`;
+        checkinCheckoutDatesValue = `${firstCheckin.getDate()}/${
+          firstCheckin.getMonth() + 1
+        }/${firstCheckin.getFullYear()} - ${firstCheckout.getDate()}/${
+          firstCheckout.getMonth() + 1
+        }/${firstCheckout.getFullYear()}`;
 
         currentReservations.value.forEach((reservation) => {
           if (
@@ -287,7 +277,12 @@ export default defineComponent({
       let folioCreateDateValue = '';
       if (currentFolio.value?.createDate) {
         const folioCreate = new Date(currentFolio.value.createDate);
-        folioCreateDateValue = `${folioCreate.getDate()}/${folioCreate.getMonth() + 1}/${folioCreate.getFullYear()} a las ${folioCreate.getHours().toString().padStart(2, '0')}:${folioCreate.getMinutes().toString().padStart(2, '0')}`;
+        folioCreateDateValue = `${folioCreate.getDate()}/${
+          folioCreate.getMonth() + 1
+        }/${folioCreate.getFullYear()} a las ${folioCreate
+          .getHours()
+          .toString()
+          .padStart(2, '0')}:${folioCreate.getMinutes().toString().padStart(2, '0')}`;
       }
       return folioCreateDateValue;
     };
@@ -355,14 +350,14 @@ export default defineComponent({
       }
 
       const pricelist = store.state.pricelists.pricelists.find(
-        (el) => el.id === currentFolio.value?.pricelistId,
+        (el) => el.id === currentFolio.value?.pricelistId
       );
       if (pricelist) {
         pricelistName.value = pricelist.name;
       } else if (currentFolio.value?.pricelistId) {
         await store.dispatch(
           'pricelists/fetchRestrictedPricelist',
-          currentFolio.value?.pricelistId,
+          currentFolio.value?.pricelistId
         );
         pricelistName.value = store.state.pricelists.restrictedPricelist?.name ?? '';
       }

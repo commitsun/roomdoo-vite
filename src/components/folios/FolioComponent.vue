@@ -449,57 +449,11 @@
       </div>
     </div>
   </div>
-  <!--
-    <Modal
-    :show="isReservationBlockedModalOpen"
-    class="reservation-blocked-modal"
-    @close="isReservationBlockedModalOpen = false"
-    :headerColor="'#FFFFFF'"
-  >
-    <template #header>
-      <div
-        class="reservation-blocked-title"
-      >
-        <CustomIcon
-          :imagePath="'/app-images/icon-lock.svg'"
-          :color="'primary'"
-          :width="'15px'"
-          :height="'15px'"
-        />
-        <span class="title">
-          Reserva bloqueada por {{ agencyName }}
-        </span>
-      </div>
-    </template>
-    <template #body>
-      <div
-        class="reservation-blocked-content"
-      >
-        <div
-          class="reservation-blocked"
-        >
-          <div class="first-row">
-            No es posible cancelar alguna de estas reserva.
-          </div>
-          <br />
-          <div class="second-row">
-            Esta reserva ha sido vendida por {{ agencyName }} y algunas
-            modificaciones están bloqueadas en Roomdoo.
-            <br />
-            <br />
-            Por favor, informe al cliente que para cancelar
-            estas reservas, debe realizarlo directamente a través de {{ agencyName }}.
-          </div>
-        </div>
-      </div>
-    </template>
-  </Modal>-->
 </template>
 
 <script lang="ts">
 import { type BatchChangesInterface } from '@/interfaces/BatchChangesInterface';
 import { defineComponent, computed, onMounted, ref, type Ref, watch, markRaw } from 'vue';
-import { type RoomTypeClassInterface } from '@/interfaces/RoomTypeClassInterface';
 
 import { type ReservationInterface } from '@/interfaces/ReservationInterface';
 import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';

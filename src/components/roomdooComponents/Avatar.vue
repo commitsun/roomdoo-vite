@@ -1,12 +1,6 @@
 <template>
-  <div
-    class="avatar"
-    :style=" backgroundColor ? `background-color: ${backgroundColor}`: ''"
-  >
-    <img
-      v-if="image && image !== ''"
-      :src="image"
-    />
+  <div class="avatar" :style="backgroundColor ? `background-color: ${backgroundColor}` : ''">
+    <img v-if="image && image !== ''" :src="image" />
     <span v-else-if="textToRender">
       {{ textToRender }}
     </span>
@@ -42,7 +36,7 @@ export default defineComponent({
   border-radius: 50%;
   font-size: 20px;
   font-weight: bold;
-  color: #FFFFFF;
+  color: #ffffff;
   img {
     width: 100%;
     height: 100%;

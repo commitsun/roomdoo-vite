@@ -140,9 +140,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
-    // añadir opción quitar filtros
     const filterOptions = [
-      // { id: 0, text: 'Ver solo...' },
       { id: 1, text: 'Check-ins pendientes' },
       { id: 2, text: 'Check-outs pendientes' },
       { id: 3, text: 'Abordo actualmente' },
@@ -151,7 +149,6 @@ export default defineComponent({
       { id: 14, text: 'Overbooking' },
     ];
     const orderByOptions = [
-      // { id: 0, text: 'Ordenar por...' },
       { id: 1, text: 'Prioridad' },
       { id: 2, text: 'Fecha check-in' },
       { id: 3, text: 'Fecha check-out' },
