@@ -68,7 +68,7 @@
               width="28px"
               height="28px"
               :color="!r.editable ? 'grey' : 'primary'"
-              class="icon debug-box"
+              class="icon"
               :class="r.expanded ? 'icon-expanded' : ''"
             />
             {{ r.roomId !== 0 ? roomShortName(r.roomId) : '?' }} -

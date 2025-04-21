@@ -34,7 +34,7 @@
         />
       </div>
     </div>
-    <hr />
+    <hr :class="quota === 0 || maxAvail === 0 || closed ? 'red' : ''" />
     <!-- QUOTA -->
     <div
       v-if="activeUser?.availabilityRuleFields?.includes('quota')"
@@ -822,7 +822,6 @@ export default defineComponent({
     .label {
       font-weight: 300;
       font-size: 0.9rem;
-      border: 1px solid red;
     }
     .rule-value {
       font-weight: bold;
@@ -873,6 +872,9 @@ export default defineComponent({
     border-top: 3px solid $primary;
     margin-top: 0.1rem;
     margin-bottom: 0;
+    &.red {
+      border-top: 3px solid red;
+    }
   }
 }
 </style>
