@@ -240,6 +240,7 @@ export default defineComponent({
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 1rem;
       .left {
         display: flex;
         align-items: center;
@@ -263,9 +264,7 @@ export default defineComponent({
             flex-direction: column;
             .room-warning {
               display: flex;
-              font-size: 0.75rem;
               .room {
-                font-size: 0.8rem;
                 font-weight: bold;
               }
               .warning {
@@ -296,7 +295,6 @@ export default defineComponent({
           .price {
             display: flex;
             font-weight: bold;
-            font-size: 0.8rem;
           }
         }
       }

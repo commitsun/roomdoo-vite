@@ -1096,10 +1096,11 @@ export default defineComponent({
     height: fit-content;
     .dates {
       flex-direction: row;
-      justify-content: space-between;
+      // justify-content: space-between;
       .from,
       .to {
         max-width: none;
+        margin-right: 1rem;
       }
     }
     .filters {

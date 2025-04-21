@@ -718,6 +718,9 @@ export default defineComponent({
       flex-direction: row;
       .dates {
         margin-right: 1rem;
+        .datepicker {
+          width: 75%;
+        }
       }
       .adults-children {
         flex-direction: row;

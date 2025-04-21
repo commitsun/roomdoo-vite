@@ -140,7 +140,6 @@ export default defineComponent({
       font-size: 17px;
       font-weight: 600 !important;
       line-height: 22px;
-      text-align: justify;
       .link-post {
         color: #fff;
         text-decoration: none;
@@ -158,7 +157,6 @@ export default defineComponent({
       word-wrap: break-word;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      text-align: justify;
     }
     .post-author {
       margin-top: 10px;

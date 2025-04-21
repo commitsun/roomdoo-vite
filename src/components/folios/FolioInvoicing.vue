@@ -364,7 +364,7 @@ export default defineComponent({
           saleLine.qtyToInvoice * saleLine.priceUnit -
           ((saleLine.discount * saleLine.priceUnit) / 100) * saleLine.qtyToInvoice;
       }
-      return amount;
+      return amount.toFixed(2);
     };
 
     const getMoveLineRowStyle = (displayType: string, numberRow: number) => {

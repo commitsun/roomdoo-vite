@@ -22,7 +22,7 @@
       </div>
     </div>
   </div>
-  <div class="transaction-content debug-box">
+  <div class="transaction-content">
     <div class="transaction-content-item">
       <div class="transaction-content-item-title">Código identificador</div>
       <div class="transaction-content-item-value-bold">

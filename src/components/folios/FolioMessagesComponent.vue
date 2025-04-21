@@ -58,7 +58,7 @@
               :style="{
                 backgroundImage: message.authorImageUrl
                   ? `url(${message.authorImageUrl})`
-                  : 'url(app-images/avatar.png)',
+                  : 'url(/app-images/avatar.png)',
               }"
             />
             <div>

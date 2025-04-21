@@ -767,12 +767,11 @@ export default defineComponent({
     user-select: none;
     .price {
       height: 1.5rem;
-      font-size: 0.9rem;
       font-weight: bold;
       .price-input {
-        padding-left: 0.8rem;
+        padding-left: 1rem;
         font-weight: bold;
-        width: 3.7rem;
+        width: 4.2rem !important;
         height: 16px;
         border: 0;
         margin-bottom: 5px;
@@ -810,7 +809,6 @@ export default defineComponent({
       cursor: pointer;
     }
     .free-rooms {
-      font-size: 0.8rem;
       height: 1.5rem;
       font-weight: 300;
       text-align: center;
@@ -823,7 +821,8 @@ export default defineComponent({
     }
     .label {
       font-weight: 300;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
+      border: 1px solid red;
     }
     .rule-value {
       font-weight: bold;

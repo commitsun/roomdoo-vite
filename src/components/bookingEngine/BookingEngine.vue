@@ -2952,15 +2952,16 @@ export default defineComponent({
         .dates {
           display: flex;
           align-items: center;
-          justify-content: space-between;
           .datepicker {
             margin-left: 1rem;
-            width: 100%;
+            width: 220px;
           }
         }
         .text-dates {
           margin-top: 1rem;
-          font-size: 0.9rem;
+          .font-bold {
+            font-weight: bold;
+          }
         }
         .room-type-option {
           display: flex;
@@ -3023,7 +3024,7 @@ export default defineComponent({
         }
         .resume-stay {
           margin-top: 0.5rem;
-          .text-bold {
+          .font-bold {
             font-weight: bold;
           }
           p {

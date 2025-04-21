@@ -73,7 +73,7 @@
           :width="'20px'"
           @click="showFilters = !showFilters"
         />
-        <button class="btn-new-partner debug-box" @click="openCreatePartner()">
+        <button class="btn-new-partner" @click="openCreatePartner()">
           <CustomIcon
             :imagePath="'/app-images/icon-add-white.svg'"
             class="icon"

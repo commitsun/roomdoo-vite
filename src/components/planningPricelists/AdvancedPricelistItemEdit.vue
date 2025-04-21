@@ -210,7 +210,7 @@
             @click="currentClosed = !currentClosed"
             :class="{ modified: currentClosed !== oldAvailabilityPlanRule.closed }"
           >
-            Salida cerrada
+            Cerrada
           </label>
         </div>
         <div class="toggle-closed">

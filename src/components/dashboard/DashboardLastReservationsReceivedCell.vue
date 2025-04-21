@@ -467,7 +467,6 @@ export default defineComponent({
           align-items: center;
           height: 15px;
           margin-bottom: 4px;
-          // width: 100%;
           position: relative;
           .folio-partner {
             position: absolute;
@@ -477,7 +476,7 @@ export default defineComponent({
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            width: 60%;
+            width: 50%;
           }
           .pill {
             font-size: 12px;
@@ -610,7 +609,7 @@ export default defineComponent({
             height: 25px;
             .folio-partner {
               font-size: 18px;
-              width: 50%;
+              width: 45%;
             }
             .pill {
               font-size: 13px;
@@ -626,14 +625,14 @@ export default defineComponent({
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1023px) {
   .new-reservations {
     .top {
       .folio {
         .folio-mid {
           .mid-top {
             .folio-partner {
-              width: 70%;
+              width: 58%;
             }
           }
           .mid-bottom {

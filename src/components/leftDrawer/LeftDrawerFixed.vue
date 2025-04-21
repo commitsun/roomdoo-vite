@@ -227,10 +227,10 @@
 <script lang="ts">
 import { defineComponent, ref, computed, markRaw } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useStore } from '../../store';
+import { useStore } from '@/store';
 import ReportComponent from '@/components/reports/ReportComponent.vue';
 import UserSettingsModal from '@/components/users/UserSettings.vue';
-import { useSupport } from '../../utils/useSupport';
+import { useSupport } from '@/utils/useSupport';
 import { dialogService } from '@/services/DialogService';
 
 export default defineComponent({
@@ -361,15 +361,15 @@ export default defineComponent({
       background-image: url('/logos/logo-black-new.svg');
       background-size: cover;
       background-repeat: no-repeat;
-      background-position: 0.65rem;
+      background-position: 0.825rem;
     }
     .logo-expanded {
       height: 35px;
-      padding-left: 0.65rem;
+      padding-left: 0.85rem;
     }
     .items {
       margin-top: 3rem;
-      margin-left: 0.5rem;
+      margin-left: 0.65rem;
       display: flex;
       flex-direction: column;
       .item-container {
@@ -474,10 +474,9 @@ export default defineComponent({
   .support-menu {
     background-color: #e9e9e980;
     margin-bottom: 20px;
-    margin-left: 0.5rem;
+    margin-left: 0.65rem;
     padding-left: 0.5rem;
     margin-right: 0.5rem;
-
     display: flex;
     align-items: center;
     height: 35px;
@@ -496,7 +495,7 @@ export default defineComponent({
     margin-bottom: 20px;
     display: flex;
     align-items: center;
-    padding-left: 1rem;
+    padding-left: 1.15rem;
     background-color: white;
     height: 35px;
     border-radius: 12px;
