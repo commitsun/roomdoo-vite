@@ -1694,7 +1694,8 @@ export default defineComponent({
       align-items: center;
       justify-content: center;
       margin-bottom: 0.5rem;
-      background-color: $primary;
+      background-color: $call_to_action_color;
+
       color: white;
       border-radius: 5px;
       height: 30px;
