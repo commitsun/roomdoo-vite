@@ -214,52 +214,9 @@
 
     <div class="rules-section" v-if="applyOn.code === 'availabilityPlan'">
       <div class="title">Reglas de disponibilidad</div>
-      <div class="rules">
+      <div class="rules debug-box">
         <div class="rule">
-          <div class="rule-content">
-            <div class="left">
-              <ToggleSwitch v-model="minStayToggleValue" class="toggle" />
-              <div class="label" @click="minStayToggleValue = !minStayToggleValue">
-                Estancia mínima
-              </div>
-            </div>
-            <InputNumber
-              v-model="minStayInput"
-              :disabled="!minStayToggleValue"
-              size="small"
-              :min="0"
-              :max="99"
-              :inputStyle="{
-                width: '35px',
-                height: '35px',
-                padding: '6px',
-                fontSize: '14px',
-                textAlign: 'center',
-              }"
-            />
-          </div>
-          <div class="rule-content">
-            <div class="left">
-              <ToggleSwitch v-model="maxStayToggleValue" class="toggle" />
-              <div class="label" @click="maxStayToggleValue = !maxStayToggleValue">
-                Estancia máxima
-              </div>
-            </div>
-            <InputNumber
-              v-model="maxStayInput"
-              :disabled="!maxStayToggleValue"
-              size="small"
-              :min="0"
-              :max="99"
-              :inputStyle="{
-                width: '35px',
-                height: '35px',
-                padding: '6px',
-                fontSize: '14px',
-                textAlign: 'center',
-              }"
-            />
-          </div>
+          <!-- quota -->
           <div class="rule-content">
             <div class="left">
               <ToggleSwitch v-model="quotaToggleValue" class="toggle" />
@@ -280,8 +237,75 @@
               }"
             />
           </div>
+          <!-- min stay -->
+          <div class="rule-content">
+            <div class="left">
+              <ToggleSwitch v-model="minStayToggleValue" class="toggle" />
+              <div class="label" @click="minStayToggleValue = !minStayToggleValue">
+                Estancia mín.
+              </div>
+            </div>
+            <InputNumber
+              v-model="minStayInput"
+              :disabled="!minStayToggleValue"
+              size="small"
+              :min="0"
+              :max="99"
+              :inputStyle="{
+                width: '35px',
+                height: '35px',
+                padding: '6px',
+                fontSize: '14px',
+                textAlign: 'center',
+              }"
+            />
+          </div>
+          <!-- max stay -->
+          <div class="rule-content">
+            <div class="left">
+              <ToggleSwitch v-model="maxStayToggleValue" class="toggle" />
+              <div class="label" @click="maxStayToggleValue = !maxStayToggleValue">
+                Estancia máx.
+              </div>
+            </div>
+            <InputNumber
+              v-model="maxStayInput"
+              :disabled="!maxStayToggleValue"
+              size="small"
+              :min="0"
+              :max="99"
+              :inputStyle="{
+                width: '35px',
+                height: '35px',
+                padding: '6px',
+                fontSize: '14px',
+                textAlign: 'center',
+              }"
+            />
+          </div>
         </div>
         <div class="rule">
+          <!-- max availability -->
+          <div class="rule-content">
+            <div class="left">
+              <ToggleSwitch v-model="maxAvailToggleValue" class="toggle small-toggle-switch" />
+              <div class="label" @click="maxAvailToggleValue = !maxAvailToggleValue">
+                Máx. dispo.
+              </div>
+            </div>
+            <InputNumber
+              v-model="maxAvailInput"
+              :disabled="!maxAvailToggleValue"
+              :inputStyle="{
+                width: '35px',
+                height: '35px',
+                padding: '6px',
+                fontSize: '14px',
+                textAlign: 'center',
+              }"
+            />
+          </div>
+          <!-- min stay arrival -->
           <div class="rule-content">
             <div class="left">
               <ToggleSwitch v-model="minStayArrivalToggleValue" class="toggle" />
@@ -304,6 +328,7 @@
               }"
             />
           </div>
+          <!-- max stay arrival -->
           <div class="rule-content">
             <div class="left">
               <ToggleSwitch v-model="maxStayArrivalToggleValue" class="toggle" />
@@ -326,27 +351,9 @@
               }"
             />
           </div>
-          <div class="rule-content">
-            <div class="left">
-              <ToggleSwitch v-model="maxAvailToggleValue" class="toggle small-toggle-switch" />
-              <div class="label" @click="maxAvailToggleValue = !maxAvailToggleValue">
-                Máx. disponibilidad
-              </div>
-            </div>
-            <InputNumber
-              v-model="maxAvailInput"
-              :disabled="!maxAvailToggleValue"
-              :inputStyle="{
-                width: '35px',
-                height: '35px',
-                padding: '6px',
-                fontSize: '14px',
-                textAlign: 'center',
-              }"
-            />
-          </div>
         </div>
         <div class="rule">
+          <!-- closed -->
           <div class="rule-content">
             <div class="left">
               <ToggleSwitch v-model="closedToggleValue" class="toggle" />
@@ -359,6 +366,7 @@
               class="checkbox"
             />
           </div>
+          <!-- closed arrival -->
           <div class="rule-content">
             <div class="left">
               <ToggleSwitch v-model="closedArrivalToggleValue" class="toggle" />
@@ -373,6 +381,7 @@
               class="checkbox"
             />
           </div>
+          <!-- closed departure -->
           <div class="rule-content">
             <div class="left">
               <ToggleSwitch v-model="closedDepartureToggleValue" class="toggle" />
@@ -470,12 +479,12 @@
         <div class="rules" v-if="applyOn.code === 'availabilityPlan'">
           <div class="label">Reglas de disponibilidad:</div>
           <div class="value">
-            <div v-if="minStayToggleValue">Estancia mínima: {{ minStayInput }}</div>
-            <div v-if="maxStayToggleValue">Estancia máxima: {{ maxStayInput }}</div>
+            <div v-if="minStayToggleValue">Estancia mín.: {{ minStayInput }}</div>
+            <div v-if="maxStayToggleValue">Estancia máx.: {{ maxStayInput }}</div>
             <div v-if="quotaToggleValue">Cupo: {{ quotaInput }}</div>
-            <div v-if="minStayArrivalToggleValue">Est.min. llegada: {{ minStayArrivalInput }}</div>
-            <div v-if="maxStayArrivalToggleValue">Est.máx. llegada: {{ maxStayArrivalInput }}</div>
-            <div v-if="maxAvailToggleValue">Máx. disponibilidad: {{ maxAvailInput }}</div>
+            <div v-if="minStayArrivalToggleValue">Est. min. llegada: {{ minStayArrivalInput }}</div>
+            <div v-if="maxStayArrivalToggleValue">Est. máx. llegada: {{ maxStayArrivalInput }}</div>
+            <div v-if="maxAvailToggleValue">Máx. dispo.: {{ maxAvailInput }}</div>
             <div v-if="closedToggleValue">Cerrada: {{ closedValue ? 'Si' : 'No' }}</div>
             <div v-if="closedArrivalToggleValue">
               Llegada cerrada: {{ closedArrivalValue ? 'Si' : 'No' }}

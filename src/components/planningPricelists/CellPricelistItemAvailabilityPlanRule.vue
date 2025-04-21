@@ -35,6 +35,7 @@
       </div>
     </div>
     <hr :class="quota === 0 || maxAvail === 0 || closed ? 'red' : ''" />
+
     <!-- QUOTA -->
     <div
       v-if="activeUser?.availabilityRuleFields?.includes('quota')"
@@ -57,32 +58,6 @@
         />
       </div>
     </div>
-    <!-- MAX AVAIL -->
-    <div
-      v-if="activeUser?.availabilityRuleFields?.includes('max_avail')"
-      class="pricelist-avail-rule-item-row"
-      :class="
-        validator.maxAvail.$error ? 'not-valid' : maxAvail !== initialMaxAvail ? 'modified' : ''
-      "
-      @click="($refs.inputMaxAvail as HTMLInputElement).focus()"
-    >
-      <div class="label">Máx. Dispo.</div>
-      <div
-        class="rule-value"
-        :class="
-          validator.maxAvail.$error ? 'not-valid' : maxAvail !== initialMaxAvail ? 'modified' : ''
-        "
-      >
-        <input
-          ref="inputMaxAvail"
-          type="number"
-          class="restriction-input"
-          v-model="maxAvail"
-          @input="updateAvailabilityPlanRule"
-          :class="{ active: showAdvancedPricelistItem }"
-        />
-      </div>
-    </div>
 
     <!-- MIN STAY -->
     <div
@@ -91,7 +66,7 @@
       :class="validator.minStay.$error ? 'not-valid' : minStay !== initialMinStay ? 'modified' : ''"
       @click="($refs.inputMinStay as HTMLInputElement).focus()"
     >
-      <div class="label">Estancia Mín.</div>
+      <div class="label">Estancia mín.</div>
       <div
         class="rule-value"
         :class="
@@ -116,7 +91,7 @@
       :class="validator.maxStay.$error ? 'not-valid' : maxStay !== initialMaxStay ? 'modified' : ''"
       @click="($refs.inputMaxStay as HTMLInputElement).focus()"
     >
-      <div class="label">Estancia Máx.</div>
+      <div class="label">Estancia máx.</div>
       <div
         class="rule-value"
         :class="
@@ -128,6 +103,33 @@
           type="number"
           class="restriction-input"
           v-model="maxStay"
+          @input="updateAvailabilityPlanRule"
+          :class="{ active: showAdvancedPricelistItem }"
+        />
+      </div>
+    </div>
+
+    <!-- MAX AVAIL -->
+    <div
+      v-if="activeUser?.availabilityRuleFields?.includes('max_avail')"
+      class="pricelist-avail-rule-item-row"
+      :class="
+        validator.maxAvail.$error ? 'not-valid' : maxAvail !== initialMaxAvail ? 'modified' : ''
+      "
+      @click="($refs.inputMaxAvail as HTMLInputElement).focus()"
+    >
+      <div class="label">Máx. dispo.</div>
+      <div
+        class="rule-value"
+        :class="
+          validator.maxAvail.$error ? 'not-valid' : maxAvail !== initialMaxAvail ? 'modified' : ''
+        "
+      >
+        <input
+          ref="inputMaxAvail"
+          type="number"
+          class="restriction-input"
+          v-model="maxAvail"
           @input="updateAvailabilityPlanRule"
           :class="{ active: showAdvancedPricelistItem }"
         />
@@ -147,7 +149,7 @@
       "
       @click="($refs.inputMinStayArrival as HTMLInputElement).focus()"
     >
-      <div class="label">Est. Mín. Lleg.</div>
+      <div class="label">Est. mín. lleg.</div>
       <div
         class="rule-value"
         :class="
@@ -182,7 +184,7 @@
       "
       @click="($refs.inputMaxStayArrival as HTMLInputElement).focus()"
     >
-      <div class="label">Est. Máx. Lleg.</div>
+      <div class="label">Est. máx. lleg.</div>
       <div
         class="rule-value"
         :class="

@@ -26,6 +26,7 @@
     </div>
     <div class="content">
       <div class="left-inputs-edit">
+        <!-- price -->
         <div
           :class="
             validator.currentPrice.$error
@@ -50,7 +51,7 @@
           />
           <label for="priceItem" class="label"> Precio (€) </label>
         </div>
-
+        <!-- quota -->
         <div
           :class="
             validator.currentQuota.$error
@@ -76,6 +77,57 @@
           <label for="quotaItem" class="label"> Cupo </label>
         </div>
 
+        <!-- min stay -->
+        <div
+          :class="
+            validator.currentMinStay.$error
+              ? 'text-red'
+              : currentMinStay !== oldAvailabilityPlanRule.minStay
+              ? 'modified'
+              : ''
+          "
+        >
+          <input
+            class="input-item-rule-value"
+            :class="
+              validator.currentMinStay.$error
+                ? 'not-valid'
+                : currentMinStay !== oldAvailabilityPlanRule.minStay
+                ? 'modified'
+                : ''
+            "
+            type="number"
+            v-model="currentMinStay"
+            @input="validator.currentMinStay.$touch"
+          />
+          <label for="minStayItem" class="label"> Estancia mín. </label>
+        </div>
+        <!-- max stay -->
+        <div
+          :class="
+            validator.currentMaxStay.$error
+              ? 'text-red'
+              : currentMaxStay !== oldAvailabilityPlanRule.maxStay
+              ? 'modified'
+              : ''
+          "
+        >
+          <input
+            class="input-item-rule-value"
+            :class="
+              validator.currentMaxStay.$error
+                ? 'not-valid'
+                : currentMaxStay !== oldAvailabilityPlanRule.maxStay
+                ? 'modified'
+                : ''
+            "
+            type="number"
+            v-model="currentMaxStay"
+            @input="validator.currentMaxStay.$touch"
+          />
+          <label for="maxStayItem" class="label"> Estancia máx. </label>
+        </div>
+        <!-- max availability -->
         <div
           :class="
             validator.currentMaxAvailability.$error
@@ -100,58 +152,34 @@
           />
           <label class="label"> Max. dispo. </label>
         </div>
-
-        <div
-          :class="
-            validator.currentMinStay.$error
-              ? 'text-red'
-              : currentMinStay !== oldAvailabilityPlanRule.minStay
-              ? 'modified'
-              : ''
-          "
-        >
-          <input
-            class="input-item-rule-value"
-            :class="
-              validator.currentMinStay.$error
-                ? 'not-valid'
-                : currentMinStay !== oldAvailabilityPlanRule.minStay
-                ? 'modified'
-                : ''
-            "
-            type="number"
-            v-model="currentMinStay"
-            @input="validator.currentMinStay.$touch"
-          />
-          <label for="minStayItem" class="label"> Estancia mínima </label>
-        </div>
-
-        <div
-          :class="
-            validator.currentMaxStay.$error
-              ? 'text-red'
-              : currentMaxStay !== oldAvailabilityPlanRule.maxStay
-              ? 'modified'
-              : ''
-          "
-        >
-          <input
-            class="input-item-rule-value"
-            :class="
-              validator.currentMaxStay.$error
-                ? 'not-valid'
-                : currentMaxStay !== oldAvailabilityPlanRule.maxStay
-                ? 'modified'
-                : ''
-            "
-            type="number"
-            v-model="currentMaxStay"
-            @input="validator.currentMaxStay.$touch"
-          />
-          <label for="maxStayItem" class="label"> Estancia máxima </label>
-        </div>
       </div>
       <div class="right-inputs-edit">
+        <!-- min stay arrival -->
+        <div
+          :class="
+            validator.currentMinStayArrival.$error
+              ? 'text-red'
+              : currentMinStayArrival !== oldAvailabilityPlanRule.minStayArrival
+              ? 'modified'
+              : ''
+          "
+        >
+          <input
+            class="input-item-rule-value"
+            :class="
+              validator.currentMinStayArrival.$error
+                ? 'not-valid'
+                : currentMinStayArrival !== oldAvailabilityPlanRule.minStayArrival
+                ? 'modified'
+                : ''
+            "
+            type="number"
+            v-model="currentMinStayArrival"
+            @input="validator.currentMinStayArrival.$touch"
+          />
+          <label class="label"> Est. mín. llegada </label>
+        </div>
+        <!-- max stay arrival -->
         <div
           :class="
             validator.currentMaxStayArrival.$error
@@ -177,31 +205,7 @@
           <label for="maxStayArrivalItem" class="label"> Est. máx. llegada </label>
         </div>
 
-        <div
-          :class="
-            validator.currentMinStayArrival.$error
-              ? 'text-red'
-              : currentMinStayArrival !== oldAvailabilityPlanRule.minStayArrival
-              ? 'modified'
-              : ''
-          "
-        >
-          <input
-            class="input-item-rule-value"
-            :class="
-              validator.currentMinStayArrival.$error
-                ? 'not-valid'
-                : currentMinStayArrival !== oldAvailabilityPlanRule.minStayArrival
-                ? 'modified'
-                : ''
-            "
-            type="number"
-            v-model="currentMinStayArrival"
-            @input="validator.currentMinStayArrival.$touch"
-          />
-          <label class="label"> Est. mín. llegada </label>
-        </div>
-
+        <!-- closed -->
         <div class="toggle-closed">
           <input name="closed" type="checkbox" v-model="currentClosed" />
           <label
@@ -213,6 +217,7 @@
             Cerrada
           </label>
         </div>
+        <!-- closed arrival -->
         <div class="toggle-closed">
           <input name="closedArrival" type="checkbox" v-model="currentClosedArrival" />
           <label
@@ -224,7 +229,7 @@
             Llegada cerrada
           </label>
         </div>
-
+        <!-- closed departure -->
         <div class="toggle-closed">
           <input name="closedDeparture" type="checkbox" v-model="currentClosedDeparture" />
           <label
