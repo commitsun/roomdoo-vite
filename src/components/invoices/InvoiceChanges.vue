@@ -51,7 +51,7 @@
           </div>
           <span> Uno de los huéspedes </span>
         </div>
-        <div class="option">
+        <div class="option" @click="openPartnerSearchDialog(false)">
           <div class="icon-wrapper">
             <CustomIcon
               imagePath="/app-images/icon-search-partner.svg"
