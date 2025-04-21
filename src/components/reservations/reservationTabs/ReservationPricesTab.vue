@@ -565,14 +565,20 @@ export default defineComponent({
     margin-right: 1.55rem !important;
   }
 }
-hr {
-  border: none;
-  height: 1px;
-  background-color: #e1e0e0;
-  width: 95%;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  margin-left: 5%;
+.price-total,
+.price-total-info,
+.commission,
+.sale-info,
+.price-detail {
+  hr {
+    border: none;
+    height: 1px;
+    background-color: #e1e0e0;
+    width: 95%;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-left: 5%;
+  }
 }
 .sale-info {
   margin: 50px 0;
@@ -584,7 +590,7 @@ hr {
   padding-top: 5px;
   padding-left: 13px;
   padding-bottom: 5px;
-  margin-bottom: 17px;
+  margin-bottom: 0.5rem;
   align-items: center;
   border-radius: 10px 10px 0px 0px;
   cursor: pointer;
@@ -674,15 +680,19 @@ hr {
 }
 .card {
   margin: 20px 8px;
+  padding-bottom: 0.5rem;
   background: rgba(250, 248, 248, 0.67);
   border-radius: 10px;
-  .extra-service {
-    padding-bottom: 8px;
+  hr {
+    border: none;
+    width: 100% !important;
+    height: 1px !important;
+    background-color: #e1e0e0 !important;
   }
+
   .line {
     margin-left: 1rem;
     margin-right: 0.5rem;
-    margin-bottom: 10px;
     display: grid;
     grid-template-columns: 3fr 2fr 2fr 2fr;
     grid-auto-rows: auto;
@@ -702,7 +712,6 @@ hr {
     justify-content: space-between;
     margin-left: 1rem;
     margin-right: 0.5rem;
-    margin-bottom: 10px;
     font-size: 0.8rem;
     font-weight: bold;
     color: #263941;
