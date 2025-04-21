@@ -70,7 +70,10 @@
       </span>
     </div>
     <hr />
-    <div class="data-reservation-row">
+    <div
+      class="data-reservation-row debug-box"
+      v-if="cancelationRuleName(reservation?.pricelistId || 0)"
+    >
       <span class="reservation-title"> Política de cancelación </span>
       <span class="reservation-data">
         {{ cancelationRuleName(reservation?.pricelistId || 0) }}
@@ -101,7 +104,7 @@
           :class="!showCard ? 'arrow-img-rotate' : ''"
         />
         <span> Precio de {{ reservationRoomTypeClassName() }} </span>
-        <div class="units q-pl-sm">
+        <div class="units">
           <CustomIcon
             :imagePath="'/app-images/icon-nights.svg'"
             :color="'#263941'"
@@ -625,6 +628,7 @@ export default defineComponent({
       background: #eaeaea;
       border-radius: 15px;
       height: 20px;
+      padding-left: 0.5rem;
       span {
         padding-left: 5px;
         padding-right: 5px;
