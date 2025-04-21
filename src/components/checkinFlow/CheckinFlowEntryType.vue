@@ -57,9 +57,6 @@
           @click="isOCRAvailable ? setOCR() : false"
           @animationend="emitNextStep()"
         >
-          <div class="new-feature-feedback" v-if="isOCRAvailable && showNewFeatureFeedback">
-            Nuevo
-          </div>
           <div class="triangle" v-if="isOCRSelected">
             <img class="check-mark" src="/app-images/check-mark.svg" />
           </div>
@@ -424,18 +421,7 @@ export default defineComponent({
         position: relative;
         border-radius: 5px;
         cursor: pointer;
-        .new-feature-feedback {
-          position: absolute;
-          top: 0;
-          left: 0;
-          background-color: #814672;
-          color: white;
-          padding: 0 0.35rem;
-          border-radius: 15px;
-          font-size: 13px;
-          font-weight: bold;
-          margin: 5px 0 0 10px;
-        }
+
         .triangle {
           position: absolute;
           top: 0;
