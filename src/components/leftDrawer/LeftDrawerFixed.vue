@@ -167,7 +167,7 @@
       </div>
       <div class="support-menu" @click="openSupportTab()">
         <img src="/app-images/support-icon.svg" />
-        <span>Soporte de roomdoo</span>
+        <span>Soporte de Roomdoo</span>
       </div>
       <div
         class="bottom-expanded"
