@@ -96,6 +96,8 @@
             </div>
           </div>
         </div>
+      </div>
+      <div class="header-right">
         <div
           class="notifications"
           @click="isOpenNotifications = !isOpenNotifications"
@@ -103,7 +105,7 @@
           tabindex="2"
           v-if="numReservationsToAssign > 0"
         >
-          <img src="/app-images/notification-empty.svg" />
+          <img src="/app-images/notification-empty.svg" class="notification-empty" />
           <div class="bubble-notifications">
             <span>{{ numReservationsToAssign }}</span>
           </div>
@@ -115,8 +117,6 @@
             {{ numReservationsToAssign }} habitaciones por asignar
           </div>
         </div>
-      </div>
-      <div class="header-right">
         <img src="/app-images/icon-event.svg" @click="moveToToday()" />
         <img src="/app-images/search.svg" @click="openSearchFolio" />
         <div class="select-property-mobile">
@@ -1261,6 +1261,12 @@ export default defineComponent({
           transition: transform 0.3s ease;
         }
       }
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
       .notifications {
         margin-right: 1rem;
         cursor: pointer;
@@ -1314,12 +1320,6 @@ export default defineComponent({
           }
         }
       }
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      height: 100%;
       img {
         height: 24px;
         width: 24px;
@@ -1554,16 +1554,23 @@ export default defineComponent({
         }
         .select-property-desk,
         .property-desk,
-        .select-filters,
-        .notifications {
+        .select-filters {
           display: flex;
         }
       }
       .header-right {
+        .notifications {
+          display: flex;
+          .notification-empty {
+            display: flex;
+            margin: 0;
+          }
+        }
         img,
         .select-property-mobile {
           display: none;
         }
+
         .button-new-reservation {
           display: flex;
           align-items: center;
