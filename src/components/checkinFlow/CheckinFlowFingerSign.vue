@@ -1,5 +1,5 @@
 <template>
-  <div class="container" @keydown.esc="$emit('closeCheckinFlow')" tabindex="0">
+  <div class="container-sign" @keydown.esc="$emit('closeCheckinFlow')" tabindex="0">
     <div class="prev-title">
       Datos {{ currentIndexCheckin + 1
       }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
@@ -423,7 +423,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.container {
+.container-sign {
   width: 100%;
   height: auto;
   min-height: 100%;
@@ -566,7 +566,7 @@ export default defineComponent({
   }
 }
 @media (min-width: 768px) {
-  .container {
+  .container-sign {
     justify-content: center;
     // prev-title
     .prev-title {

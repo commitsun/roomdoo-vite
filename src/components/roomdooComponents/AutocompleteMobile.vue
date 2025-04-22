@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container-autocomplete-mobile">
     <div class="search">
       <div class="left">
         <img src="/app-images/arrow-left-blue.svg" @click="closeRightDrawer" />
@@ -187,7 +187,7 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.container {
+.container-autocomplete-mobile {
   height: 100%;
   display: flex;
   flex-direction: column;

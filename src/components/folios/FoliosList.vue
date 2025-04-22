@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="folio-list-container">
     <div class="drawer-header-mbl">
       <div class="drawer-search">
         <CustomIcon
@@ -497,7 +497,7 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.container {
+.folio-list-container {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -603,7 +603,7 @@ export default defineComponent({
   }
 }
 @media (min-width: 1024px) {
-  .container {
+  .folio-list-container {
     .drawer-header-dsk {
       display: flex;
     }

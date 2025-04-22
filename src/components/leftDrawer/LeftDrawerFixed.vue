@@ -1,5 +1,5 @@
 <template>
-  <div class="container" @mouseenter="isOpen = true" @mouseleave="closeExpanded">
+  <div class="container-left-drawer-fixed" @mouseenter="isOpen = true" @mouseleave="closeExpanded">
     <div class="top" v-if="!isOpen">
       <div class="logo" />
       <div class="items">
@@ -335,7 +335,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.container {
+.container-left-drawer-fixed {
   user-select: none;
   height: 97vh;
   width: 57px;

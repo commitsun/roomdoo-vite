@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container-multiselect">
     <div class="title">
       {{ title }}
     </div>
@@ -76,7 +76,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.container {
+.container-multiselect {
   padding: 1rem 0 1rem 1rem;
   font-size: 16px;
   .title {
@@ -126,7 +126,7 @@ export default defineComponent({
 }
 
 @media (max-width: 1024px) {
-  .container {
+  .container-multiselect {
     padding: 1rem 0 1rem 0.5rem;
     font-size: 14px;
     .options-group {
