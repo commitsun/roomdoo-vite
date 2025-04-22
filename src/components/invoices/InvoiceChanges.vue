@@ -224,7 +224,7 @@
                     type="text"
                     :value="saleLine.name"
                     :disabled="!isLineRemoved[index]"
-                    _style="getSaleLinesToInvoiceRowStyle(saleLine.displayType, index)"
+                    :style="getSaleLinesToInvoiceRowStyle(saleLine.displayType, index)"
                   />
                 </TooltipComponent>
               </div>
@@ -278,7 +278,7 @@
                     type="text"
                     :value="invoiceLine.name"
                     :disabled="!isLineRemoved[index]"
-                    _style="getSaleLinesToInvoiceRowStyle(saleLine.displayType, index)"
+                    :style="getSaleLinesToInvoiceRowStyle(saleLine.displayType, index)"
                   />
                 </TooltipComponent>
               </div>
@@ -347,7 +347,7 @@
                     type="text"
                     :value="saleLine.name"
                     :disabled="!isLineRemoved[index]"
-                    _style="getSaleLinesToInvoiceRowStyle(saleLine.displayType, index)"
+                    :style="getSaleLinesToInvoiceRowStyle(saleLine.displayType, index)"
                   />
                 </TooltipComponent>
               </div>
