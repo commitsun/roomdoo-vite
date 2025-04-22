@@ -110,7 +110,8 @@
     </div>
     <div class="fifth">
       <div class="label">Mensaje</div>
-      <Editor v-model="mailContent" />
+
+      <div class="editable" contenteditable="true" ref="content" @input="updateContent" />
     </div>
   </div>
 </template>
@@ -164,6 +165,12 @@ export default defineComponent({
       email: {
         email,
       },
+    };
+
+    const content = ref<HTMLElement | null>(null);
+
+    const updateContent = () => {
+      mailContent.value = content.value?.innerHTML || '';
     };
 
     const subject = ref(props.defaultSubject ? props.defaultSubject : '');
@@ -380,6 +387,9 @@ export default defineComponent({
       } else if (store.state.folios.currentFolio?.partnerEmail) {
         emails.value.push(store.state.folios.currentFolio.partnerEmail);
       }
+      if (content.value) {
+        content.value.innerHTML = mailContent.value;
+      }
     });
     return {
       store,
@@ -406,6 +416,8 @@ export default defineComponent({
       removePartner,
       removeEmail,
       addMailToPartner,
+      updateContent,
+      content,
     };
   },
 });
