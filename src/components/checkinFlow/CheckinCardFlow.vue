@@ -528,11 +528,13 @@ export default defineComponent({
         }
       }
       .tooltip {
-        text-align: center;
         position: absolute;
         background-color: $primary;
         color: white;
-        padding: 0.25rem 1.5rem;
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
         border-radius: 5px;
         width: fit-content;
         bottom: 35px;

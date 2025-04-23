@@ -216,6 +216,14 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
       context.commit('SET_ADULTS_IN_FOLIO', response.data);
     });
   },
+
+  async fetchFolioPaymentLink(context, payload: { folioId: number; amount: number }) {
+    let params = '';
+    if (payload.amount) {
+      params += `?amount=${payload.amount}`;
+    }
+    return api.get(`folios/${payload.folioId}/payment-link${params}`);
+  },
 };
 
 export default actions;

@@ -15,12 +15,15 @@
         Fecha Límite:
         <span class="text-bold">{{ getDateLimit() }}</span>
       </div>
-      <button
-        class="charge-btn"
-        @click="openChargesModal(saleLine?.defaultInvoiceTo ?? 0, saleLine.pendingToPay)"
-      >
-        Registrar cobro
-      </button>
+      <div class="charge-btns">
+        <button class="link-btn" @click="openPaymentLinkModal()">Generar link</button>
+        <button
+          class="charge-btn"
+          @click="openChargesModal(saleLine.defaultInvoiceTo ?? 0, saleLine.pendingToPay)"
+        >
+          Registrar cobro
+        </button>
+      </div>
     </div>
   </div>
   <template v-if="transactions.length > 0">
@@ -195,7 +198,7 @@ import type { PartnerTransactions } from '@/interfaces/PartnerTransaction';
 import TransactionCharges from '@/components/transactions/TransactionCharges.vue';
 import DownPaymentInvoiceChanges from '@/components/transactions/DownPaymentInvoiceChanges.vue';
 import TransactionComponent from '@/components/transactions/TransactionComponent.vue';
-
+import FolioDirectPaymentLink from '@/components/folios/FolioDirectPaymentLink.vue';
 import { useStore } from '@/store';
 import { dialogService } from '@/services/DialogService';
 
@@ -391,6 +394,16 @@ export default defineComponent({
         content: markRaw(DownPaymentInvoiceChanges),
         props: {
           transaction: currentTransaction.value,
+        },
+      });
+    };
+
+    const openPaymentLinkModal = () => {
+      dialogService.open({
+        header: 'Generar link de cobro',
+        content: markRaw(FolioDirectPaymentLink),
+        props: {
+          pendingAmount: pendingAmount.value,
         },
       });
     };
@@ -612,6 +625,7 @@ export default defineComponent({
       closeTransactionDialog,
       printDownPaymentInvoice,
       showCreateDownPaymentInvoiceBtn,
+      openPaymentLinkModal,
     };
   },
 });
@@ -644,15 +658,27 @@ export default defineComponent({
         font-weight: bold;
       }
     }
-    .charge-btn {
-      color: white;
-      background-color: $primary;
-      border: none;
-      border-radius: 3px;
-      padding: 0 2rem;
-      font-weight: bold;
-      height: 30px;
-      cursor: pointer;
+    .charge-btns {
+      display: flex;
+      flex-direction: column;
+      .link-btn {
+        background-color: #f0f0f0;
+        border: none;
+        border-radius: 3px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1rem;
+      }
+      .charge-btn {
+        color: white;
+        background-color: $primary;
+        border: none;
+        border-radius: 3px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+      }
     }
   }
 }
@@ -864,8 +890,20 @@ export default defineComponent({
       .date-limit {
         margin-bottom: 0;
       }
-      .charge-btn {
-        width: 200px;
+      .charge-btns {
+        flex-direction: row;
+        .link-btn {
+          margin: 0.7rem 1rem;
+          padding: 0 1rem;
+          height: 30px;
+          font-size: 14px;
+        }
+        .charge-btn {
+          margin: 0.7rem 1rem;
+          font-size: 14px;
+          padding: 0 2rem;
+          height: 30px;
+        }
       }
     }
   }
