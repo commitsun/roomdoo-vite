@@ -207,6 +207,11 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    pmsPropertyState: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   setup(props, context) {
     const store = useStore();
@@ -242,7 +247,7 @@ export default defineComponent({
 
     const openLocation = () => {
       window.open(
-        `https://www.google.com/maps/search/?api=1&query=${props.pmsPropertyName}+${props.pmsPropertyStreet}+${props.pmsPropertyCity}`,
+        `https://www.google.com/maps/search/?api=1&query=${props.pmsPropertyName}+${props.pmsPropertyStreet}+${props.pmsPropertyCity}+${props.pmsPropertyState}`,
         '_blank'
       );
     };

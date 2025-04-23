@@ -67,6 +67,7 @@
         :pmsPropertyPhoneNumber="precheckinInfo.pmsPropertyPhoneNumber"
         :pmsPropertyStreet="precheckinInfo.pmsPropertyStreet"
         :pmsPropertyCity="precheckinInfo.pmsPropertyCity"
+        :pmsPropertyState="precheckinInfo.pmsPropertyState"
         @showReservationsForPrecheckin="showReservationsForPrecheckin()"
         @showReservationsForSharing="showReservationsForSharing()"
       />

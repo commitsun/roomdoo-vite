@@ -53,6 +53,7 @@
         :pmsPropertyPhoneNumber="precheckinInfo?.pmsPropertyPhoneNumber"
         :pmsPropertyStreet="precheckinInfo?.pmsPropertyStreet"
         :pmsPropertyCity="precheckinInfo?.pmsPropertyCity"
+        :pmsPropertyState="precheckinInfo?.pmsPropertyState"
         @openReservationCheckinFlow="isCheckinFlowStepperOpen = true"
       />
     </div>
