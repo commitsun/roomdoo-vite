@@ -102,7 +102,9 @@
           <option :value="0">Solo alojamiento</option>
           <option
             v-for="boardService in boardServices.filter(
-              (el) => el.roomTypeId === reservation.roomTypeId
+              (el) =>
+                el.roomTypeId === reservation.roomTypeId &&
+                (el.pricelistIds.includes(selectedPricelistId) || el.pricelistIds.length === 0)
             )"
             :key="boardService.id"
             :value="boardService.id"
@@ -351,6 +353,10 @@ export default defineComponent({
     instancedFromGrouped: {
       required: false,
       default: false,
+    },
+    selectedPricelistId: {
+      type: Number,
+      required: true,
     },
   },
   emits: [

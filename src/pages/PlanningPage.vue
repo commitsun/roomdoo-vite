@@ -528,11 +528,9 @@ export default defineComponent({
         store.state.properties.activeProperty?.id
       );
       void store.dispatch('agencies/fetchAgencies', store.state.properties.activeProperty?.id);
-      void store.dispatch(
-        'accountJournals/fetchAccountJournals',
-
-        { pmsPropertyId: store.state.properties.activeProperty?.id }
-      );
+      void store.dispatch('accountJournals/fetchAccountJournals', {
+        pmsPropertyId: store.state.properties.activeProperty?.id,
+      });
 
       await Promise.all([
         store.dispatch('pricelists/fetchPricelists', {

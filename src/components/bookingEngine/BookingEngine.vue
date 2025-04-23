@@ -597,6 +597,7 @@
             :reservation="reservation"
             :selectedReservationType="selectedReservationType"
             :reservationIndex="reservationIndex"
+            :selectedPricelistId="selectedPricelistId"
             @setReservationAdults="setReservationAdults($event)"
             @setReservationChildren="setReservationChildren($event)"
             @setReservationRoomId="setReservationRoomId($event)"
@@ -628,6 +629,7 @@
               :reservation="reservation"
               :selectedReservationType="selectedReservationType"
               :reservationIndex="reservationIndex"
+              :selectedPricelistId="selectedPricelistId"
               @toggleReservationAutoAssignRoomChanged="
                 reservation.autoAssignRoom = !reservation.autoAssignRoom
               "
