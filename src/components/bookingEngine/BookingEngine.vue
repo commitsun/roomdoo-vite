@@ -167,7 +167,11 @@
               <span class="label"> Canal de venta: </span>
               <div class="select">
                 <AutocompleteComponent
-                  :items="saleChannels.map((el) => ({ value: el.id, name: el.name }))"
+                  :items="
+                    saleChannels
+                      .filter((el) => el.isOnLine === false)
+                      .map((el) => ({ value: el.id, name: el.name }))
+                  "
                   id="sale-channel-booking-engine-autocomplete"
                   v-model="selectedSaleChannelId"
                   :minChars="0"
@@ -208,7 +212,11 @@
               <span class="label"> Agencia: </span>
               <div class="select">
                 <AutocompleteComponent
-                  :items="agencies.map((el) => ({ value: el.id, name: el.name }))"
+                  :items="
+                    agencies
+                      .filter((el) => el.saleChannelId === selectedSaleChannelId)
+                      .map((el) => ({ value: el.id, name: el.name }))
+                  "
                   id="agencies-bookin-engine-autocomplete"
                   v-model="selectedAgencyId"
                   :minChars="0"

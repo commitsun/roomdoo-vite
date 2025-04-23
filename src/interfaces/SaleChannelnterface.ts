@@ -3,4 +3,5 @@ export interface SaleChannelInterface {
   name: string;
   channelType: string;
   iconUrl: string;
+  isOnLine: boolean;
 }
