@@ -356,41 +356,87 @@
           <div class="left">Añadir habitaciones</div>
         </div>
         <div class="content-section-card">
+          <div class="availability-plan" v-if="showAvailabilityPlan">
+            <div class="icon-alert">
+              <img src="/app-images/icon-alert.svg" class="alert" />
+            </div>
+            <div class="availability-plan-text">
+              <span class="availability-plan-title">
+                Disponibilidad limitada por restricciones
+              </span>
+              <span>
+                "{{ availabilityPlanName }}" tiene reglas aplicadas en estas fechas, consulta el
+                calendario
+              </span>
+            </div>
+          </div>
           <span v-for="roomType in roomTypeSelector" :key="roomType.id">
             <div class="room-type-option">
-              <div class="left">
-                <div class="room-type-name">
-                  {{ roomTypeName(roomType.id) }}
+              <div class="left-wrapper">
+                <div class="left">
+                  <div class="room-type-name">
+                    {{ roomTypeName(roomType.id) }}
+                  </div>
+                  <div
+                    class="room-type-text text-red"
+                    v-if="
+                      freeRoomsByType.filter(
+                        (el) =>
+                          el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
+                      ).length === 0
+                    "
+                  >
+                    No hay habitaciones libres
+                  </div>
+                  <div class="room-type-text" v-else>
+                    {{
+                      freeRoomsByType.filter(
+                        (el) =>
+                          el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
+                      ).length
+                    }}
+                    habitaci{{
+                      freeRoomsByType.filter(
+                        (el) =>
+                          el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
+                      ).length === 1
+                        ? 'ón'
+                        : 'ones'
+                    }}
+                    libre{{
+                      freeRoomsByType.filter(
+                        (el) =>
+                          el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
+                      ).length === 1
+                        ? ''
+                        : 's'
+                    }}
+                  </div>
                 </div>
                 <div
-                  class="room-type-text text-red"
-                  v-if="
-                    globalAvailableRooms.filter(
-                      (el) => el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
-                    ).length === 0
-                  "
+                  class="available-room-type-pill"
+                  v-if="isRoomTypeAvailabilityLimited(roomType.id)"
                 >
-                  No hay habitaciones disponibles
-                </div>
-                <div class="room-type-text" v-else>
-                  {{
-                    globalAvailableRooms.filter(
-                      (el) => el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
-                    ).length
-                  }}
-                  habitaci{{
-                    globalAvailableRooms.filter(
-                      (el) => el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
-                    ).length === 1
-                      ? 'ón '
-                      : 'ones '
-                  }}disponible{{
-                    globalAvailableRooms.filter(
-                      (el) => el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
-                    ).length === 1
-                      ? ''
-                      : 's'
-                  }}
+                  <img src="/app-images/icon-alert.svg" class="icon-alert" />
+                  <div
+                    class="available-room-type available-room-type-red"
+                    v-if="
+                      (globalAvailableRooms.find((rt) => rt.roomTypeId === roomType.id)?.count ||
+                        0) <= 0
+                    "
+                  >
+                    Sin disponibilidad
+                  </div>
+                  <div class="available-room-type" v-else>
+                    {{
+                      globalAvailableRooms.find((rt) => rt.roomTypeId === roomType.id)?.count || 0
+                    }}
+                    disponible{{
+                      globalAvailableRooms.find((rt) => rt.roomTypeId === roomType.id)?.count === 1
+                        ? ''
+                        : 's'
+                    }}
+                  </div>
                 </div>
               </div>
               <div class="right">
@@ -461,15 +507,13 @@
                       class="btn"
                       :class="{
                         disabled:
-                          globalAvailableRooms.filter(
+                          freeRoomsByType.filter(
                             (el) =>
                               el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
                           ).length === 0 && selectedReservationType === 'out',
                         'no-avail':
-                          globalAvailableRooms.filter(
-                            (el) =>
-                              el.roomTypeId === roomType.id && !notAvailableRoomIds.includes(el.id)
-                          ).length === 0,
+                          (globalAvailableRooms.find((rt) => rt.roomTypeId === roomType.id)
+                            ?.count || 0) <= 0,
                       }"
                       :pt="{
                         root: {
@@ -969,6 +1013,11 @@ import type {
   ExtraServiceInterface,
 } from '@/interfaces/BatchChangesInterface';
 import type { ReservationApiInterface } from '@/interfaces/ReservationInterface';
+
+interface countglobalAvailableRooms {
+  roomTypeId: number;
+  count: number;
+}
 export default defineComponent({
   components: {
     DatePicker,
@@ -995,6 +1044,8 @@ export default defineComponent({
     // refs
     const step = ref(1);
     const selectedReservationType = ref('normal');
+    const freeRoomsByType = ref([] as RoomInterface[]);
+    const availabilityPlanName = ref('');
     const selectedSaleChannelId = ref(0);
     const selectedPricelistId = ref(0);
     const selectedAgencyId = ref(0);
@@ -1003,7 +1054,7 @@ export default defineComponent({
     const roomClosureReasonDescription = ref('');
     const dates: Ref<Date[]> = ref([today, tomorrow]);
     const roomTypeSelector = ref([] as RoomTypeSelectorInterface[]);
-    const globalAvailableRooms = ref([] as RoomInterface[]);
+    const globalAvailableRooms = ref([] as countglobalAvailableRooms[]);
     const prices = ref([] as RoomTypePrices[]);
     const reservationsByRoomTypeToCreate = ref([] as RoomTypeReservationsToCreateInterface[]);
     const oldReservationsByRoomTypeToCreate = ref({} as RoomTypeReservationsToCreateInterface[]);
@@ -1079,7 +1130,7 @@ export default defineComponent({
       if (checkin.value && checkout.value) {
         const from = checkin.value;
         const to = checkout.value;
-        return globalAvailableRooms.value
+        return freeRoomsByType.value
           .filter((el) =>
             reservationsByRoomTypeToCreate.value
               .map((el2) => el2.reservations)
@@ -1243,6 +1294,20 @@ export default defineComponent({
       return result;
     });
 
+    const isRoomTypeAvailabilityLimited = (roomTypeId: number): boolean => {
+      const free =
+        globalAvailableRooms.value.find((rt) => rt.roomTypeId === roomTypeId)?.count ?? 0;
+      const available = freeRoomsByType.value.filter(
+        (el) => el.roomTypeId === roomTypeId && !notAvailableRoomIds.value.includes(el.id)
+      ).length;
+      const isFreeAndavailableDifferent = free !== available && free >= 0;
+      return isFreeAndavailableDifferent;
+    };
+
+    const showAvailabilityPlan = computed(() =>
+      roomTypeSelector.value.some((rt) => isRoomTypeAvailabilityLimited(rt.id))
+    );
+
     const reservationsMappedForBatchChanges = computed(() => {
       const rdo = [] as BatchChangesInterface[];
       reservationsByRoomTypeToCreate.value.forEach((rt) => {
@@ -1361,6 +1426,14 @@ export default defineComponent({
             roomTypeReservations?.reservations.splice(indexToRemove, 1);
           }
         }
+        if (roomId !== 0) {
+          const availableRooms = globalAvailableRooms.value.find(
+            (el) => el.roomTypeId === value.roomTypeId
+          );
+          if (availableRooms) {
+            availableRooms.count += 1;
+          }
+        }
       }
     };
 
@@ -1368,7 +1441,7 @@ export default defineComponent({
       void store.dispatch('layout/showSpinner', true);
       // room type
       const roomType = store.state.roomTypes.roomTypes.find((el) => el.id === roomTypeId);
-
+      const availableRooms = globalAvailableRooms.value.find((el) => el.roomTypeId === roomTypeId);
       let roomPrice = 0;
 
       if (checkin.value && checkout.value && roomType) {
@@ -1400,7 +1473,7 @@ export default defineComponent({
 
         // avail room ids with global checkin & checkout and not in
         // reservations in the same range
-        const availRoomIds = globalAvailableRooms.value.filter(
+        const availRoomIds = freeRoomsByType.value.filter(
           (el) =>
             !roomsNotAvailFromOverlaps.includes(el.id) && el.roomTypeClassId === roomType.classId
         );
@@ -1493,7 +1566,7 @@ export default defineComponent({
           roomTypeId,
           roomTypeClassId: roomType.classId,
           boardServiceId: defaultBoardServiceId ?? 0,
-          roomId: room?.id ?? 0,
+          roomId: availableRooms && availableRooms.count > 0 ? room?.id ?? 0 : 0,
           roomPrice,
           reservationLines,
           boardServicePrice: 0,
@@ -1520,6 +1593,9 @@ export default defineComponent({
           // if exists push reservation
           reservationsRoomTypeId.reservations.push(newReservation);
         }
+      }
+      if (availableRooms && availableRooms.count > 0) {
+        availableRooms.count -= 1;
       }
       void store.dispatch('layout/showSpinner', false);
     };
@@ -1721,7 +1797,7 @@ export default defineComponent({
             'rooms/fetchRoomsByAvailability',
             payload
           )) as AxiosResponse<RoomInterface[]>;
-          globalAvailableRooms.value = response.data;
+          freeRoomsByType.value = response.data;
           // set availability for each room type
           roomTypes.value
             .filter((el) => store.state.rooms.rooms.map((r) => r.roomTypeId).includes(el.id))
@@ -1731,6 +1807,14 @@ export default defineComponent({
                 numRoomsToOccupy: 0,
               });
             });
+          const responseFreeRooms = (await store.dispatch('availability/fetchNumFreeRooms', {
+            pmsPropertyId: store.state.properties.activeProperty.id,
+            from: checkin.value,
+            to: checkout.value,
+            pricelistId: selectedPricelistId.value,
+          })) as AxiosResponse<countglobalAvailableRooms[]>;
+
+          globalAvailableRooms.value = responseFreeRooms.data;
         }
       }
     };
@@ -2623,11 +2707,20 @@ export default defineComponent({
                 prices: store.state.prices.prices,
               });
             }, undefined as unknown);
+            const selectedPricelist = store.state.pricelists.pricelists.find(
+              (el) => el.id === selectedPricelistId.value
+            );
+            const availabilityPlan = store.state.availabilityPlans.availabilityPlans.find(
+              (el) => el.id === selectedPricelist?.defaultAvailabilityPlanId
+            );
+            if (availabilityPlan && availabilityPlan.name) {
+              availabilityPlanName.value = availabilityPlan.name;
+            }
           }
-        } catch {
+        } catch (error) {
           dialogService.open({
             header: 'Error',
-            content: 'Algo ha ido mal',
+            content: 'Algo ha ido mal' + error,
             btnAccept: 'Ok',
           });
         } finally {
@@ -2788,6 +2881,11 @@ export default defineComponent({
       openBatchChanges,
       saveBatchChanges,
       backToLastReservationView,
+      globalAvailableRooms,
+      availabilityPlanName,
+      showAvailabilityPlan,
+      isRoomTypeAvailabilityLimited,
+      freeRoomsByType,
     };
   },
 });
@@ -2989,6 +3087,22 @@ export default defineComponent({
               }
             }
           }
+          .available-room-type-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fbf0da;
+            border-radius: 15px;
+            padding: 0 0.5rem;
+            margin-bottom: 0.5rem;
+            .icon-alert {
+              margin-right: 0.5rem;
+              margin-bottom: 1px;
+            }
+            .available-room-type {
+              font-size: 12px;
+            }
+          }
           .right {
             .number-selector {
               font-weight: bold;
@@ -3107,6 +3221,28 @@ export default defineComponent({
                 width: 150px;
                 height: 25px;
               }
+            }
+          }
+        }
+        .availability-plan {
+          display: flex;
+          background-color: #fbf0da;
+          align-items: center;
+          width: 100%;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          .icon-alert {
+            margin-left: 1rem;
+            margin-right: 1rem;
+          }
+          .availability-plan-text {
+            display: flex;
+            flex-direction: column;
+            color: #73510d;
+            padding: 0.75rem 0;
+            font-size: 12px;
+            .availability-plan-title {
+              font-weight: bold;
             }
           }
         }
@@ -3310,6 +3446,26 @@ export default defineComponent({
                 .label,
                 .value {
                   flex: 1;
+                }
+              }
+            }
+          }
+          .availability-plan-text {
+            font-size: 14px !important;
+          }
+          .room-type-option {
+            .left-wrapper {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              width: 100%;
+              .available-room-type-pill {
+                margin-bottom: 0 !important;
+                width: 150px;
+                margin-right: 1rem;
+                .available-room-type {
+                  font-size: 13px !important;
+                  margin: 0 auto;
                 }
               }
             }

@@ -272,7 +272,7 @@ export default defineComponent({
                 align-items: center;
                 flex: 1 1 auto;
 
-                font-size: 0.65rem;
+                font-size: 0.8rem;
                 .icon {
                   margin-left: 1rem;
                   margin-right: 0.5rem;

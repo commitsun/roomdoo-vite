@@ -38,6 +38,28 @@ const actions: ActionTree<AvailabilityStateInterface, StateInterface> = {
       }
     });
   },
+  async fetchNumFreeRooms(
+    context,
+    payload: {
+      pmsPropertyId: number;
+      from: Date;
+      to: Date;
+      pricelistId?: number;
+    }
+  ) {
+    let params = `?pmsPropertyId=${payload.pmsPropertyId}`;
+    const from = `${payload.from.getFullYear()}-${(payload.from.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.from.getDate().toString().padStart(2, '0')}`;
+    const to = `${payload.to.getFullYear()}-${(payload.to.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${payload.to.getDate().toString().padStart(2, '0')}`;
+    params += `&availabilityFrom=${from}&availabilityTo=${to}`;
+    if (payload.pricelistId) {
+      params += `&pricelistId=${payload.pricelistId}`;
+    }
+    return api.get(`/avails/count-free-rooms${params}`);
+  },
 };
 
 export default actions;
