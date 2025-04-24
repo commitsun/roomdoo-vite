@@ -58,8 +58,20 @@
       />
       <transition name="menu-checkins">
         <div class="checkins-menu" v-if="isFromDrawer && openCheckinMenu">
-          <div v-if="checkinPartnerState !== 'draft'" @mousedown.stop="$emit('printCheckin')">
+          <div
+            class="print-checkin-menu"
+            v-if="checkinPartnerState !== 'draft'"
+            @mousedown.stop="$emit('printCheckin')"
+          >
             <span> Imprimir </span>
+          </div>
+          <div
+            v-if="checkinPartnerState !== 'draft'"
+            @mousedown.stop="$emit('viewPDFCheckin')"
+          >
+            <span>
+              Ver check-in
+            </span>
           </div>
           <div
             @mousedown.stop="$emit('displayForm')"
@@ -162,7 +174,7 @@
           </button>
           <div class="print-btns" v-if="!isFromDrawer && !isPreCheckin">
             <button
-              class="btn-reprint-checkin"
+              class="btn-sign-checkin"
               v-if="isExistingCheckinPartnerMandatoryDataComplete"
               @click="$emit('displayFingerSign')"
             >
@@ -189,6 +201,20 @@
                 class="icon-print-sign"
               />
               Imprimir
+            </button>
+            <button
+              class="btn-view-pdf"
+              v-if="isExistingCheckinPartnerMandatoryDataComplete"
+              @click="$emit('viewPDFCheckin')"
+            >
+              <CustomIcon
+                :imagePath="'app-images/icon-pdf.svg'"
+                color="primary"
+                :width="'18px'"
+                :height="'18px'"
+                class="icon-print-sign"
+              />
+              Ver PDF
             </button>
           </div>
           <button
@@ -480,6 +506,9 @@ export default defineComponent({
           font-weight: bold;
         }
       }
+      .print-checkin-menu {
+        display: none;
+      }
     }
   }
   .title-closed-body {
@@ -493,7 +522,7 @@ export default defineComponent({
       justify-content: space-between;
       width: 100%;
       position: relative;
-
+      
       .reservation-title {
         margin-left: 1rem;
         text-overflow: ellipsis;
@@ -563,6 +592,11 @@ export default defineComponent({
         opacity: 1;
       }
     }
+    hr {
+      width: 95%;
+      margin: 0.5rem auto;
+
+    }
     .data-reservation-row:first-of-type {
       margin-top: 1rem;
     }
@@ -594,7 +628,7 @@ export default defineComponent({
       .print-btns {
         display: flex;
         margin-left: auto;
-        .btn-reprint-checkin {
+        .btn-reprint-checkin, .btn-sign-checkin, .btn-view-pdf {
           display: flex;
           align-items: center;
           background-color: transparent;
@@ -608,6 +642,12 @@ export default defineComponent({
           .icon-print-sign {
             margin-right: 5px;
           }
+        }
+        .btn-sign-checkin, .btn-view-pdf {
+          display: flex;
+        }
+        .btn-reprint-checkin {
+          display: none;
         }
       }
       .btn-do-checkin {
@@ -658,6 +698,9 @@ export default defineComponent({
 
       .checkins-menu {
         width: auto;
+        .print-checkin-menu {
+          display: flex;
+        }
       }
       .checkin-partner-existing-name,
       .checkin-partner-existing-state {
@@ -689,6 +732,14 @@ export default defineComponent({
       }
       .buttons {
         font-size: 14px;
+        .print-btns {
+          .btn-reprint-checkin {
+            display: flex;
+          }
+          .btn-view-pdf {
+            display: none;
+          }
+        }
       }
     }
   }

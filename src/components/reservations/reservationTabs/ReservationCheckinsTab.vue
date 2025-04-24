@@ -83,7 +83,6 @@
             :width="'22px'"
             :height="'22px'"
             @click="isCheckinMenuOpen = !isCheckinMenuOpen"
-            @blur="isCheckinMenuOpen = false"
             tabindex="1"
           />
           <transition name="menu-checkins">
@@ -95,8 +94,18 @@
                   )
                 "
                 @click="printAllCheckins()"
+                class="print-checkins-menu"
               >
                 <span> Imprimir todos </span>
+              </div>
+              <div
+                v-if="allCheckinPartners.some((el)=>el.checkinPartnerState!=='dummy'
+                && el.checkinPartnerState !== 'draft')"
+                @click="viewAllCheckinsPDF()"
+              >
+                <span>
+                  Ver todos
+                </span>
               </div>
               <div @click="showSegmentation()" v-if="segmentations.length > 0">
                 <span>
@@ -146,6 +155,7 @@
         :isSegmentation="reservation?.segmentationId ? true : false"
         isCollapsible
         @printCheckin="printCheckin(checkinPartner)"
+        @viewPDFCheckin="viewCheckinPDF(checkinPartner)"
         @doCheckin="performDoCheckin(checkinPartner)"
         @displayForm="setActiveCheckinPartnerAndDisplayForm(checkinPartner)"
         @removeCheckinPartner="setActiveCheckinPartnerAndRemove(checkinPartner)"
@@ -184,7 +194,7 @@ export default defineComponent({
     ReservationSegmentation,
   },
   setup() {
-    const { doCheckin, saveCheckinPartner, checkinMandatoryDataComplete, printCheckin } =
+    const { doCheckin, saveCheckinPartner, checkinMandatoryDataComplete, printCheckin, printAllCheckins, viewCheckinPDF, viewAllCheckinsPDF} =
       useCheckinPartner();
     const store = useStore();
     const router = useRouter();
@@ -291,47 +301,6 @@ export default defineComponent({
         checkinDate.getMonth() === today.getMonth() &&
         checkinDate.getFullYear() === today.getFullYear();
       return isCheckinDateToday;
-    };
-
-    const base64ToArrayBuffer = (data: string) => {
-      const bString = window.atob(data);
-      const bLength = bString.length;
-      const bytes = new Uint8Array(bLength);
-      for (let i = 0; i < bLength; i += 1) {
-        const ascii = bString.charCodeAt(i);
-        bytes[i] = ascii;
-      }
-      return bytes;
-    };
-
-    const openPrintWindow = async (checkinPartnerId: number) => {
-      void store.dispatch('layout/showSpinner', true);
-      try {
-        const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
-          reservationId: reservation.value?.id,
-          checkinPartnerId,
-        })) as AxiosResponse<{ binary: string }>;
-        if (response.data && response.data) {
-          const content = base64ToArrayBuffer(`${response.data.binary}`);
-          const blob = new Blob([content], { type: 'application/pdf' });
-          const url = window.URL.createObjectURL(blob);
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = url;
-          document.body.appendChild(iframe);
-          if (iframe) {
-            iframe.contentWindow?.print();
-          }
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
     };
 
     const doCheckout = async () => {
@@ -508,36 +477,6 @@ export default defineComponent({
           children: reservation.value?.children,
         },
       });
-    };
-
-    const printAllCheckins = async () => {
-      void store.dispatch('layout/showSpinner', true);
-      try {
-        const response = (await store.dispatch(
-          'checkinPartners/fetchPdfAllCheckins',
-          store.state.reservations.currentReservation?.id
-        )) as AxiosResponse<{ binary: string }>;
-        if (response.data) {
-          const content = base64ToArrayBuffer(`${response.data.binary}`);
-          const blob = new Blob([content], { type: 'application/pdf' });
-          const url = window.URL.createObjectURL(blob);
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = url;
-          document.body.appendChild(iframe);
-          if (iframe) {
-            iframe.contentWindow?.print();
-          }
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
     };
 
     const state = (checkinState: string) => {
@@ -751,9 +690,10 @@ export default defineComponent({
       undoOnboard,
       removeCheckinPartner,
       setActiveCheckinPartnerAndRemove,
-      openPrintWindow,
       openAdultsModal,
       printAllCheckins,
+      viewCheckinPDF,
+      viewAllCheckinsPDF,
       performDoCheckin,
       performSaveCheckinPartner,
       showSegmentation,
@@ -863,6 +803,9 @@ export default defineComponent({
             &:hover {
               font-weight: bold;
             }
+          }
+          .print-checkins-menu {
+            display: none;
           }
         }
       }
@@ -1141,6 +1084,9 @@ export default defineComponent({
           .three-dots-icon {
             .checkins-menu {
               right: 65%;
+              .print-checkins-menu {
+                display: flex;
+              }
             }
           }
         }

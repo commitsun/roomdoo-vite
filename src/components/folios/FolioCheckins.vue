@@ -123,8 +123,20 @@
                         )
                     "
                     @click="printAllCheckins(reservation.id)"
+                    class="print-checkins-menu"
                   >
                     <span> Imprimir todos </span>
+                  </div>
+                  <div
+                    v-if="allCheckinPartners.filter(
+                      (el) => el.reservationId === reservation.id).some(
+                      (el)=>el.checkinPartnerState!=='dummy'
+                    && el.checkinPartnerState !== 'draft')"
+                    @click="viewAllCheckinsPDF()"
+                  >
+                    <span>
+                      Ver todos
+                    </span>
                   </div>
                   <div
                     @click="showSegmentation(reservation.id, index)"
@@ -182,6 +194,7 @@
             :isSegmentation="reservation?.segmentationId ? true : false"
             isCollapsible
             @printCheckin="setCurrentReservationAndPrintCheckin(checkinPartner, reservation)"
+            @viewPDFCheckin="viewCheckinPDF(checkinPartner)"
             @doCheckin="performDoCheckin(checkinPartner, index)"
             @displayForm="setActiveCheckinPartnerAndDisplayForm(checkinPartner, indexCheckin)"
             @removeCheckinPartner="setActiveCheckinPartnerAndRemove(checkinPartner, indexCheckin)"
@@ -235,7 +248,7 @@ export default defineComponent({
     ReservationSegmentation,
   },
   setup(props) {
-    const { doCheckin, saveCheckinPartner, checkinMandatoryDataComplete, printCheckin } =
+    const { doCheckin, saveCheckinPartner, checkinMandatoryDataComplete, printCheckin, viewCheckinPDF, viewAllCheckinsPDF } =
       useCheckinPartner();
     const router = useRouter();
 
@@ -929,6 +942,8 @@ export default defineComponent({
       showSegmentation,
       checkinMandatoryDataComplete,
       printCheckin,
+      viewCheckinPDF,
+      viewAllCheckinsPDF,
     };
   },
 });
@@ -1113,6 +1128,9 @@ export default defineComponent({
               &:hover {
                 font-weight: bold;
               }
+            }
+            .print-checkins-menu {
+              display: none;
             }
           }
         }
@@ -1309,6 +1327,9 @@ export default defineComponent({
           .three-dots-icon {
             .checkins-menu {
               right: 65%;
+              .print-checkins-menu {
+                display: flex;
+              }
             }
           }
         }

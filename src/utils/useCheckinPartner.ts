@@ -132,6 +132,49 @@ export function useCheckinPartner() {
     }
   };
 
+  const viewCheckinPDF = async (checkinPartner: CheckinPartnerInterface) => {
+    try {
+      void store.dispatch('layout/showSpinner', true);
+      await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
+      const response = await store.dispatch('checkinPartners/fetchPdfCheckin', { reservationId: store.state.reservations.currentReservation?.id, checkinPartnerId: checkinPartner.id })as AxiosResponse<{binary: string}>;
+      if (response.data) {
+        const content = base64ToArrayBuffer(`${response.data.binary}`);
+        const blob = new Blob([content], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      }
+    } catch (error) {
+      dialogService.open({
+        header: 'Error',
+        content: 'Algo ha ido mal',
+        btnAccept: 'Ok',
+      });
+    } finally {
+      void store.dispatch('layout/showSpinner', false);
+    }
+  };
+
+  const viewAllCheckinsPDF = async () => {
+    try {
+      void store.dispatch('layout/showSpinner', true);
+      const response = await store.dispatch('checkinPartners/fetchPdfAllCheckins', store.state.reservations.currentReservation?.id) as AxiosResponse<{binary: string}>;
+      if (response.data) {
+        const content = base64ToArrayBuffer(`${response.data.binary}`);
+        const blob = new Blob([content], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      }
+    } catch (error) {
+      dialogService.open({
+        header: 'Error',
+        content: 'Algo ha ido mal',
+        btnAccept: 'Ok',
+      });
+    } finally {
+      void store.dispatch('layout/showSpinner', false);
+    }
+  };
+
   const doCheckin = async (checkinPartner: CheckinPartnerInterface) => {
     try {
       void store.dispatch('layout/showSpinner', true);
@@ -310,5 +353,7 @@ export function useCheckinPartner() {
     validateDocumentNumber,
     validateSupportNumber,
     checkinMandatoryDataComplete,
+    viewCheckinPDF,
+    viewAllCheckinsPDF,
   };
 }
