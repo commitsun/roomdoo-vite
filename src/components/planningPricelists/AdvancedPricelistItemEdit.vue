@@ -530,7 +530,12 @@ export default defineComponent({
       } else {
         style += 'left: 144px;';
       }
-      if (store.state.roomTypes.roomTypes.length - indexRoomType <= 1) {
+      if (
+        store.state.roomTypes.roomTypes.length === 1 ||
+        store.state.roomTypes.roomTypes.length === 2
+      ) {
+        style += 'top: 0;';
+      } else if (store.state.roomTypes.roomTypes.length - indexRoomType <= 1) {
         style += 'bottom: 0;';
       } else {
         style += 'top: 5px;';
