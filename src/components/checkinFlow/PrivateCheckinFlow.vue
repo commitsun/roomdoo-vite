@@ -81,6 +81,7 @@
                 :isSegmentation="currentReservation?.segmentationId ? true : false"
                 isCollapsible
                 @printCheckin="performPrintCheckin(checkinPartner)"
+                @viewPDFCheckin="viewCheckinPDF(checkinPartner)"
                 @doCheckin="performDoCheckin(checkinPartner)"
                 @displayForm="setActiveCheckinPartnerAndDisplayForm(checkinPartner)"
                 @selectActiveCheckinPartner="selectActiveCheckinPartner(index)"
@@ -204,6 +205,7 @@
                 :isCheckinToday="isCheckinToday(activeCheckinPartner)"
                 :isSegmentation="currentReservation?.segmentationId ? true : false"
                 @printCheckin="performPrintCheckin(activeCheckinPartner)"
+                @viewPDFCheckin="viewCheckinPDF(activeCheckinPartner)"
                 @doCheckin="performDoCheckin(activeCheckinPartner)"
                 @displayForm="setActiveCheckinPartnerAndDisplayForm(activeCheckinPartner)"
                 @displayFingerSign="openFingerSign(activeCheckinPartner)"
@@ -304,6 +306,7 @@
                 :isCheckinToday="isCheckinToday(activeCheckinPartner)"
                 :isSegmentation="currentReservation?.segmentationId ? true : false"
                 @printCheckin="performPrintCheckin(activeCheckinPartner)"
+                @viewPDFCheckin="viewCheckinPDF(activeCheckinPartner)"
                 @doCheckin="performDoCheckin(activeCheckinPartner)"
                 @displayForm="setActiveCheckinPartnerAndDisplayForm(activeCheckinPartner)"
                 @displayFingerSign="openFingerSign(activeCheckinPartner)"
@@ -485,6 +488,7 @@
                 :isCheckinToday="isCheckinToday(activeCheckinPartner)"
                 :isSegmentation="currentReservation?.segmentationId ? true : false"
                 @printCheckin="performPrintCheckin(activeCheckinPartner)"
+                @viewPDFCheckin="viewCheckinPDF(activeCheckinPartner)"
                 @doCheckin="performDoCheckin(activeCheckinPartner)"
                 @displayForm="isFormDisplayed = true"
                 @displayFingerSign="openFingerSign(activeCheckinPartner)"
@@ -638,7 +642,7 @@ export default defineComponent({
     )?.id;
 
     // checkin partner common methods
-    const { saveCheckinPartner, printCheckin, doCheckin, checkinMandatoryDataComplete } =
+    const { saveCheckinPartner, printCheckin, doCheckin, checkinMandatoryDataComplete, viewCheckinPDF } =
       useCheckinPartner();
 
     // used for animation
@@ -1415,6 +1419,7 @@ export default defineComponent({
       capturedPhoto,
       processOCR,
       openFingerSign,
+      viewCheckinPDF,
     };
   },
 });
