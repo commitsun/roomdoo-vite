@@ -603,6 +603,7 @@
           :key="roomTypeReservations.roomTypeId"
           :roomTypeReservations="roomTypeReservations"
           :selectedReservationType="selectedReservationType"
+          :selectedPricelistId="selectedPricelistId"
           :checkinDateSelected="checkin"
           :checkoutDateSelected="checkout"
           @toggleRoomType="toggleRoomType($event)"
@@ -625,6 +626,7 @@
             :selectedReservationType="selectedReservationType"
             :checkinDateSelected="checkin"
             :checkoutDateSelected="checkout"
+            :selectedPricelistId="selectedPricelistId"
             @toggleReservation="toggleOldReservation($event)"
             @toggleRoomType="toggleOldRoomType($event)"
           />
@@ -1008,16 +1010,13 @@ import FolioBatchChanges from '@/components/folios//FolioBatchChanges.vue';
 
 import type { TreeNode } from 'primevue/treenode';
 import type { FolioApiInterface } from '@/interfaces/FolioInterface';
+import type { CountGlobalAvailableRooms } from '@/interfaces/CountGlobalAvailableRooms';
 import type {
   BatchChangesInterface,
   ExtraServiceInterface,
 } from '@/interfaces/BatchChangesInterface';
 import type { ReservationApiInterface } from '@/interfaces/ReservationInterface';
 
-interface countglobalAvailableRooms {
-  roomTypeId: number;
-  count: number;
-}
 export default defineComponent({
   components: {
     DatePicker,
@@ -1054,7 +1053,7 @@ export default defineComponent({
     const roomClosureReasonDescription = ref('');
     const dates: Ref<Date[]> = ref([today, tomorrow]);
     const roomTypeSelector = ref([] as RoomTypeSelectorInterface[]);
-    const globalAvailableRooms = ref([] as countglobalAvailableRooms[]);
+    const globalAvailableRooms = ref([] as CountGlobalAvailableRooms[]);
     const prices = ref([] as RoomTypePrices[]);
     const reservationsByRoomTypeToCreate = ref([] as RoomTypeReservationsToCreateInterface[]);
     const oldReservationsByRoomTypeToCreate = ref({} as RoomTypeReservationsToCreateInterface[]);
@@ -1812,7 +1811,7 @@ export default defineComponent({
             from: checkin.value,
             to: checkout.value,
             pricelistId: selectedPricelistId.value,
-          })) as AxiosResponse<countglobalAvailableRooms[]>;
+          })) as AxiosResponse<CountGlobalAvailableRooms[]>;
 
           globalAvailableRooms.value = responseFreeRooms.data;
         }
@@ -2881,7 +2880,6 @@ export default defineComponent({
       openBatchChanges,
       saveBatchChanges,
       backToLastReservationView,
-      globalAvailableRooms,
       availabilityPlanName,
       showAvailabilityPlan,
       isRoomTypeAvailabilityLimited,

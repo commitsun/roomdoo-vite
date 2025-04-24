@@ -67,10 +67,10 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, Ref, computed, watch } from 'vue';
+import { defineComponent, onMounted, ref, type Ref, computed, watch } from 'vue';
 import useVuelidate from '@vuelidate/core';
 import { required, maxValue, minValue } from '@vuelidate/validators';
-import { AxiosResponse } from 'axios';
+import { type AxiosResponse } from 'axios';
 import { useStore } from '@/store';
 import CustomIcon from '@/components/roomdooComponents/CustomIcon.vue';
 

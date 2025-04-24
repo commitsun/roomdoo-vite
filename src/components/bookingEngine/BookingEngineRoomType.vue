@@ -147,6 +147,7 @@
             _toggleReservationAutoAssignRoomChanged="reservation.autoAssignRoom
               = !reservation.autoAssignRoom"
             :instancedFromGrouped="true"
+            :selectedPricelistId="selectedPricelistId"
           />
           <!-- TODO REVIEW PREVIUS COMMENTED EMIT TO PARENT AND LISTEN IT FROM PARENT -->
         </div>
@@ -181,6 +182,10 @@ export default defineComponent({
     },
     checkoutDateSelected: {
       type: Date,
+      required: true,
+    },
+    selectedPricelistId: {
+      type: Number,
       required: true,
     },
   },

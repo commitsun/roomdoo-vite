@@ -278,7 +278,9 @@
                     type="text"
                     :value="invoiceLine.name"
                     :disabled="!isLineRemoved[index]"
-                    :style="getSaleLinesToInvoiceRowStyle(saleLine.displayType, index)"
+                    :style="
+                      getSaleLinesToInvoiceRowStyle(invoiceLinesToSend[index]?.displayType, index)
+                    "
                   />
                 </TooltipComponent>
               </div>
