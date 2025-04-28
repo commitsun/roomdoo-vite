@@ -59,7 +59,7 @@
     </div>
     <div class="btn-continue-container flex-column">
       <div class="checkbox-container" v-if="isUnderFourteen && !isNationality && countryId === 0">
-        <Checkbox class="checkbox" v-model="noDocument" />
+        <CheckboxComponent class="checkbox" v-model="noDocument" />
         <span @click="noDocument = !noDocument"> El menor no tiene documento </span>
       </div>
       <button

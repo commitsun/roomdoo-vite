@@ -65,13 +65,8 @@
           >
             <span> Imprimir </span>
           </div>
-          <div
-            v-if="checkinPartnerState !== 'draft'"
-            @mousedown.stop="$emit('viewPDFCheckin')"
-          >
-            <span>
-              Ver check-in
-            </span>
+          <div v-if="checkinPartnerState !== 'draft'" @mousedown.stop="$emit('viewPDFCheckin')">
+            <span> Ver check-in </span>
           </div>
           <div
             @mousedown.stop="$emit('displayForm')"
@@ -208,13 +203,13 @@
               @click="$emit('viewPDFCheckin')"
             >
               <CustomIcon
-                :imagePath="'app-images/icon-pdf.svg'"
+                :imagePath="'/app-images/visibility-on.svg'"
                 color="primary"
                 :width="'18px'"
                 :height="'18px'"
                 class="icon-print-sign"
               />
-              Ver PDF
+              Ver check-in
             </button>
           </div>
           <button
@@ -522,7 +517,7 @@ export default defineComponent({
       justify-content: space-between;
       width: 100%;
       position: relative;
-      
+
       .reservation-title {
         margin-left: 1rem;
         text-overflow: ellipsis;
@@ -595,7 +590,6 @@ export default defineComponent({
     hr {
       width: 95%;
       margin: 0.5rem auto;
-
     }
     .data-reservation-row:first-of-type {
       margin-top: 1rem;
@@ -628,7 +622,9 @@ export default defineComponent({
       .print-btns {
         display: flex;
         margin-left: auto;
-        .btn-reprint-checkin, .btn-sign-checkin, .btn-view-pdf {
+        .btn-reprint-checkin,
+        .btn-sign-checkin,
+        .btn-view-pdf {
           display: flex;
           align-items: center;
           background-color: transparent;
@@ -640,10 +636,12 @@ export default defineComponent({
             outline: none;
           }
           .icon-print-sign {
-            margin-right: 5px;
+            margin-left: 1rem;
+            margin-right: 0.5rem;
           }
         }
-        .btn-sign-checkin, .btn-view-pdf {
+        .btn-sign-checkin,
+        .btn-view-pdf {
           display: flex;
         }
         .btn-reprint-checkin {
@@ -737,7 +735,7 @@ export default defineComponent({
             display: flex;
           }
           .btn-view-pdf {
-            display: none;
+            display: flex;
           }
         }
       }
