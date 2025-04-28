@@ -214,7 +214,7 @@
 
     <div class="rules-section" v-if="applyOn.code === 'availabilityPlan'">
       <div class="title">Reglas de disponibilidad</div>
-      <div class="rules debug-box">
+      <div class="rules">
         <div class="rule">
           <!-- quota -->
           <div class="rule-content">

@@ -70,10 +70,7 @@
       </span>
     </div>
     <hr />
-    <div
-      class="data-reservation-row debug-box"
-      v-if="cancelationRuleName(reservation?.pricelistId || 0)"
-    >
+    <div class="data-reservation-row" v-if="cancelationRuleName(reservation?.pricelistId || 0)">
       <span class="reservation-title"> Política de cancelación </span>
       <span class="reservation-data">
         {{ cancelationRuleName(reservation?.pricelistId || 0) }}
@@ -133,10 +130,8 @@
             tabindex="1"
           />
           <transition>
-            <div class="services-options" v-if="openBoardServiceOptions">
-              <div @mousedown="(changePricesModal = true), (isShowingNightsDetail = true)">
-                Editar
-              </div>
+            <div class="services-options debug-box" v-if="openBoardServiceOptions">
+              <div @mousedown="openPricesChanges()">Editar</div>
             </div>
           </transition>
         </div>
