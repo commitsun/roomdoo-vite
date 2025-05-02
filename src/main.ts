@@ -7,9 +7,29 @@ import Aura from '@primeuix/themes/aura';
 import 'primeicons/primeicons.css';
 import { store } from '@/store';
 
+import { en_GB } from 'primelocale/js/en_GB.js';
+import { en } from 'primelocale/js/en.js';
+import { es } from 'primelocale/js/es.js';
+
 import '@/assets/style.css';
 import { createHead } from '@vueuse/head';
 import { definePreset } from '@primevue/themes';
+
+const langAndArea = window.navigator.language.split('-');
+let locale;
+if (langAndArea.length > 1) {
+  const country = langAndArea[1].toUpperCase();
+  if (country === 'GB') {
+    locale = en_GB;
+  }
+} else {
+  if (langAndArea[0] === 'es') {
+    locale = es;
+  } else {
+    locale = en;
+  }
+}
+
 const myPreset = definePreset(Aura, {
   semantic: {
     primary: {
@@ -31,47 +51,12 @@ const head = createHead();
 const app = createApp(App);
 app.use(PrimeVue, {
   theme: {
-    preset: myPreset,
+    preset: Aura,
     options: {
       darkModeSelector: false || 'none',
     },
   },
-  locale: {
-    ...defaultOptions.locale,
-    firstDayOfWeek: 1,
-    dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-    dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sab'],
-    dayNamesMin: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
-    monthNames: [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre',
-    ],
-    monthNamesShort: [
-      'En',
-      'Feb',
-      'Mar',
-      'Abr',
-      'May',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dic',
-    ],
-    today: 'Hoy',
-  },
+  locale,
 });
 app.use(router);
 app.use(axiosPlugin);
