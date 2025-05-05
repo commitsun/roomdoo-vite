@@ -5,7 +5,7 @@ import App from './App.vue';
 import PrimeVue, { defaultOptions } from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 import 'primeicons/primeicons.css';
-import { store } from '@/store';
+import { store } from '@/legacy/store';
 
 import { en_GB } from 'primelocale/js/en_GB.js';
 import { en } from 'primelocale/js/en.js';

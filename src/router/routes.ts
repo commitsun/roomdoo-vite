@@ -8,8 +8,10 @@ const routes: RouteRecordRaw[] = [
   // login
   {
     path: '/login/:pmsPropertyId(\\d+)?',
-    component: () => import('@/layouts/LoginLayout.vue'),
-    children: [{ name: 'login', path: '', component: () => import('@/pages/LoginPage.vue') }],
+    component: () => import('@/legacy/layouts/LoginLayout.vue'),
+    children: [
+      { name: 'login', path: '', component: () => import('@/legacy/pages/LoginPage.vue') },
+    ],
   },
   // // -----------------------------------------
   // // reset password
@@ -23,71 +25,79 @@ const routes: RouteRecordRaw[] = [
   // // dashboard (initial page)
   {
     path: '/:pmsPropertyId(\\d+)?',
-    component: () => import('@/layouts/MainLayout.vue'),
+    component: () => import('@/legacy/layouts/MainLayout.vue'),
     children: [
-      { name: 'dashboard', path: '', component: () => import('@/pages/DashboardPage.vue') },
+      { name: 'dashboard', path: '', component: () => import('@/legacy/pages/DashboardPage.vue') },
     ],
   },
   // planning
   {
     path: '/planning/:pmsPropertyId(\\d+)?',
-    component: () => import('@/layouts/MainLayout.vue'),
-    children: [{ name: 'planning', path: '', component: () => import('@/pages/PlanningPage.vue') }],
+    component: () => import('@/legacy/layouts/MainLayout.vue'),
+    children: [
+      { name: 'planning', path: '', component: () => import('@/legacy/pages/PlanningPage.vue') },
+    ],
   },
   // -----------------------------------------
   // transactions
   {
     path: '/transactions/:pmsPropertyId(\\d+)?',
-    component: () => import('@/layouts/MainLayout.vue'),
+    component: () => import('@/legacy/layouts/MainLayout.vue'),
     children: [
-      { name: 'transactions', path: '', component: () => import('@/pages/TransactionsPage.vue') },
+      {
+        name: 'transactions',
+        path: '',
+        component: () => import('@/legacy/pages/TransactionsPage.vue'),
+      },
     ],
   },
   // -----------------------------------------
   // invoices
   {
     path: '/invoices/:pmsPropertyId(\\d+)?',
-    component: () => import('@/layouts/MainLayout.vue'),
-    children: [{ name: 'invoices', path: '', component: () => import('@/pages/InvoicesPage.vue') }],
+    component: () => import('@/legacy/layouts/MainLayout.vue'),
+    children: [
+      { name: 'invoices', path: '', component: () => import('@/legacy/pages/InvoicesPage.vue') },
+    ],
   },
 
   // partners
   {
     path: '/partners/:pmsPropertyId(\\d+)?',
-    component: () => import('@/layouts/MainLayout.vue'),
+    component: () => import('@/legacy/layouts/MainLayout.vue'),
     children: [
-      { name: 'partners', path: '', component: () => import('@/pages/PartnerListPage.vue') },
+      { name: 'partners', path: '', component: () => import('@/legacy/pages/PartnerListPage.vue') },
     ],
   },
   // folio precheckin
   {
     path: '/:folioId([^/]+)/precheckin/:folioToken([^/]+)',
-    component: () => import('@/layouts/PublicLayout.vue'),
+    component: () => import('@/legacy/layouts/PublicLayout.vue'),
     children: [
       {
         name: 'folio-precheckin',
         path: '',
-        component: () => import('@/pages/PublicFolioPage.vue'),
+        component: () => import('@/legacy/pages/PublicFolioPage.vue'),
       },
     ],
   },
   // reservation precheckin
   {
     path: '/:reservationId([^/]+)/precheckin-reservation/:reservationToken([^/]+)',
-    component: () => import('@/layouts/PublicLayout.vue'),
+    component: () => import('@/legacy/layouts/PublicLayout.vue'),
     children: [
       {
         name: 'reservation-precheckin',
         path: '',
-        component: () => import('@/pages/PublicReservationPage.vue'),
+        component: () => import('@/legacy/pages/PublicReservationPage.vue'),
       },
     ],
   },
   // test
   {
     path: '/test',
-    component: () => import('@/layouts/MainLayout.vue'),
-    children: [{ name: 'test', path: '', component: () => import('@/pages/TestPage.vue') }],
+    component: () => import('@/legacy/layouts/MainLayout.vue'),
+    children: [{ name: 'test', path: '', component: () => import('@/legacy/pages/TestPage.vue') }],
   },
   // // 404
   // { path: '/404', component: () => import('@/pages/Error404Page.vue') },
