@@ -1,11 +1,11 @@
-import { dialogService } from "@/services/DialogService";
-import axios, { type AxiosInstance } from "axios";
-import type { App } from "vue";
+import { dialogService } from '@/legacy/services/DialogService';
+import axios, { type AxiosInstance } from 'axios';
+import type { App } from 'vue';
 
 // Crear la instancia de Axios
 const endPoint = import.meta.env.DEV
-  ? "/api"
-  : `${window.location.href.split(".")[0]}.host.roomdoo.com/api`;
+  ? '/api'
+  : `${window.location.href.split('.')[0]}.host.roomdoo.com/api`;
 
 const api: AxiosInstance = axios.create({
   baseURL: endPoint,
@@ -15,17 +15,17 @@ const api: AxiosInstance = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.config.url !== "/login") {
-      console.error("Axios interceptor error:", error.response);
+    if (error.response && error.response.config.url !== '/login') {
+      console.error('Axios interceptor error:', error.response);
       if (error.response.status === 403 || error.response.status === 401) {
         // console.log('Redirecting to login...');
-        window.location.href = "/login";
+        window.location.href = '/login';
         // Reemplaza con un router push si usas Vue Router
       } else {
         dialogService.open({
-          header: "Algo ha ido mal",
+          header: 'Algo ha ido mal',
           content: error.response.data.description,
-          btnAccept: "Aceptar",
+          btnAccept: 'Aceptar',
         });
       }
     }
