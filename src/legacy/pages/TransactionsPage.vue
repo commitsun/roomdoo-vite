@@ -1197,6 +1197,7 @@ export default defineComponent({
           position: relative;
           min-width: 200px;
           user-select: none;
+          display: flex;
           &:focus {
             outline: none;
           }
@@ -1601,6 +1602,8 @@ export default defineComponent({
   .main-content-transactions {
     .header {
       margin-left: 1rem;
+      padding-left: 7px;
+      padding-right: 7px;
       .header-row {
         display: flex;
         justify-content: space-between;
@@ -1626,6 +1629,7 @@ export default defineComponent({
             height: 43px;
             border-radius: 10px;
             display: flex;
+            flex-direction: row;
             align-items: center;
             justify-content: space-between;
             .icon-arrow-down {
@@ -1813,6 +1817,8 @@ export default defineComponent({
       background-color: #f8f8f8;
       justify-content: space-between;
       z-index: 50;
+      padding-left: 7px;
+      padding-right: 7px;
       .filter-items {
         justify-content: start;
         .input-search-desk-wrapper {
@@ -2089,11 +2095,12 @@ export default defineComponent({
 @media (min-width: 1240px) {
   .main-content-transactions {
     .header {
-      padding: 18px 60px;
+      padding: 18px 7px;
     }
     .filters-container {
       position: relative;
       z-index: 5;
+
       .transaction-creation-buttons {
         button {
           font-size: 15px;

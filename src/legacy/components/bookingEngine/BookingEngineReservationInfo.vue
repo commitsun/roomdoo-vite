@@ -186,7 +186,7 @@
             :class="{
               'not-editable': !reservation.editable,
               'not-adults': reservation.adults === 0,
-              }"
+            }"
           >
             <CustomIcon
               imagePath="/app-images/icon-alert-2.svg"
@@ -196,9 +196,7 @@
               class="icon"
               v-if="reservation.adults === 0"
             />
-            <span class="title-label">  
-              Adultos
-            </span>
+            <span class="title-label"> Adultos </span>
           </div>
           <div class="value">
             <AppButton

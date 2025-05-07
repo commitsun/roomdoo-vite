@@ -1001,7 +1001,7 @@ export default defineComponent({
       .header {
         width: 100%;
         height: 80px;
-        padding-left: 2.6rem;
+        padding-left: 0;
         padding-right: 1.6rem;
         background-color: #f8f8f8;
         display: flex;
@@ -1011,6 +1011,7 @@ export default defineComponent({
         margin-left: 1rem;
         margin-bottom: 0;
         .left {
+          padding-left: 7px;
           .icon-menu {
             display: none;
           }
@@ -1034,6 +1035,9 @@ export default defineComponent({
           .select-filters {
             display: flex;
           }
+        }
+        .btn-new-partner {
+          margin-right: 7px;
         }
         .icon-filters {
           display: none;

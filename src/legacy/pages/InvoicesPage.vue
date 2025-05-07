@@ -1063,8 +1063,8 @@ export default defineComponent({
         width: 20px;
       }
       .select-property-desk {
-        height: 100%;
-        width: 375px;
+        height: 40px;
+        width: 300px;
         font-size: 15px;
         display: none;
       }
@@ -1325,9 +1325,7 @@ export default defineComponent({
       border: none;
       flex: 1;
       cursor: pointer;
-      &:hover {
-        // opacity: 0.8;
-      }
+
       .add-partner-btn-text {
         margin-left: 5px;
         margin-top: 3px;
@@ -1400,6 +1398,7 @@ export default defineComponent({
     .header-invoices {
       height: 75px;
       margin-left: 1rem;
+      padding-left: 7px;
       .header-left {
         .icon-menu {
           display: none;
