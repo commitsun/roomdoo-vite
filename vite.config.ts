@@ -22,6 +22,11 @@ export default defineConfig({
         secure: false,
       },
     },
+    hmr: {
+      protocol: 'ws',
+      host: '127.0.0.1', // o tu IP local si accedes desde otra máquina
+      port: 3000,
+    },
   },
   css: {
     preprocessorOptions: {
