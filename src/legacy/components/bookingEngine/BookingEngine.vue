@@ -24,6 +24,16 @@
               colorHover="primary"
               @click="backToLastReservationView()"
             />
+            <CustomIcon
+              v-if="!currentFolio && step === 1"
+              imagePath="/app-images/back-arrow-black.svg"
+              width="22px"
+              height="22px"
+              class="icon-arrow-back icon-arrow-back-mobile"
+              color="black"
+              colorHover="primary"
+              @click="closeBookingEngine()"
+            />
             <span class="title">
               {{ !currentFolio ? 'Nueva reserva' : 'Añadir habitaciones' }}
             </span>
@@ -2659,6 +2669,10 @@ export default defineComponent({
       }
     };
 
+    const closeBookingEngine = () => {
+      void store.dispatch('layout/rightDrawerDisplayed', false);
+    };
+
     watch(partners, () => {
       itemsAutocompleteCustomer.value = partners.value.map((el) => ({
         value: el.id,
@@ -2894,6 +2908,7 @@ export default defineComponent({
       showAvailabilityPlan,
       isRoomTypeAvailabilityLimited,
       freeRoomsByType,
+      closeBookingEngine,
     };
   },
 });
@@ -2938,7 +2953,7 @@ export default defineComponent({
             margin-right: 0.5rem;
           }
           .title {
-            font-size: 0.9rem;
+            font-size: 1.2rem;
           }
         }
         .folio {
@@ -3397,6 +3412,9 @@ export default defineComponent({
       padding-right: 0.5rem;
       .first {
         .left {
+          .icon-arrow-back-mobile {
+            display: none;
+          }
           .title {
             font-size: 1.2rem !important;
           }
