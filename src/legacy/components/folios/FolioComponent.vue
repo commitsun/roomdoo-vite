@@ -1057,11 +1057,11 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     background-color: #263941;
-    &.bg-out {
-      background-color: #aadeff;
-    }
     &.bg-confirm {
       background-color: #1e9ed9;
+    }
+    &.bg-out {
+      background-color: #aadeff;
     }
     &.bg-draft {
       background-color: #dca81c;
