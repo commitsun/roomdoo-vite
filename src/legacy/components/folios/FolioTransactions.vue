@@ -4,7 +4,10 @@
     v-for="saleLine in saleLinesToPay"
     :key="saleLine.defaultInvoiceTo ?? 0"
   >
-    <div class="pending-amount-section">
+    <div
+      class="pending-amount-section"
+      :class="{ 'has-charges': saleLine.pendingToPay > 0 }"
+    >
       <div class="pending-title">Pdte. de cobrar a {{ saleLine.partnerName }}:</div>
       <div class="pending-amount">
         {{ saleLine.pendingToPay ? saleLine.pendingToPay.toFixed(2) : '0' }} €
@@ -642,8 +645,16 @@ export default defineComponent({
     color: white;
     font-weight: bold;
     padding: 0.5rem;
+    border-radius: 4px;
+    &.has-charges {
+      border-radius: 4px 4px 0 0 !important;
+    }
     .pending-title {
       max-width: 75%;
+      margin-left: .5rem;
+    }
+    .pending-amount {
+      margin-right: .5rem;
     }
   }
   .charge-section {
@@ -652,6 +663,7 @@ export default defineComponent({
     padding: 0.5rem;
     .date-limit {
       margin-bottom: 0.5rem;
+      margin-left: 0.5rem;
       .text-bold {
         font-weight: bold;
       }
@@ -659,6 +671,8 @@ export default defineComponent({
     .charge-btns {
       display: flex;
       flex-direction: column;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
       .link-btn {
         background-color: #f0f0f0;
         border: none;
@@ -685,17 +699,24 @@ export default defineComponent({
   margin-top: 1rem;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
     0 3px 1px -2px rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
+    border-radius: 4px !important;
   .recorded-transactions-title {
     font-weight: bold;
     background: #899b9e;
     color: white;
     padding: 0.5rem;
+    border-radius: 4px 4px 0 0 !important;
+    .title {
+      margin-left: 0.5rem;
+    }
   }
   .recorded-charges-title {
     padding: 0.5rem;
     font-weight: bold;
     background: #daf7fc;
+    .title {
+      margin-left: 0.5rem;
+    }
   }
 
   table {
@@ -710,11 +731,14 @@ export default defineComponent({
       position: absolute;
       width: 1px;
       user-select: none;
+      
     }
     tr {
       padding: 0.5rem;
       display: block;
       margin-bottom: 0.625em;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
     }
     td {
       display: block;
@@ -743,6 +767,7 @@ export default defineComponent({
             align-items: center;
             width: 100%;
             height: 30px;
+            margin-top: 1rem;
           }
 
           .btn-print-down-payment-invoice {
@@ -803,6 +828,7 @@ export default defineComponent({
     display: flex;
     flex-direction: row-reverse;
     padding: 0.5rem;
+    margin-right: 0.5rem;
     .total-amount {
       font-weight: bold;
       margin-left: 0.5rem;
@@ -824,6 +850,8 @@ export default defineComponent({
 
   .repay-container {
     padding: 0.5rem;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
     .repay-btn {
       width: 100%;
       height: 30px;
@@ -834,6 +862,7 @@ export default defineComponent({
       padding: 0 1.5rem;
       font-weight: bold;
       cursor: pointer;
+      
     }
   }
 
@@ -885,11 +914,13 @@ export default defineComponent({
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
+      padding-right: 0;
       .date-limit {
         margin-bottom: 0;
       }
       .charge-btns {
         flex-direction: row;
+        margin-right: 0;
         .link-btn {
           margin: 0.7rem 1rem;
           padding: 0 1rem;
@@ -897,7 +928,7 @@ export default defineComponent({
           font-size: 14px;
         }
         .charge-btn {
-          margin: 0.7rem 1rem;
+          margin: 0.7rem;
           font-size: 14px;
           padding: 0 2rem;
           height: 30px;
@@ -909,6 +940,8 @@ export default defineComponent({
     table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 14px;
+      table-layout: fixed;
       thead {
         display: table-header-group;
         border: none;
@@ -942,6 +975,7 @@ export default defineComponent({
         display: table-cell;
         text-align: center;
         padding: 0.5em;
+        margin-right: 0.5rem;
         .checkbox {
           display: flex;
         }
@@ -955,6 +989,35 @@ export default defineComponent({
           min-width: 120px;
         }
       }
+      tbody {
+        tr {
+          td:last-child {
+            .btn-print-down-payment-invoice,
+            .btn-create-down-payment-invoice {
+              margin-top: 0 !important;
+              font-size: 14px;
+            }
+
+          }
+        }
+      }
+      th,td {
+        width: 25%;
+        text-align: center;
+        padding: 0.5em;
+      }
+
+      td:not(:last-child) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      td:last-child {
+        white-space: normal;
+        width: 155px;
+      }
+
     }
     .repay-container {
       display: flex;
