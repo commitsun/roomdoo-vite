@@ -1,13 +1,6 @@
 <template>
   <div class="folio-detail">
-    <div
-      class="folio-header"
-      :class="{
-        'bg-out': currentFolio?.reservationType === 'out',
-        'bg-confirm': currentFolio?.state === 'confirm',
-        'bg-draft': currentFolio?.state === 'draft',
-      }"
-    >
+    <div class="folio-header" :class="computedFolioClass">
       <div class="first-row">
         <img
           class="arrow-left-img"
@@ -506,6 +499,13 @@ export default defineComponent({
           currentFolio.value?.accessToken ?? ''
         }`
     );
+
+    const computedFolioClass = computed(() => {
+      if (currentFolio.value?.reservationType === 'out') return 'bg-out';
+      if (currentFolio.value?.state === 'confirm') return 'bg-confirm';
+      if (currentFolio.value?.state === 'draft') return 'bg-draft';
+      return '';
+    });
     const currentRoomTypeClasses = computed(() => {
       const roomTypeClasses: roomTypeClassesInterface[] = [];
       currentReservations.value?.forEach((reser) => {
@@ -1011,6 +1011,7 @@ export default defineComponent({
       folioPublicLink,
       isSomeItemMenu,
       isReservationBlockedModalOpen,
+      computedFolioClass,
       isAllowedAddRooms,
       isAllowedBatchChanges,
       isAllowedConfirmReservations,
