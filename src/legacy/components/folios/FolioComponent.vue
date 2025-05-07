@@ -1057,11 +1057,11 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     background-color: #263941;
-    &.bg-confirm {
-      background-color: #1e9ed9;
-    }
     &.bg-out {
       background-color: #aadeff;
+    }
+    &.bg-confirm {
+      background-color: #1e9ed9;
     }
     &.bg-draft {
       background-color: #dca81c;
@@ -1170,6 +1170,7 @@ export default defineComponent({
             color: #f21e1e;
             .menu-len-reservations {
               margin-left: 0.2rem;
+              font-variant-ligatures: none;
             }
           }
           .option-confirm {
@@ -1178,6 +1179,7 @@ export default defineComponent({
             color: $primary;
             .menu-len-reservations {
               margin-left: 0.2rem;
+              font-variant-ligatures: none;
             }
           }
         }
@@ -1424,6 +1426,7 @@ export default defineComponent({
               color: #f21e1e;
               .menu-len-reservations {
                 margin-left: 0.2rem;
+                font-variant-ligatures: none;
               }
             }
             .option-confirm {
@@ -1432,6 +1435,7 @@ export default defineComponent({
               color: $primary;
               .menu-len-reservations {
                 margin-left: 0.2rem;
+                font-variant-ligatures: none;
               }
             }
           }
