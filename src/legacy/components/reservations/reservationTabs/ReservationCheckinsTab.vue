@@ -83,6 +83,7 @@
             :width="'22px'"
             :height="'22px'"
             @click="isCheckinMenuOpen = !isCheckinMenuOpen"
+            @blur="isCheckinMenuOpen = false"
             tabindex="1"
           />
           <transition name="menu-checkins">
