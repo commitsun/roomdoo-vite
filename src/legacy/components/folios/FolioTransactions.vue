@@ -142,7 +142,7 @@
                 target="_blank"
                 @click.stop
               >
-                <span class="hovertext" data-hover="Imprimir Factura"> Factura </span>
+                <span class="hovertext"> Factura </span>
               </AppButton>
               <AppButton
                 class="btn-create-down-payment-invoice btn"
@@ -152,9 +152,7 @@
                 "
                 @click.stop="openDownPaymentDialog(refund)"
               >
-                <span class="hovertext" data-hover="Crear factura de anticipo">
-                  Fra. anticipo
-                </span>
+                <span class="hovertext"> Fra. anticipo </span>
               </AppButton>
             </td>
           </tr>

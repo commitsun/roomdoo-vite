@@ -75,7 +75,7 @@
               <TransitionGroup name="accordion-transition">
                 <div
                   v-if="index <= 2 || (showAllBoardServices[indexBoardService] && index > 2)"
-                  class="service-grid deubg-box"
+                  class="service-grid"
                 >
                   <span class="">
                     {{ serviceLineDate(serviceLine.date) }}
@@ -762,6 +762,7 @@ export default defineComponent({
     }
     .service-container-inner {
       margin-top: 1rem;
+
       .service {
         display: flex;
         justify-content: space-between;
@@ -809,6 +810,8 @@ export default defineComponent({
         justify-items: center;
         align-items: center;
         margin-left: 1rem;
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
         span:nth-child(1) {
           justify-self: start;
         }
@@ -826,7 +829,6 @@ export default defineComponent({
         border: none;
         height: 1px;
         background-color: #e1e0e0;
-        width: 95%;
       }
       .services-menu {
         user-select: none;
@@ -937,6 +939,8 @@ export default defineComponent({
       grid-auto-rows: auto;
       justify-items: center;
       align-items: center;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
       span:nth-child(1) {
         justify-self: start;
       }

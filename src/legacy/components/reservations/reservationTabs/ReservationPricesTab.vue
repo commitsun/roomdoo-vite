@@ -130,7 +130,7 @@
             tabindex="1"
           />
           <transition>
-            <div class="services-options debug-box" v-if="openBoardServiceOptions">
+            <div class="services-options" v-if="openBoardServiceOptions">
               <div @mousedown="openPricesChanges()">Editar</div>
             </div>
           </transition>
@@ -698,6 +698,8 @@ export default defineComponent({
     grid-gap: 1rem;
     align-items: center;
     font-size: 0.8rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
     span:nth-child(1) {
       margin-left: 5px;
     }
@@ -794,6 +796,8 @@ export default defineComponent({
       }
     }
     .service-line {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
       font-size: 1rem;
     }
   }

@@ -683,7 +683,6 @@ export default defineComponent({
           width: 100%;
           padding: 0.5rem 0.5rem 0.5rem 0;
           .btn {
-            border-radius: 0 !important;
             max-width: 25px;
             height: 25px !important;
             flex: 1;

@@ -358,7 +358,12 @@
         <div class="content-section-card">
           <div class="availability-plan" v-if="showAvailabilityPlan">
             <div class="icon-alert">
-              <img src="/app-images/icon-alert.svg" class="alert" />
+              <CustomIcon
+                imagePath="/app-images/icon-alert-2.svg"
+                width="14px"
+                height="14px"
+                color="#73510d"
+              />
             </div>
             <div class="availability-plan-text">
               <span class="availability-plan-title">
@@ -417,7 +422,12 @@
                   class="available-room-type-pill"
                   v-if="isRoomTypeAvailabilityLimited(roomType.id)"
                 >
-                  <img src="/app-images/icon-alert.svg" class="icon-alert" />
+                  <CustomIcon
+                    imagePath="/app-images/icon-alert-2.svg"
+                    width="14px"
+                    height="14px"
+                    color="#73510d"
+                  />
                   <div
                     class="available-room-type available-room-type-red"
                     v-if="
@@ -2949,7 +2959,7 @@ export default defineComponent({
           .old-price,
           .new-price {
             border-radius: 15px;
-            font-size: 0.75rem;
+            font-size: 0.9rem;
             padding: 0 0.3rem;
             display: flex;
             align-items: center;
@@ -2957,11 +2967,11 @@ export default defineComponent({
           }
           .old-price {
             color: grey;
-            border: 2px solid grey;
+            border: 1px solid grey;
           }
           .new-price {
             color: $primary;
-            border: 2px solid $primary;
+            border: 1px solid $primary;
           }
           .icon-arrow-back {
             margin: 0 0.5rem;
@@ -2970,11 +2980,11 @@ export default defineComponent({
         .rooms {
           .old-rooms {
             color: grey;
-            font-size: 0.75rem;
+            font-size: 0.9rem;
           }
           .new-rooms {
             color: $primary;
-            font-size: 0.75rem;
+            font-size: 0.9rem;
           }
         }
       }
@@ -3010,6 +3020,9 @@ export default defineComponent({
       }
       .content-section-card {
         padding: 1rem;
+        hr {
+          border-top: 1px solid lightgrey;
+        }
         .reservation-type {
           display: flex;
           justify-content: space-between;
@@ -3076,9 +3089,10 @@ export default defineComponent({
           .left {
             .room-type-name {
               font-weight: bold;
+              font-size: 15px;
             }
             .room-type-text {
-              font-size: 0.8rem;
+              font-size: 1rem;
               color: gray;
               &.text-red {
                 color: red;
@@ -3094,11 +3108,12 @@ export default defineComponent({
             padding: 0 0.5rem;
             margin-bottom: 0.5rem;
             .icon-alert {
-              margin-right: 0.5rem;
+              margin-right: 1rem;
               margin-bottom: 1px;
             }
             .available-room-type {
               font-size: 12px;
+              color: #73510d;
             }
           }
           .right {
@@ -3118,7 +3133,6 @@ export default defineComponent({
               }
               .icon-wrapper {
                 .btn {
-                  border-radius: 0 !important;
                   width: 22px !important;
                   height: 22px !important;
                   &.disabled {
@@ -3377,7 +3391,7 @@ export default defineComponent({
 @media (min-width: 1024px) {
   .booking-engine {
     padding-left: 2rem;
-    padding: 1rem 0.25rem 0.5rem 1.5rem;
+    padding: 1rem 0.25rem 0.5rem 1.9rem;
     margin-right: 0.25rem;
     .header {
       padding-right: 0.5rem;
@@ -3396,7 +3410,7 @@ export default defineComponent({
           .prices {
             .old-price,
             .new-price {
-              font-size: 1rem;
+              font-size: 1.2rem !important;
             }
           }
           .rooms {

@@ -390,6 +390,9 @@ export default defineComponent({
         .text-regular {
           margin-left: 3px;
         }
+        .text-bold {
+          font-weight: bold;
+        }
         .placeholder {
           color: #878787;
         }

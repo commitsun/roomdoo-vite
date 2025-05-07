@@ -1635,7 +1635,7 @@ export default defineComponent({
     .top-left {
       min-width: $left_column_mobile_width;
       .top-left-content {
-        font-size: 17px;
+        font-size: 14px;
         display: flex;
         height: 100%;
         .left {
@@ -1658,10 +1658,11 @@ export default defineComponent({
             display: none;
             color: black;
             span {
+              border: 1px solid black;
               cursor: pointer;
-              border: 1px solid #000000;
+              font-size: 14px !important;
               border-radius: 7px;
-              padding: 0.1rem 0.4rem 0.2rem 0.3rem;
+              padding: 0.3rem;
             }
           }
         }

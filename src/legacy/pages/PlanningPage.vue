@@ -1347,6 +1347,7 @@ export default defineComponent({
       }
       .button-new-reservation {
         display: none;
+        height: 40px;
         justify-content: space-around;
         width: 170px;
         align-items: center;
@@ -1356,7 +1357,7 @@ export default defineComponent({
         padding: 0.5rem 1rem 0.5rem 0.5rem;
         cursor: pointer;
         .text-new-reservation {
-          font-size: 14px;
+          font-size: 15px;
           font-weight: bold;
           user-select: none;
         }
