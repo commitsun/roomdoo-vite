@@ -51,7 +51,7 @@ const head = createHead();
 const app = createApp(App);
 app.use(PrimeVue, {
   theme: {
-    preset: Aura,
+    preset: myPreset,
     options: {
       darkModeSelector: false || 'none',
     },
