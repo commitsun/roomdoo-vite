@@ -1,12 +1,27 @@
 @import 'tailwindcss';
 @font-face {
-  font-family: 'rethink-sans';
-  src: url('/RethinkSans-Regular.ttf') format('truetype');
+  font-family: 'Rethink Sans';
+  src: url('/fonts/rethink/RethinkSans-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
+@font-face {
+  font-family: 'Rethink Sans';
+  src: url('/fonts/rethink/RethinkSans-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 html {
   font-size: 14px !important;
 }
 
 body {
-  font-family: 'rethink-sans', sans-serif;
+  font-family: 'Rethink Sans', 'Inter', Arial;
+}
+
+hr {
+  border-top: 1px solid lightgray;
 }
