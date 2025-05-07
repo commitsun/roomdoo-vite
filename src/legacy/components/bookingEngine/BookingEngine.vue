@@ -35,7 +35,7 @@
               @click="closeBookingEngine()"
             />
             <span class="title">
-              {{ !currentFolio ? 'Nueva reserva' : 'Añadir habitaciones' }}
+              {{ !currentFolio ? 'NUEVA RESERVA' : 'AÑADIR HABITACIONES' }}
             </span>
           </div>
 
@@ -2930,14 +2930,13 @@ export default defineComponent({
     font-size: 1rem;
     font-weight: bold;
     padding-right: 0.75rem;
+    padding-top:  0.5rem;
     .first {
       display: flex;
-      justify-content: space-between;
       .left,
       .right {
         display: flex;
         flex-direction: column;
-        width: 50%;
       }
       .left {
         font-weight: bold;
@@ -2954,17 +2953,19 @@ export default defineComponent({
             margin-right: 0.5rem;
           }
           .title {
-            font-size: 1.2rem;
+            font-size: 16px;
           }
         }
         .folio {
           display: flex;
+          margin-left: .5rem;
           .icon-arrow-back {
             margin-right: 0.5rem;
           }
         }
       }
       .right {
+        margin-left: auto;
         .prices,
         .rooms {
           display: flex;
@@ -3007,6 +3008,7 @@ export default defineComponent({
     }
     .second {
       font-size: 1rem;
+      margin-left: .5rem;
     }
   }
   .content {
