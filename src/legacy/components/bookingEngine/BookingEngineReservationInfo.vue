@@ -3,14 +3,19 @@
     <div class="field">
       <div class="label" :class="!reservation.editable ? 'not-editable' : ''">
         <CustomIcon
-          imagePath="/app-images/icon-alert.svg"
+          imagePath="/app-images/icon-alert-2.svg"
           width="12px"
           height="12px"
           color="red"
           class="icon"
           v-if="reservation.roomId === 0 && !reservation.autoAssignRoom"
         />
-        Habitación
+        <span
+          class="room-label"
+          :class="reservation.roomId === 0 && !reservation.autoAssignRoom ? 'error' : ''"
+        >
+          Habitación
+        </span>
       </div>
       <div class="value">
         <div
@@ -176,7 +181,25 @@
 
       <div class="adults-children">
         <div class="adults">
-          <div class="label" :class="!reservation.editable ? 'not-editable' : ''">Adultos</div>
+          <div
+            class="adults-label"
+            :class="{
+              'not-editable': !reservation.editable,
+              'not-adults': reservation.adults === 0,
+              }"
+          >
+            <CustomIcon
+              imagePath="/app-images/icon-alert-2.svg"
+              width="12px"
+              height="12px"
+              color="red"
+              class="icon"
+              v-if="reservation.adults === 0"
+            />
+            <span class="title-label">  
+              Adultos
+            </span>
+          </div>
           <div class="value">
             <AppButton
               icon="pi pi-minus"
@@ -205,7 +228,7 @@
             <input
               type="number"
               :class="{
-                'text-red': reservation.adults === 0,
+                'not-adults': reservation.adults === 0,
                 'not-editable': !reservation.editable,
               }"
               :value="reservation.adults"
@@ -589,6 +612,11 @@ export default defineComponent({
       &.not-editable {
         color: grey;
       }
+      .room-label {
+        &.error {
+          color: red;
+        }
+      }
     }
     select {
       width: 10rem;
@@ -663,11 +691,19 @@ export default defineComponent({
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-        .label {
+        .adults-label {
           font-weight: bold;
           user-select: none;
+          display: flex;
+          align-items: center;
+          .icon {
+            margin-right: 0.5rem;
+          }
           &.not-editable {
             color: grey;
+          }
+          &.not-adults {
+            color: red;
           }
         }
         &:last-child {
@@ -700,6 +736,10 @@ export default defineComponent({
               border-color: grey;
               color: grey;
               cursor: not-allowed;
+            }
+            &.not-adults {
+              border-color: red;
+              color: red;
             }
           }
         }
