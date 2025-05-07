@@ -434,9 +434,10 @@
                 >
                   <CustomIcon
                     imagePath="/app-images/icon-alert-2.svg"
-                    width="14px"
-                    height="14px"
+                    width="13px"
+                    height="13px"
                     color="#73510d"
+                    class="icon-warning"
                   />
                   <div
                     class="available-room-type available-room-type-red"
@@ -3117,7 +3118,7 @@ export default defineComponent({
           .available-room-type-pill {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-evenly;
             background-color: #fbf0da;
             border-radius: 15px;
             padding: 0 0.5rem;
@@ -3491,8 +3492,13 @@ export default defineComponent({
               width: 100%;
               .available-room-type-pill {
                 margin-bottom: 0 !important;
+                margin-top: 0 !important;
                 width: 150px;
                 margin-right: 1rem;
+                height: 22px;
+                .icon-warning {
+                  margin-left: .5rem;
+                }
                 .available-room-type {
                   font-size: 13px !important;
                   margin: 0 auto;
