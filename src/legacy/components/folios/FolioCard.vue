@@ -968,6 +968,7 @@ export default defineComponent({
             color: #f21e1e;
             .menu-len-reservations {
               margin-left: 0.2rem;
+              font-variant-ligatures: none;
             }
           }
           .option-confirm {
@@ -976,6 +977,7 @@ export default defineComponent({
             color: $primary;
             .menu-len-reservations {
               margin-left: 0.2rem;
+              font-variant-ligatures: none;
             }
           }
         }
