@@ -1833,7 +1833,6 @@ export default defineComponent({
             pmsPropertyId: store.state.properties.activeProperty.id,
             from: checkin.value,
             to: checkout.value,
-            pricelistId: selectedPricelistId.value,
           })) as AxiosResponse<CountGlobalAvailableRooms[]>;
 
           globalAvailableRooms.value = responseFreeRooms.data;
