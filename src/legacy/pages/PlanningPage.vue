@@ -260,20 +260,58 @@
         <span> Cambios masivos </span>
       </div>
     </div>
-    <div class="new-reservation">
-      <CustomIcon
-        :imagePath="'/app-images/add_circle_outline.svg'"
-        :color="'primary'"
-        :width="'32px'"
-        :height="'32px'"
-        @click="openBookingEngine"
-      />
-    </div>
+    <SpeedDial
+      v-if="!isBookingEngineOpenInMobile"
+      :model="[
+        {
+          icon: 'pi pi-pencil',
+          command: () => {
+            openMassiveChangesDialog();
+          },
+        },
+        {
+          icon: 'pi pi-plus',
+          command: () => {
+            openBookingEngine();
+          },
+        },
+      ]"
+      direction="up"
+      mask
+      :maskStyle="{ zIndex: 998, pointerEvents: 'none' }"
+      :style="{
+        zIndex: 999,
+        position: 'absolute',
+        right: '1rem',
+        bottom: '1rem',
+      }"
+      :itemStyle="{ zIndex: 1001, position: 'relative', border: '1px solid red' }"
+      :buttonProps="{
+        style: {
+          backgroundColor: '#ffffff',
+          color: '#2563eb',
+          border: 'none',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+          width: '3.5rem',
+          height: '3.5rem',
+          borderRadius: '50%',
+          opacity: '0.75',
+        },
+      }"
+      :actionButtonProps="{
+        style: {
+          backgroundColor: '#2563eb',
+          color: '#ffffff',
+          border: 'none',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+          width: '3.5rem',
+          height: '3.5rem',
+          borderRadius: '50%',
+          marginBottom: '1rem',
+        },
+      }"
+    />
   </div>
-  <!--
-  <q-dialog v-model="massiveChangesDialog" persistent>
-    <MassiveChangesDialog />
-  </q-dialog> -->
 </template>
 <script lang="ts">
 import {
@@ -287,6 +325,7 @@ import {
   inject,
   nextTick,
   markRaw,
+  h,
 } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -296,11 +335,12 @@ import CustomSelect from '@/legacy/components/roomdooComponents/CustomSelect.vue
 import { useStore } from '@/legacy/store';
 import { useHead } from '@vueuse/head';
 import DatePicker from 'primevue/datepicker';
+import SpeedDial from 'primevue/speeddial';
 
 import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
 import PlanningReservations from '@/legacy/components/planningReservations/PlanningReservations.vue';
 import PlanningPricelist from '@/legacy/components/planningPricelists/PlanningPricelist.vue';
-import MassiveChangesDialog from '@/legacy/components/priceAvailBatchChanges/PriceAvailBatchChanges.vue';
+import PriceAvailBatchChanges from '@/legacy/components/priceAvailBatchChanges/PriceAvailBatchChanges.vue';
 import MultiSelect from '@/legacy/components/roomdooComponents/MultiSelect.vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import { usePlanning } from '@/legacy/utils/usePlanning';
@@ -313,7 +353,7 @@ export default defineComponent({
     DatePicker,
     PlanningReservations,
     PlanningPricelist,
-    // MassiveChangesDialog,
+    SpeedDial,
     InputText,
     MultiSelect,
     AutocompleteComponent,
@@ -379,8 +419,14 @@ export default defineComponent({
     const selectedPropertyIdFromRightSelector = ref(inject('selectedPropertyIdFromRightSelector'));
     const massiveChangesDialog = ref(false);
     const finishLoadingData = ref(false);
-
     const numPricesRulesToSave = ref(0);
+
+    const isBookingEngineOpenInMobile = computed(
+      () =>
+        (store.state.layout.showing === 'NewFolioStep1' ||
+          store.state.layout.showing === 'NewFolioStep2') &&
+        rightDrawerExpanded.value
+    );
 
     const activeUser = computed(() => store.state.user.activeUser);
     const activeProperty = computed(() => store.state.properties.activeProperty);
@@ -479,7 +525,7 @@ export default defineComponent({
     const openMassiveChangesDialog = () => {
       dialogService.open({
         header: 'CAMBIOS MASIVOS',
-        content: markRaw(MassiveChangesDialog),
+        content: markRaw(PriceAvailBatchChanges),
         closable: true,
       });
     };
@@ -1126,6 +1172,7 @@ export default defineComponent({
       massiveChangesDialog,
       numPricesRulesToSave,
       finishLoadingData,
+      isBookingEngineOpenInMobile,
     };
   },
 });
