@@ -454,10 +454,10 @@ export default defineComponent({
       return result;
     });
 
+    const activePricelistId = computed(() => store.state.pricelists.activePricelist?.id);
+
     const activePricelist = computed(() =>
-      store.state.pricelists.pricelists.find(
-        (el) => el.id === store.state.pricelists.activePricelist?.id
-      )
+      store.state.pricelists.dailyPricelists.find((el) => el.id === activePricelistId.value)
     );
 
     const activeAvailabilityPlan = computed(() =>
@@ -1169,6 +1169,7 @@ export default defineComponent({
       openPlanningPricelists,
       closePlanningPricelists,
       openMassiveChangesDialog,
+      activePricelistId,
       massiveChangesDialog,
       numPricesRulesToSave,
       finishLoadingData,
