@@ -3,11 +3,11 @@ import axios, { type AxiosInstance } from 'axios';
 import type { App } from 'vue';
 
 // Crear la instancia de Axios
-// const endPoint = import.meta.env.DEV
-//   ? '/api'
-//   : `${window.location.href.split('.')[0]}.host.roomdoo.com/api`;
+const endPoint = import.meta.env.DEV
+  ? '/api'
+  : `${window.location.href.split('.')[0]}.host.roomdoo.com/api`;
 
-const endPoint = 'https://staging16.odoo.aldahotels.moduon.net/api';
+// const endPoint = 'https://staging16.odoo.aldahotels.moduon.net/api';
 const api: AxiosInstance = axios.create({
   baseURL: endPoint,
 });

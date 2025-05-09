@@ -53,9 +53,9 @@
       </div>
     </div>
     <div class="data-reservation-row" v-if="currentReservation?.overbooking">
-      <div class="btn-overbooking" @click="changeRoomsModal = true">
+      <div class="btn-overbooking" @click="toggleShowRoomsDialog(true)">
         <CustomIcon
-          imagePath="/app-images/icon-alert.svg"
+          imagePath="/app-images/icon-alert-2.svg"
           color="#FFFFFF"
           width="12px"
           height="12px"
@@ -470,10 +470,6 @@ export default defineComponent({
         }
         // SEGMENTATION / CHECKIN TAB
         if (code === 'checkin_done_precheckin') {
-          alert(
-            !currentReservation.value?.segmentationId &&
-              store.state.categories.categories.length > 0
-          );
           if (
             !currentReservation.value?.segmentationId &&
             store.state.categories.categories.length > 0
@@ -683,6 +679,24 @@ export default defineComponent({
       }
     };
 
+    const toggleShowRoomsDialog = (param: boolean) => {
+      splitMode.value = param;
+      dialogService.open({
+        header: 'CAMBIO DE HABITACIÓN',
+        content: markRaw(ReservationRoomChanges),
+        props: {
+          splitMode: param,
+        },
+        onClose: async () => {
+          await store.dispatch(
+            'reservations/fetchReservationWizardState',
+            store.state.reservations.currentReservation?.id
+          );
+        },
+        onAccept: (result?: unknown) => context.emit('setTabValue', 'room'),
+      });
+    };
+
     watch(wizardState, () => {
       if (wizardState.value?.code) {
         showWizardState.value = true;
@@ -744,6 +758,7 @@ export default defineComponent({
       showWizardState,
       showSegmentationModal,
       pricelistName,
+      toggleShowRoomsDialog,
       getDateFormat,
       getAgencyName,
       getDateTimeFormat,
