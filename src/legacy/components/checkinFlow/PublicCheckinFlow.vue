@@ -405,7 +405,7 @@ import { useRoute } from 'vue-router';
 import {
   useCheckinPartner,
   DEFAULT_CHECKIN_PARTNER_VALUES,
-} from '@/legacyu/utils/useCheckinPartner';
+} from '@/legacy/utils/useCheckinPartner';
 import utilsDates from '@/legacy/utils/dates';
 import { useStore } from '@/legacy/store';
 

@@ -1107,7 +1107,7 @@ export default defineComponent({
     const languages = computed(() => store.state.languages.languages);
 
     const pricelists = computed(() => {
-      const result = store.state.pricelists.pricelists;
+      const result = [...store.state.pricelists.pricelists];
       const currentPricelist = store.state.pricelists.pricelists.find(
         (el) => el.id === currentFolio.value?.pricelistId
       );
@@ -2930,7 +2930,7 @@ export default defineComponent({
     font-size: 1rem;
     font-weight: bold;
     padding-right: 0.75rem;
-    padding-top:  0.5rem;
+    padding-top: 0.5rem;
     .first {
       display: flex;
       .left,
@@ -2958,7 +2958,7 @@ export default defineComponent({
         }
         .folio {
           display: flex;
-          margin-left: .5rem;
+          margin-left: 0.5rem;
           .icon-arrow-back {
             margin-right: 0.5rem;
           }
@@ -3008,7 +3008,7 @@ export default defineComponent({
     }
     .second {
       font-size: 1rem;
-      margin-left: .5rem;
+      margin-left: 0.5rem;
     }
   }
   .content {
@@ -3499,7 +3499,7 @@ export default defineComponent({
                 margin-right: 1rem;
                 height: 22px;
                 .icon-warning {
-                  margin-left: .5rem;
+                  margin-left: 0.5rem;
                 }
                 .available-room-type {
                   font-size: 13px !important;

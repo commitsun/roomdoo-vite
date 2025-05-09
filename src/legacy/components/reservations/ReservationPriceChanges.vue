@@ -782,7 +782,7 @@ export default defineComponent({
     const currentReservation = computed(() => store.state.reservations.currentReservation);
 
     const pricelists = computed(() => {
-      const result = store.state.pricelists.pricelists;
+      const result = [...store.state.pricelists.pricelists];
       const currentPricelist = store.state.pricelists.pricelists.find(
         (el) => el.id === currentReservation.value?.pricelistId
       );
