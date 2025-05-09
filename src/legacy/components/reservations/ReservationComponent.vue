@@ -16,7 +16,7 @@
       <div class="room">
         <div class="room-row">
           <CustomIcon
-            imagePath="/app-images/icon-alert.svg"
+            imagePath="/app-images/icon-alert-2.svg"
             color="#FFFFFF"
             width="10px"
             height="10px"
