@@ -21,6 +21,8 @@ if (langAndArea.length > 1) {
   const country = langAndArea[1].toUpperCase();
   if (country === 'GB') {
     locale = en_GB;
+  } else {
+    locale = langAndArea[0] === 'es' ? es : en;
   }
 } else {
   if (langAndArea[0] === 'es') {

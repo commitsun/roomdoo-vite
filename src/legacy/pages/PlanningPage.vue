@@ -260,57 +260,59 @@
         <span> Cambios masivos </span>
       </div>
     </div>
-    <SpeedDial
-      v-if="!isBookingEngineOpenInMobile"
-      :model="[
-        {
-          icon: 'pi pi-pencil',
-          command: () => {
-            openMassiveChangesDialog();
+    <span class="speed-dial-wrapper">
+      <SpeedDial
+        v-if="!isBookingEngineOpenInMobile"
+        :model="[
+          {
+            icon: 'pi pi-pencil',
+            command: () => {
+              openMassiveChangesDialog();
+            },
           },
-        },
-        {
-          icon: 'pi pi-plus',
-          command: () => {
-            openBookingEngine();
+          {
+            icon: 'pi pi-plus',
+            command: () => {
+              openBookingEngine();
+            },
           },
-        },
-      ]"
-      direction="up"
-      mask
-      :maskStyle="{ zIndex: 998, pointerEvents: 'none' }"
-      :style="{
-        zIndex: 999,
-        position: 'absolute',
-        right: '1rem',
-        bottom: '1rem',
-      }"
-      :itemStyle="{ zIndex: 1001, position: 'relative', border: '1px solid red' }"
-      :buttonProps="{
-        style: {
-          backgroundColor: '#ffffff',
-          color: '#2563eb',
-          border: 'none',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-          width: '3.5rem',
-          height: '3.5rem',
-          borderRadius: '50%',
-          opacity: '0.75',
-        },
-      }"
-      :actionButtonProps="{
-        style: {
-          backgroundColor: '#2563eb',
-          color: '#ffffff',
-          border: 'none',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-          width: '3.5rem',
-          height: '3.5rem',
-          borderRadius: '50%',
-          marginBottom: '1rem',
-        },
-      }"
-    />
+        ]"
+        direction="up"
+        mask
+        :maskStyle="{ zIndex: 998, pointerEvents: 'none' }"
+        :style="{
+          zIndex: 999,
+          position: 'absolute',
+          right: '1rem',
+          bottom: '1rem',
+        }"
+        :itemStyle="{ zIndex: 1001, position: 'relative', border: '1px solid red' }"
+        :buttonProps="{
+          style: {
+            backgroundColor: '#ffffff',
+            color: '#2563eb',
+            border: 'none',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+            width: '3.5rem',
+            height: '3.5rem',
+            borderRadius: '50%',
+            opacity: '0.75',
+          },
+        }"
+        :actionButtonProps="{
+          style: {
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
+            border: 'none',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+            width: '3.5rem',
+            height: '3.5rem',
+            borderRadius: '50%',
+            marginBottom: '1rem',
+          },
+        }"
+      />
+    </span>
   </div>
 </template>
 <script lang="ts">
@@ -1634,6 +1636,10 @@ export default defineComponent({
       box-shadow: none;
       background-color: #f0f0f0;
       box-shadow: 0px -2px 14px 0px #0000001a;
+    }
+    .speed-dial-wrapper {
+      display: none;
+      border: 1px solid red;
     }
     .down-container {
       display: block;
