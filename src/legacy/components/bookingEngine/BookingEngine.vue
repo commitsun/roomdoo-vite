@@ -1520,18 +1520,20 @@ export default defineComponent({
         // create reservation lines
         const reservationLines: ReservationLineInterface[] = [];
 
-        utilsDates.getDatesRange(dateFrom, dateTo).forEach((date) => {
-          reservationLines.push({
-            date,
-            price:
-              prices.value
-                .find((el) => el.roomTypeId === roomTypeId)
-                ?.prices.find((el) => el.date.getTime() === date.getTime())?.price ?? 0,
-            discount: 0,
-            roomId: room?.id ?? 0,
-            pmsPropertyId: store.state.properties.activeProperty?.id ?? 0,
+        utilsDates
+          .getDatesRange(dateFrom, new Date(dateTo.getTime() - ONE_DAY_IN_MS))
+          .forEach((date) => {
+            reservationLines.push({
+              date,
+              price:
+                prices.value
+                  .find((el) => el.roomTypeId === roomTypeId)
+                  ?.prices.find((el) => el.date.getTime() === date.getTime())?.price ?? 0,
+              discount: 0,
+              roomId: room?.id ?? 0,
+              pmsPropertyId: store.state.properties.activeProperty?.id ?? 0,
+            });
           });
-        });
 
         const lastNight = new Date(dateTo);
         lastNight.setDate(lastNight.getDate() - 1);
