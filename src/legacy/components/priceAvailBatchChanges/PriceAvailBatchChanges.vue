@@ -226,8 +226,7 @@
               v-model="quotaInput"
               :disabled="!quotaToggleValue"
               size="small"
-              :min="0"
-              :max="99"
+              :min="-1"
               :inputStyle="{
                 width: '35px',
                 height: '35px',
@@ -296,6 +295,8 @@
             <InputNumber
               v-model="maxAvailInput"
               :disabled="!maxAvailToggleValue"
+              size="small"
+              :min="-1"
               :inputStyle="{
                 width: '35px',
                 height: '35px',
