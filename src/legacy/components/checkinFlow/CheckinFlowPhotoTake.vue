@@ -1,12 +1,23 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
+
     <div class="step-title">
       <span class="step">
         {{ step }}
@@ -16,6 +27,7 @@
         {{ title }}
       </span>
     </div>
+
     <div class="mobile-mask">
       <div class="first" />
       <div class="second">
@@ -25,6 +37,7 @@
       </div>
       <div class="third" />
     </div>
+
     <div class="video-container">
       <video ref="videoElement" autoplay playsInline />
       <div class="desktop-mask">
@@ -40,6 +53,7 @@
         <div class="third" />
       </div>
     </div>
+
     <div class="mobile-buttons">
       <div class="btn-back">
         <CustomIcon
@@ -63,24 +77,27 @@
           class="icon-arrow"
           @click="browseFile()"
         />
-        Galería
+        {{ $t('gallery') }}
       </div>
     </div>
+
     <div class="desktop-buttons">
       <div class="btn-container">
-        <CustomButton text="Hacer foto" color="primary" @click="takePicture" />
+        <CustomButton :text="$t('take_photo')" color="primary" @click="takePicture" />
       </div>
       <div class="btn-container">
-        <CustomButton text="Subir archivo" backgroundColor="#51B2DD" @click="browseFile" />
+        <CustomButton :text="$t('upload_file')" backgroundColor="#51B2DD" @click="browseFile" />
       </div>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, ref, onMounted, type Ref, onUnmounted } from 'vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import CustomButton from '@/legacy/components/roomdooComponents/CustomButton.vue';
 import { dialogService } from '@/legacy/services/DialogService';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   props: {
@@ -107,6 +124,7 @@ export default defineComponent({
     CustomButton,
   },
   setup(props, context) {
+    const { t } = useI18n();
     const stream: Ref<MediaStream | null> = ref(null);
     const videoElement = ref<HTMLVideoElement | null>(null);
     const photoData = ref('');
@@ -152,33 +170,30 @@ export default defineComponent({
           switch (error.name) {
             case 'NotAllowedError':
               dialogService.open({
-                header: 'Error',
-                content:
-                  'La cámara está bloqueada. Por favor, habilita los permisos de cámara en la configuración de tu navegador.',
-                btnAccept: 'Ok',
+                header: t('error'),
+                content: t('camera_error_permission'),
+                btnAccept: t('ok'),
               });
               break;
             case 'NotFoundError':
               dialogService.open({
-                header: 'Error',
-                content:
-                  'No se encontró ninguna cámara. Asegúrate de que tu dispositivo tiene una cámara disponible y que está conectada.',
-                btnAccept: 'Ok',
+                header: t('error'),
+                content: t('camera_error_not_found'),
+                btnAccept: t('ok'),
               });
               break;
             case 'NotReadableError':
               dialogService.open({
-                header: 'Error',
-                content:
-                  'No se puede acceder a la cámara. Asegúrate de que ninguna otra aplicación la esté usando.',
-                btnAccept: 'Ok',
+                header: t('error'),
+                content: t('camera_error_not_readable'),
+                btnAccept: t('ok'),
               });
               break;
             default:
               dialogService.open({
-                header: 'Error',
-                content: 'Algo ha ido mal. Inténtalo de nuevo más tarde.',
-                btnAccept: 'Ok',
+                header: t('error'),
+                content: t('camera_error_generic'),
+                btnAccept: t('ok'),
               });
           }
         }

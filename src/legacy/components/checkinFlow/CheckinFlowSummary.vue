@@ -1,15 +1,28 @@
 <template>
   <div class="page-container" @keydown.esc="$emit('closeCheckinFlow')">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
-      <span class="title-text"> Resumen </span>
+      <span class="title-text"> {{ t('summary') }} </span>
     </div>
     <div class="checkin-flow-card">
       <slot name="checkin-flow-card" />
@@ -27,19 +40,21 @@
           ).length === 1 &&
           (checkinPartnerActive.checkinPartnerState === 'dummy' ||
             checkinPartnerActive.checkinPartnerState === 'draft')
-            ? 'Guardar'
-            : 'Continuar con siguiente huésped'
+            ? t('save')
+            : t('continue_with_next_guest')
         }}
       </template>
-      <template v-else> Continuar </template>
+      <template v-else> {{ t('continue') }} </template>
     </button>
   </div>
 </template>
+
 
 <script lang="ts">
 import { defineComponent, computed, ref, type Ref, type PropType } from 'vue';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
 import { useStore } from '@/legacy/store';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   props: {
@@ -94,6 +109,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const { t } = useI18n();
     const btnSaveCheckinPartnerRef: Ref<HTMLButtonElement | null> = ref(null);
     const isCheckinPartnerModalOpen = ref(false);
 
@@ -111,16 +127,16 @@ export default defineComponent({
 
     const state = (checkinState: string) => {
       if (checkinState === 'onboard') {
-        return 'Check-in completado';
+        return t('checkin_completed');
       }
       if (checkinState === 'draft') {
-        return 'Check-in incompleto';
+        return t('checkin_incomplete');
       }
       if (checkinState === 'precheckin') {
-        return 'Llegada pendiente';
+        return t('pending_arrival');
       }
       if (checkinState === 'done') {
-        return 'Check-out completado';
+        return t('checkout_completed');
       }
       return '';
     };
@@ -192,6 +208,7 @@ export default defineComponent({
       state,
       stateColor,
       headerStateColor,
+      t,
     };
   },
 });

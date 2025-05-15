@@ -24,32 +24,36 @@
         <div class="feedback-wrapper">
           <div
             class="feedback"
-            v-if="
-              checkinPartners.every(
-                (checkinPartner) =>
-                  checkinPartner.checkinPartnerState === 'onboard' ||
-                  checkinPartner.checkinPartnerState === 'precheckin'
-              )
-            "
+            v-if="checkinPartners.every(
+              (checkinPartner) =>
+                checkinPartner.checkinPartnerState === 'onboard' ||
+                checkinPartner.checkinPartnerState === 'precheckin'
+            )"
           >
-            Todos los checkins completados
+            {{ $t('all_checkins_completed') }}
           </div>
           <div class="feedback" v-else>
-            {{ currentIndexCheckin === 0 ? 'Primer' : `${currentIndexCheckin + 1}º` }} check-in
+            {{
+              currentIndexCheckin === 0
+                ? $t('checkin_first_label')
+                : `${currentIndexCheckin + 1}º`
+            }}
+            check-in
             {{
               checkinPartners[currentIndexCheckin].checkinPartnerState === 'draft'
-                ? 'parcialmente completado'
-                : 'completado'
+                ? $t('checkin_status_partial')
+                : $t('completed')
             }}
           </div>
           <div v-if="numPendingCheckins > 0">
-            {{ numPendingCheckins }} más pendiente{{ numPendingCheckins > 1 ? 's' : '' }}
+            {{ $t('pending_checkins', { count: numPendingCheckins }) }}
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, onMounted, computed } from 'vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';

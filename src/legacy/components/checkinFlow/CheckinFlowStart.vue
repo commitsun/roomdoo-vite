@@ -7,20 +7,20 @@
     ref="firstPageContainerRef"
   >
     <img src="/app-images/icon-check-blue.svg" class="check-icon" />
-    <span class="first-page-title"> Asistente de check-in </span>
-    <span class="partner-name"> Reserva de {{ partnerName }} </span>
+    <span class="first-page-title"> {{ t('checkin_assistant') }} </span>
+    <span class="partner-name"> {{ t('reservation_for') }} {{ partnerName }} </span>
     <span class="property">
       {{ propertyName }}
     </span>
-    <span> Habitación {{ roomTypeName }} </span>
+    <span> {{ t('room_type') }} {{ roomTypeName }} </span>
     <span class="room">
       {{ reservationCode }}
     </span>
     <div class="reservation-info">
       <div class="reservation-info-titles">
-        <span> Noches </span>
-        <span> Fechas </span>
-        <span> Personas </span>
+        <span> {{ t('nights') }} </span>
+        <span> {{ t('dates') }} </span>
+        <span> {{ t('people') }} </span>
       </div>
       <div class="reservation-info-data">
         <span>
@@ -82,7 +82,7 @@
       class="btn-print-all-container"
       v-if="!checkinPartners.every((cp) => cp.checkinPartnerState === 'dummy') && !isPrecheckin"
     >
-      <span class="btn-print-all" @click="printAllCheckins"> Imprimir todos </span>
+      <span class="btn-print-all" @click="printAllCheckins"> {{ t('print_all_checkins') }} </span>
     </div>
     <div class="checkin-flow-card">
       <slot name="checkin-flow-card" />
@@ -94,8 +94,8 @@
     >
       {{
         checkinPartners.every((cp) => cp.checkinPartnerState === 'dummy')
-          ? 'Comenzar check-in'
-          : 'Siguiente huésped'
+          ? t('start_checkin')
+          : t('next_guest')
       }}
     </button>
   </div>
@@ -105,6 +105,7 @@ import { defineComponent, ref, computed, onMounted, type Ref } from 'vue';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
 import { useStore } from '@/legacy/store';
 import { useCheckinPartner } from '@/legacy/utils/useCheckinPartner';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   emits: [
@@ -162,6 +163,7 @@ export default defineComponent({
     },
   },
   setup(props, context) {
+    const { t } = useI18n();
     const hasEmittedNext = false;
     const store = useStore();
     const { printAllCheckins } = useCheckinPartner();
@@ -200,6 +202,7 @@ export default defineComponent({
       capitalizeFirstLetter,
       nextCheckinPartner,
       printAllCheckins,
+      t,
     };
   },
 });

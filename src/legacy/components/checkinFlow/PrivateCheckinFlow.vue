@@ -10,7 +10,10 @@
         </button>
       </div>
       <div class="content-step">
-        <TransitionGroup :name="isStepIncreasing ? 'slide-fade' : 'slide-fade-decreases'">
+        <TransitionGroup
+          :name="isStepIncreasing ? 'slide-fade' : 'slide-fade-decreases'"
+          @after-enter="handleAfterEnter"
+        >
           <CheckinPartnerForm
             v-if="isFormDisplayed"
             :checkinPartner="activeCheckinPartner"
@@ -111,7 +114,7 @@
             showNewFeatureFeedback
           />
           <CheckinFlowPhotoTake
-            title="Cara frontal"
+            :title="$t('scan_document_front')"
             :step="currentStepNumber"
             v-else-if="currentStep === 'take-photo-front'"
             :currentIndexCheckin="currentIndexCheckin"
@@ -141,7 +144,7 @@
           />
 
           <CheckinFlowPhotoTake
-            title="Cara trasera"
+            :title="$t('scan_document_back')"
             :step="currentStepNumber"
             v-else-if="currentStep === 'take-photo-back'"
             :currentIndexCheckin="currentIndexCheckin"
@@ -220,6 +223,7 @@
             @closeCheckinFlow="closeCheckinFlow()"
             :currentIndexCheckin="currentIndexCheckin"
             @setIsAllowedNextStep="setIsAllowedNextStep($event)"
+            @registerOnEnter="registerOnEnter"
             :step="currentStepNumber"
           />
 
@@ -244,8 +248,8 @@
             :isUnderFourteen="yearsFrom(activeCheckinPartner.birthdate) <= 14"
             @next="nextStep()"
             @closeCheckinFlow="closeCheckinFlow()"
-            title="País de origen del documento"
-            subtitle="Selecciona el país del documento del huésped"
+            :title="t('document_country')"
+            :subtitle="t('document_country_description')"
             :currentIndexCheckin="currentIndexCheckin"
             @setIsAllowedNextStep="setIsAllowedNextStep($event)"
             @noDocumentSelected="activeCheckinPartner.documentType = 0"
@@ -323,6 +327,7 @@
             @setIsAllowedNextStep="setIsAllowedNextStep($event)"
             :step="currentStepNumber"
             @persistCheckinPartner="persistCheckinPartner"
+            @registerOnEnter="registerOnEnter"
           />
 
           <CheckinFlowDocumentSupportNumber
@@ -361,6 +366,8 @@
               yearsFrom(activeCheckinPartner.birthdate) <= 14
             "
             :isNotDocumentCountry="activeCheckinPartner.documentCountryId === -1"
+            :title="t('nationality')"
+            :subtitle="t('nationality_description')"
             v-model="activeCheckinPartner.nationality"
             @next="nextStep()"
             @closeCheckinFlow="closeCheckinFlow()"
@@ -402,8 +409,8 @@
             v-model="activeCheckinPartner.countryId"
             @next="nextStep()"
             @closeCheckinFlow="closeCheckinFlow()"
-            title="País de residencia"
-            subtitle="Selecciona el país de residencia del huésped"
+            :title="t('residence_country')"
+            :subtitle="t('residence_country_description')"
             :currentIndexCheckin="currentIndexCheckin"
             @setIsAllowedNextStep="setIsAllowedNextStep($event)"
             :step="currentStepNumber"
@@ -528,6 +535,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, type Ref, watch } from 'vue';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
+import { useI18n } from 'vue-i18n';
 
 import CheckinPartnerForm from '@/legacy/components/checkinPartners/CheckinPartnerForm.vue';
 import CheckinFlowStart from '@/legacy/components/checkinFlow/CheckinFlowStart.vue';
@@ -625,10 +633,12 @@ export default defineComponent({
 
   setup(props, context) {
     const store = useStore();
+    const { t } = useI18n();
     const { yearsFrom } = utilsDates;
 
     const currentStepNumber = ref(1);
 
+    const currentAfterEnterHandler = ref<(() => void) | null>(null);
     // constant for country spain
     const NATIONALITY_CODE_SPAIN = store.state.countries.countries.find(
       (el) => el.code === 'ES'
@@ -1343,10 +1353,10 @@ export default defineComponent({
           )
         ) {
           dialogService.open({
-            header: 'No se ha podido escanear el documento',
+            header: t('not_scanned'),
             content:
-              'Los datos no se pudieron reconocer. Por favor, introduce los datos manualmente.',
-            btnAccept: 'Continuar',
+              t('enter_data_manually'),
+            btnAccept: t('continue'),
           });
         }
         const checkinPartner = {
@@ -1365,6 +1375,14 @@ export default defineComponent({
       } finally {
         void store.dispatch('layout/showSpinner', false);
       }
+    };
+
+    const registerOnEnter = (fn: () => void) => {
+      currentAfterEnterHandler.value = fn;
+    };
+
+    const handleAfterEnter = () => {
+      currentAfterEnterHandler.value?.();
     };
 
     watch([currentStep, isFormDisplayed, isFingerSignDisplayed], () => {
@@ -1397,6 +1415,8 @@ export default defineComponent({
       documentImageBase64Back,
       isFingerSignDisplayed,
       currentStepNumber,
+      registerOnEnter,    
+      handleAfterEnter,
       yearsFrom,
       deleteNextDocNumberStepValues,
       closeSignatureStep,
@@ -1428,6 +1448,7 @@ export default defineComponent({
       processOCR,
       openFingerSign,
       viewCheckinPDF,
+      t,
     };
   },
 });

@@ -19,8 +19,19 @@
         :class="!isBodyOpen ? 'dropdown-icon' : 'dropdown-icon-rotate'"
       />
       <span v-if="isPreCheckin && isFromStart">
-        {{ checkinPartnerIndex + 1 }}<sup>{{ checkinPartnerIndex === 1 ? 'o' : 'er' }}</sup> huésped
-        {{ isFromStart ? 'completado' : '' }}
+        {{ checkinPartnerIndex + 1 }}
+        <sup>
+          {{
+            checkinPartnerIndex === 0
+            ? $t('ordinal_1')
+            : checkinPartnerIndex === 1
+            ? $t('ordinal_2')
+            : checkinPartnerIndex === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_4')
+          }}
+        </sup> 
+        {{$t('completed')}}
       </span>
       <span
         class="checkin-partner-existing-name"
@@ -63,10 +74,10 @@
             v-if="checkinPartnerState !== 'draft'"
             @mousedown.stop="$emit('printCheckin')"
           >
-            <span> Imprimir </span>
+            <span>{{ $t('print') }}</span>
           </div>
           <div v-if="checkinPartnerState !== 'draft'" @mousedown.stop="$emit('viewPDFCheckin')">
-            <span> Ver check-in </span>
+            <span>{{ $t('view_checkin') }}</span>
           </div>
           <div
             @mousedown.stop="$emit('displayForm')"
@@ -75,13 +86,13 @@
               (checkinPartnerState === 'precheckin' || checkinPartnerState === 'draft')
             "
           >
-            <span> Modificar huésped </span>
+            <span>{{ $t('edit_guest') }}</span>
           </div>
           <div
             @mousedown.stop="$emit('removeCheckinPartner')"
             v-if="checkinPartnerState !== 'onboard' && checkinPartnerState !== 'done'"
           >
-            <span> Eliminar huésped </span>
+            <span>{{ $t('delete_guest') }}</span>
           </div>
         </div>
       </transition>
@@ -96,7 +107,7 @@
           v-if="countryName !== '' && !isExistingCheckinPartner"
           :style="{ paddingLeft: isFromDrawer ? '.75rem' : '0' }"
         >
-          <span class="reservation-title"> Nacionalidad </span>
+          <span class="reservation-title">{{ $t('nationality') }}</span>
           <span class="reservation-data" :style="{ marginRight: isFromDrawer ? '1.5rem' : '1rem' }">
             <img :src="`/country-flags/${countryCode}.svg`" class="flag" />
             {{ countryName }}
@@ -109,7 +120,7 @@
           v-if="age > 0 && !isExistingCheckinPartner"
           :style="{ paddingLeft: isFromDrawer ? '.75rem' : '0' }"
         >
-          <span class="reservation-title"> Edad </span>
+          <span class="reservation-title">{{ $t('age') }}</span>
           <span class="reservation-data" :style="{ marginRight: isFromDrawer ? '1.5rem' : '1rem' }">
             {{ age }}
           </span>
@@ -149,11 +160,11 @@
             :class="{ 'show-tooltip': showTooltip }"
             ref="tooltip"
           >
-            Copiar
+            {{ $t('copy') }}
           </div>
         </div>
         <div v-else-if="isPreCheckin" class="data-reservation-row">
-          <div class="reservation-title">Los datos del huésped ya existen en el sistema.</div>
+          <div class="reservation-title">{{ $t('guest_data_exists') }}</div>
         </div>
         <div class="buttons">
           <button
@@ -165,7 +176,11 @@
               v-if="!isExistingCheckinPartnerMandatoryDataComplete"
               src="/app-images/icon-alert.svg"
             />
-            {{ isExistingCheckinPartnerMandatoryDataComplete ? 'Editar datos' : 'Completar datos' }}
+            {{
+              isExistingCheckinPartnerMandatoryDataComplete
+                ? $t('edit_data')
+                : $t('complete_data')
+            }}
           </button>
           <div class="print-btns" v-if="!isFromDrawer && !isPreCheckin">
             <button
@@ -181,7 +196,7 @@
                 :height="'18px'"
                 class="icon-print-sign"
               />
-              {{ checkinSignature ? 'Firmado' : 'Firmar' }}
+              {{ checkinSignature ? $t('signed') : $t('sign') }}
             </button>
             <button
               class="btn-reprint-checkin"
@@ -195,7 +210,7 @@
                 :height="'18px'"
                 class="icon-print-sign"
               />
-              Imprimir
+              {{ $t('print') }}
             </button>
             <button
               class="btn-view-pdf"
@@ -209,7 +224,7 @@
                 :height="'18px'"
                 class="icon-print-sign"
               />
-              Ver check-in
+              {{ $t('view_checkin') }}
             </button>
           </div>
           <button
@@ -225,14 +240,14 @@
               :height="'20px'"
               class="icon-checkin"
             />
-            Marcar llegada
+            {{ $t('mark_arrival') }}
           </button>
           <button
             class="btn-continue-checkin"
             @click="$emit('selectActiveCheckinPartner')"
             v-if="checkinPartnerState === 'draft' && !isFromDrawer"
           >
-            Continuar
+            {{ $t('continue') }}
           </button>
         </div>
       </div>
@@ -240,9 +255,11 @@
   </div>
 </template>
 
+
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -345,6 +362,8 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
+
     const isBodyOpen = ref(true);
     const openCheckinMenu = ref(false);
     const doCheckinButton = ref<HTMLButtonElement | null>(null);
@@ -352,16 +371,16 @@ export default defineComponent({
     const showTooltip = ref(false);
 
     const state = (checkinState: string) => {
-      let checkinStateText = 'Check-in incompleto';
       if (checkinState === 'precheckin') {
-        checkinStateText = 'Llegada pendiente';
+        return t('pending_arrival');
       } else if (checkinState === 'onboard') {
-        checkinStateText = 'Check-in completado';
+        return t('checkin_completed');
       } else if (checkinState === 'done') {
-        checkinStateText = 'Check-out completado';
+        return t('checkout_completed');
       }
-      return checkinStateText;
+      return t('checkin_incomplete');
     };
+
 
     const headerStateColor = (checkinState: string) => {
       let color = '#FF8A001A';
@@ -386,7 +405,7 @@ export default defineComponent({
     const hideTooltip = () => {
       showTooltip.value = false;
       if (tooltip.value) {
-        tooltip.value.textContent = 'Copiar';
+        tooltip.value.textContent = t('copy');
         tooltip.value.style.right = '30px';
       }
     };
@@ -394,7 +413,7 @@ export default defineComponent({
     const copyDocumentNumberToClipboard = () => {
       void navigator.clipboard.writeText(props.documentNumber);
       if (tooltip.value) {
-        tooltip.value.textContent = '¡Copiado!';
+        tooltip.value.textContent = t('copied');
         tooltip.value.style.right = '20px';
       }
     };

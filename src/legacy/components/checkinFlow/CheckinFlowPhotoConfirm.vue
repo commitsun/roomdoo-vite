@@ -1,32 +1,43 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
-      <span class="title-text"> Compruebe la legibilidad </span>
+      <span class="title-text">{{ $t('check_legibility_title') }}</span>
     </div>
     <div class="image-container">
       <img :src="documentImageBase64" alt="no image" />
     </div>
     <div class="buttons">
       <div class="btn-container">
-        <CustomButton text="Reintentar" backgroundColor="#51B2DD" @click="$emit('previous')" />
+        <CustomButton :text="$t('retry')" backgroundColor="#51B2DD" @click="$emit('previous')" />
       </div>
       <div class="btn-container">
-        <CustomButton text="Continuar" color="primary" @click="$emit('next')" />
+        <CustomButton :text="$t('continue')" color="primary" @click="$emit('next')" />
       </div>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CustomButton from '@/legacy/components/roomdooComponents/CustomButton.vue';

@@ -19,25 +19,29 @@
       </div>
       <div class="reservation-header-info">
         <!-- share reservation link -->
-        <div class="reservation-title" v-if="isSharingReservationLinks">Compartir check-in</div>
+        <div class="reservation-title" v-if="isSharingReservationLinks">
+          {{ t('share_checkin') }}
+        </div>
+
         <!-- some checkins completed but pending checkins -->
         <div
           class="reservation-title"
           v-else-if="checkinNamesCompleted.length < adults && checkinNamesCompleted.length > 0"
         >
-          Falta{{ adults - checkinNamesCompleted.length > 1 ? 'n ' : ' '
-          }}{{ adults - checkinNamesCompleted.length }} huésped{{
-            adults - checkinNamesCompleted.length > 1 ? 'es' : ''
-          }}
+          {{ t('guests_missing', { count: adults - checkinNamesCompleted.length })}}
         </div>
-        <!-- 0 checkins completed -->
+
+        <!-- all checkins completed -->
         <div class="reservation-title" v-else-if="checkinNamesCompleted.length === adults">
-          Check-in completado
+          {{ t('checkin_completed') }}
         </div>
         <div class="reservation-title" v-else>
-          Check-in de {{ adults + children }} huésped{{ adults + children > 1 ? 'es' : '' }}
+          {{
+            t('checkin_for_guests', { count: adults + children })
+          }}
         </div>
-        <!-- room type name -->
+
+        <!-- room type name or guest names -->
         <div class="reservation-subtitle" v-if="checkinNamesCompleted.length === 0">
           {{ roomTypeName }}
         </div>
@@ -64,9 +68,9 @@
     </div>
     <div class="reservation-card-body">
       <div class="titles">
-        <div>Noches</div>
-        <div>Fechas</div>
-        <div>Personas</div>
+        <div>{{ t('nights') }}</div>
+        <div>{{ t('dates') }}</div>
+        <div>{{ t('people') }}</div>
       </div>
       <div class="reservation-info">
         <div class="nights">
@@ -120,7 +124,7 @@ import { defineComponent, markRaw, ref } from 'vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import ShareLinkModal from '@/legacy/components/precheckin/ShareLinkModal.vue';
 import { dialogService } from '@/legacy/services/DialogService';
-
+import { useI18n } from 'vue-i18n';
 export default defineComponent({
   components: {
     CustomIcon,
@@ -174,20 +178,19 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const isModalOpen = ref(false);
+    const { t } = useI18n();
     const pathToShare = ref('');
     const shareReservationLink = () => {
       const baseUrl = window.location.href.split('/').slice(0, 3).join('/');
       pathToShare.value = `${baseUrl}/${props.id}/precheckin-reservation/${props.accessToken}`;
 
       const canShare = 'share' in window.navigator;
-      if (!canShare) {
+      if (canShare) {
         void navigator.share({
           title: document.title,
           url: pathToShare.value,
         });
       } else {
-        isModalOpen.value = true;
         dialogService.open({
           header: 'Compartir enlace',
           content: markRaw(ShareLinkModal),
@@ -205,10 +208,10 @@ export default defineComponent({
     };
 
     return {
-      isModalOpen,
       pathToShare,
       shareReservationLink,
       openReservationCheckin,
+      t,
     };
   },
 });

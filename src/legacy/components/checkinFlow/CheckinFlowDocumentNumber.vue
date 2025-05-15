@@ -1,25 +1,43 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
+
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Número de documento
+        {{ $t('document_number_title') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <span class="step-subtitle"> Introduce el número de documento </span>
+
+    <span class="step-subtitle">
+      {{ $t('document_number_subtitle') }}
+    </span>
+
     <InputText
       v-model="documentNumber"
       class="input"
       @keydown="handleKeypress($event)"
-      placeholder="Escribe aquí"
+      :placeholder="$t('placeholder_write_here')"
       :isBorder="false"
       placeholderBlue
       textColor="primary"
@@ -33,27 +51,25 @@
       v-if="existingCheckinPartner && !isDocumentNumberAlreadyInReservation"
     >
       <span>
-        Este documento pertenece a un huésped registrado en el sistema.<br />
+        {{ $t('document_already_exists') }}<br />
         <span v-if="!isExistingCheckinPartnerMandatoryDataComplete">
           <br />
-          <b>Datos del huésped incompletos.</b>
+          <b>{{ $t('guest_data_incomplete') }}</b>
           <br />
-          Falta información obligatoria según la normativa legal. Por favor, actualiza los datos
-          antes de realizar el check-in.
+          {{ $t('guest_data_update_required') }}
         </span>
         <span v-else>
           <span v-if="!isPrecheckin">
-            Por favor, comprueba que los datos estén actualizados antes de hacer su check-in.
+            {{ $t('guest_data_confirm') }}
           </span>
-          <span v-else> Todos los datos están completos. </span>
+          <span v-else> {{ $t('guest_data_completed') || 'Todos los datos están completos.' }} </span>
         </span>
       </span>
     </div>
 
     <div class="checkin-partner-existing-feedback" v-else-if="isDocumentNumberAlreadyInReservation">
       <span>
-        <b>Este huésped ya se encuentra registrado en la reserva</b>
-        <br />
+        <b>{{ $t('guest_already_in_reservation') }}</b><br />
       </span>
     </div>
 
@@ -72,9 +88,7 @@
           width="12px"
           height="12px"
         />
-        <span>
-          {{ validator.documentNumber.$errors[0].$message }}
-        </span>
+        <span>{{ validator.documentNumber.$errors[0].$message }}</span>
       </div>
 
       <button
@@ -88,8 +102,9 @@
         "
         @keydown.esc="$emit('closeCheckinFlow')"
       >
-        Aceptar
+        {{ $t('accept') }}
       </button>
+
       <div
         class="existing-btns"
         v-if="existingCheckinPartner && !isDocumentNumberAlreadyInReservation"
@@ -102,14 +117,15 @@
         >
           {{
             checkinPartnersToComplete.length - 1 > 0
-              ? 'Guardar y continuar con siguiente huésped'
-              : 'Guardar'
+              ? $t('save_and_continue_next_guest')
+              : $t('save')
           }}
         </button>
       </div>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import {
   defineComponent,
@@ -132,6 +148,7 @@ import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
 import { useCheckinPartner } from '@/legacy/utils/useCheckinPartner';
 import { useStore } from '@/legacy/store';
 import { dialogService } from '@/legacy/services/DialogService';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   emits: [
@@ -190,6 +207,7 @@ export default defineComponent({
   setup(props, context) {
     let hasEmittedNext = false;
 
+    const { t } = useI18n();
     const store = useStore();
     const route = useRoute();
 
@@ -306,7 +324,7 @@ export default defineComponent({
 
     const validationRules = computed(() => ({
       documentNumber: {
-        validDocumentNumber: helpers.withMessage('Nº de documento no válido', validDocumentNumber),
+        validDocumentNumber: helpers.withMessage(t('invalid_document_number'), validDocumentNumber),
       },
     }));
 

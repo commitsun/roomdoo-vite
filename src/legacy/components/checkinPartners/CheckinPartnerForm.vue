@@ -3,7 +3,7 @@
     <div class="form-row">
       <div class="item">
         <span>
-          País del documento
+          {{ t('document_country') }}
           <span class="asterisk" v-if="!isUnderFourteen"> * </span>
         </span>
         <AutocompleteComponent
@@ -35,7 +35,7 @@
       </div>
       <div class="item">
         <span>
-          Tipo de documento
+          {{ t('document_type_title') }}
           <span class="asterisk" v-if="!isUnderFourteen"> * </span>
         </span>
         <CustomSelect
@@ -65,7 +65,7 @@
       </div>
       <div class="item item-2">
         <span>
-          Nº documento
+          {{ t('document_number_short') }}
           <span class="asterisk" v-if="!isUnderFourteen"> * </span>
         </span>
         <InputText
@@ -92,7 +92,7 @@
     <div class="form-row">
       <div class="item item-3">
         <span>
-          Fecha de expedición
+          {{ t('expedition_date_title') }}
           <span class="asterisk" v-if="!isUnderFourteen"> * </span>
         </span>
         <InputDate
@@ -119,7 +119,7 @@
       </div>
       <div class="item item-4">
         <span>
-          Número de soporte
+          {{ t('support_number_title') }}
           <span
             class="asterisk"
             v-if="
@@ -158,7 +158,7 @@
     <div class="form-row">
       <div class="item item-5">
         <span>
-          Nombre
+          {{ t('first_name') }}
           <span class="asterisk">*</span>
         </span>
         <InputText
@@ -175,7 +175,7 @@
       </div>
       <div class="item item-6">
         <span>
-          Primer apellido
+          {{ t('last_name') }}
           <span class="asterisk">*</span>
         </span>
         <InputText
@@ -192,7 +192,7 @@
       </div>
       <div class="item item-7">
         <span>
-          Segundo apellido
+          {{ t('second_last_name') }}
           <span class="asterisk" v-if="editingCheckinPartner.documentType === DOCUMENT_TYPE_DNI">
             *
           </span>
@@ -213,7 +213,7 @@
     <div class="form-row">
       <div class="item item-9">
         <span>
-          Fecha de nacimiento
+          {{ t('birthdate_title') }}
           <span class="asterisk">*</span>
         </span>
         <InputDate
@@ -241,7 +241,7 @@
 
       <div class="item item-10">
         <span>
-          Nacionalidad
+          {{ t('nationality') }}
           <span class="asterisk">*</span>
         </span>
         <AutocompleteComponent
@@ -273,7 +273,7 @@
       </div>
       <div class="item item-8">
         <span>
-          Género
+          {{ t('gender') }}
           <span class="asterisk">*</span>
         </span>
         <CustomSelect
@@ -307,7 +307,7 @@
     <div class="form-row">
       <div class="item" v-if="isUnderAge">
         <span>
-          Adulto responsable
+          {{ t('responsible_adult_label') }}
           <span class="asterisk">*</span>
         </span>
         <AutocompleteComponent
@@ -331,7 +331,7 @@
       </div>
       <div class="item" v-if="isUnderAge">
         <span>
-          Relación de parentesco
+          {{ t('kinship_relationship') }}
           <span class="asterisk">*</span>
         </span>
         <CustomSelect
@@ -356,7 +356,7 @@
     </div>
     <div class="form-row">
       <div class="item item-11">
-        <span> Email </span>
+        <span> {{ t('email_label') }} </span>
         <InputText
           class="input"
           v-model="editingCheckinPartner.email"
@@ -370,7 +370,7 @@
         </div>
       </div>
       <div class="item item-12">
-        <span> Teléfono </span>
+        <span> {{ t('phone_label') }} </span>
         <InputText class="input" v-model="editingCheckinPartner.mobile" />
         <div class="error-message"></div>
       </div>
@@ -379,7 +379,7 @@
     <div class="form-row">
       <div class="item item-13 residence-street">
         <span>
-          Calle
+          {{ t('street') }}
           <span class="asterisk">*</span>
         </span>
         <InputText
@@ -396,7 +396,7 @@
       </div>
       <div class="item item-14 residence-zip">
         <span>
-          Código postal
+          {{ t('zip_code') }}
           <span class="asterisk">*</span>
         </span>
         <InputText
@@ -416,7 +416,7 @@
     <div class="form-row">
       <div class="item item-16">
         <span>
-          País
+          {{ t('country') }}
           <span class="asterisk">*</span>
         </span>
         <AutocompleteComponent
@@ -448,7 +448,7 @@
       </div>
       <div class="item item-17" v-if="residenceStates.length > 0">
         <span>
-          Provincia o Estado
+          {{ t('province') }}
           <span class="asterisk">*</span>
         </span>
         <AutocompleteComponent
@@ -478,7 +478,7 @@
       </div>
       <div class="item item-15">
         <span>
-          Población
+          {{ t('city') }}
           <span class="asterisk">*</span>
         </span>
         <InputText
@@ -498,7 +498,7 @@
       <div class="left">
         <CustomButton
           class="button"
-          text="Eliminar datos"
+          :text="t('delete_data')"
           backgroundColor="white"
           textColor="primary"
           borderColor="primary"
@@ -519,7 +519,7 @@
         </CustomButton>
         <CustomButton
           class="button"
-          text="Imprimir"
+          :text="t('print')"
           backgroundColor="white"
           textColor="primary"
           borderColor="primary"
@@ -547,7 +547,7 @@
       <div class="right">
         <CustomButton
           class="button"
-          text="Guardar"
+          :text="t('save')"
           backgroundColor="primary"
           textColor="white"
           @click="validateAndSaveCheckinPartner()"
@@ -563,7 +563,7 @@
         </CustomButton>
         <CustomButton
           class="button"
-          text="Marcar llegada"
+          :text="t('mark_arrival')"
           backgroundColor="primary"
           textColor="white"
           v-if="isCheckinAllowed && !isPublicCheckinFlow"
@@ -598,6 +598,7 @@ import { useStore } from '@/legacy/store';
 import { useCheckinPartner } from '@/legacy/utils/useCheckinPartner';
 import utilsDates from '@/legacy/utils/dates';
 import { dialogService } from '@/legacy/services/DialogService';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -630,20 +631,21 @@ export default defineComponent({
     const { yearsFrom } = utilsDates;
 
     const store = useStore();
+    const { t } = useI18n();
 
     const optionsRelationship = [
-      { id: 1, code: 'PM', text: 'Padre o madre' },
-      { id: 2, code: 'TU', text: 'Tutor/a' },
-      { id: 3, code: 'TI', text: 'Tío/a' },
-      { id: 4, code: 'HR', text: 'Hermano/a' },
-      { id: 5, code: 'AB', text: 'Abuelo/a' },
-      { id: 6, code: 'BA', text: 'Bisabuelo/a' },
-      { id: 7, code: 'CD', text: 'Cuñado/a' },
-      { id: 8, code: 'CY', text: 'Cónyuge' },
-      { id: 9, code: 'SB', text: 'Sobrino/a' },
-      { id: 10, code: 'SG', text: 'Suegro/a' },
-      { id: 11, code: 'YN', text: 'Yerno o nuera' },
-      { id: 12, code: 'OT', text: 'Otro' },
+    { id: 1, code: 'PM', text: t('parent') },
+      { id: 2, code: 'TU', text: t('guardian') },
+      { id: 3, code: 'TI', text: t('uncle_aunt') },
+      { id: 4, code: 'HR', text: t('sibling') },
+      { id: 5, code: 'AB', text: t('grandparent') },
+      { id: 6, code: 'BA', text: t('great_grandparent') },
+      { id: 7, code: 'CD', text: t('brother_sister_in_law') },
+      { id: 8, code: 'CY', text: t('spouse') },
+      { id: 9, code: 'SB', text: t('nephew_niece') },
+      { id: 10, code: 'SG', text: t('parent_in_law') },
+      { id: 11, code: 'YN', text: t('son_daughter_in_law') },
+      { id: 12, code: 'OT', text: t('other') }
     ];
 
     const selectedRelationShip = ref(0);
@@ -764,7 +766,7 @@ export default defineComponent({
     const validationCheckinRules = computed(() => ({
       editingCheckinPartner: {
         documentType: {
-          required: helpers.withMessage('El tipo de documento es obligatorio', (value: number) => {
+          required: helpers.withMessage(t('document_type_required'), (value: number) => {
             if (!isUnderFourteen.value) {
               return value > 0;
             }
@@ -773,25 +775,25 @@ export default defineComponent({
         },
         documentNumber: {
           required: helpers.withMessage(
-            'El nº de documento es obligatorio',
+            t('document_number_required'),
             requiredIf(!isUnderFourteen.value)
           ),
           validDocumentNumber: helpers.withMessage(
-            'Nº de documento no válido',
+            t('invalid_document_number'),
             validDocumentNumber
           ),
           isDuplicateCheckinPartner: helpers.withMessage(
-            'Este huésped ya existe en la reserva',
+            t('guest_reservation_exists'),
             isDuplicateCheckinPartner
           ),
         },
         documentExpeditionDate: {
           required: helpers.withMessage(
-            'La fecha de expedición es obligatoria',
+            t('expedition_date_required'),
             requiredIf(!isUnderFourteen.value)
           ),
           maxValue: helpers.withMessage(
-            'La fecha de expedición deber ser menor o igual a hoy.',
+            t('expedition_date_invalid_future'),
             (value: Date | undefined) => {
               if (value) {
                 return value.getTime() < new Date().getTime();
@@ -802,36 +804,36 @@ export default defineComponent({
         },
         documentSupportNumber: {
           required: helpers.withMessage(
-            'El número de soporte es obligatorio',
+            t('support_number_required'),
             requiredIf(
               editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI ||
                 editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE
             )
           ),
           validSupportNumber: helpers.withMessage(
-            'El número de soporte no es válido',
+            t('invalid_support_number'),
             validateEditingCheckinPartnerSupportNumber
           ),
         },
         firstname: {
-          required: helpers.withMessage('El nombre es obligatorio', required),
+          required: helpers.withMessage(t('first_name_required'), required),
         },
         lastname: {
-          required: helpers.withMessage('El apellido es obligatorio', required),
+          required: helpers.withMessage(t('last_name_required'), required),
         },
         lastname2: {
           required: helpers.withMessage(
-            'El 2º apellido es obligatorio',
+            t('second_last_name_required'),
             requiredIf(editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI)
           ),
         },
         gender: {
-          required: helpers.withMessage('El género es obligatorio', required),
+          required: helpers.withMessage(t('gender_required'), required),
         },
         birthdate: {
-          required: helpers.withMessage('La fecha de nacimiento es obligatoria', required),
+          required: helpers.withMessage(t('birthdate_required'), required),
           minValue: helpers.withMessage(
-            'La fecha de nacimiento no válida.',
+            t('birthdate_invalid'),
             (value: Date | undefined) => {
               if (value) {
                 const dateToTest = new Date();
@@ -843,7 +845,7 @@ export default defineComponent({
             }
           ),
           maxValue: helpers.withMessage(
-            'La fecha de nacimiento no válida.',
+            t('birthdate_invalid'),
             (value: Date | undefined) => {
               if (value) {
                 return value.getTime() < new Date().getTime();
@@ -853,7 +855,7 @@ export default defineComponent({
           ),
         },
         responsibleCheckinPartnerId: {
-          required: helpers.withMessage('El adulto responsable es obligatorio', (value: number) => {
+          required: helpers.withMessage(t('responsible_adult_required'), (value: number) => {
             if (isUnderAge.value) {
               return value > 0;
             }
@@ -862,30 +864,30 @@ export default defineComponent({
         },
         relationship: {
           required: helpers.withMessage(
-            'La relación de parentesco es obligatoria',
+            t('kinship_relationship_required'),
             requiredIf(isUnderAge.value)
           ),
         },
         nationality: {
-          required: helpers.withMessage('La nacionalidad es obligatoria', minValue(1)),
+          required: helpers.withMessage(t('nationality_required'), minValue(1)),
         },
         residenceStreet: {
-          required: helpers.withMessage('La calle es obligatoria', required),
+          required: helpers.withMessage(t('residence_street_required'), required),
         },
         zip: {
-          required: helpers.withMessage('El código postal es obligatorio', required),
+          required: helpers.withMessage(t('zip_required'), required),
         },
         residenceCity: {
-          required: helpers.withMessage('La población es obligatoria', required),
+          required: helpers.withMessage(t('city_required'), required),
         },
         countryId: {
-          required: helpers.withMessage('El país de residencia es obligatorio', minValue(1)),
+          required: helpers.withMessage(t('residence_country_required'), minValue(1)),
         },
         countryState: {
-          validCountryState: helpers.withMessage('La provincia es obligatoria', validateState),
+          validCountryState: helpers.withMessage(t('province_required'), validateState),
         },
         documentCountryId: {
-          required: helpers.withMessage('El país del documento es obligatorio', (value: number) => {
+          required: helpers.withMessage(t('document_country_required'), (value: number) => {
             if (!isUnderFourteen.value) {
               return value > 0;
             }
@@ -893,7 +895,7 @@ export default defineComponent({
           }),
         },
         email: {
-          email: helpers.withMessage('El email no es válido', email),
+          email: helpers.withMessage(t('invalid_email'), email),
         },
       },
     }));
@@ -1199,6 +1201,7 @@ export default defineComponent({
       printCheckin,
       fetchCheckinPartnerByDocNumber,
       fetchAddressByZip,
+      t,
     };
   },
 });

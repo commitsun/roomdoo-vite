@@ -1,37 +1,58 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
+
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Fecha de expedición
+        {{ $t('expedition_date_title') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <div class="step-subtitle">Introduce la fecha de expedición del documento</div>
+    <div class="step-subtitle">
+      {{ $t('expedition_date_subtitle') }}
+    </div>
+
     <div class="date-input">
-      <InputDate
+
+      <DatePicker
         ref="documentExpeditionDateRef"
         v-model="documentExpeditionDate"
-        id="doc-expedition-input"
-        class="input"
-        :openYearViewFirst="true"
-        :includeCalendar="true"
-        :placeholder="'DD/MM/AAAA'"
-        :firstYearInRange="new Date().getFullYear() - 19"
-        textColor="primary"
-        placeholderBlue
-        @dateSelected="documentExpeditionDate = $event"
-        @enter="nextAndSave()"
-        @keydown.esc="$emit('closeCheckinFlow')"
-        @badFormatting="isDocumentExpeditionWrongFormat = $event"
+        :placeholder="appLocale?.dateFormat.replace('yy', 'yyyy')"
+        :maxDate="new Date()"
+        :inputStyle="{ 
+          color: '#51B2DD',
+          fontSize: '30px',
+          borderTop: 'none',
+          borderLeft: 'none',
+          borderRight: 'none',
+          borderBottom: '1px solid #51B2DD', 
+          borderRadius: '0px',
+          width: '100%',
+        }"
+        @input="inputDate($event)"
+        @keyup.enter="nextAndSave()"
       />
+
       <div
         v-if="isDocumentExpeditionGreaterThanToday && !isDocumentExpeditionWrongFormat"
         class="input-error"
@@ -42,8 +63,9 @@
           width="12px"
           height="12px"
         />
-        <span> La fecha de expedición no puede ser posterior que la fecha actual </span>
+        <span>{{ $t('expedition_date_invalid_future') }}</span>
       </div>
+
       <div v-if="isDocumentExpeditionWrongFormat" class="input-error">
         <CustomIcon
           imagePath="/app-images/icon-alert.svg"
@@ -51,8 +73,9 @@
           width="12px"
           height="12px"
         />
-        <span> El formato de fecha es incorrecto </span>
+        <span>{{ $t('birthdate_bad_format') }}</span>
       </div>
+
       <div
         v-if="isDocumentExpeditionLesserThan40Years && !isDocumentExpeditionWrongFormat"
         class="input-error"
@@ -63,9 +86,10 @@
           width="12px"
           height="12px"
         />
-        <span> La fecha de expedición no puede ser anterior a 40 años </span>
+        <span>{{ $t('expedition_date_invalid_past') }}</span>
       </div>
     </div>
+
     <div class="btn-continue-container">
       <button
         class="btn-continue"
@@ -77,12 +101,13 @@
           !isDocumentExpeditionWrongFormat
         "
       >
-        Aceptar
+        {{ $t('accept') }}
       </button>
       <div v-else class="empty-div" />
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import {
   defineComponent,
@@ -94,13 +119,14 @@ import {
   computed,
   type ComponentPublicInstance,
 } from 'vue';
-import InputDate from '@/legacy/components/roomdooComponents/InputDate.vue';
+import { appLocale } from '@/main';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
+import { DatePicker } from 'primevue';
 
 export default defineComponent({
   components: {
-    InputDate,
     CustomIcon,
+    DatePicker,
   },
 
   props: {
@@ -162,6 +188,56 @@ export default defineComponent({
       }
     };
 
+    const inputDate = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+
+      const format = appLocale?.dateFormat?.toLowerCase() || 'dd/mm/yyyy';
+
+      const digits = input.value.replace(/\D/g, '');
+
+      let newValue = '';
+      let cursorPosition = input.selectionStart ?? digits.length;
+
+      if (format.startsWith('yy')) {
+        if (digits.length <= 4) {
+          newValue = digits;
+        } else if (digits.length <= 6) {
+          newValue = `${digits.slice(0, 4)}/${digits.slice(4)}`;
+        } else if (digits.length < 8) {
+          newValue = `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6, 8)}`;
+        } else if(digits.length === 8) {
+          const datepickerComponent = documentExpeditionDateRef.value as any;
+          datepickerComponent.overlayVisible = false;
+        }
+      } else {
+        if (digits.length <= 2) {
+          newValue = digits;
+        } else if (digits.length <= 4) {
+          newValue = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        } else if (digits.length < 8) {
+          newValue = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+        } else if(digits.length === 8) {
+          const datepickerComponent = documentExpeditionDateRef.value as any;
+          datepickerComponent.overlayVisible = false;
+        }
+      }
+
+      const oldLength = input.value.length;
+      input.value = newValue;
+
+      const newLength = newValue.length;
+      const delta = newLength - oldLength;
+
+      input.setSelectionRange((cursorPosition ?? 0) + delta, (cursorPosition ?? 0) + delta);
+    };
+
+    const onAfterEnterHandler =  () => {
+      if (!documentExpeditionDate.value) {
+        const datepicker = documentExpeditionDateRef.value as any;
+        datepicker?.$el?.querySelector('input')?.focus();
+      }
+    };
+
     watch(documentExpeditionDate, () => {
       if (
         !isDocumentExpeditionGreaterThanToday.value &&
@@ -178,6 +254,7 @@ export default defineComponent({
     });
 
     onMounted(() => {
+      context.emit('registerOnEnter', onAfterEnterHandler);
       // load model value and allow next step or not
       if (props.modelValue) {
         documentExpeditionDate.value = props.modelValue;
@@ -185,7 +262,6 @@ export default defineComponent({
       } else {
         context.emit('setIsAllowedNextStep', false);
       }
-      documentExpeditionDateRef.value?.focus();
     });
 
     return {
@@ -194,7 +270,9 @@ export default defineComponent({
       isDocumentExpeditionLesserThan40Years,
       isDocumentExpeditionWrongFormat,
       documentExpeditionDateRef,
+      appLocale,
       nextAndSave,
+      inputDate,
     };
   },
 });

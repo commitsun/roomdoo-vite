@@ -1,28 +1,42 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
+
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
-      <span class="title-text"> Escanear documento </span>
+      <span class="title-text">
+        {{ $t('scan_document') }}
+      </span>
     </div>
-    <span class="step-subtitle"> Captura ambas caras del documento </span>
+
+    <span class="step-subtitle">
+      {{ $t('scan_document_subtitle') }}
+    </span>
 
     <div class="images-container">
       <div class="first-image-container">
         <div
           class="img-document-container"
-          :class="{
-            'with-image': documentImageBase64Front,
-          }"
+          :class="{ 'with-image': documentImageBase64Front }"
           @click="$emit('backToCaptureFrontDocument')"
         >
           <div class="triangle">
@@ -30,14 +44,12 @@
           </div>
           <img class="img-document" :src="documentImageBase64Front" />
         </div>
-        <span> Frontal </span>
+        <span>{{ $t('scan_document_front') }}</span>
       </div>
       <div class="second-image-container">
         <div
           class="img-document-container"
-          :class="{
-            'with-image': documentImageBase64Back,
-          }"
+          :class="{ 'with-image': documentImageBase64Back }"
           @click="$emit('backToCaptureBackDocument')"
         >
           <div class="triangle" v-if="documentImageBase64Back">
@@ -49,13 +61,14 @@
             :class="documentImageBase64Back ? '' : 'img-placeholder'"
           />
         </div>
-        <span> Trasera </span>
+        <span>{{ $t('scan_document_back') }}</span>
       </div>
     </div>
+
     <div class="buttons">
       <div class="btn-container" v-if="!documentImageBase64Back">
         <CustomButton
-          text="Documento sin cara trasera"
+          :text="$t('scan_document_no_back')"
           backgroundColor="#51B2DD"
           @click="$emit('processOCR')"
         />
@@ -63,7 +76,9 @@
       <div class="btn-container">
         <CustomButton
           :text="
-            documentImageBase64Front && documentImageBase64Back ? 'Escanear datos' : 'Continuar'
+            documentImageBase64Front && documentImageBase64Back
+              ? $t('scan_document_scan_data')
+              : $t('continue')
           "
           color="primary"
           @click="
@@ -77,6 +92,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CustomButton from '@/legacy/components/roomdooComponents/CustomButton.vue';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   props: {
@@ -102,7 +118,10 @@ export default defineComponent({
     CustomButton,
   },
   setup() {
-    return {};
+    const { t } = useI18n();
+    return {
+      t,
+    };
   },
 });
 </script>

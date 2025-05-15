@@ -64,7 +64,7 @@
             @setIsAllowedNextStep="isAllowedNextStep = $event"
           />
           <CheckinFlowPhotoTake
-            title="Cara frontal"
+            :title="$t('scan_document_front')"
             :step="currentStepNumber"
             v-else-if="currentStep === 'take-photo-front'"
             :currentIndexCheckin="currentIndexCheckin"
@@ -92,7 +92,7 @@
             @backToCaptureFrontDocument="currentStep = 'take-photo-front'"
           />
           <CheckinFlowPhotoTake
-            title="Cara trasera"
+            :title="$t('scan_document_back')"
             :step="currentStepNumber"
             v-else-if="currentStep === 'take-photo-back'"
             :currentIndexCheckin="currentIndexCheckin"
@@ -129,6 +129,7 @@
             :reservationId="reservationId"
             :reservationToken="reservationToken"
             @setIsAllowedNextStep="isAllowedNextStep = $event"
+            @registerOnEnter="registerOnEnter"
           />
           <CheckinFlowRelationship
             v-else-if="currentStep === 'relationship' && activeCheckinPartner"
@@ -150,8 +151,8 @@
               activeCheckinPartner.birthdate
             "
             v-model="activeCheckinPartner.documentCountryId"
-            title="País de origen del documento"
-            subtitle="Selecciona el país del documento del huésped"
+            :title="t('document_country')"
+            :subtitle="t('document_country_description')"
             :currentIndexCheckin="currentIndexCheckin"
             :step="currentStepNumber"
             :isUnderFourteen="yearsFrom(activeCheckinPartner.birthdate) <= 14"
@@ -192,6 +193,7 @@
             :currentIndexCheckin="currentIndexCheckin"
             :step="currentStepNumber"
             @setIsAllowedNextStep="isAllowedNextStep = $event"
+            @registerOnEnter="registerOnEnter"
           />
           <CheckinFlowDocumentSupportNumber
             v-else-if="currentStep === 'documentSupportNumber' && activeCheckinPartner"
@@ -252,8 +254,8 @@
             v-else-if="currentStep === 'residenceCountry'"
             v-model="activeCheckinPartner.countryId"
             @next="nextStep()"
-            title="País de residencia"
-            subtitle="Selecciona el país de residencia del huésped"
+            :title="t('residence_country')"
+            :subtitle="t('residence_country_description')"
             :currentIndexCheckin="currentIndexCheckin"
             @setIsAllowedNextStep="isAllowedNextStep = $event"
             :step="currentStepNumber"
@@ -400,6 +402,7 @@
 <script lang="ts">
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
 import { defineComponent, ref, type Ref, computed, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { useRoute } from 'vue-router';
 import {
@@ -488,8 +491,10 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
     const route = useRoute();
+    const { t } = useI18n();
     const { yearsFrom } = utilsDates;
 
+    const currentAfterEnterHandler = ref<(() => void) | null>(null);
     const reservationToken = route.params.reservationToken as string;
     const reservationId = parseInt(route.params.reservationId as string, 10);
 
@@ -1264,10 +1269,10 @@ export default defineComponent({
           )
         ) {
           dialogService.open({
-            header: 'No se ha podido escanear el documento',
+            header: t('not_scanned'),
             content:
-              'Los datos no se pudieron reconocer. Por favor, introduce los datos manualmente.',
-            btnAccept: 'Continuar',
+              t('enter_data_manually'),
+            btnAccept: t('continue'),
           });
         }
 
@@ -1319,14 +1324,13 @@ export default defineComponent({
       }
     };
 
-    onMounted(() => {
-      store.state.precheckin.folioPublicInfo?.reservations[0].checkinPartners.forEach((el) => {
-        publicCheckinPartners.value.push({
-          ...DEFAULT_CHECKIN_PARTNER_VALUES,
-          ...el,
-        });
-      });
-    });
+    const registerOnEnter = (fn: () => void) => {
+      currentAfterEnterHandler.value = fn;
+    };
+
+    const handleAfterEnter = () => {
+      currentAfterEnterHandler.value?.();
+    };
 
     watch(currentStep, () => {
       if (currentStep.value === 'start') {
@@ -1342,6 +1346,15 @@ export default defineComponent({
         await store.dispatch('countryStates/fetchCountryStates', value);
       }
     );
+
+    onMounted(() => {
+      store.state.precheckin.folioPublicInfo?.reservations[0].checkinPartners.forEach((el) => {
+        publicCheckinPartners.value.push({
+          ...DEFAULT_CHECKIN_PARTNER_VALUES,
+          ...el,
+        });
+      });
+    });
 
     return {
       isStepIncreasing,
@@ -1364,6 +1377,8 @@ export default defineComponent({
       currentProgress,
       reservationToken,
       reservationId,
+      registerOnEnter,    
+      handleAfterEnter,
       yearsFrom,
       deleteNextDocNumberStepValues,
       processOCR,
@@ -1381,6 +1396,7 @@ export default defineComponent({
       previousStep,
       nextCheckinPartnerToComplete,
       previousStepExistingCheckinPartner,
+      t,
     };
   },
 });

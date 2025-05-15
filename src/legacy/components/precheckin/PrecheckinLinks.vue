@@ -12,7 +12,7 @@
       />
     </div>
     <div class="text">
-      <div class="main-text">Check-in completado</div>
+      <div class="main-text">{{ $t('checkin_completed') }}</div>
       <div class="guests">
         {{ folioCheckinNamesCompleted.join(', ') }}
       </div>
@@ -35,7 +35,7 @@
       />
     </div>
     <div class="text">
-      <div class="main-text">Check-in completado</div>
+      <div class="main-text">{{ $t('checkin_completed') }}</div>
       <div class="guests">
         {{ reservationCheckinNamesCompleted.join(', ') }}
       </div>
@@ -52,7 +52,7 @@
       />
     </div>
     <div class="text">
-      <div class="main-text">Hacer check-in</div>
+      <div class="main-text">{{ $t('menu_checkin_action') }}</div>
     </div>
   </div>
 
@@ -69,9 +69,8 @@
         :height="'24px'"
       />
     </div>
-
     <div class="text">
-      <div class="main-text">Invita a otros a registrarse</div>
+      <div class="main-text">{{ $t('menu_invite_others') }}</div>
     </div>
   </div>
   <hr />
@@ -87,7 +86,7 @@
       </div>
       <div class="text">
         <div class="main-text">
-          Pagar ahora {{ folioPendingAmount.toString().replace('.', ',') }} €
+          {{ $t('menu_pay_now', { amount: folioPendingAmount.toString().replace('.', ',') }) }}
         </div>
       </div>
     </div>
@@ -108,7 +107,7 @@
       />
     </div>
     <div class="text">
-      <div class="main-text">Cómo llegar</div>
+      <div class="main-text">{{ $t('menu_how_to_arrive') }}</div>
     </div>
   </div>
   <div class="menu-button" @click="callPhoneNumber()">
@@ -121,7 +120,7 @@
       />
     </div>
     <div class="text">
-      <div class="main-text">Contactar</div>
+      <div class="main-text">{{ $t('menu_contact') }}</div>
     </div>
   </div>
   <template v-if="isFolio">
@@ -129,13 +128,13 @@
     <div class="menu-button" @click="openFolioPortal()">
       <div class="icon"></div>
       <div class="text">
-        <div class="main-text">Ver detalle</div>
+        <div class="main-text">{{ $t('menu_view_details') }}</div>
       </div>
     </div>
     <div class="menu-button" @click="downloadFolioPortal()">
       <div class="icon"></div>
       <div class="text">
-        <div class="main-text">Descargar</div>
+        <div class="main-text">{{ $t('menu_download') }}</div>
       </div>
     </div>
   </template>

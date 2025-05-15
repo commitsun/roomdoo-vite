@@ -1,8 +1,21 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
@@ -17,6 +30,7 @@
     <div class="step-subtitle">
       {{ subtitle }}
     </div>
+
     <AutocompleteComponent
       :disable="noDocument"
       class="autocomplete-country"
@@ -45,6 +59,7 @@
       @animationend="emitNextStep()"
       isRoundedIcons
     />
+
     <div v-if="isUnderFourteen" class="input-warning">
       <CustomIcon
         imagePath="/app-images/icon-alert.svg"
@@ -52,26 +67,31 @@
         width="12px"
         height="12px"
       />
-      <span> Solo menores de 14 años españoles pueden registrarse sin documento </span>
+      <span>{{ $t('under_14_warning') }}</span>
     </div>
+
     <div class="btn-continue-container">
-      <button class="btn-continue" @click="emitNextStep()" v-if="countryId !== 0">Aceptar</button>
+      <button class="btn-continue" @click="emitNextStep()" v-if="countryId !== 0">
+        {{ $t('accept') }}
+      </button>
     </div>
+
     <div class="btn-continue-container flex-column">
       <div class="checkbox-container" v-if="isUnderFourteen && !isNationality && countryId === 0">
         <CheckboxComponent class="checkbox" v-model="noDocument" />
-        <span @click="noDocument = !noDocument"> El menor no tiene documento </span>
+        <span @click="noDocument = !noDocument">{{ $t('minor_has_no_document') }}</span>
       </div>
       <button
         class="btn-continue"
         @click="emitNextStep()"
         v-if="isUnderFourteen && !isNationality && countryId === 0 && noDocument"
       >
-        Continuar
+        {{ $t('continue') }}
       </button>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted, watch } from 'vue';
 import AutocompleteComponent from '@/legacy/components/roomdooComponents/AutocompleteComponent.vue';

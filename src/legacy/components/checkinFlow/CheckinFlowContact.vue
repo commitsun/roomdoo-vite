@@ -1,25 +1,39 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
-      <span class="title-text"> Datos de contacto </span>
+      <span class="title-text">{{ $t('contact_data') }}</span>
     </div>
-    <div class="step-subtitle">Introduce {{ titleText }}</div>
+    <div class="step-subtitle">{{ $t('enter_contact_data_instruction', { field: titleText }) }}</div>
+
     <div class="input-wrap" v-if="!isHiddenMail">
-      <span class="input-label"> Email </span>
+      <span class="input-label">{{ $t('email_label') }}</span>
       <InputText
         v-model="emailRef"
         class="input"
         @keydown.enter="onEnterEmail()"
         @keydown.esc="$emit('closeCheckinFlow')"
-        placeholder="Escribe aquí"
+        :placeholder="$t('placeholder_write_here')"
         :isBorder="false"
         placeholderBlue
         textColor="primary"
@@ -28,36 +42,36 @@
       />
       <div v-if="validator.emailRef.$errors.length > 0" class="input-error">
         <CustomIcon
-          :imagePath="'/app-images/icon-alert.svg'"
-          :color="'#982113'"
-          :width="'12px'"
-          :height="'12px'"
+          imagePath="/app-images/icon-alert.svg"
+          color="#982113"
+          width="12px"
+          height="12px"
         />
-        <span>
-          {{ validator.emailRef.$errors[0].$message }}
-        </span>
+        <span>{{ $t('invalid_email') }}</span>
       </div>
     </div>
 
     <div class="input-wrap" v-if="!isHiddenPhone">
-      <span class="input-label"> Teléfono </span>
+      <span class="input-label">{{ $t('phone_label') }}</span>
       <InputText
         v-model="phone"
         class="input"
         @keydown.enter="submitForm()"
         @keydown.esc="$emit('closeCheckinFlow')"
-        placeholder="Escribe aquí"
+        :placeholder="$t('placeholder_write_here')"
         :isBorder="false"
         placeholderBlue
         textColor="primary"
         ref="phoneInputRef"
       />
     </div>
+
     <div class="btn-continue-container">
-      <button class="btn-continue" @click="submitForm">Aceptar</button>
+      <button class="btn-continue" @click="submitForm">{{ $t('accept') }}</button>
     </div>
   </div>
 </template>
+
 
 <script lang="ts">
 import {
@@ -73,6 +87,8 @@ import useVuelidate from '@vuelidate/core';
 import { email, helpers } from '@vuelidate/validators';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
+import { useI18n } from 'vue-i18n';
+
 
 export default defineComponent({
   components: {
@@ -110,6 +126,8 @@ export default defineComponent({
   },
 
   setup(props, context) {
+    const { t } = useI18n();
+
     let hasEmittedNext = false;
     const phone = ref('');
     const emailRef = ref('');
@@ -119,7 +137,7 @@ export default defineComponent({
 
     const validationRules = computed(() => ({
       emailRef: {
-        emailRef: helpers.withMessage('Email no válido', email),
+        emailRef: helpers.withMessage(t('invalid_email'), email),
       },
     }));
 
@@ -180,11 +198,11 @@ export default defineComponent({
       }
 
       if (!props.isHiddenMail && !props.isHiddenPhone) {
-        titleText.value = 'el email y el teléfono del huésped';
+        titleText.value = t('enter_contact_data_email_phone');
       } else if (props.isHiddenMail) {
-        titleText.value = 'el teléfono del huésped';
+        titleText.value = t('enter_contact_data_phone');
       } else if (props.isHiddenPhone) {
-        titleText.value = 'el email del huésped';
+        titleText.value = t('enter_contact_data_email');
       }
       if (emailInputRef.value) {
         emailInputRef.value.focus();
