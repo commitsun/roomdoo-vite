@@ -1,20 +1,30 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
-      <span class="title-text"> ¿Cómo vas a introducir los datos? </span>
+      <span class="title-text"> {{ $t('how_enter_data') }} </span>
     </div>
-    <span class="step-subtitle"> Selecciona un modo para registrar los datos del huésped </span>
+    <span class="step-subtitle"> {{ $t('select_mode_guest_data') }} </span>
 
     <div
       class="options"
@@ -46,8 +56,7 @@
               <span> A </span>
             </div>
             <div class="second">
-              Asistente de <br />
-              check-in
+              {{ $t('checkin_assistant') }}
             </div>
           </div>
         </div>
@@ -73,8 +82,7 @@
               <span> B </span>
             </div>
             <div class="second">
-              Escanear <br />
-              documento
+              {{ $t('scan_document') }}
             </div>
           </div>
         </div>
@@ -102,13 +110,12 @@
               <span> C </span>
             </div>
             <div class="second">
-              Buscar cliente <br />
-              habitual
+              {{ $t('search_regular_customer') }}
             </div>
           </div>
         </div>
         <div
-          class="option"
+          class="option option-form"
           :class="{ blink: isManualEntryByForm && isAnimation }"
           @animationend="emitDisplayForm()"
           @click="setManualEntryByForm()"
@@ -129,8 +136,7 @@
               <span> D </span>
             </div>
             <div class="second">
-              Formulario <br />
-              clásico
+              {{ $t('classic_form') }}
             </div>
           </div>
         </div>
@@ -138,7 +144,7 @@
     </div>
     <div class="btn-container">
       <CustomButton
-        text="Aceptar"
+        :text="$t('accept')"
         class="btn-continue"
         v-if="isManualEntryByWizard || isManualEntryByForm || isOCRSelected || isRegularCostumer"
         @click="continueNextStep()"
@@ -146,12 +152,14 @@
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, onMounted, ref, type Ref } from 'vue';
 
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import CustomButton from '@/legacy/components/roomdooComponents/CustomButton.vue';
 import { useStore } from '@/legacy/store';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -198,6 +206,7 @@ export default defineComponent({
     'displayForm',
   ],
   setup(props, context) {
+    const { t } = useI18n();
     let hasEmittedNext = false;
     const isManualEntryByWizard = ref(false);
     const isManualEntryByForm = ref(false);
@@ -451,12 +460,14 @@ export default defineComponent({
         .option-icon {
           display: flex;
           flex: 1 1 auto;
+          justify-content: center;
         }
         .option-text {
           width: 100%;
           display: flex;
           justify-content: center;
           padding-bottom: 14px;
+          min-height: 56px;
           .first {
             margin-top: 2px;
             display: flex;
@@ -558,8 +569,12 @@ export default defineComponent({
             cursor: not-allowed;
           }
           .option-text {
+            width: 90%;
+            margin-left: 1.2rem;
             .first {
               display: flex;
+              min-width: 20px;
+              min-height: 20px;
             }
             .second {
               text-align: inherit;

@@ -1,6 +1,6 @@
 <template>
   <div class="share-modal-body">
-    <div class="second-title">Enlace para checkin:</div>
+    <div class="second-title">{{ t('share_checkin_link') }}</div>
     <div class="copy-link">
       <input type="text" readonly :value="link" ref="textInputRef" @blur="blurInputRef()" />
       <button @click="copyCurrentPath()">
@@ -8,7 +8,8 @@
       </button>
     </div>
 
-    <div class="title">Compartir mediante:</div>
+    <div class="title">{{ t('share_via') }}</div>
+
     <div class="share-media" @click="shareLinkViaWhatsapp()">
       <div class="icon">
         <CustomIcon
@@ -19,7 +20,7 @@
         />
       </div>
       <div class="text">
-        <div class="main-text">Whatsapp</div>
+        <div class="main-text">{{ t('share_whatsapp') }}</div>
       </div>
     </div>
     <div class="share-media" @click="shareLinkViaTelegram()">
@@ -32,7 +33,7 @@
         />
       </div>
       <div class="text">
-        <div class="main-text">Telegram</div>
+        <div class="main-text">{{ t('share_telegram') }}</div>
       </div>
     </div>
     <div class="share-media" @click="shareLinkViaMail()">
@@ -45,21 +46,18 @@
         />
       </div>
       <div class="text">
-        <div class="main-text">Correo electrónico</div>
+        <div class="main-text">{{ t('share_email') }}</div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, type Ref } from 'vue';
+import { defineComponent, ref, type Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 
 export default defineComponent({
   props: {
-    isOpen: {
-      type: Boolean,
-      required: true,
-    },
     link: {
       type: String,
       required: true,
@@ -69,18 +67,19 @@ export default defineComponent({
     CustomIcon,
   },
   setup(props) {
-    const isModalOpen = ref(props.isOpen);
+    const { t } = useI18n();
     const textInputRef: Ref<null | HTMLInputElement> = ref(null);
-    const textButton = ref('Copiar enlace');
+    const textButton = ref(t('copy_link'));
+
     const copyCurrentPath = () => {
       void navigator.clipboard.writeText(props.link);
-      textButton.value = '¡Enlace copiado!';
+      textButton.value = t('link_copied');
       textInputRef.value?.focus();
       textInputRef.value?.select();
     };
     const blurInputRef = () => {
       textInputRef.value?.blur();
-      textButton.value = 'Copiar enlace';
+      textButton.value = t('copy_link');
     };
     const shareLinkViaWhatsapp = () => {
       window.open(`https://wa.me/?text=${props.link}`);
@@ -94,18 +93,14 @@ export default defineComponent({
       window.open(`mailto:?body=${props.link}`);
     };
 
-    onMounted(() => {
-      isModalOpen.value = props.isOpen;
-    });
-
     return {
+      t,
       copyCurrentPath,
       blurInputRef,
       shareLinkViaWhatsapp,
       shareLinkViaTelegram,
       shareLinkViaMail,
       textInputRef,
-      isModalOpen,
       textButton,
     };
   },
@@ -144,9 +139,9 @@ export default defineComponent({
       border-radius: 6px;
       border: 1px solid $primary;
       cursor: pointer;
-      &:hover {
-        background-color: darken($primary, 10%);
-      }
+      // &:hover {
+      //   background-color: darken($primary, 10%);
+      // }
     }
   }
 

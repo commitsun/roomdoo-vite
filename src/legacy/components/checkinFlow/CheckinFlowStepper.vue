@@ -44,11 +44,16 @@
           />
         </div>
         <span v-if="numPendingCheckins > 0">
-          {{ numPendingCheckins }} huésped{{ numPendingCheckins > 1 ? 'es' : '' }} pendiente{{
-            numPendingCheckins > 1 ? 's' : ''
+          {{ numPendingCheckins }}
+          {{
+            numPendingCheckins === 1
+              ? t('pending_singular')
+              : t('pending_plural')
           }}
         </span>
-        <span v-else> {{ checkinPartners.length }} huéspedes </span>
+        <span v-else>
+          {{ checkinPartners.length }} {{ t('total_guests') }}
+        </span>
       </div>
       <div
         class="stepper-arrows"
@@ -105,6 +110,8 @@
 import { defineComponent, computed } from 'vue';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
+import { useI18n } from 'vue-i18n';
+
 
 export default defineComponent({
   components: {
@@ -143,6 +150,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
     const numPendingCheckins = computed(
       () =>
         props.checkinPartners.filter(
@@ -167,6 +175,7 @@ export default defineComponent({
     return {
       numPendingCheckins,
       iconColor,
+      t,
     };
   },
 });

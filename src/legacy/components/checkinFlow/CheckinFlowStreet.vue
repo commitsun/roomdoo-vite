@@ -1,8 +1,21 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
@@ -10,17 +23,19 @@
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Calle de residencia
+        {{ t('residence_street_title') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <div class="step-subtitle">Introduce la calle de residencia del huésped</div>
+    <div class="step-subtitle">
+      {{ t('residence_street_subtitle') }}
+    </div>
     <InputText
       v-model="street"
       class="input"
       @keydown.enter="onKeypressEnter()"
       @keydown.esc="$emit('closeCheckinFlow')"
-      placeholder="Escribe aquí"
+      :placeholder="t('placeholder_write_here')"
       :isBorder="false"
       placeholderBlue
       textColor="primary"
@@ -39,7 +54,9 @@
           {{ validator.street.$errors[0].$message }}
         </span>
       </div>
-      <button v-if="street !== ''" class="btn-continue" @click="emitNextStep()">Aceptar</button>
+      <button v-if="street !== ''" class="btn-continue" @click="emitNextStep()">
+        {{ t('accept') }}
+      </button>
     </div>
   </div>
 </template>
@@ -57,6 +74,7 @@ import useVuelidate from '@vuelidate/core';
 import { required, helpers } from '@vuelidate/validators';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -79,13 +97,14 @@ export default defineComponent({
   },
 
   setup(props, context) {
+    const { t } = useI18n();
     let hasEmittedNext = false;
     const street = ref('');
     const streetInputRef: Ref<ComponentPublicInstance<HTMLInputElement> | null> = ref(null);
 
     const validationRules = computed(() => ({
       street: {
-        required: helpers.withMessage('La calle de residencia es obligatoria', required),
+        required: helpers.withMessage(t('residence_street_required'), required),
       },
     }));
     const validator = useVuelidate(validationRules, {
@@ -127,6 +146,7 @@ export default defineComponent({
       emitNextStep,
       onKeypressEnter,
       validator,
+      t,
     };
   },
 });

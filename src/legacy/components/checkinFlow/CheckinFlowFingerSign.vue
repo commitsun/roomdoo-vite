@@ -1,20 +1,31 @@
 <template>
   <div class="container-sign" @keydown.esc="$emit('closeCheckinFlow')" tabindex="0">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
-      <span class="title-text"> Firmar parte de entrada </span>
+      <span class="title-text"> {{ $t('sign_title') }} </span>
     </div>
     <div class="step-subtitle" v-if="!isPreCheckin">
-      A firmar por {{ checkinPartner.firstname }}
-      {{ checkinPartner.lastname }}
-      {{ checkinPartner.lastname2 }}
+      {{ $t('sign_by', { name: checkinPartner.firstname + ' ' + checkinPartner.lastname + ' ' + checkinPartner.lastname2 }) }}
     </div>
 
     <div class="content">
@@ -23,110 +34,83 @@
           <div class="first">
             <div class="field">
               <div class="title" v-if="isPreCheckin">
-                Ficha {{ reservationReference }} ({{ roomTypeName }})
+                {{ $t('sign_file', { reference: reservationReference, room: roomTypeName }) }}
               </div>
               <div class="title" v-else>
-                Ficha {{ currentReservation?.name }} ({{ getCurrentRoomName() }})
+                {{ $t('sign_file', { reference: currentReservation?.name, room: getCurrentRoomName() }) }}
               </div>
             </div>
             <div class="field">
-              <div class="label">Importe total: &nbsp;</div>
-              <div class="data">
-                <span v-if="isPreCheckin"> {{ reservationAmount }} € </span>
-                <span v-else> {{ currentFolio?.amountTotal }} € </span>
-              </div>
+              <div class="label">{{ $t('total_amount', { amount: isPreCheckin ? reservationAmount : currentFolio?.amountTotal }) }}</div>
             </div>
             <br />
             <div class="field">
-              <div class="label">
-                {{ propertyName }}
-              </div>
+              <div class="label">{{ propertyName }}</div>
             </div>
             <div class="field">
-              <div class="data">
-                {{ companyName }}
-              </div>
+              <div class="data">{{ companyName }}</div>
             </div>
             <div class="field">
-              <div class="data">
-                {{ propertyAddress }}
-              </div>
+              <div class="data">{{ propertyAddress }}</div>
             </div>
-
             <div class="field">
-              <div class="data">
-                {{ propertyCity }}
-              </div>
+              <div class="data">{{ propertyCity }}</div>
             </div>
-
             <div class="field" v-if="propertyCategory && propertyCategory !== ''">
-              <div class="data">Categoría: &nbsp;{{ propertyCategory }}</div>
+              <div class="data">{{ $t('property_category', { category: propertyCategory }) }}</div>
             </div>
             <br />
           </div>
           <div class="second">
             <div class="field">
-              <div class="title">Documentación del viajero</div>
+              <div class="title">{{ $t('traveler_data') }}</div>
             </div>
-
             <div class="field" v-if="checkinPartnerFullName !== ''">
-              <div class="label">
-                {{ checkinPartnerFullName }}
-              </div>
+              <div class="label">{{ checkinPartnerFullName }}</div>
             </div>
             <div class="field" v-if="checkinPartner.birthdate !== null">
               <div class="data">
-                Fecha de nacimiento: &nbsp;{{
-                  checkinPartner.birthdate?.toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
+                {{ $t('birthdate_label', {
+                  birthdate: checkinPartner.birthdate?.toLocaleDateString('es-ES', {
+                    year: 'numeric', month: '2-digit', day: '2-digit'
                   })
-                }}
+                }) }}
               </div>
             </div>
             <div class="field" v-if="documentTypeName() !== ''">
-              <div class="data">{{ documentTypeName() }}: &nbsp;</div>
               <div class="data">
-                {{ checkinPartner.documentNumber }}
+                {{ $t('document_label', { type: documentTypeName(), number: checkinPartner.documentNumber }) }}
               </div>
             </div>
             <div class="field" v-if="genderName() !== ''">
-              <div class="data">Género: &nbsp;</div>
               <div class="data">
-                {{ genderName() }}
+                {{ $t('gender_label', { gender: genderName() }) }}
               </div>
             </div>
             <div class="field">
               <div class="data">
-                Fecha de entrada:&nbsp;
-                {{
-                  checkin.toLocaleString('es-ES', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
+                {{ $t('checkin_date', {
+                  date: checkin.toLocaleDateString('es-ES', {
+                    year: 'numeric', month: '2-digit', day: '2-digit'
                   })
-                }}
+                }) }}
               </div>
             </div>
             <div class="field">
               <div class="data">
-                Fecha de salida:&nbsp;{{
-                  checkout.toLocaleString('es-ES', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
+                {{ $t('checkout_date', {
+                  date: checkout.toLocaleDateString('es-ES', {
+                    year: 'numeric', month: '2-digit', day: '2-digit'
                   })
-                }}
+                }) }}
               </div>
             </div>
           </div>
           <br />
           <div class="third">
             <div class="field">
-              <div class="title">Condiciones</div>
+              <div class="title">{{ $t('terms_title') }}</div>
             </div>
-
             <div class="field cardex">
               {{ cardexWarning }}
             </div>
@@ -141,28 +125,20 @@
       <div class="second-row">
         <div class="wrapper">
           <div class="signature-title">
-            Firmado
-            <span v-if="!isPreCheckin">
-              por {{ checkinPartner.firstname }}
-              {{ checkinPartner.lastname }}
-              {{ checkinPartner.lastname2 }}, en {{ activeProperty?.city }},</span
-            >a fecha
-            {{
-              new Date().toLocaleTimeString('es-ES', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
+            {{ $t('signed_by', {
+              name: `${checkinPartner.firstname} ${checkinPartner.lastname} ${checkinPartner.lastname2}`,
+              city: activeProperty?.city,
+              datetime: new Date().toLocaleTimeString('es-ES', {
+                year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
               })
-            }}
+            }) }}
           </div>
           <VueSignaturePad
             class="signature-pad"
             clearOnResize
             ref="signature"
-            height="100%"
-            width="100%"
+            height="98%"
+            width="98%"
             :max-width="2"
             :min-width="2"
             :options="{
@@ -172,7 +148,7 @@
             @afterUpdateStroke="handleAfterUpdateStroke"
           />
 
-          <button class="clear-btn" @click="clearSignature()">Reintentar</button>
+          <button class="clear-btn" @click="clearSignature()">{{ $t('retry') }}</button>
         </div>
       </div>
       <button
@@ -180,18 +156,21 @@
         :class="{ disabled: base64Data === '' }"
         @click="base64Data !== '' ? persistCheckinPartner() : false"
       >
-        Aceptar y continuar
+        {{ $t('accept_and_continue') }}
       </button>
       <br />
     </div>
   </div>
 </template>
 
+
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted } from 'vue';
 import { VueSignaturePad } from '@selemondev/vue3-signature-pad';
 import { useStore } from '@/legacy/store';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
+import { useI18n } from 'vue-i18n';
+
 
 export default defineComponent({
   components: {
@@ -246,6 +225,8 @@ export default defineComponent({
     },
   },
   setup(props, context) {
+    const { t } = useI18n();
+
     const store = useStore();
     const signature = ref<any>();
     const currentReservation = computed(() => store.state.reservations.currentReservation);
@@ -276,15 +257,11 @@ export default defineComponent({
     };
 
     const genderName = () => {
-      let result = '';
-      if (props.checkinPartner.gender === 'male') {
-        result = 'Hombre';
-      } else if (props.checkinPartner.gender === 'female') {
-        result = 'Mujer';
-      } else if (props.checkinPartner.gender === 'other') {
-        result = 'Otro';
-      }
-      return result;
+      const gender = props.checkinPartner.gender;
+      if (gender === 'male') return t('male');
+      if (gender === 'female') return t('female');
+      if (gender === 'other') return t('other');
+      return '';
     };
 
     const privacyPolicyText = computed(() => {
@@ -515,6 +492,9 @@ export default defineComponent({
         position: relative;
         width: 100%;
         height: 250px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         .signature-title {
           pointer-events: none;
           touch-action: none;

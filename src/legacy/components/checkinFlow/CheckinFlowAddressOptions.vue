@@ -7,20 +7,30 @@
     tabindex="0"
   >
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
-      <span class="title-text"> Dirección del huésped </span>
+      <span class="title-text"> {{ $t('step_guest_address_title') }} </span>
     </div>
-    <div class="step-subtitle">Indica si quieres usar la misma dirección</div>
+    <div class="step-subtitle">{{ $t('step_guest_address_subtitle') }}</div>
     <div class="residence-grid">
       <div
         v-for="(checkinPartner, index) in completedCheckinPartnersAddress"
@@ -37,7 +47,7 @@
           <span class="residence-letter">
             {{ letters[index] }}
           </span>
-          <span class="residence-name"> Misma dirección </span>
+          <span class="residence-name"> {{ $t('same_address') }} </span>
         </div>
         <span class="residence-address">
           {{ checkinPartner.residenceStreet }}
@@ -64,18 +74,19 @@
           <span class="residence-letter">
             {{ letters[completedCheckinPartnersAddress.length] }}
           </span>
-          <span class="residence-name"> Nueva dirección </span>
+          <span class="residence-name"> {{ $t('new_address') }} </span>
         </div>
       </div>
     </div>
     <div class="btn-continue-container">
       <button class="btn-continue" @click="emitNextStep()" v-if="addressOptionSelected !== 0">
-        Aceptar
+        {{ $t('accept') }}
       </button>
       <div v-else class="empty-div" />
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, watch, type Ref } from 'vue';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';

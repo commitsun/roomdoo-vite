@@ -7,11 +7,21 @@
     tabindex="0"
   >
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
@@ -19,11 +29,11 @@
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Género
+        {{ $t('gender') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <span class="step-subtitle"> Selecciona el género </span>
+    <span class="step-subtitle"> {{ $t('select_gender') }} </span>
     <div class="gender-grid" tabindex="0">
       <div
         v-for="(gender, index) in genders"
@@ -45,13 +55,17 @@
       </div>
     </div>
     <div class="btn-continue-container">
-      <button class="btn-continue" @click="emitNextStep()" v-if="genderRef !== ''">Aceptar</button>
+      <button class="btn-continue" @click="emitNextStep()" v-if="genderRef !== ''">
+        {{ $t('accept') }}
+      </button>
       <div v-else class="empty-div" />
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, type Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   props: {
@@ -70,13 +84,14 @@ export default defineComponent({
   },
 
   setup(props, context) {
+    const { t } = useI18n();
     let hasEmittedNext = false;
     const letters = ['A', 'B', 'C'];
     const genderRef = ref('');
     const genders = ref([
-      { id: 'male', name: 'Hombre' },
-      { id: 'female', name: 'Mujer' },
-      { id: 'other', name: 'Otro' },
+      { id: 'male', name: t('male') },
+      { id: 'female', name: t('female') },
+      { id: 'other', name: t('other') },
     ]);
     const genderDivRef: Ref<HTMLDivElement | null> = ref(null);
     const isAnimation = ref(false);

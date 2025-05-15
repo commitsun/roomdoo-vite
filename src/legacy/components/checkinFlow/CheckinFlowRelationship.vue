@@ -1,11 +1,21 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
@@ -13,13 +23,17 @@
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Adulto responsable del menor
+        {{ $t('responsible_adult_title') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <span class="step-subtitle"> Vincula al menor con un adulto registrado en esta reserva </span>
+
+    <span class="step-subtitle">
+      {{ $t('responsible_adult_subtitle') }}
+    </span>
+
     <div class="input-wrap" v-if="isPrecheckin">
-      <span class="input-label"> Nº de documento del adulto responsable </span>
+      <span class="input-label">{{ $t('responsible_adult_document_label') }}</span>
       <InputText
         isUpperCase
         v-model="adultDocumentNumber"
@@ -35,7 +49,7 @@
       />
     </div>
     <div class="input-wrap" v-else>
-      <span class="input-label"> Adulto responsable </span>
+      <span class="input-label">{{ $t('responsible_adult_label') }}</span>
       <AutocompleteComponent
         class="input-text"
         v-model="selectedResponsibleCheckinPartnerId"
@@ -54,11 +68,11 @@
       />
     </div>
     <div class="input-wrap">
-      <span class="input-label"> Parentesco con el menor </span>
+      <span class="input-label">{{ $t('relationship_label') }}</span>
       <AutocompleteComponent
         class="input-text"
         v-model="selectedRelationShip"
-        :items="optionsRelationship.map((item) => ({ value: item.id, name: item.text }))"
+        :items="optionsRelationship.map((item) => ({ value: item.id, name: $t(item.text) }))"
         focusable
         inputColorText="primary"
         iconExpandCollapse
@@ -71,10 +85,8 @@
         :minChars="0"
       />
     </div>
-    <div
-      class="input-error"
-      v-if="isAdultDocumentNumberMissingInFolio && adultDocumentNumber !== ''"
-    >
+
+    <div class="input-error" v-if="isAdultDocumentNumberMissingInFolio && adultDocumentNumber !== ''">
       <CustomIcon
         imagePath="/app-images/icon-alert.svg"
         color="#982113"
@@ -82,17 +94,16 @@
         height="12px"
       />
       <span>
-        El documento proporcionado no corresponde a ningún huésped registrado en esta reserva
+        {{ $t('responsible_adult_not_found') }}
       </span>
     </div>
     <div class="additional-info">
-      <span>
-        En España es obligatorio indicar un adulto responsable y su parentesco al registrar a un
-        menor.
-      </span>
+      <span>{{ $t('responsible_adult_note') }}</span>
     </div>
     <div class="btn-continue-container" v-if="canProceedToNextStep">
-      <button class="btn-continue" @click="next()">Aceptar</button>
+      <button class="btn-continue" @click="next()">
+        {{ $t('accept') }}
+      </button>
     </div>
   </div>
 </template>
@@ -111,6 +122,7 @@ import { useStore } from '@/legacy/store';
 import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import AutocompleteComponent from '@/legacy/components/roomdooComponents/AutocompleteComponent.vue';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -160,19 +172,20 @@ export default defineComponent({
 
   setup(props, context) {
     const store = useStore();
+    const { t } = useI18n();
     const optionsRelationship = [
-      { id: 1, code: 'PM', text: 'Padre o madre' },
-      { id: 2, code: 'TU', text: 'Tutor/a' },
-      { id: 3, code: 'TI', text: 'Tío/a' },
-      { id: 4, code: 'HR', text: 'Hermano/a' },
-      { id: 5, code: 'AB', text: 'Abuelo/a' },
-      { id: 6, code: 'BA', text: 'Bisabuelo/a' },
-      { id: 7, code: 'CD', text: 'Cuñado/a' },
-      { id: 8, code: 'CY', text: 'Cónyuge' },
-      { id: 9, code: 'SB', text: 'Sobrino/a' },
-      { id: 10, code: 'SG', text: 'Suegro/a' },
-      { id: 11, code: 'YN', text: 'Yerno o nuera' },
-      { id: 12, code: 'OT', text: 'Otro' },
+      { id: 1, code: 'PM', text: t('parent') },
+      { id: 2, code: 'TU', text: t('guardian') },
+      { id: 3, code: 'TI', text: t('uncle_aunt') },
+      { id: 4, code: 'HR', text: t('sibling') },
+      { id: 5, code: 'AB', text: t('grandparent') },
+      { id: 6, code: 'BA', text: t('great_grandparent') },
+      { id: 7, code: 'CD', text: t('brother_sister_in_law') },
+      { id: 8, code: 'CY', text: t('spouse') },
+      { id: 9, code: 'SB', text: t('nephew_niece') },
+      { id: 10, code: 'SG', text: t('parent_in_law') },
+      { id: 11, code: 'YN', text: t('son_daughter_in_law') },
+      { id: 12, code: 'OT', text: t('other') }
     ];
     let hasEmittedNext = false;
 

@@ -1,6 +1,6 @@
 <template>
   <div class="footer-container">
-    <div class="text">Con la tecnología de</div>
+    <div class="text">{{$t('with_technology')}}</div>
     <img src="/logos/logo-black-new.svg" />
   </div>
 </template>

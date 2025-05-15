@@ -1,8 +1,21 @@
 <template>
   <div class="page-container" @keydown.esc="$emit('closeCheckinFlow')" tabindex="0">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
@@ -10,11 +23,11 @@
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Datos de residencia
+        {{ $t('residence_data') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <div class="step-subtitle">Introducir datos de residencia del huésped</div>
+    <div class="step-subtitle">{{ $t('enter_residence_data') }}</div>
     <!-- zip autocomplete -->
     <div class="select-wrap" v-if="isSpanishGuest && !isHiddenCity">
       <CustomIcon
@@ -28,7 +41,7 @@
         class="input-filter-address"
         ref="addressSearchInputRef"
         type="text"
-        placeholder="Busca por código postal o población"
+        :placeholder="$t('search_by_zip_or_city')"
         v-model="address"
         @blur="showFilteredAddresses = false"
         @input="filterAddress"
@@ -57,7 +70,7 @@
 
     <!-- zip input -->
     <div class="input-wrap" v-if="!isHiddenZip">
-      <span class="input-label"> Código postal </span>
+      <span class="input-label">{{ $t('zip_code') }}</span>
       <InputText
         v-model="zip"
         class="input"
@@ -83,7 +96,7 @@
 
     <!-- city input -->
     <div class="input-wrap" v-if="!isHiddenCity">
-      <span class="input-label"> Población </span>
+      <span class="input-label">{{ $t('city') }}</span>
       <InputText
         v-model="city"
         class="input"
@@ -109,7 +122,7 @@
 
     <!-- state autocomplete -->
     <div class="input-wrap" v-if="countryStates && countryStates?.length > 0 && !isHiddenState">
-      <span class="input-label"> Provincia </span>
+      <span class="input-label">{{ $t('province') }}</span>
       <div class="select-residence-state-wrap">
         <AutocompleteComponent
           :items="countryStates.map((state) => ({ value: state.id, name: state.name }))"
@@ -152,11 +165,12 @@
       @click="nextAndSave"
       v-show="showBtnContinue()"
     >
-      Aceptar
+      {{ $t('accept') }}
     </button>
     <div v-if="!showBtnContinue()" class="empty-div" />
   </div>
 </template>
+
 <script lang="ts">
 import {
   defineComponent,
@@ -174,6 +188,7 @@ import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
 import AutocompleteComponent from '@/legacy/components/roomdooComponents/AutocompleteComponent.vue';
 import { type AddressInterface } from '@/legacy/interfaces/AddressInterface';
 import { useStore } from '@/legacy/store';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -227,6 +242,7 @@ export default defineComponent({
     },
   },
   setup(props, context) {
+    const { t } = useI18n();
     let hasEmittedNext = false;
     const store = useStore();
     const address = ref('');
@@ -246,18 +262,19 @@ export default defineComponent({
 
     const validationRules = computed(() => ({
       zip: {
-        required: helpers.withMessage('El código postal es obligatorio', required),
+        required: helpers.withMessage(t('zip_required'), required),
       },
       city: {
-        required: helpers.withMessage('La población es obligatoria', required),
+        required: helpers.withMessage(t('city_required'), required),
       },
       residenceState: {
         required: helpers.withMessage(
-          'La provincia es obligatoria',
+          t('province_required'),
           requiredIf(props.isSpanishGuest)
         ),
       },
     }));
+
     const validator = useVuelidate(validationRules, {
       zip,
       city,

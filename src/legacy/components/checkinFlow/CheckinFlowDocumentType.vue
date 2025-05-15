@@ -5,20 +5,38 @@
     @keydown.esc="$emit('closeCheckinFlow')"
   >
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup> 
+      {{ $t('guest') }}
     </div>
+
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Tipo de documento
+        {{ $t('document_type_title') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <div class="step-subtitle">Selecciona el tipo de documento</div>
+
+    <div class="step-subtitle">
+      {{ $t('document_type_subtitle') }}
+    </div>
+
     <div class="doc-type-grid" ref="docTypeRef" tabindex="0">
       <div
         v-for="(documentType, index) in documentTypes"
@@ -39,17 +57,19 @@
         </span>
       </div>
     </div>
+
     <div class="btn-continue-container">
       <button
         class="btn-continue"
         @click="emitNextStep()"
         :class="docType === 0 ? 'btn-continue-hidden' : ''"
       >
-        Aceptar
+        {{ $t('accept') }}
       </button>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted, watch, type Ref } from 'vue';
 import { useStore } from '@/legacy/store';

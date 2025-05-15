@@ -1,20 +1,37 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup>{{ currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o' }}</sup> huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
+
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Nº de soporte
+        {{ $t('support_number_title') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <span class="step-subtitle"> Introduce el número de soporte del DNI </span>
+    <span class="step-subtitle">
+      {{ $t('support_number_subtitle') }}
+    </span>
+
     <InputText
       v-model="supportNumber"
       class="input"
@@ -39,7 +56,7 @@
           height="12px"
         />
         <span>
-          {{ validator.$errors[0].$message }}
+          {{ validator.supportNumber.$errors[0].$message }}
         </span>
       </div>
       <button
@@ -47,11 +64,12 @@
         @click="nextAndSave()"
         v-if="supportNumber.length === 9 && validator.supportNumber.$errors.length === 0"
       >
-        Aceptar
+        {{ $t('accept') }}
       </button>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import {
   defineComponent,
@@ -66,6 +84,7 @@ import useVuelidate from '@vuelidate/core';
 import { helpers } from '@vuelidate/validators';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -88,6 +107,7 @@ export default defineComponent({
   },
 
   setup(props, context) {
+    const { t } = useI18n();
     let hasEmittedNext = false;
     const supportNumber = ref('');
     const supportNumberInput: Ref<ComponentPublicInstance<HTMLInputElement> | null> = ref(null);
@@ -104,7 +124,7 @@ export default defineComponent({
 
     const validationRules = computed(() => ({
       supportNumber: {
-        validSupportNumber: helpers.withMessage('Número de soporte no válido', validSupportNumber),
+        validSupportNumber: helpers.withMessage(t('invalid_support_number'), validSupportNumber),
       },
     }));
 

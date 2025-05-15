@@ -1,11 +1,21 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
     <div class="step-title">
       <span class="step">
@@ -13,30 +23,33 @@
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        Fecha de nacimiento
+        {{ $t('birthdate_title') }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <span class="step-subtitle"> Introduce la fecha de nacimiento del huésped </span>
+    <span class="step-subtitle">
+      {{ $t('birthdate_subtitle') }}
+    </span>
     <div class="date-input">
-      <InputDate
-        id="birthdate-input"
+      <DatePicker
         ref="birthDateInputRef"
         v-model="birthdate"
-        class="input"
-        :includeCalendar="true"
-        :openYearViewFirst="true"
-        :firstYearInRange="new Date().getFullYear() - 40"
-        placeholder="DD/MM/AAAA"
-        placeholderBlue
-        textColor="primary"
-        @dateSelected="birthdate = $event"
-        @enter="nextAndSave()"
-        @keydown.esc="$emit('closeCheckinFlow')"
-        @badFormatting="isBirthdateWrongFormat = $event"
+        :placeholder="appLocale?.dateFormat.replace('yy', 'yyyy')"
+        :maxDate="new Date()"
+        :inputStyle="{ 
+          color: '#51B2DD',
+          fontSize: '30px',
+          borderTop: 'none',
+          borderLeft: 'none',
+          borderRight: 'none',
+          borderBottom: '1px solid #51B2DD', 
+          borderRadius: '0px',
+          width: '100%',
+        }"
+        @input="inputDate($event)"
+        @keyup.enter="nextAndSave()"
       />
     </div>
-    <!-- not valid age -->
     <div v-if="notValidAge" class="input-error">
       <CustomIcon
         imagePath="/app-images/icon-alert.svg"
@@ -44,11 +57,8 @@
         width="12px"
         height="12px"
       />
-      <span>
-        La fecha de nacimiento no puede ser posterior a la fecha actual ni anterior a 120 años
-      </span>
+      <span>{{ $t('birthdate_invalid_range') }}</span>
     </div>
-    <!-- not an adult and not adults in folio-->
     <div v-else-if="isUnderAge && !areThereAnyAdultsInFolio" class="input-error">
       <CustomIcon
         imagePath="/app-images/icon-alert.svg"
@@ -56,9 +66,8 @@
         width="12px"
         height="12px"
       />
-      <span> Primero debes registrar un adulto </span>
+      <span>{{ $t('birthdate_no_adult') }}</span>
     </div>
-    <!-- not an adult and there are adults in folio-->
     <div v-else-if="isUnderAge && areThereAnyAdultsInFolio" class="input-warning">
       <CustomIcon
         imagePath="/app-images/icon-alert.svg"
@@ -66,9 +75,8 @@
         width="12px"
         height="12px"
       />
-      <span> Estás registrando a un menor. Deberás vincularlo a un adulto responsable. </span>
+      <span>{{ $t('birthdate_minor_warning') }}</span>
     </div>
-    <!-- not a valid date -->
     <div v-if="isBirthdateWrongFormat" class="input-error">
       <CustomIcon
         imagePath="/app-images/icon-alert.svg"
@@ -76,16 +84,17 @@
         width="12px"
         height="12px"
       />
-      <span> El formato de fecha es incorrecto </span>
+      <span>{{ $t('birthdate_bad_format') }}</span>
     </div>
     <div class="btn-continue-container">
       <button class="btn-continue" @click="nextAndSave()" v-if="canProceedToNextStep">
-        Aceptar
+        {{ $t('accept') }}
       </button>
       <div v-else class="empty-div" />
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import {
   defineComponent,
@@ -97,14 +106,16 @@ import {
   computed,
   type ComponentPublicInstance,
 } from 'vue';
-import InputDate from '@/legacy/components/roomdooComponents/InputDate.vue';
+import DatePicker from 'primevue/datepicker';
+import { appLocale } from '@/main';
+
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import utilsDates from '@/legacy/utils/dates';
 import { useStore } from '@/legacy/store';
 
 export default defineComponent({
   components: {
-    InputDate,
+    DatePicker,
     CustomIcon,
   },
 
@@ -189,6 +200,56 @@ export default defineComponent({
       }
     };
 
+    const inputDate = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+
+      const format = appLocale?.dateFormat?.toLowerCase() || 'dd/mm/yyyy';
+
+      const digits = input.value.replace(/\D/g, '');
+
+      let newValue = '';
+      let cursorPosition = input.selectionStart ?? digits.length;
+
+      if (format.startsWith('yy')) {
+        if (digits.length <= 4) {
+          newValue = digits;
+        } else if (digits.length <= 6) {
+          newValue = `${digits.slice(0, 4)}/${digits.slice(4)}`;
+        } else if (digits.length < 8) {
+          newValue = `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6, 8)}`;
+        } else if(digits.length === 8) {
+          const datepickerComponent = birthDateInputRef.value as any;
+          datepickerComponent.overlayVisible = false;
+        }
+      } else {
+        if (digits.length <= 2) {
+          newValue = digits;
+        } else if (digits.length <= 4) {
+          newValue = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        } else if (digits.length < 8) {
+          newValue = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+        } else if(digits.length === 8) {
+          const datepickerComponent = birthDateInputRef.value as any;
+          datepickerComponent.overlayVisible = false;
+        }
+      }
+
+      const oldLength = input.value.length;
+      input.value = newValue;
+
+      const newLength = newValue.length;
+      const delta = newLength - oldLength;
+
+      input.setSelectionRange((cursorPosition ?? 0) + delta, (cursorPosition ?? 0) + delta);
+    };
+
+    const onAfterEnterHandler =  () => {
+      if (!birthdate.value) {
+        const datepicker = birthDateInputRef.value as any;
+        datepicker?.$el?.querySelector('input')?.focus();
+      }
+    };
+
     watch(birthdate, async () => {
       if (birthdate.value && !notValidAge.value && !isBirthdateWrongFormat.value) {
         context.emit('update:modelValue', birthdate.value);
@@ -213,11 +274,14 @@ export default defineComponent({
       }
     });
 
-    onMounted(() => {
+    onMounted(async() => {
+      context.emit('registerOnEnter', onAfterEnterHandler);
       if (props.modelValue) {
         birthdate.value = props.modelValue;
+        context.emit('setIsAllowedNextStep', true);
+      } else {
+        context.emit('setIsAllowedNextStep', false);
       }
-      birthDateInputRef.value?.focus();
     });
 
     return {
@@ -228,7 +292,9 @@ export default defineComponent({
       areThereAnyAdultsInFolio,
       canProceedToNextStep,
       birthDateInputRef,
+      appLocale,
       nextAndSave,
+      inputDate,
     };
   },
 });
@@ -445,5 +511,4 @@ export default defineComponent({
     }
   }
 }
-/* registrar adulto */
 </style>

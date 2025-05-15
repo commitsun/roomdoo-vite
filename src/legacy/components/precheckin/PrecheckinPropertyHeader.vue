@@ -45,6 +45,7 @@ import { defineComponent, ref, computed, markRaw } from 'vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import ShareLinkModal from '@/legacy/components/precheckin/ShareLinkModal.vue';
 import { dialogService } from '@/legacy/services/DialogService';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   props: {
@@ -82,8 +83,8 @@ export default defineComponent({
     CustomIcon,
   },
   setup(props) {
+    const { t } = useI18n();
     const currentPath = `${window.location.href}`;
-    const isModalOpen = ref(false);
     const pmsPropertyLocation = computed(() => {
       let result = '';
       if (props.pmsPropertyCity && props.pmsPropertyState) {
@@ -97,15 +98,14 @@ export default defineComponent({
     });
     const shareLink = () => {
       const canShare = 'share' in window.navigator;
-      if (!canShare) {
+      if (canShare) {
         void navigator.share({
           title: document.title,
           url: currentPath,
         });
       } else {
-        isModalOpen.value = true;
         dialogService.open({
-          header: 'Compartir enlace',
+          header: t('share_link'),
           content: markRaw(ShareLinkModal),
           closable: true,
           props: {
@@ -131,7 +131,6 @@ export default defineComponent({
 
     return {
       currentPath,
-      isModalOpen,
       pmsPropertyLocation,
       shareLink,
       shareLinkViaWhatsapp,

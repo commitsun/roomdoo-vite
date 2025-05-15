@@ -1,11 +1,13 @@
 import { createApp } from 'vue';
 import router from './router';
-import axiosPlugin from '@/plugins/axios.ts';
+import axiosPlugin from '@/plugins/axios';
 import App from './App.vue';
 import PrimeVue, { defaultOptions } from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 import 'primeicons/primeicons.css';
 import { store } from '@/legacy/store';
+import { i18n } from '@/plugins/i18n';
+
 
 import { en_GB } from 'primelocale/js/en_GB.js';
 import { en } from 'primelocale/js/en.js';
@@ -64,5 +66,8 @@ app.use(router);
 app.use(axiosPlugin);
 app.use(head);
 app.use(store);
+app.use(i18n);
 
 app.mount('#app');
+export const appLocale = locale;
+

@@ -1,20 +1,35 @@
 <template>
   <div class="page-container" @keydown.esc="$emit('closeCheckinFlow')">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
+
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
-      <span class="title-text"> Búsqueda de cliente habitual </span>
+      <span class="title-text">
+        {{ $t('regular_customer_search') }}
+      </span>
     </div>
-    <div class="step-subtitle">Búsqueda por nombre, dni, email, tlf...</div>
+
+    <div class="step-subtitle">{{ $t('search_by') }}</div>
+
     <div class="autocomplete-customer-search">
       <AutocompleteComponent
         :items="itemsAutocompleteCustomer"
@@ -51,16 +66,14 @@
       v-if="existingCheckinPartner && !isExistingCheckinPartnerAlreadyInReservation"
     >
       <span>
-        Este huésped ya existe en el sistema.<br />
+        {{ $t('guest_already_exists') }}<br />
         <span v-if="!isExistingCheckinPartnerMandatoryDataComplete">
           <br />
-          <b>Datos del huésped incompletos.</b>
-          <br />
-          Falta información obligatoria según la normativa legal. Por favor, actualiza los datos
-          antes de realizar el check-in.
+          <b>{{ $t('guest_data_incomplete') }}</b><br />
+          {{ $t('guest_data_update_required') }}
         </span>
         <span v-else>
-          Por favor, comprueba que los datos estén actualizados antes de hacer su check-in.
+          {{ $t('guest_data_confirm') }}
         </span>
       </span>
     </div>
@@ -70,17 +83,18 @@
       v-else-if="isExistingCheckinPartnerAlreadyInReservation"
     >
       <span>
-        <b>Este huésped ya se encuentra registrado en la reserva</b>
-        <br />
-        Por favor, antes de completar el check-in, verifica que no hay huéspedes duplicados.
+        <b>{{ $t('guest_already_in_reservation') }}</b><br />
+        {{ $t('guest_check_duplicates') }}
       </span>
     </div>
+
     <div class="checkin-flow-card">
       <slot
         name="checkin-flow-card"
         v-if="existingCheckinPartner && !isExistingCheckinPartnerAlreadyInReservation"
       />
     </div>
+
     <div class="btns-container">
       <div
         class="existing-btns"
@@ -93,13 +107,16 @@
           id="btn-save-existing-partner"
         >
           {{
-            checkinPartnersToComplete.length - 1 > 0 ? 'Continuar con siguiente huésped' : 'Guardar'
+            checkinPartnersToComplete.length - 1 > 0
+              ? $t('continue_with_next_guest')
+              : $t('save')
           }}
         </button>
       </div>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import {
   defineComponent,

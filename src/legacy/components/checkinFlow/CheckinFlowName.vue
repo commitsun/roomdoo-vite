@@ -1,25 +1,40 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      Datos {{ currentIndexCheckin + 1
-      }}<sup class="sup">{{
-        currentIndexCheckin === 0 || currentIndexCheckin === 2 ? 'er' : 'o'
-      }}</sup>
-      huésped
+      {{
+        $t('guest_data_title', { index: currentIndexCheckin + 1 })
+      }}
+      <sup>
+        {{
+          currentIndexCheckin === 0
+            ? $t('ordinal_1')
+            : currentIndexCheckin === 1
+            ? $t('ordinal_2')
+            : currentIndexCheckin === 2
+            ? $t('ordinal_3')
+            : $t('ordinal_other')
+        }}
+      </sup>
+      {{ $t('guest') }}
     </div>
+
     <div class="step-title">
       <span class="step">
         {{ step }}
         <img src="/app-images/back-arrow-blue.svg" />
       </span>
       <span class="title-text">
-        {{ (textTitle as string).charAt(0).toUpperCase() + textTitle.slice(1) }}
+        {{ textTitle }}
         <span class="asterisk">*</span>
       </span>
     </div>
-    <span class="step-subtitle"> Introducir {{ textTitle }} </span>
+
+    <span class="step-subtitle">
+      {{ $t('enter_field', { field: textTitle }) }}
+    </span>
+
     <div class="input-wrap" v-if="!isHiddenFirstName">
-      <span class="input-label"> Nombre </span>
+      <span class="input-label"> {{ $t('first_name') }} </span>
       <InputText
         v-model="firstname"
         @keydown.enter="nextFieldAfterLastNameField()"
@@ -31,19 +46,13 @@
         class="input-text"
       />
       <div v-if="validator.firstname.$errors.length > 0" class="input-error">
-        <CustomIcon
-          imagePath="/app-images/icon-alert.svg"
-          color="#982113"
-          width="12px"
-          height="12px"
-        />
-        <span>
-          {{ validator.firstname.$errors[0].$message }}
-        </span>
+        <CustomIcon imagePath="/app-images/icon-alert.svg" color="#982113" width="12px" height="12px" />
+        <span>{{ validator.firstname.$errors[0].$message }}</span>
       </div>
     </div>
+
     <div class="input-wrap" v-if="!isHiddenLastName">
-      <span class="input-label"> Primer apellido </span>
+      <span class="input-label"> {{ $t('last_name') }} </span>
       <InputText
         v-model="lastname"
         @keydown.enter="nextFieldAfterFirstNameField()"
@@ -55,20 +64,13 @@
         class="input-text"
       />
       <div v-if="validator.lastname.$errors.length > 0" class="input-error">
-        <CustomIcon
-          :imagePath="'/app-images/icon-alert.svg'"
-          :color="'#982113'"
-          :width="'12px'"
-          :height="'12px'"
-        />
-        <span>
-          {{ validator.lastname.$errors[0].$message }}
-        </span>
+        <CustomIcon imagePath="/app-images/icon-alert.svg" color="#982113" width="12px" height="12px" />
+        <span>{{ validator.lastname.$errors[0].$message }}</span>
       </div>
     </div>
 
     <div class="input-wrap" v-if="(!isHiddenLastName2 && isSpanishGuest) || isUnderFourteen">
-      <span class="input-label"> Segundo apellido </span>
+      <span class="input-label"> {{ $t('second_last_name') }} </span>
       <InputText
         v-model="lastname2"
         @keydown.enter="nextStep"
@@ -80,22 +82,19 @@
         class="input-text"
       />
       <div v-if="validator.lastname2.$errors.length > 0" class="input-error">
-        <CustomIcon
-          :imagePath="'/app-images/icon-alert.svg'"
-          :color="'#982113'"
-          :width="'12px'"
-          :height="'12px'"
-        />
-        <span>
-          {{ validator.lastname2.$errors[0].$message }}
-        </span>
+        <CustomIcon imagePath="/app-images/icon-alert.svg" color="#982113" width="12px" height="12px" />
+        <span>{{ validator.lastname2.$errors[0].$message }}</span>
       </div>
     </div>
+
     <div class="btn-continue-container">
-      <button class="btn-continue" @click="nextStep()" v-if="!validator.$invalid">Aceptar</button>
+      <button class="btn-continue" @click="nextStep()" v-if="!validator.$invalid">
+        {{ $t('accept') }}
+      </button>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import {
   defineComponent,
@@ -110,6 +109,7 @@ import useVuelidate from '@vuelidate/core';
 import { required, requiredIf, helpers } from '@vuelidate/validators';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -164,6 +164,7 @@ export default defineComponent({
   },
 
   setup(props, context) {
+    const { t } = useI18n();
     let hasEmittedNext = false;
     const firstname = ref('');
     const lastname = ref('');
@@ -172,14 +173,14 @@ export default defineComponent({
 
     const validationRules = computed(() => ({
       firstname: {
-        required: helpers.withMessage('El nombre es obligatorio', required),
+        required: helpers.withMessage(t('first_name_required'), required),
       },
       lastname: {
-        required: helpers.withMessage('El apellido es obligatorio', required),
+        required: helpers.withMessage(t('last_name_required'), required),
       },
       lastname2: {
         required: helpers.withMessage(
-          'El 2º apellido es obligatorio',
+          t('second_last_name_required'),
           requiredIf(props.isSpanishGuest)
         ),
       },
@@ -290,17 +291,17 @@ export default defineComponent({
       }
 
       if (!props.isHiddenFirstName && !props.isHiddenLastName && !props.isHiddenLastName2) {
-        textTitle.value = 'nombre y apellidos';
+        textTitle.value = t('full_name');
       } else if (!props.isHiddenFirstName && props.isHiddenLastName && props.isHiddenLastName2) {
-        textTitle.value = 'nombre';
+        textTitle.value = t('first_name');
       } else if (props.isHiddenFirstName && !props.isHiddenLastName && !props.isHiddenLastName2) {
-        textTitle.value = 'apellidos';
+        textTitle.value = t('last_names');
       } else if (props.isHiddenFirstName && !props.isHiddenLastName && props.isHiddenLastName2) {
-        textTitle.value = 'primer apellido';
+        textTitle.value = t('last_name');
       } else if (props.isHiddenFirstName && props.isHiddenLastName && !props.isHiddenLastName2) {
-        textTitle.value = 'segundo apellido';
+        textTitle.value = t('second_last_name');
       } else if (!props.isHiddenFirstName && props.isHiddenLastName && !props.isHiddenLastName2) {
-        textTitle.value = 'nombre y segundo apellido';
+        textTitle.value = t('first_and_second_name');
       }
       if (firstnameInputRef.value) {
         firstnameInputRef.value.focus();
