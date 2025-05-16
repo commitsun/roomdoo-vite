@@ -1239,13 +1239,6 @@ export default defineComponent({
     const saveChanges = async () => {
       void store.dispatch('layout/showSpinner', true);
       try {
-        if (currentReservation.value?.isSplitted) {
-          dialogService.open({
-            header: 'Operación no permitida',
-            content: 'Operación no permitida en reservas partidas',
-          });
-          return;
-        }
         let pricePerNight = fixedPriceByNight.value;
 
         if (isFixedPriceTotalReservation.value) {
@@ -1263,7 +1256,7 @@ export default defineComponent({
                 : el?.price,
             discount:
               isFixedPriceByNight.value || isFixedPriceTotalReservation.value ? 0 : el?.discount,
-            roomId: currentReservationLines.value[0].roomId,
+            roomId: el.roomId,
             pmsPropertyId: store.state.properties.activeProperty?.id,
             reservationId: currentReservation.value?.id,
           }));
