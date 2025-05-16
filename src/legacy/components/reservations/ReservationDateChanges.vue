@@ -85,16 +85,7 @@
               </div>
             </div>
             <div class="select-container">
-              <select
-                v-if="item.reservationLine"
-                v-model="item.reservationLine.roomId"
-                _change="
-                  selectRoomIdPerNight(
-                    parseInt(($event.target as HTMLSelectElement).value, 10),
-                    item.reservationLineId ?? 0
-                  )
-                "
-              >
+              <select v-if="item.reservationLine" v-model="item.reservationLine.roomId">
                 <option
                   v-for="room in item.rooms"
                   :key="room.id"
