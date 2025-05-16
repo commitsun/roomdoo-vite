@@ -368,7 +368,6 @@ import { usePlanning } from '@/legacy/utils/usePlanning';
 import { dialogService } from '@/legacy/services/DialogService';
 import { useStore } from '@/legacy/store';
 import type { RoomInterface } from '@/legacy/interfaces/RoomInterfaces';
-import type { AxiosResponse } from 'axios';
 import type { AvailabilityPerDayInterface } from '@/legacy/interfaces/AvailabilityPerDayInterface';
 
 interface CalendarChangeDatesInterface {
