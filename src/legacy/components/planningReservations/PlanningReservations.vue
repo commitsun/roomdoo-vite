@@ -159,6 +159,7 @@
             v-for="room in planning.filter((el) => filteredRoomIds.includes(el.roomId))"
             :key="room.roomId"
             class="room-left"
+            :roomId="room.roomId"
           >
             <div class="line" />
             <div class="room-info">

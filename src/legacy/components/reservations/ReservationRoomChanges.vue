@@ -285,13 +285,7 @@ import { dialogService } from '@/legacy/services/DialogService';
 
 import type { AmenityInterface } from '@/legacy/interfaces/AmenityInterface';
 import type { RoomInterface } from '@/legacy/interfaces/RoomInterfaces';
-
-interface AvailabilityPerDayInterface {
-  date: Date;
-  rooms?: RoomInterface[];
-  reservationLineId?: number;
-  roomId?: number;
-}
+import type { AvailabilityPerDayInterface } from '@/legacy/interfaces/AvailabilityPerDayInterface';
 
 interface GroupedAmenitiesAmenityInterface {
   id: number;

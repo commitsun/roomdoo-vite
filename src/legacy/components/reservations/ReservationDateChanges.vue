@@ -60,6 +60,55 @@
         </div>
       </div>
     </div>
+    <div class="calendar-container" v-if="currentReservation?.isSplitted">
+      <div class="first">
+        <div class="month-year">{{ dateStartMonth() }} {{ dateStartYear() }}</div>
+      </div>
+      <div class="calendar-content">
+        <div
+          class="day day-name"
+          v-for="day in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']"
+          :key="day"
+        >
+          <span class="long">
+            {{ day }}
+          </span>
+          <span class="short">
+            {{ day[0] }}
+          </span>
+        </div>
+        <div class="day" v-for="(item, index) in calendarDates" :key="index">
+          <div :class="item.reservationLine && !item.new ? 'content' : item.new ? 'new' : 'empty'">
+            <div class="header-day">
+              <div class="month-day">
+                {{ item.date.getDate() }}
+              </div>
+            </div>
+            <div class="select-container">
+              <select
+                v-if="item.reservationLine"
+                v-model="item.reservationLine.roomId"
+                _change="
+                  selectRoomIdPerNight(
+                    parseInt(($event.target as HTMLSelectElement).value, 10),
+                    item.reservationLineId ?? 0
+                  )
+                "
+              >
+                <option
+                  v-for="room in item.rooms"
+                  :key="room.id"
+                  :value="room.id"
+                  :selected="item.reservationLine && item.reservationLine.roomId === room.id"
+                >
+                  {{ room.shortName }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="option" v-if="currentReservation?.pricelistId">
       <span> Establecer el precio según la tarifa asignada</span>
@@ -327,12 +376,16 @@ import utilsDates, { localeSpain, ONE_DAY_IN_MS } from '@/legacy/utils/dates';
 import { usePlanning } from '@/legacy/utils/usePlanning';
 import { dialogService } from '@/legacy/services/DialogService';
 import { useStore } from '@/legacy/store';
+import type { RoomInterface } from '@/legacy/interfaces/RoomInterfaces';
+import type { AxiosResponse } from 'axios';
+import type { AvailabilityPerDayInterface } from '@/legacy/interfaces/AvailabilityPerDayInterface';
 
 interface CalendarChangeDatesInterface {
   date: Date;
   reservationLine?: ReservationLineInterface;
   new: boolean;
   isInRange: boolean;
+  rooms?: RoomInterface[];
 }
 
 export default defineComponent({
@@ -347,9 +400,7 @@ export default defineComponent({
     const store = useStore();
     const route = useRoute();
     const { refreshPlanning } = usePlanning();
-
     const localeValue = ref(localeSpain);
-
     const checkinDate = ref(new Date());
     const checkoutDate = ref(new Date());
     const newRange = ref([] as Date[]);
@@ -364,9 +415,8 @@ export default defineComponent({
     const price = ref(0);
     const discount = ref(0);
     const calendarDates = ref([] as CalendarChangeDatesInterface[]);
-
+    const availabilityPerDay = ref([] as AvailabilityPerDayInterface[]);
     const pricelistName = ref('no pricelist found');
-
     const saleChannels = computed(() => store.state.saleChannels.saleChannels);
     const availableRooms = computed(() => store.state.rooms.rooms);
     const activeProperty = computed(() => store.state.properties.activeProperty);
@@ -409,6 +459,7 @@ export default defineComponent({
       }
       return true;
     };
+
     const validationRules = computed(() => ({
       price: {
         required,
@@ -434,16 +485,15 @@ export default defineComponent({
       return result;
     };
 
-    const saveChanges = async () => {
-      // if reservation is splitted, abort the operation
-      if (currentReservation.value?.isSplitted) {
-        dialogService.open({
-          header: 'Operación no permitida',
-          content: 'Operación no permitida en reservas parrtidas.',
-          btnAccept: 'Ok',
-        });
-        return;
+    const dateStartYear = () => {
+      let result = '';
+      if (currentReservation.value) {
+        result = new Date(currentReservation?.value.checkin).getFullYear().toString();
       }
+      return result;
+    };
+
+    const saveChanges = async () => {
       const reservationLines = calendarDates.value
         .filter((el) => el.isInRange)
         .map((el) => el.reservationLine)
@@ -451,7 +501,7 @@ export default defineComponent({
           date: el?.date,
           price: el?.price,
           discount: el?.discount,
-          roomId: currentReservationLines.value[0].roomId,
+          roomId: el.roomId,
           pmsPropertyId: activeProperty.value?.id,
           reservationId: currentReservation.value?.id,
         }));
@@ -482,7 +532,35 @@ export default defineComponent({
       }
     };
 
-    const buildCalendarDates = () => {
+    const buildAvailabilityPerDay = async () => {
+      availabilityPerDay.value = [];
+      await Promise.all(
+        utilsDates.getDatesRange(checkinDate.value, checkoutDate.value).map(async (date) => {
+          const oneDayAfter = new Date(date);
+          oneDayAfter.setDate(date.getDate() + 1);
+          const response = await store.dispatch('rooms/fetchRoomsByAvailability', {
+            pmsPropertyId: activeProperty.value?.id,
+            availabilityFrom: date,
+            availabilityTo: oneDayAfter,
+            pricelistId: currentFolio.value?.pricelistId,
+            currentLines: currentReservationLines.value.map((el) => el.id),
+          });
+          availabilityPerDay.value.push({
+            date,
+            rooms: (response.data as RoomInterface[]).filter(
+              (el) =>
+                el.capacity >= (currentReservation.value?.adults ?? 0) &&
+                el.roomTypeClassId ===
+                  store.state.roomTypes.roomTypes.find(
+                    (el) => el.id === currentReservation.value?.roomTypeId
+                  )?.classId
+            ),
+          });
+        })
+      );
+    };
+
+    const buildCalendarDates = async () => {
       // Assuming firstDayOfWeek = 1 (monday)
       calendarDates.value = [];
       let startDate;
@@ -517,14 +595,13 @@ export default defineComponent({
             isInRange: false,
           };
           if (night) {
-            // this would make sense but spreading the object 'night' but logic bussiness' double check is needed
-            // night.price = isFixedPricePerNight.value ? price.value : night.price;
-            // night.discount = isFixedPricePerNight.value ? discount.value : night.discount;
             item = {
               new: false,
               date,
               reservationLine: night,
               isInRange: true,
+              rooms: availabilityPerDay.value.find((el) => el.date.getTime() === date.getTime())
+                ?.rooms,
             };
           } else if (
             currentReservation.value &&
@@ -537,6 +614,8 @@ export default defineComponent({
             item = {
               new: true,
               date,
+              rooms: availabilityPerDay.value.find((el) => el.date.getTime() === date.getTime())
+                ?.rooms,
               reservationLine: {
                 pmsPropertyId: activeProperty.value?.id ?? -1,
                 date,
@@ -637,6 +716,7 @@ export default defineComponent({
             void store.dispatch('layout/showSpinner', false);
           }
         }
+        await buildAvailabilityPerDay();
         buildCalendarDates();
       }
     });
@@ -666,6 +746,7 @@ export default defineComponent({
             void store.dispatch('layout/showSpinner', false);
           }
         }
+        await buildAvailabilityPerDay();
         buildCalendarDates();
       }
     });
@@ -691,6 +772,7 @@ export default defineComponent({
         );
         pricelistName.value = store.state.pricelists.restrictedPricelist?.name ?? '';
       }
+      await buildAvailabilityPerDay();
     });
 
     return {
@@ -730,6 +812,7 @@ export default defineComponent({
       isDiscountError,
 
       dateStartMonth,
+      dateStartYear,
       pricelistName,
       ONE_DAY_IN_MS,
       saveChanges,
@@ -836,18 +919,23 @@ export default defineComponent({
               }
             }
           }
-          .inputs {
-            width: 100%;
-            label,
-            input {
-              font-size: 0.55rem;
-            }
-            input {
+          .select-container {
+            select {
+              &:focus {
+                outline: none !important;
+              }
+              text-align: center;
+
               width: 100%;
-              padding-left: 0.2rem;
-              height: 20px;
-              font-size: 0.7rem;
-              border: 1px solid black;
+              overflow: hidden;
+              overflow-wrap: break-word;
+              display: inline-block;
+              white-space: pre-line;
+              color: $primary;
+              font-weight: bold;
+              border: none;
+              background-color: white;
+              font-size: 1.1rem;
             }
           }
         }
