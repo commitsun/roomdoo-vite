@@ -60,7 +60,7 @@
         </div>
       </div>
     </div>
-    <div class="calendar-container" v-if="currentReservation?.isSplitted">
+    <div class="calendar-container splitted-container" v-if="currentReservation?.isSplitted">
       <div class="first">
         <div class="month-year">{{ dateStartMonth() }} {{ dateStartYear() }}</div>
       </div>
@@ -329,13 +329,23 @@
         </span>
       </div>
     </div>
+
     <div class="buttons">
       <AppButton
         :label="'Guardar'"
         @click="saveChanges()"
         class="button"
-        :disabled="isPriceError || isDiscountError"
-        :class="{ disabled: isPriceError || isDiscountError }"
+        :disabled="
+          isPriceError ||
+          isDiscountError ||
+          (someReservationLineInRangeWithNoRoom && currentReservation.isSplitted)
+        "
+        :class="{
+          disabled:
+            isPriceError ||
+            isDiscountError ||
+            (someReservationLineInRangeWithNoRoom && currentReservation.isSplitted),
+        }"
       />
       <AppButton
         :label="'Cancelar'"
@@ -462,6 +472,10 @@ export default defineComponent({
       },
     }));
 
+    const someReservationLineInRangeWithNoRoom = computed(() => {
+      return calendarDates.value.some((el) => el.isInRange && el.reservationLine?.roomId === -1);
+    });
+
     const validator = useVuelidate(validationRules, {
       price,
       discount,
@@ -491,7 +505,9 @@ export default defineComponent({
           date: el?.date,
           price: el?.price,
           discount: el?.discount,
-          roomId: el.roomId,
+          roomId: currentReservation.value?.isSplitted
+            ? el?.roomId
+            : currentReservation.value?.preferredRoomId,
           pmsPropertyId: activeProperty.value?.id,
           reservationId: currentReservation.value?.id,
         }));
@@ -782,6 +798,7 @@ export default defineComponent({
       isFixedPricePerNight,
       price,
       discount,
+      someReservationLineInRangeWithNoRoom,
 
       calendarDates,
       isDiscountShowedAsPercentage,
@@ -928,6 +945,20 @@ export default defineComponent({
               font-size: 1.1rem;
             }
           }
+          .inputs {
+            width: 100%;
+            label,
+            input {
+              font-size: 0.55rem;
+            }
+            input {
+              width: 100%;
+              padding-left: 0.2rem;
+              height: 20px;
+              font-size: 0.7rem;
+              border: 1px solid black;
+            }
+          }
         }
         .empty {
           background-color: $tertiary;
@@ -942,6 +973,9 @@ export default defineComponent({
         }
       }
     }
+  }
+  .splitted-container {
+    margin-top: 1rem;
   }
   .preview-changes {
     display: flex;
