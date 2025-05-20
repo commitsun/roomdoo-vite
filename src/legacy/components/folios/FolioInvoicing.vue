@@ -336,7 +336,7 @@ export default defineComponent({
         }
         total += subTotal;
       });
-      return total.toFixed(2);
+      return Number(total.toFixed(2));
     };
 
     const getTotalToInvoiceWithPartner = (partnerId: number) => {
