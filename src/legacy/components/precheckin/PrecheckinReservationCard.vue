@@ -125,6 +125,8 @@ import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import ShareLinkModal from '@/legacy/components/precheckin/ShareLinkModal.vue';
 import { dialogService } from '@/legacy/services/DialogService';
 import { useI18n } from 'vue-i18n';
+import {useRoute, useRouter} from 'vue-router';
+import { selectedLang } from '@/plugins/locale';
 export default defineComponent({
   components: {
     CustomIcon,
@@ -179,6 +181,8 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
+    const route = useRoute();
+    const router = useRouter();
     const pathToShare = ref('');
     const shareReservationLink = () => {
       const baseUrl = window.location.href.split('/').slice(0, 3).join('/');
@@ -203,8 +207,13 @@ export default defineComponent({
     };
 
     const openReservationCheckin = () => {
-      const baseUrl = window.location.href.split('/').slice(0, 3).join('/');
-      window.location.href = `${baseUrl}/${props.id}/precheckin-reservation/${props.accessToken}?wizard=true`;
+      const langParam = route.params.lang || selectedLang.value;
+      router.push({
+        path: `/${props.id}/precheckin-reservation/${props.accessToken}/${langParam}`,
+        query: {
+          wizard: 'true',
+        },
+      });
     };
 
     return {

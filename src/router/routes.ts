@@ -71,7 +71,7 @@ const routes: RouteRecordRaw[] = [
   },
   // folio precheckin
   {
-    path: '/:folioId([^/]+)/precheckin/:folioToken([^/]+)',
+    path: '/:folioId([^/]+)/precheckin/:folioToken([^/]+)/:lang([a-z]{2})?',
     component: () => import('@/legacy/layouts/PublicLayout.vue'),
     children: [
       {
@@ -81,9 +81,10 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+
   // reservation precheckin
   {
-    path: '/:reservationId([^/]+)/precheckin-reservation/:reservationToken([^/]+)',
+    path: '/:reservationId([^/]+)/precheckin-reservation/:reservationToken([^/]+)/:lang([a-z]{2})?',
     component: () => import('@/legacy/layouts/PublicLayout.vue'),
     children: [
       {
