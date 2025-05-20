@@ -461,6 +461,7 @@ import FolioMessagesComponent from '@/legacy/components/folios/FolioMessagesComp
 import FolioTransactions from '@/legacy/components/folios/FolioTransactions.vue';
 import FolioCheckins from '@/legacy/components/folios/FolioCheckins.vue';
 import FolioInvoicing from '@/legacy/components/folios/FolioInvoicing.vue';
+import { selectedLang } from '@/plugins/locale';
 
 import { usePlanning } from '@/legacy/utils/usePlanning';
 import {
@@ -493,11 +494,8 @@ export default defineComponent({
     const reservation = computed(() => store.state.reservations.currentReservation);
     const currentReservations = computed(() => store.state.reservations.reservations);
     const forceMoveFolioTab = computed(() => store.state.layout.forceMoveFolioTab);
-    const folioPublicLink = computed(
-      () =>
-        `${window.location.origin}/${currentFolio.value?.id ?? 0}/precheckin/${
-          currentFolio.value?.accessToken ?? ''
-        }`
+    const folioPublicLink = computed(() =>
+      `${window.location.origin}/${currentFolio.value?.id ?? 0}/precheckin/${currentFolio.value?.accessToken ?? ''}/${selectedLang}`
     );
 
     const computedFolioClass = computed(() => {

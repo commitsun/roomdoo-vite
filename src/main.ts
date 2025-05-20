@@ -7,32 +7,12 @@ import Aura from '@primeuix/themes/aura';
 import 'primeicons/primeicons.css';
 import { store } from '@/legacy/store';
 import { i18n } from '@/plugins/i18n';
+import { locale } from '@/plugins/locale';
 
-
-import { en_GB } from 'primelocale/js/en_GB.js';
-import { en } from 'primelocale/js/en.js';
-import { es } from 'primelocale/js/es.js';
 
 import '@/assets/style.css';
 import { createHead } from '@vueuse/head';
 import { definePreset } from '@primevue/themes';
-
-const langAndArea = window.navigator.language.split('-');
-let locale;
-if (langAndArea.length > 1) {
-  const country = langAndArea[1].toUpperCase();
-  if (country === 'GB') {
-    locale = en_GB;
-  } else {
-    locale = langAndArea[0] === 'es' ? es : en;
-  }
-} else {
-  if (langAndArea[0] === 'es') {
-    locale = es;
-  } else {
-    locale = en;
-  }
-}
 
 const myPreset = definePreset(Aura, {
   semantic: {

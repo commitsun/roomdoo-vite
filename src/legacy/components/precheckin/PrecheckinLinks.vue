@@ -143,6 +143,8 @@
 import { defineComponent, computed } from 'vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import { useStore } from '@/legacy/store';
+import {useRoute, useRouter} from 'vue-router';
+import { selectedLang } from '@/plugins/locale';
 
 export default defineComponent({
   emits: [
@@ -215,6 +217,8 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
 
+    const route = useRoute();
+    const router = useRouter();
     const folioReservations = computed(() => store.state.precheckin.folioPublicInfo?.reservations);
 
     const downloadFolioPortal = () => {
@@ -232,10 +236,15 @@ export default defineComponent({
     const clickOnCheckinButton = () => {
       if (props.isFolio) {
         if (folioReservations.value?.length === 1) {
-          const baseUrl = window.location.href.split('/').slice(0, 3).join('/');
           const reservationId = folioReservations.value[0].id;
           const reservationToken = folioReservations.value[0].accessToken;
-          window.location.href = `${baseUrl}/${reservationId}/precheckin-reservation/${reservationToken}?wizard=true`;
+          const langParam = route.params.lang || selectedLang.value;
+          router.push({
+            path: `/${reservationId}/precheckin-reservation/${reservationToken}/${langParam}`,
+            query: {
+              wizard: 'true',
+            },
+          });
         } else {
           context.emit('showReservationsForPrecheckin');
         }

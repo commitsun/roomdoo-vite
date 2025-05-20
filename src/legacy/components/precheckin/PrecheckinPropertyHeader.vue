@@ -7,6 +7,35 @@
       height: headerHeight,
     }"
   >
+    <Select
+      v-model="selectedLocale"
+      :options="locales"
+      optionLabel="label"
+      class="select-language"
+      placeholder="Select Language"
+    >
+      <template #option="slotProps">
+        <div class="flex items-center gap-2">
+          <img
+            :src="slotProps.option.flag"
+            alt=""
+            class="w-5 h-5 rounded-full"
+          />
+          <span>{{ slotProps.option.label }}</span>
+        </div>
+      </template>
+
+      <template #value="slotProps">
+        <div class="flex items-center gap-2">
+          <img
+            :src="slotProps.value?.flag"
+            alt=""
+            class="w-5 h-5 rounded-full"
+          />
+          <span>{{ slotProps.value?.label }}</span>
+        </div>
+      </template>
+    </Select>
     <div
       class="overlay"
       :style="{
@@ -41,11 +70,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, markRaw } from 'vue';
+import { defineComponent, ref, computed, markRaw, watch, onMounted } from 'vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import ShareLinkModal from '@/legacy/components/precheckin/ShareLinkModal.vue';
 import { dialogService } from '@/legacy/services/DialogService';
+import Select from 'primevue/select';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { selectedLang } from '@/plugins/locale';
 
 export default defineComponent({
   props: {
@@ -81,9 +113,18 @@ export default defineComponent({
   },
   components: {
     CustomIcon,
+    Select,
   },
   setup(props) {
-    const { t } = useI18n();
+    const { t, locale } = useI18n();
+    const router = useRouter();
+    const route = useRoute();
+    const locales = ref([
+      { label: 'Español', value: 'es', flag: '/country-flags/es.svg' },
+      { label: 'English', value: 'en', flag: '/country-flags/gb.svg' },
+    ]);
+    const selectedLocale = ref(locales.value.find(l => l.value === locale.value));
+
     const currentPath = `${window.location.href}`;
     const pmsPropertyLocation = computed(() => {
       let result = '';
@@ -129,9 +170,50 @@ export default defineComponent({
       void navigator.clipboard.writeText(currentPath);
     };
 
+    watch(selectedLocale, (newLocale) => {
+      if (newLocale?.value) {
+        locale.value = newLocale.value;
+        const newParams = { ...route.params, lang: newLocale.value };
+        router.push({ name: route.name!, params: newParams });
+      }
+    });
+
+    // onMounted(() => {
+    //   const langUrl = route.params.lang;
+    //   const availableLocale = locales.value.find(l => l.value === langUrl);
+
+    //   const fallbackLocale = locales.value.find(l => l.value === selectedLang); 
+
+    //   const finalLocale = availableLocale || fallbackLocale || locales.value[0]; 
+
+    //   selectedLocale.value = finalLocale;
+    //   locale.value = finalLocale.value;
+    // });
+
+    onMounted(() => {
+      const langUrl = route.params.lang as string | undefined;
+
+      let languageCode: string;
+
+      if (langUrl && ['en', 'es'].includes(langUrl)) {
+        languageCode = langUrl;
+      } else {
+        const browserLang = window.navigator.language.toLowerCase().substring(0, 2);
+        languageCode = ['es', 'gl', 'ca'].includes(browserLang) ? 'es' : 'en';
+      }
+
+      const selected = locales.value.find(l => l.value === languageCode);
+      selectedLocale.value = selected ?? locales.value[1]; // fallback a 'en'
+      locale.value = selectedLocale.value.value;
+    });
+
+
+
     return {
       currentPath,
       pmsPropertyLocation,
+      selectedLocale,
+      locales,
       shareLink,
       shareLinkViaWhatsapp,
       shareLinkViaTelegram,
@@ -151,10 +233,21 @@ export default defineComponent({
   padding-top: 25px;
   position: relative;
   background-size: cover;
+  .select-language {
+    position: absolute;
+    top: 20px;
+    left: 15px;
+    z-index: 1;
+    width: 130px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   .link-share-row {
     position: absolute;
-    top: 25px;
-    right: 20px;
+    top: 20px;
+    right: 15px;
     display: flex;
     justify-content: flex-end;
     .link-share {
