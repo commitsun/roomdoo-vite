@@ -221,6 +221,9 @@ export default defineComponent({
 
     const createOrEditTransaction = async () => {
       let partnerId = null;
+      const year = chargeDate.value.getFullYear();
+      const month = String(chargeDate.value.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+      const day = String(chargeDate.value.getDate()).padStart(2, '0');
 
       if (partnerName.value && store.state.partners.currentPartner) {
         partnerId = store.state.partners.currentPartner?.id;
@@ -230,7 +233,7 @@ export default defineComponent({
         journalId: accountJournal.value,
         pmsPropertyId: activeProperty.value?.id,
         amount: amount.value,
-        date: chargeDate.value,
+        date: `${year}-${month}-${day}`,
         transactionType:
           props.isCustomer && props.transaction
             ? props.transaction.transactionType
