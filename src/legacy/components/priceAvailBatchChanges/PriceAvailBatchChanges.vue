@@ -757,8 +757,8 @@ export default defineComponent({
 
       if (applyOn.value.code === 'availabilityPlan') {
         const availabilityPlanRules = [] as PayloadCreateAvailPlanRuleInterface[];
-        availabilityPlans.value.forEach((avPlanId) => {
-          roomTypes.value.forEach((rtId) => {
+        selectedAvailabilityPlans.value.forEach((avPlanId) => {
+          selectedRoomTypeIds.value.forEach((rtId) => {
             dates.forEach((date) => {
               const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1)
                 .toString()
@@ -834,8 +834,8 @@ export default defineComponent({
         }
       } else {
         const pricelistItems: PayloadCreatePricelistItemInterface[] = [];
-        pricelists.value.forEach((pricelist) => {
-          roomTypes.value.forEach((rtId) => {
+        selectedPricelists.value.forEach((pricelist) => {
+          selectedRoomTypeIds.value.forEach((rtId) => {
             dates.forEach((date) => {
               const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1)
                 .toString()
