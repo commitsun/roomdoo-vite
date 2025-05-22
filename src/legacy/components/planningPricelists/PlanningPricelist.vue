@@ -42,6 +42,7 @@
           <CellPricelistItemAvailabilityPlanRule
             :indexDay="indexDay"
             :indexRoomType="indexRoomType"
+            :roomTypeIdsToFilter="roomTypeIdsToFilter"
             :freeRooms="item.freeRooms"
             :roomTypeId="el.roomTypeId"
             :date="item.date"

@@ -1,7 +1,7 @@
 <template>
   <div
     :id="id"
-    :style="stylePosition(indexDay, indexRoomType)"
+    :style="stylePosition()"
     v-if="oldAvailabilityPlanRule && oldPricelistItem"
     class="edit-dialog"
   >
@@ -309,6 +309,10 @@ export default defineComponent({
       type: Number,
       required: true,
     },
+    roomTypeIdsToFilter: {
+      type: Array,
+      required: true,
+    },
     roomTypeId: {
       type: Number,
       required: true,
@@ -523,23 +527,26 @@ export default defineComponent({
     });
 
     // styles
-    const stylePosition = (indexDay: number, indexRoomType: number) => {
+    const stylePosition = () => {
       let style = '';
-      if (indexDay > 22) {
+
+      if (props.indexDay > 22) {
         style += 'right: 35px;';
       } else {
         style += 'left: 144px;';
       }
-      if (
-        store.state.roomTypes.roomTypes.length === 1 ||
-        store.state.roomTypes.roomTypes.length === 2
-      ) {
-        style += 'top: 0;';
-      } else if (store.state.roomTypes.roomTypes.length - indexRoomType <= 1) {
-        style += 'bottom: 0;';
-      } else {
-        style += 'top: 5px;';
+
+
+      let heightPosition = 'top: 0;';
+
+      if (props.roomTypeIdsToFilter.length > 3) {
+        if (props.indexRoomType > 2) {
+          heightPosition = 'bottom: 0;';
+        }
       }
+
+      style += heightPosition;
+
       return style;
     };
 

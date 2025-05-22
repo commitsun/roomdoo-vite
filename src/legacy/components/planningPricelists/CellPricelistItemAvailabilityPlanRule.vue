@@ -34,8 +34,7 @@
         />
       </div>
     </div>
-    <hr :class="quota === 0 || maxAvail === 0 || closed ? 'red' : ''" />
-
+    <hr :class="(quota === 0 || maxAvail === 0 || closed) ? 'red' : (freeRooms === 0) ? 'grey' : ''" />
     <!-- QUOTA -->
     <div
       v-if="activeUser?.availabilityRuleFields?.includes('quota')"
@@ -267,6 +266,7 @@
       :id="currentPopUp"
       :indexDay="indexDay"
       :indexRoomType="indexRoomType"
+      :roomTypeIdsToFilter="roomTypeIdsToFilter"
       :roomTypeId="roomTypeId"
       :roomTypeName="roomTypeName(roomTypeId)"
       :pricelistItem="{
@@ -329,6 +329,10 @@ export default defineComponent({
     },
     indexRoomType: {
       type: Number,
+      required: true,
+    },
+    roomTypeIdsToFilter: {
+      type: Array as () => number[],
       required: true,
     },
     roomTypeId: {
@@ -876,6 +880,9 @@ export default defineComponent({
     margin-bottom: 0;
     &.red {
       border-top: 3px solid red;
+    }
+    &.grey {
+      border-top: 3px solid #808080;
     }
   }
 }
