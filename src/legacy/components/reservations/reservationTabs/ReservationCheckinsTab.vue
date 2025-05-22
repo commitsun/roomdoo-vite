@@ -329,7 +329,7 @@ export default defineComponent({
             store.state.reservations.currentReservation?.id
           ),
         ]);
-        if (router.currentRoute.value.path === '/planning/') {
+        if (router.currentRoute.value.name === 'planning') {
           await store.dispatch('planning/fetchPlanning', {
             dateStart: store.state.planning.dateStart,
             dateEnd: store.state.planning.dateEnd,
@@ -365,7 +365,7 @@ export default defineComponent({
             store.state.reservations.currentReservation?.id
           ),
         ]);
-        if (router.currentRoute.value.path === '/planning/') {
+        if (router.currentRoute.value.name === 'planning') {
           await store.dispatch('planning/fetchPlanning', {
             dateStart: store.state.planning.dateStart,
             dateEnd: store.state.planning.dateEnd,

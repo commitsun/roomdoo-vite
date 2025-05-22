@@ -408,7 +408,7 @@ export default defineComponent({
           store.dispatch('reservations/fetchReservations', currentFolio.value?.id),
           store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
         ]);
-        if (router.currentRoute.value.path === '/planning/') {
+        if (router.currentRoute.value.name === 'planning') {
           await store.dispatch('planning/fetchPlanning', {
             dateStart: store.state.planning.dateStart,
             dateEnd: store.state.planning.dateEnd,
@@ -450,7 +450,7 @@ export default defineComponent({
           store.dispatch('reservations/fetchReservations', currentFolio.value?.id),
           store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
         ]);
-        if (router.currentRoute.value.path === '/planning/') {
+        if (router.currentRoute.value.name === 'planning') {
           await store.dispatch('planning/fetchPlanning', {
             dateStart: store.state.planning.dateStart,
             dateEnd: store.state.planning.dateEnd,

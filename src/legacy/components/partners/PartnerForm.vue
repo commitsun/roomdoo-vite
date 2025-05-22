@@ -544,6 +544,7 @@ import { dialogService } from '@/legacy/services/DialogService';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import type { PartnerInterface } from '@/legacy/interfaces/PartnerInterface';
 import type { AxiosResponse } from 'axios';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   props: {
@@ -576,6 +577,8 @@ export default defineComponent({
     const { fetchPartners } = usePartner();
     const { refreshPlanning } = usePlanning();
     const store = useStore();
+    const router = useRouter();
+
     // consts
     const contactTypeOptions = [
       { label: 'Particular', value: 'person' },
@@ -929,7 +932,9 @@ export default defineComponent({
         });
         await store.dispatch('partners/fetchCurrentPartner', partnerId);
         context.emit('partnerCreated');
-        await refreshPlanning();
+        if (router.currentRoute.value.name === 'planning') {
+          await refreshPlanning();
+        }
         context.emit('accept');
       } catch {
         dialogService.open({

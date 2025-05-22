@@ -202,7 +202,7 @@ export function useCheckinPartner() {
           store.state.folios.currentFolio?.id
         ),
       ]);
-      if (router.currentRoute.value.path === '/planning/') {
+      if (router.currentRoute.value.name === 'planning') {
         await store.dispatch('planning/fetchPlanning', {
           dateStart: store.state.planning.dateStart,
           dateEnd: store.state.planning.dateEnd,
@@ -256,7 +256,7 @@ export function useCheckinPartner() {
         btnAccept: 'Ok',
       });
     } finally {
-      if (router.currentRoute.value.path === '/planning/') {
+      if (router.currentRoute.value.name === 'planning') {
         await store.dispatch('planning/fetchPlanning', {
           dateStart: store.state.planning.dateStart,
           dateEnd: store.state.planning.dateEnd,
