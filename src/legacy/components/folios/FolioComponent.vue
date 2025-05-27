@@ -57,7 +57,7 @@
                       .length === currentReservations?.length
                   )
                 "
-                @click="openBatchChangesDialog(currentFolio?.id)"
+                @click="openBatchChangesDialog(currentFolio)"
               >
                 Modificación en lote
               </div>
@@ -207,7 +207,7 @@
                 </div>
                 <div
                   v-if="isAllowedBatchChanges(currentFolio, currentReservations)"
-                  @click="openBatchChangesDialog(currentFolio.id)"
+                  @click="openBatchChangesDialog(currentFolio)"
                 >
                   Modificación en lote
                 </div>
@@ -405,8 +405,8 @@
         </a>
         <div
           class="masive-changes"
-          @click="openBatchChangesDialog(currentFolio?.id)"
-          v-if="currentFolio?.reservationType !== 'out'"
+          @click="openBatchChangesDialog(currentFolio)"
+          v-if="currentFolio && currentFolio?.reservationType !== 'out'"
         >
           <img src="/app-images/icon-list.svg" class="icon" />
           <span> Cambios del folio en lote </span>
@@ -473,6 +473,7 @@ import {
 } from '@/legacy/utils/folio';
 import { dialogService } from '@/legacy/services/DialogService';
 import type { roomTypeClassesInterface } from '@/legacy/interfaces/roomTypeClassesInterface';
+import type { FolioInterface } from '@/legacy/interfaces/FolioInterface';
 
 export default defineComponent({
   components: {
@@ -716,10 +717,10 @@ export default defineComponent({
       });
     };
 
-    const openBatchChangesDialog = async (folioId: number | undefined) => {
+    const openBatchChangesDialog = async (folio: FolioInterface) => {
       void store.dispatch('layout/showSpinner', true);
       try {
-        await store.dispatch('reservations/fetchReservations', folioId);
+        await store.dispatch('reservations/fetchReservations', folio.id);
         await store.dispatch('reservationLines/fetchCurrentFolioReservationLines');
 
         await store.dispatch(
@@ -732,7 +733,7 @@ export default defineComponent({
           header: 'CAMBIOS EN LOTE',
           content: markRaw(FolioBatchChanges),
           props: {
-            folioName: currentFolio.value?.name,
+            folio: folio,
             fromBookingEngine: false,
             reservations: reservationsMappedForBatchChanges,
           },

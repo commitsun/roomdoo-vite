@@ -5,8 +5,8 @@ export interface ServiceInterface {
   isBoardService: boolean;
   boardServiceLineId?: number;
   reservationId?: number;
-  id: number;
-  name: string;
+  id?: number;
+  name?: string;
   quantity?: number;
   priceTotal?: number;
   priceSubtotal?: number;

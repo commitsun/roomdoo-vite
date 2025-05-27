@@ -2,7 +2,7 @@
   <div class="main-content">
     <div class="header">
       <div class="folio-name">
-        {{ folioName }}
+        {{ folio.name }}
       </div>
       <div class="prices" v-if="modifiedReservations.filter((el) => el.selected).length > 0">
         <div class="old-price">{{ priceFolioBefore.toFixed(2) }}€</div>
@@ -551,6 +551,7 @@ import type { ReservationLineInterface } from '@/legacy/interfaces/ReservationLi
 import type { ServiceLineInterface } from '@/legacy/interfaces/ServiceLineInterface';
 import type { ProductInterface } from '@/legacy/interfaces/ProductInterface';
 import type { ServiceInterface } from '@/legacy/interfaces/ServiceInterface';
+import type { FolioInterface } from '@/legacy/interfaces/FolioInterface';
 
 export default defineComponent({
   components: {
@@ -566,9 +567,9 @@ export default defineComponent({
     MultiSelect,
   },
   props: {
-    folioName: {
-      type: String,
-      required: false,
+    folio: {
+      type: Object as () => FolioInterface,
+      required: true,
     },
     fromBookingEngine: {
       type: Boolean,
@@ -1559,7 +1560,7 @@ export default defineComponent({
             } else {
               el.reservationLines.forEach((line) => {
                 const oldDiscount = props.reservations[index].reservationLines.find(
-                  (rl) => rl.date.getTime() === line.date.getTime()
+                  (rl) => (rl.date as Date).getTime() === (line.date as Date).getTime()
                 )?.discount;
                 line.discount = oldDiscount ?? 0;
               });
@@ -1585,7 +1586,7 @@ export default defineComponent({
           } else {
             el.reservationLines.forEach((line) => {
               const oldDiscount = props.reservations[index].reservationLines.find(
-                (rl) => rl.date.getTime() === line.date.getTime()
+                (rl) => (rl.date as Date).getTime() === (line.date as Date).getTime()
               )?.discount;
               line.discount = oldDiscount ?? 0;
             });
@@ -1687,105 +1688,57 @@ export default defineComponent({
                   })),
               });
             } else {
-              // FROM FOLIO HEADER
-              // DELETE SERVICES
-              if (!props.fromBookingEngine) {
-                await Promise.all(
-                  calendarServicesToRemove.value.map(async (el) => {
-                    await store.dispatch('services/deleteService', el);
-                  })
-                );
-                calendarServicesToRemove.value = [];
-              }
-              // update reservations
-              await Promise.all(
-                modifiedReservations.value
-                  .filter((reservation) => reservation.selected)
-                  .map(async (reservation) => {
-                    // build board services array
-                    const boardServices = [] as ServiceInterface[];
-                    reservation.extraServices
-                      .filter((s) => s.isBoardService)
-                      .forEach((s) => {
-                        const val = {
-                          productId: s.productId,
-                          isBoardService: s.isBoardService,
-                          boardServiceLineId: s.boardServiceLineId,
-                          serviceLines: s.items.map((l) => ({ ...l })),
-                        } as ServiceInterface;
-                        boardServices.push(val);
-                      });
-                    // update reservation (including previous array)
-                    await store.dispatch('reservations/updateReservation', {
-                      pricelistId: store.state.folios.currentFolio?.pricelistId,
-                      reservationId: reservation.id,
-                      adults: reservation.adults,
-                      children: reservation.children,
-                      boardServiceId: reservation.boardServiceId,
-                      boardServices,
-                      roomTypeId: reservation.roomTypeId,
-                      checkin: reservation.checkin,
-                      checkout: reservation.checkout,
-                      reservationLines: reservation.reservationLines,
-                    });
-                    // for each reservation, iterate over extra services
-                    const servicesToCreate = [] as ServiceInterface[];
-                    const servicesToUpdate = [] as ServiceInterface[];
-                    reservation.extraServices
-                      .filter((s) => !s.isBoardService)
-                      .forEach((s) => {
-                        const val = {
-                          productId: s.productId,
-                          isBoardService: false,
-                          serviceLines: s.items.map((l) => ({ ...l })),
-                        } as ServiceInterface;
-                        if (s.serviceId) {
-                          val.id = s.serviceId;
-                          servicesToUpdate.push(val);
-                        } else {
-                          servicesToCreate.push(val);
-                        }
-                      });
-                    // create services
-                    await Promise.all(
-                      servicesToCreate.map(async (service) => {
-                        await store.dispatch('services/createService', {
-                          reservationId: reservation.id,
-                          productId: service.productId,
-                          serviceLines: service.serviceLines,
-                        });
-                      })
-                    );
-                    // update services
-                    await Promise.all(
-                      servicesToUpdate.map(async (service) => {
-                        await store.dispatch('services/updateService', {
-                          reservationId: reservation.id,
-                          serviceId: service.id,
-                          productId: service.productId,
-                          serviceLines: service.serviceLines,
-                        });
-                      })
-                    );
-                  })
-              );
-              if (route.fullPath.includes('planning')) {
-                await refreshPlanning();
-              }
-              if (store.state.folios.currentFolio) {
-                await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);
-                await store.dispatch(
-                  'reservations/fetchReservations',
-                  store.state.folios.currentFolio.id
-                );
-              } else {
-                await store.dispatch('folios/fetchFolios', {
-                  propertyId: store.state.properties.activeProperty?.id,
-                  dateStart: store.state.planning.dateStart,
-                  dateEnd: store.state.planning.dateEnd,
-                  limit: 40,
-                  offset: 0,
-                });
+              const folio = {
+                reservations: modifiedReservations.value.map((el) => ({
+                  id: el.id,
+                  checkin: el.checkin as Date,
+                  checkout: el.checkout,
+                  adults: el.adults,
+                  children: el.children,
+                  boardServiceId: el.boardServiceId,
+                  reservationLines: el.reservationLines.map((rl) => ({
+                    date: rl.date,
+                    price: rl.price,
+                    discount: rl.discount,
+                    roomId: rl.roomId,
+                  })),
+                  services: el.extraServices.map((s) => {
+                    const serviceData = {
+                      id: s.serviceId,
+                      isBoardService: s.isBoardService,
+                      productId: s.productId,
+                      serviceLines: s.items.map((l) => ({
+                        date: l.date,
+                        discount: l.discount,
+                        priceUnit: l.priceUnit,
+                        quantity: l.quantity,
+                      })),
+                    };
+
+                    if (!s.serviceId) {
+                      delete serviceData.id;
+                    }
+
+                    return serviceData;
+                  }),
+                })),
+              };
+
+              await store.dispatch('folios/updateFolioBatchChanges', {
+                folioId: props.folio.id,
+                reservations: folio.reservations,
+              });
+              await refreshPlanning();
+
+              void store.dispatch('planning/fetchPlanning', {
+                dateStart: store.state.planning.dateStart,
+                dateEnd: store.state.planning.dateEnd,
+                propertyId: store.state.properties.activeProperty?.id,
+                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+              });
+              if (props.folio.id) {
+                void store.dispatch('folios/fetchFolio', props.folio.id);
+                void store.dispatch('reservations/fetchReservations', props.folio.id);
               }
               if (store.state.reservations.currentReservation) {
                 void store.dispatch(
@@ -1800,14 +1753,11 @@ export default defineComponent({
                   'services/fetchServices',
                   store.state.reservations.currentReservation?.id
                 );
+                void store.dispatch(
+                  'reservationServices/fetchReservationServices',
+                  store.state.reservations.currentReservation?.id
+                );
               }
-              await Promise.all([
-                store.dispatch('reservationLines/fetchCurrentFolioReservationLines'),
-                store.dispatch(
-                  'services/fetchFolioServices',
-                  store.state.reservations.reservations?.map((el) => el.id)
-                ),
-              ]);
             }
           } catch {
             dialogService.open({
@@ -1964,7 +1914,7 @@ export default defineComponent({
               line.price = parseFloat(fixedPricePerNight.value) ?? 0;
             } else {
               const previousLine = props.reservations[reservationIndex].reservationLines.find(
-                (el) => el.date.getTime() === line.date.getTime()
+                (el) => (el.date as Date).getTime() === (line.date as Date).getTime()
               );
               if (previousLine) {
                 line.price = previousLine.price;
@@ -1972,8 +1922,9 @@ export default defineComponent({
                 line.price =
                   roomPrices.value
                     .find((roomType) => roomType.roomTypeId === res.roomTypeId)
-                    ?.prices.find((roomPrice) => roomPrice.date.getTime() === line.date.getTime())
-                    ?.price ?? 0;
+                    ?.prices.find(
+                      (roomPrice) => roomPrice.date.getTime() === (line.date as Date).getTime()
+                    )?.price ?? 0;
               }
             }
           });
@@ -2092,25 +2043,26 @@ export default defineComponent({
           el.children = newChildrenValue;
           el.extraServices.forEach((ex) => {
             if (ex.isBoardService) {
+              console.log('isBoardService', ex);
               let qty: number;
               const bsl = boardServicePrices.value.find(
                 (bsli) => bsli.boardServiceLineId === ex.boardServiceLineId
               );
               if (bsl?.isAdults && bsl.isChildren) {
                 qty = newAdultsValue + newChildrenValue;
-              } else if (bsl?.isAdults) {
-                qty = newAdultsValue;
               } else if (bsl?.isChildren) {
                 qty = newChildrenValue;
               } else {
+                qty = newAdultsValue;
               }
               ex.items.forEach((i) => {
-                i.quantity = qty;
+                i.quantity = qty ?? i.quantity;
               });
             } else if (extraServicesProductIdsPerPerson.includes(ex.productId)) {
               ex.items.forEach((i) => {
                 if (adults.value && adults.value >= 1 && adults.value <= maxAdults.value) {
                   i.quantity = adults.value;
+                  console.log(adults.value);
                 } else {
                   i.quantity = props.reservations[index].adults;
                 }

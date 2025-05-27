@@ -1037,6 +1037,7 @@ import type {
   ExtraServiceInterface,
 } from '@/legacy/interfaces/BatchChangesInterface';
 import type { ReservationApiInterface } from '@/legacy/interfaces/ReservationInterface';
+import folio from '@/legacy/utils/folio';
 
 export default defineComponent({
   components: {
@@ -2396,6 +2397,7 @@ export default defineComponent({
         header: 'CAMBIOS EN LOTE',
         content: markRaw(FolioBatchChanges),
         props: {
+          folio: currentFolio.value,
           fromBookingEngine: true,
           reservations: reservationsMappedForBatchChanges,
         },

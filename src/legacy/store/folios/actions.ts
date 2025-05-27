@@ -12,6 +12,7 @@ import type {
 } from '@/legacy/interfaces/PayloadAccountMoveInterface';
 import type { StateInterface } from '../index';
 import type { FoliosStateInterface } from '.';
+import type { ReservationInterface } from '@/legacy/interfaces/ReservationInterface';
 
 const { CancelToken } = axios;
 let cancel: (() => void) | undefined;
@@ -223,6 +224,34 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
       params += `?amount=${payload.amount}`;
     }
     return api.get(`folios/${payload.folioId}/payment-link${params}`);
+  },
+
+  async updateFolioBatchChanges(
+    context,
+    payload: {
+      folioId: number;
+      reservations: ReservationInterface[];
+    }
+  ) {
+    payload.reservations.forEach((res: ReservationInterface) => {
+      res.reservationLines?.forEach((line) => {
+        line.date = `${(line.date as Date).getFullYear()}-${((line.date as Date).getMonth() + 1)
+          .toString()
+          .padStart(2, '0')}-${(line.date as Date).getDate().toString().padStart(2, '0')}`;
+      });
+
+      res.checkin = `${(res.checkin as Date).getFullYear()}-${((res.checkin as Date).getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${(res.checkin as Date).getDate().toString().padStart(2, '0')}`;
+      res.checkout = `${(res.checkout as Date).getFullYear()}-${(
+        (res.checkout as Date).getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}-${(res.checkout as Date).getDate().toString().padStart(2, '0')}`;
+    });
+    // console.log(payload);
+
+    return api.patch(`/folios/p/${payload.folioId}`, payload);
   },
 };
 

@@ -1,4 +1,5 @@
 import { type PlanningReservationLineInterface } from './PlanningReservationLineInterface';
+import type { ReservationLineApiInterface } from './ReservationLineInterface';
 import { type ServiceInterface } from './ServiceInterface';
 
 export interface ReservationInterface {
@@ -11,7 +12,7 @@ export interface ReservationInterface {
   saleChannelId?: number;
   children?: number;
   saleChannel?: string;
-  reservationLines?: PlanningReservationLineInterface[];
+  reservationLines?: PlanningReservationLineInterface[] | ReservationLineApiInterface[];
   services?: ServiceInterface[];
 
   reservationType: string;
@@ -70,4 +71,5 @@ export interface ReservationInterface {
 export interface ReservationApiInterface extends ReservationInterface {
   checkin: string;
   checkout: string;
+  reservationLines?: ReservationLineApiInterface[];
 }
