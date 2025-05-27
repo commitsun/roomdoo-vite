@@ -19,7 +19,7 @@ api.interceptors.response.use(
     if (error.response && error.response.config.url !== '/login') {
       console.error('Axios interceptor error:', error.response);
       if (error.response.status === 403 || error.response.status === 401) {
-        // console.log('Redirecting to login...');
+        // 'Redirecting to login...';
         window.location.href = '/login';
         // Reemplaza con un router push si usas Vue Router
       } else {

@@ -83,7 +83,6 @@ const actions: ActionTree<TransactionsStateInterface, StateInterface> = {
     return api.post('/transactions', payload);
   },
   editTransaction(context, payload: TransactionInterface) {
-    console.log(payload);
     let transactionId = 0;
     if (payload.id) {
       transactionId = payload.id;

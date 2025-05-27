@@ -2043,7 +2043,6 @@ export default defineComponent({
           el.children = newChildrenValue;
           el.extraServices.forEach((ex) => {
             if (ex.isBoardService) {
-              console.log('isBoardService', ex);
               let qty: number;
               const bsl = boardServicePrices.value.find(
                 (bsli) => bsli.boardServiceLineId === ex.boardServiceLineId
@@ -2062,7 +2061,6 @@ export default defineComponent({
               ex.items.forEach((i) => {
                 if (adults.value && adults.value >= 1 && adults.value <= maxAdults.value) {
                   i.quantity = adults.value;
-                  console.log(adults.value);
                 } else {
                   i.quantity = props.reservations[index].adults;
                 }
