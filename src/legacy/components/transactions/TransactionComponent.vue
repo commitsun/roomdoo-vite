@@ -284,13 +284,10 @@ export default defineComponent({
       });
     };
     const restorePartner = () => {
-      console.log('restorePartner');
       void store.dispatch('partners/removePartner');
       partnerName.value = '';
       selectedPartner.value = null;
       selectedPartnerId.value = 0;
-
-      console.log('selectedPartnerId', selectedPartner.value);
     };
 
     const notNegativeNumber = () => {
@@ -322,7 +319,6 @@ export default defineComponent({
     };
 
     watch(selectedPartnerId, () => {
-      console.log('selectedPartnerId', selectedPartnerId.value);
       const partner =
         store.state.partners.partners.find((el) => el.id === selectedPartnerId.value) ?? null;
       selectedPartner.value = partner;
@@ -333,7 +329,6 @@ export default defineComponent({
     });
 
     watch(currentPartner, () => {
-      console.log('currentPartner', currentPartner.value);
       const partner = currentPartner.value;
       selectedPartner.value = partner;
       partnerName.value = partner?.name ?? null;
@@ -369,10 +364,6 @@ export default defineComponent({
             await store
               .dispatch('partners/fetchCurrentPartner', props.transaction.partnerId)
               .then(() => {
-                console.log(
-                  'store.state.partners.currentPartner',
-                  store.state.partners.currentPartner
-                );
                 if (store.state.partners.currentPartner) {
                   partnerName.value = store.state.partners.currentPartner.name ?? '';
                   selectedPartner.value = store.state.partners.currentPartner;

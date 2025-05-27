@@ -249,8 +249,6 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
         .toString()
         .padStart(2, '0')}-${(res.checkout as Date).getDate().toString().padStart(2, '0')}`;
     });
-    // console.log(payload);
-
     return api.patch(`/folios/p/${payload.folioId}`, payload);
   },
 };

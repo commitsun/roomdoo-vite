@@ -811,8 +811,6 @@ export default defineComponent({
     };
 
     const drawLinesBetweenSplittedReservations = () => {
-      // console.log(colorList, indexListColors.value);
-
       splittedReservationsBorders.value = [];
 
       // reservation lines (date, nextLineSplitted, reservationId, reservationLineId)
