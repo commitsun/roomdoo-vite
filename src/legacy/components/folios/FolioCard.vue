@@ -123,10 +123,7 @@
               <div v-if="isAllowedAddRooms(folio)" @mousedown="updateFolio(folio.id)">
                 Añadir habitaciones
               </div>
-              <div
-                v-if="isAllowedBatchChanges(folio)"
-                @mousedown="openBatchChangesDialog(folio.id)"
-              >
+              <div v-if="isAllowedBatchChanges(folio)" @mousedown="openBatchChangesDialog(folio)">
                 Modificación en lote
               </div>
               <div
@@ -487,10 +484,10 @@ export default defineComponent({
       });
     };
 
-    const openBatchChangesDialog = async (folioId: number | undefined) => {
+    const openBatchChangesDialog = async (folio: FolioInterface) => {
       void store.dispatch('layout/showSpinner', true);
       try {
-        await store.dispatch('reservations/fetchReservations', folioId);
+        await store.dispatch('reservations/fetchReservations', folio.id);
         await store.dispatch('reservationLines/fetchCurrentFolioReservationLines');
 
         await store.dispatch(
@@ -503,6 +500,7 @@ export default defineComponent({
           header: 'CAMBIOS EN LOTE',
           content: markRaw(FolioBatchChanges),
           props: {
+            folio: folio,
             folioName: props.folio.name,
             fromBookingEngine: false,
             reservations: reservationsMappedForBatchChanges,

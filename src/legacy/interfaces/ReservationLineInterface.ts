@@ -1,5 +1,5 @@
 export interface ReservationLineInterface {
-  date: Date;
+  date: Date | string;
   price: number;
   discount: number;
   roomId: number;
@@ -10,4 +10,8 @@ export interface ReservationLineInterface {
   cancelDiscount?: number;
   reservationId?: number;
   isReselling?: boolean;
+}
+
+export interface ReservationLineApiInterface extends ReservationLineInterface {
+  date: string;
 }
