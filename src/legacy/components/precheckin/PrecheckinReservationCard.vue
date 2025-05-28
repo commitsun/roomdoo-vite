@@ -207,7 +207,7 @@ export default defineComponent({
     };
 
     const openReservationCheckin = () => {
-      const langParam = route.params.lang || selectedLang.value;
+      const langParam = route.params.lang || selectedLang;
       router.push({
         path: `/${props.id}/precheckin-reservation/${props.accessToken}/${langParam}`,
         query: {
