@@ -238,7 +238,7 @@ export default defineComponent({
         if (folioReservations.value?.length === 1) {
           const reservationId = folioReservations.value[0].id;
           const reservationToken = folioReservations.value[0].accessToken;
-          const langParam = route.params.lang || selectedLang.value;
+          const langParam = route.params.lang || selectedLang;
           router.push({
             path: `/${reservationId}/precheckin-reservation/${reservationToken}/${langParam}`,
             query: {

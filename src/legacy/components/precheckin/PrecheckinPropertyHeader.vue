@@ -7,7 +7,7 @@
       height: headerHeight,
     }"
   >
-    <Select
+    <AppSelect
       v-model="selectedLocale"
       :options="locales"
       optionLabel="label"
@@ -35,7 +35,7 @@
           <span>{{ slotProps.value?.label }}</span>
         </div>
       </template>
-    </Select>
+    </AppSelect>
     <div
       class="overlay"
       :style="{
@@ -77,7 +77,6 @@ import { dialogService } from '@/legacy/services/DialogService';
 import Select from 'primevue/select';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { selectedLang } from '@/plugins/locale';
 
 export default defineComponent({
   props: {
@@ -113,7 +112,7 @@ export default defineComponent({
   },
   components: {
     CustomIcon,
-    Select,
+    AppSelect: Select,
   },
   setup(props) {
     const { t, locale } = useI18n();
@@ -177,18 +176,6 @@ export default defineComponent({
         router.push({ name: route.name!, params: newParams });
       }
     });
-
-    // onMounted(() => {
-    //   const langUrl = route.params.lang;
-    //   const availableLocale = locales.value.find(l => l.value === langUrl);
-
-    //   const fallbackLocale = locales.value.find(l => l.value === selectedLang); 
-
-    //   const finalLocale = availableLocale || fallbackLocale || locales.value[0]; 
-
-    //   selectedLocale.value = finalLocale;
-    //   locale.value = finalLocale.value;
-    // });
 
     onMounted(() => {
       const langUrl = route.params.lang as string | undefined;
