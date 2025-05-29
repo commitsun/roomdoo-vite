@@ -34,7 +34,7 @@
         />
       </div>
     </div>
-    <hr :class="(quota === 0 || maxAvail === 0 || closed) ? 'red' : (freeRooms === 0) ? 'grey' : ''" />
+    <hr :class="(quota === 0 || maxAvail === 0 || closed) && (freeRooms > 0) ? 'red' : (freeRooms === 0) ? 'grey' : ''" />
     <!-- QUOTA -->
     <div
       v-if="activeUser?.availabilityRuleFields?.includes('quota')"
