@@ -191,7 +191,7 @@
               <div @click.stop="openServiceCalendarMode(indexServices)">
                 <span> Editar servicio </span>
               </div>
-              <div @click.stop="deleteService(service.id, indexServices)">
+              <div v-if="service.id" @click.stop="deleteService(service.id, indexServices)">
                 <span> Eliminar servicio </span>
               </div>
             </div>

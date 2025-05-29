@@ -89,13 +89,13 @@
           <span class="reservation-line-title">
             <span class="reservation-line-index"> {{ index + 1 }}ª </span> Desde
             <span class="text-bold">
-              {{ reservationLineDate(reservationLines[0].date) }}
+              {{ reservationLineDate(reservationLines[0].date as Date) }}
             </span>
             al
             <span class="text-bold">
               {{
                 reservationLineDate(
-                  addDayToDate(reservationLines[reservationLines.length - 1].date)
+                  addDayToDate(reservationLines[reservationLines.length - 1].date as Date)
                 )
               }}
             </span>
@@ -216,7 +216,9 @@ export default defineComponent({
       const oneDay = 24 * 60 * 60 * 1000;
       const lines = reservationLines.value;
 
-      const sortedLines = lines.sort((a, b) => a.date.getTime() - b.date.getTime());
+      const sortedLines = lines.sort(
+        (a, b) => (a.date as Date).getTime() - (b.date as Date).getTime()
+      );
 
       for (let i = 0; i < sortedLines.length; i += 1) {
         const line = sortedLines[i];
@@ -225,7 +227,9 @@ export default defineComponent({
         if (
           currentGroup.length === 0 ||
           line.roomId !== prevLine.roomId ||
-          !Math.round(Math.abs((line.date.getTime() - prevLine.date.getTime()) / oneDay))
+          !Math.round(
+            Math.abs(((line.date as Date).getTime() - (prevLine.date as Date).getTime()) / oneDay)
+          )
         ) {
           if (currentGroup.length > 0) {
             groupedLines.push(currentGroup);
