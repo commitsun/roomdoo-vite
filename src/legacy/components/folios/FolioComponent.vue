@@ -75,17 +75,33 @@
               </div>
               <div
                 class="option-cancel"
-                v-if="
-                  currentReservations &&
-                  currentReservations?.some(
-                    (el) =>
-                      el.stateCode === 'draft' ||
-                      el.stateCode === 'confirm' ||
-                      el.stateCode === 'arrival_delayed'
-                  )
-                "
+                v-if="isAllowedCancelReservations(currentFolio, currentReservations)"
                 @click="cancelReservations(currentFolio.id)"
               >
+                <CustomIcon
+                  :imagePath="'/app-images/icon-lock.svg'"
+                  :color="'primary'"
+                  :width="'12px'"
+                  :height="'12px'"
+                  v-if="
+                    isSomeFolioReservationBlocked() &&
+                    currentFolio.firstCheckin &&
+                    new Date(currentFolio.firstCheckin).getTime() >= today().getTime()
+                  "
+                  class="icon-cancel"
+                />
+                <CustomIcon
+                  :imagePath="'/app-images/icon-alert-2.svg'"
+                  :color="'red'"
+                  :width="'12px'"
+                  :height="'12px'"
+                  v-else-if="
+                    isSomeFolioReservationBlocked() &&
+                    currentFolio.firstCheckin &&
+                    new Date(currentFolio.firstCheckin).getTime() < today().getTime()
+                  "
+                  class="icon-cancel"
+                />
                 <span> Cancelar reservas </span>
                 <span class="menu-len-reservations"> ({{ currentReservations?.length }}) </span>
               </div>
@@ -224,7 +240,31 @@
                   v-if="isAllowedCancelReservations(currentFolio, currentReservations)"
                   @click="cancelReservations(currentFolio.id)"
                 >
-                  <span> Cancelar reservas </span>
+                  <CustomIcon
+                    :imagePath="'/app-images/icon-lock.svg'"
+                    :color="'primary'"
+                    :width="'12px'"
+                    :height="'12px'"
+                    v-if="
+                      isSomeFolioReservationBlocked() &&
+                      currentFolio.firstCheckin &&
+                      new Date(currentFolio.firstCheckin).getTime() >= today().getTime()
+                    "
+                    class="icon-cancel"
+                  />
+                  <CustomIcon
+                    :imagePath="'/app-images/icon-alert-2.svg'"
+                    :color="'red'"
+                    :width="'12px'"
+                    :height="'12px'"
+                    v-else-if="
+                      isSomeFolioReservationBlocked() &&
+                      currentFolio.firstCheckin &&
+                      new Date(currentFolio.firstCheckin).getTime() < today().getTime()
+                    "
+                    class="icon-cancel"
+                  />
+                  <span class="cancel-text"> Cancelar reservas </span>
                   <span class="menu-len-reservations"> ({{ currentReservations?.length }}) </span>
                 </div>
               </div>
@@ -474,6 +514,7 @@ import {
 import { dialogService } from '@/legacy/services/DialogService';
 import type { roomTypeClassesInterface } from '@/legacy/interfaces/roomTypeClassesInterface';
 import type { FolioInterface } from '@/legacy/interfaces/FolioInterface';
+import utilsDates from '@/legacy/utils/dates';
 
 export default defineComponent({
   components: {
@@ -491,12 +532,20 @@ export default defineComponent({
     const { refreshPlanning } = usePlanning();
 
     const store = useStore();
+    const today = (): Date => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today;
+    };
     const currentFolio = computed(() => store.state.folios.currentFolio);
     const reservation = computed(() => store.state.reservations.currentReservation);
     const currentReservations = computed(() => store.state.reservations.reservations);
     const forceMoveFolioTab = computed(() => store.state.layout.forceMoveFolioTab);
-    const folioPublicLink = computed(() =>
-      `${window.location.origin}/${currentFolio.value?.id ?? 0}/precheckin/${currentFolio.value?.accessToken ?? ''}/${selectedLang}`
+    const folioPublicLink = computed(
+      () =>
+        `${window.location.origin}/${currentFolio.value?.id ?? 0}/precheckin/${
+          currentFolio.value?.accessToken ?? ''
+        }/${selectedLang}`
     );
 
     const computedFolioClass = computed(() => {
@@ -793,6 +842,34 @@ export default defineComponent({
       }
     };
 
+    const doCancelReservations = async () => {
+      void store.dispatch('layout/showSpinner', true);
+      try {
+        await store.dispatch('folios/cancelFolioReservations', {
+          folioId: currentFolio.value?.id,
+          cancelReservations: true,
+        });
+        await store.dispatch('folios/fetchFolio', currentFolio.value?.id);
+        await store.dispatch('reservations/fetchReservations', currentFolio.value?.id);
+        if (store.state.reservations.currentReservation) {
+          await store.dispatch(
+            'reservations/fetchReservation',
+            store.state.reservations.currentReservation.id
+          );
+        }
+        isOpenMenu.value = false;
+        await refreshPlanning();
+      } catch {
+        dialogService.open({
+          header: 'Error',
+          content: 'Algo ha ido mal',
+          btnAccept: 'Ok',
+        });
+      } finally {
+        void store.dispatch('layout/showSpinner', false);
+      }
+    };
+
     const cancelReservations = async (folioId: number) => {
       await store.dispatch('folios/fetchFolio', folioId);
       await store.dispatch('reservations/fetchReservations', folioId);
@@ -801,48 +878,50 @@ export default defineComponent({
         const agencyName = store.state.agencies.agencies.find(
           (el) => el.id === currentFolio.value?.agencyId
         )?.name;
-        const moreThanOneReservation = currentReservations.value.length > 1;
-        if (moreThanOneReservation) {
-          titleDialog = 'Reservas bloqueadas';
-        } else {
-          titleDialog = 'Reserva bloqueada';
-        }
-        if (agencyName) {
-          titleDialog += ` por ${agencyName}`;
-        }
-        dialogService.open({
-          iconHeader: '/app-images/icon-lock.svg',
-          header: titleDialog,
-          content: markRaw(FolioOrReservationCancelBlocked),
-          props: {
-            agencyName: agencyName,
-            isFolio: true,
-            moreThanOneReservation: moreThanOneReservation,
-          },
-        });
-      } else {
-        void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('folios/cancelFolioReservations', {
-            folioId,
-            cancelReservations: true,
-          });
-          await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
-          await store.dispatch(
-            'reservations/fetchReservations',
-            store.state.folios.currentFolio?.id
-          );
-          isOpenMenu.value = false;
-          await refreshPlanning();
-        } catch {
+        if (
+          currentFolio.value?.firstCheckin &&
+          new Date(currentFolio.value.firstCheckin).getTime() >= today().getTime()
+        ) {
+          const moreThanOneReservation = currentReservations.value.length > 1;
+          if (moreThanOneReservation) {
+            titleDialog = 'Reservas bloqueadas';
+          } else {
+            titleDialog = 'Reserva bloqueada';
+          }
+          if (agencyName) {
+            titleDialog += ` por ${agencyName}`;
+          }
           dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
+            iconHeader: '/app-images/icon-lock.svg',
+            header: titleDialog,
+            content: markRaw(FolioOrReservationCancelBlocked),
+            props: {
+              agencyName: agencyName,
+              isFolio: true,
+              moreThanOneReservation: moreThanOneReservation,
+            },
           });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
+        } else {
+          titleDialog = '¿Quieres cancelar esta reserva como No Show (no presentado) en Roomdoo?';
+          dialogService.open({
+            iconHeader: '/app-images/icon-alert-2.svg',
+            iconHeaderColor: 'red',
+            header: titleDialog,
+            content: agencyName
+              ? `Esta acción no notifica ni afecta a ${agencyName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyName} para aplicar cambios ahí.`
+              : '',
+            props: {
+              agencyName: agencyName,
+            },
+            onAccept: () => {
+              doCancelReservations();
+            },
+            btnAccept: 'Marcar No show',
+            btnCancel: 'Cancelar',
+          });
         }
+      } else {
+        doCancelReservations();
       }
     };
 
@@ -906,6 +985,10 @@ export default defineComponent({
         color,
       };
       return style;
+    };
+
+    const isSomeFolioReservationBlocked = () => {
+      return currentReservations.value?.some((el) => el.isBlocked);
     };
 
     const setCurrentreservation = (reservationId: number) => {
@@ -1011,6 +1094,8 @@ export default defineComponent({
       isSomeItemMenu,
       isReservationBlockedModalOpen,
       computedFolioClass,
+      today,
+      isSomeFolioReservationBlocked,
       isAllowedAddRooms,
       isAllowedBatchChanges,
       isAllowedConfirmReservations,
@@ -1159,7 +1244,9 @@ export default defineComponent({
           margin-top: 35px;
           z-index: 100;
           div {
-            padding: 0.3rem 1rem;
+            padding: 0.3rem 0 0.3rem 1rem;
+            display: flex;
+            align-items: center;
             &:hover {
               font-weight: bold;
             }
@@ -1168,6 +1255,9 @@ export default defineComponent({
             display: flex;
             align-items: center;
             color: #f21e1e;
+            .cancel-text {
+              margin-left: 0.3rem;
+            }
             .menu-len-reservations {
               margin-left: 0.2rem;
               font-variant-ligatures: none;
@@ -1415,7 +1505,9 @@ export default defineComponent({
             left: -175px;
             margin-top: 0.8rem;
             div {
-              padding: 0.3rem 1rem;
+              padding: 0.3rem 0 0.3rem 1rem;
+              display: flex;
+              align-items: center;
               &:hover {
                 font-weight: bold;
               }
@@ -1424,6 +1516,9 @@ export default defineComponent({
               display: flex;
               align-items: center;
               color: #f21e1e;
+              .cancel-text {
+                margin-left: 0.3rem;
+              }
               .menu-len-reservations {
                 margin-left: 0.2rem;
                 font-variant-ligatures: none;

@@ -155,7 +155,14 @@
               :color="'primary'"
               :width="'12px'"
               :height="'12px'"
-              v-if="reservation?.isBlocked"
+              v-if="reservation?.isBlocked && new Date(reservation.checkin).getTime() >= today().getTime()"
+            />
+            <CustomIcon
+              :imagePath="'/app-images/icon-alert-2.svg'"
+              :color="'red'"
+              :width="'12px'"
+              :height="'12px'"
+              v-else-if="reservation?.isBlocked && new Date(reservation.checkin).getTime() < today().getTime()"
             />
             <span> Cancelar reserva </span>
           </div>
@@ -175,6 +182,8 @@ import type { FolioInterface } from '@/legacy/interfaces/FolioInterface';
 import { usePlanning } from '@/legacy/utils/usePlanning';
 import { dialogService } from '@/legacy/services/DialogService';
 import FolioOrReservationCancelBlocked from '@/legacy/components/alerts/FolioOrReservationCancelBlocked.vue';
+import utilsDates from '@/legacy/utils/dates';
+
 export default defineComponent({
   components: {
     CustomIcon,
@@ -193,6 +202,11 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { refreshPlanning } = usePlanning();
+    const today = (): Date => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today;
+    };
     const roomTypeDefaultCode = ref('no-room-type-name');
     const openReservationOptionsMenu = ref(false);
     const activeProperty = computed(() => store.state.properties.activeProperty);
@@ -308,51 +322,70 @@ export default defineComponent({
       store.state.agencies.agencies.find((el) => el.id === currentReservation.value?.agencyId)
         ?.name;
 
+    const doCancelReservation = async(folioId: number, reservationId: number) => {
+      void store.dispatch('layout/showSpinner', true);
+      try {
+        await store.dispatch('reservations/cancelReservation', reservationId);
+        const payload = {
+          propertyId: store.state.properties.activeProperty?.id,
+          filter: store.state.layout.rightDrawerSearchParam,
+          limit: 40,
+          offset: 0,
+        };
+        await store.dispatch('reservations/fetchReservation', reservationId);
+        await store.dispatch('reservations/fetchReservations', folioId);
+        await store.dispatch('folios/fetchFolios', payload);
+        openReservationOptionsMenu.value = false;
+        if (router.currentRoute.value.path === '/planning/') {
+          await refreshPlanning();
+        }
+      } catch {
+        dialogService.open({
+          header: 'Error',
+          content: 'Algo ha ido mal',
+          btnAccept: 'Ok',
+        });
+      } finally {
+        void store.dispatch('layout/showSpinner', false);
+      }
+    };
+
     const cancelReservation = async (folioId: number, reservationId: number) => {
       if (props.reservation?.isBlocked) {
         let messageDialog = '';
         const agencyName = store.state.agencies.agencies.find(
           (el) => el.id === props.reservation.agencyId
         )?.name;
-        if (agencyName) {
-          messageDialog = `Reserva bloqueada por ${agencyName}`;
-        } else {
-          messageDialog = 'Reserva bloqueada';
-        }
-        dialogService.open({
-          iconHeader: '/app-images/icon-lock.svg',
-          header: messageDialog,
-          content: markRaw(FolioOrReservationCancelBlocked),
-          props: {
-            agencyName: agencyName,
-          },
-        });
-      } else {
-        void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('reservations/cancelReservation', reservationId);
-          const payload = {
-            propertyId: store.state.properties.activeProperty?.id,
-            filter: store.state.layout.rightDrawerSearchParam,
-            limit: 40,
-            offset: 0,
-          };
-          await store.dispatch('reservations/fetchReservation', reservationId);
-          await store.dispatch('reservations/fetchReservations', folioId);
-          await store.dispatch('folios/fetchFolios', payload);
-          openReservationOptionsMenu.value = false;
-          if (router.currentRoute.value.name === 'planning') {
-            await refreshPlanning();
+        if (new Date(props.reservation.checkin).getTime() >= today().getTime()) {
+          if (agencyName) {
+            messageDialog = `Reserva bloqueada por ${agencyName}`;
+          } else {
+            messageDialog = 'Reserva bloqueada';
           }
-        } catch {
           dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
+            iconHeader: '/app-images/icon-lock.svg',
+            header: messageDialog,
+            content: markRaw(FolioOrReservationCancelBlocked),
+            props: {
+              agencyName: agencyName,
+            },
           });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
+        } else {
+          messageDialog = '¿Quieres cancelar esta reserva como No Show (no presentado) en Roomdoo?';
+          dialogService.open({
+            iconHeader: '/app-images/icon-alert-2.svg',
+            iconHeaderColor: 'red',
+            header: messageDialog,
+            content: agencyName ? `Esta acción no notifica ni afecta a ${agencyName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyName} para aplicar cambios ahí.` : '',
+            onAccept: () => {
+              doCancelReservation(folioId, reservationId);
+            },
+            btnAccept: 'Marcar No show',
+            btnCancel: 'Cancelar',
+          });
         }
+      } else {
+        doCancelReservation(folioId, reservationId);
       }
     };
     const confirmReservation = async (folioId: number, reservationId: number) => {
@@ -408,6 +441,7 @@ export default defineComponent({
       roomTypeDefaultCode,
       openReservationOptionsMenu,
       currentReservation,
+      today,
     };
   },
 });

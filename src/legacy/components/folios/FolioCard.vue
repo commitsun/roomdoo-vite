@@ -137,9 +137,29 @@
               <div
                 class="option-cancel"
                 v-if="isAllowedCancelReservations(folio) && folio.id"
-                @mousedown="cancelReservations(folio.id ?? 0)"
+                @mousedown="cancelReservations()"
               >
-                <span> Cancelar reservas </span>
+                <CustomIcon
+                  :imagePath="'/app-images/icon-lock.svg'"
+                  :color="'primary'"
+                  :width="'12px'"
+                  :height="'12px'"
+                  v-if="folio.reservations.some((el) => el.isBlocked)
+                  && folio.firstCheckin
+                  && new Date(folio.firstCheckin).getTime() >= today().getTime()"
+                  class="icon-cancel"
+                />
+                <CustomIcon
+                  :imagePath="'/app-images/icon-alert-2.svg'"
+                  :color="'red'"
+                  :width="'12px'"
+                  :height="'12px'"
+                  v-else-if="folio.reservations.some((el) => el.isBlocked)
+                  && folio.firstCheckin
+                  && new Date(folio.firstCheckin).getTime() < today().getTime()"
+                  class="icon-cancel"
+                />
+                <span class="cancel-text"> Cancelar reservas </span>
                 <span class="menu-len-reservations"> ({{ folio.reservations.length }}) </span>
               </div>
             </div>
@@ -324,6 +344,7 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
     const { refreshPlanning } = usePlanning();
+
     const isOpen = ref(true);
     const isOpenMenu = ref(false);
     const isBatchChangesDialog = ref(false);
@@ -332,6 +353,12 @@ export default defineComponent({
     const pricelistName = ref('');
     const reservationsMappedForBatchChanges = ref([] as BatchChangesInterface[]);
     const showAll = ref(false);
+
+    const today = (): Date => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today;
+    };
 
     const circleBorderStyle = (folio: FolioInterface) => {
       let color = '#263941';
@@ -547,40 +574,11 @@ export default defineComponent({
     const getAgencyName = (agencyId: number) =>
       store.state.agencies.agencies.find((el) => el.id === agencyId)?.name;
 
-    const cancelReservations = async (folioId: number) => {
-      await store.dispatch('folios/fetchFolio', folioId);
-      agencyName.value = getAgencyName(store.state.folios.currentFolio?.agencyId ?? 0) ?? '';
-      await store.dispatch('reservations/fetchReservations', folioId);
-
-      if (props.folio.reservations.some((el) => el.isBlocked)) {
-        let titleDialog = '';
-        const agencyName = store.state.agencies.agencies.find(
-          (el) => el.id === props.folio.agencyId
-        )?.name;
-        const moreThanOneReservation = props.folio.reservations.length > 1;
-        if (moreThanOneReservation) {
-          titleDialog = 'Reservas bloqueadas';
-        } else {
-          titleDialog = 'Reserva bloqueada';
-        }
-        if (agencyName) {
-          titleDialog += ` por ${agencyName}`;
-        }
-        dialogService.open({
-          iconHeader: '/app-images/icon-lock.svg',
-          header: titleDialog,
-          content: markRaw(FolioOrReservationCancelBlocked),
-          props: {
-            agencyName: agencyName,
-            isFolio: true,
-            moreThanOneReservation: moreThanOneReservation,
-          },
-        });
-      } else {
-        void store.dispatch('layout/showSpinner', true);
+    const doCancelReservations = async() => {
+      void store.dispatch('layout/showSpinner', true);
         try {
           await store.dispatch('folios/cancelFolioReservations', {
-            folioId,
+            folioId: props.folio.id,
             cancelReservations: true,
           });
           const payload = {
@@ -599,11 +597,66 @@ export default defineComponent({
             btnAccept: 'Ok',
           });
         } finally {
+          void store.dispatch('reservations/setCurrentReservations', null);
+          void store.dispatch('folios/setCurrentFolio', null);
           void store.dispatch('layout/showSpinner', false);
         }
       }
-      void store.dispatch('reservations/setCurrentReservations', null);
-      void store.dispatch('folios/setCurrentFolio', null);
+
+
+    const cancelReservations = async () => {
+      await store.dispatch('folios/fetchFolio', props.folio.id);
+      agencyName.value = getAgencyName(store.state.folios.currentFolio?.agencyId ?? 0) ?? '';
+      await store.dispatch('reservations/fetchReservations', props.folio.id);
+
+      if (props.folio.reservations.some((el) => el.isBlocked)) {
+        let titleDialog = '';
+        const agencyName = store.state.agencies.agencies.find(
+          (el) => el.id === props.folio.agencyId
+        )?.name;
+        if (
+          props.folio.firstCheckin
+          && new Date(props.folio.firstCheckin).getTime() >= today().getTime()
+        ) {
+          const moreThanOneReservation = props.folio.reservations.length > 1;
+          if (moreThanOneReservation) {
+            titleDialog = 'Reservas bloqueadas';
+          } else {
+            titleDialog = 'Reserva bloqueada';
+          }
+          if (agencyName) {
+            titleDialog += ` por ${agencyName}`;
+          }
+          dialogService.open({
+            iconHeader: '/app-images/icon-lock.svg',
+            header: titleDialog,
+            content: markRaw(FolioOrReservationCancelBlocked),
+            props: {
+              agencyName: agencyName,
+              isFolio: true,
+              moreThanOneReservation: moreThanOneReservation,
+            },
+          });
+        } else {
+          titleDialog = '¿Quieres cancelar esta reserva como No Show (no presentado) en Roomdoo?';
+          dialogService.open({
+            iconHeader: '/app-images/icon-alert-2.svg',
+            iconHeaderColor: 'red',
+            header: titleDialog,
+            content: agencyName ? `Esta acción no notifica ni afecta a ${agencyName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyName} para aplicar cambios ahí.` : '',
+            props: {
+              agencyName: agencyName,
+            },
+            onAccept: () => {
+              doCancelReservations();
+            },
+            btnAccept: 'Marcar No show',
+            btnCancel: 'Cancelar',
+          });
+        }
+      } else {
+        doCancelReservations();
+      };
     };
 
     const agencyImage = (agencyId: number) =>
@@ -748,6 +801,7 @@ export default defineComponent({
       agencyName,
       pricelistName,
       reservationsByCategory,
+      today,
       moveToFirstReservation,
       doCheckinAction,
       anyCheckinToday,
@@ -955,7 +1009,7 @@ export default defineComponent({
           left: -175px;
           top: -10px;
           div {
-            padding: 0.3rem 1rem;
+            padding: 0.3rem 0 0.3rem 1rem;
             &:hover {
               font-weight: bold;
             }
@@ -964,6 +1018,12 @@ export default defineComponent({
             display: flex;
             align-items: center;
             color: #f21e1e;
+            .icon-cancel {
+              margin-bottom: 1px;
+            }
+            .cancel-text {
+              margin-left: 0.3rem;
+            }
             .menu-len-reservations {
               margin-left: 0.2rem;
               font-variant-ligatures: none;
