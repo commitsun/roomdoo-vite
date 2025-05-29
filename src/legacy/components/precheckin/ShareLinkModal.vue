@@ -107,6 +107,9 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
+// avoid warnign
+@use 'sass:color';
+
 .share-modal-body {
   display: flex;
   flex-direction: column;
@@ -139,9 +142,9 @@ export default defineComponent({
       border-radius: 6px;
       border: 1px solid $primary;
       cursor: pointer;
-      // &:hover {
-      //   background-color: darken($primary, 10%);
-      // }
+      &:hover {
+        background-color: color.adjust($primary, $lightness: -10%);
+      }
     }
   }
 
