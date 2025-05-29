@@ -1014,7 +1014,7 @@ export default defineComponent({
         .forEach((el) => {
           if (el.reservationLine) {
             const line = currentReservationLines.value.find(
-              (l) => l.date.getTime() === el.date.getTime()
+              (l) => (l.date as Date).getTime() === el.date.getTime()
             );
             if (line) {
               el.reservationLine.price = line.price;
@@ -1095,8 +1095,9 @@ export default defineComponent({
               item.reservationLine.discount = 0;
               item.reservationLine.discountPrice = 0;
               item.reservationLine.price =
-                store.state.prices.prices.find((el) => el.date.getTime() === night.date.getTime())
-                  ?.price ?? 0;
+                store.state.prices.prices.find(
+                  (el) => el.date.getTime() === (night.date as Date).getTime()
+                )?.price ?? 0;
             }
           }
           calendarDates.value.push(item);

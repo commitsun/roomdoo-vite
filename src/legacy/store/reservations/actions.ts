@@ -70,9 +70,9 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
   },
   async updateReservation(context, payload: PayloadReservationChangeInterface) {
     const reservationLines = payload.reservationLines?.map((el) => ({
-      date: `${el.date.getFullYear()}-${(el.date.getMonth() + 1)
+      date: `${(el.date as Date).getFullYear()}-${((el.date as Date).getMonth() + 1)
         .toString()
-        .padStart(2, '0')}-${el.date.getDate().toString().padStart(2, '0')}`,
+        .padStart(2, '0')}-${(el.date as Date).getDate().toString().padStart(2, '0')}`,
       discount: el.discount,
       price: el.price,
       reservationId: el.reservationId,
