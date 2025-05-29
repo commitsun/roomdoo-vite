@@ -3,6 +3,7 @@ import type { Component } from 'vue';
 
 export interface DialogOptions {
   iconHeader?: string; // Icono para el título del diálogo
+  iconHeaderColor?: string; // Color del icono del título
   header: string; // Título del diálogo
   content: string | Component; // Componente para el contenido del diálogo
   footer?: Component; // Componente para el pie del diálogo

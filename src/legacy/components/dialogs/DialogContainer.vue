@@ -28,7 +28,7 @@
           <CustomIcon
             v-if="dialog.iconHeader"
             :imagePath="dialog.iconHeader"
-            color="primary"
+            :color="dialog.iconHeaderColor ? dialog.iconHeaderColor : 'primary'"
             width="15px"
             height="15px"
             class="mr-2"
