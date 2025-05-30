@@ -540,7 +540,10 @@ export default defineComponent({
               reservationLine: {
                 pmsPropertyId: activeProperty.value?.id ?? -1,
                 date,
-                price: isFixedPricePerNight.value ? price.value : priceFromPricelist ?? 0,
+                price:
+                  !isPricePerPricelist && isFixedPricePerNight
+                    ? price.value
+                    : priceFromPricelist ?? 0,
                 discount: isFixedPricePerNight.value ? discount.value : 0,
                 discountPrice: 0,
                 roomId: -1,
