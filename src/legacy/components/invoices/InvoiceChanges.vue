@@ -222,7 +222,7 @@
                   <input
                     class="name-input"
                     type="text"
-                    :value="saleLine.name"
+                    v-model="saleLine.name"
                     :disabled="!isLineRemoved[index]"
                     :style="getSaleLinesToInvoiceRowStyle(saleLine.displayType, index)"
                   />
@@ -743,18 +743,16 @@ export default defineComponent({
 
     const getSaleLinesToInvoiceRowStyle = (displayType: string, numberRow: number) => {
       let backgroundColor = '';
-      let color = 'lightgrey';
       let fontWeight = 'normal';
       if (displayType === 'line_section') {
         backgroundColor = '#d6ebf2';
         fontWeight = 'bold';
-        color = 'black';
       } else if (numberRow % 2 === 0) {
         backgroundColor = '#EEF7FA';
       }
       const style: Record<string, string> = {
         backgroundColor,
-        color,
+        color: 'black',
         fontWeight,
       };
       return style;
@@ -1432,6 +1430,7 @@ export default defineComponent({
           flex-direction: column;
           justify-content: space-between;
           .name {
+            color: black;
             margin: 0.5rem 0;
             width: 100%;
             .tooltip-component {
