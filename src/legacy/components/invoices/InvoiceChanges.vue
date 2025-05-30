@@ -779,6 +779,23 @@ export default defineComponent({
     };
 
     const saveInvoice = async () => {
+      if (
+        //
+        getTotalToInvoice.value === 0 ||
+        (!partnerToAdd.value && !isSimplifiedInvoice.value) ||
+        noMinimumPartnerDataError.value ||
+        (props.isRenderSaleLines &&
+          saleLinesToSend.value.some(
+            (el, index) => el.name === '' && isLineRemoved.value[index]
+          )) ||
+        (props.isRenderInvoiceLines &&
+          invoiceLinesToSend.value.some(
+            (el, index) => el.name === '' && isLineRemoved.value[index]
+          ))
+        //
+      ) {
+        return;
+      }
       void store.dispatch('layout/showSpinner', true);
       try {
         if (props.isRenderSaleLines) {
