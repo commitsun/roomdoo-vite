@@ -207,7 +207,13 @@
     <div class="second">
       <div class="sale-lines" v-if="isRenderSaleLines">
         <div v-for="(saleLine, index) in saleLinesToSend" :key="saleLine.id">
-          <div class="sale-line-section" v-if="saleLine.displayType === 'line_section'">
+          <div
+            :class='{
+              "sale-line-section": saleLine.displayType === "line_section",
+              "sale-line-note": saleLine.displayType === "line_note",
+            }'
+            v-if="saleLine.displayType === 'line_section' || (saleLine.displayType === 'line_note' && saleLineNotInInvoiceLines(saleLine))"
+          >
             {{ saleLine.name }}
           </div>
           <div class="sale-line" v-else-if="saleLine.qtyToInvoice > 0">
@@ -261,7 +267,13 @@
       </div>
       <div class="sale-lines" v-else-if="isRenderInvoiceLines">
         <div v-for="(invoiceLine, index) in invoiceLinesToSend" :key="invoiceLine.id ?? 0">
-          <div class="sale-line-section" v-if="invoiceLine.displayType === 'line_section'">
+          <div
+            :class='{
+              "sale-line-section": invoiceLine.displayType === "line_section",
+              "sale-line-note": invoiceLine.displayType === "line_note",
+            }'
+            v-if="invoiceLine.displayType === 'line_section' || invoiceLine.displayType === 'line_note'"
+          >
             {{ invoiceLine.name }}
           </div>
           <div class="sale-line" v-else-if="invoiceLine.quantity > 0">
@@ -332,7 +344,13 @@
       </div>
       <div class="sale-lines" v-if="isRenderInvoiceLines && showFolioSaleLines">
         <div v-for="(saleLine, index) in saleLinesToInvoice" :key="saleLine.id">
-          <div class="sale-line-section" v-if="saleLine.displayType === 'line_section'">
+          <div
+            :class='{
+              "sale-line-section": saleLine.displayType === "line_section",
+              "sale-line-note": saleLine.displayType === "line_note",
+            }'
+            v-if="saleLine.displayType === 'line_section' || (saleLine.displayType === 'line_note' && saleLineNotInInvoiceLines(saleLine))"
+          >
             {{ saleLine.name }}
           </div>
           <div class="sale-line" v-else-if="saleLine.qtyToInvoice > 0">
@@ -720,10 +738,14 @@ export default defineComponent({
       let backgroundColor = '';
       let fontWeight = 'normal';
       let color = '';
-
+      let fontStyle = 'normal';
       if (displayType === 'line_section') {
         backgroundColor = '#d6ebf2';
         fontWeight = 'bold';
+      } else if (displayType === 'line_note') {
+        fontStyle = 'italic';
+        color = 'black';
+        backgroundColor = '#FFFFFF';
       } else if (numberRow % 2 === 0) {
         backgroundColor = '#EEF7FA';
       }
@@ -736,6 +758,7 @@ export default defineComponent({
         backgroundColor,
         fontWeight,
         color,
+        fontStyle,
       };
 
       return style;
@@ -744,8 +767,15 @@ export default defineComponent({
     const getSaleLinesToInvoiceRowStyle = (displayType: string, numberRow: number) => {
       let backgroundColor = '';
       let fontWeight = 'normal';
+      let fontStyle = 'normal';
       if (displayType === 'line_section') {
         backgroundColor = '#d6ebf2';
+        fontWeight = 'bold';
+      } else if (displayType === 'line_note') {
+        fontStyle = 'italic';
+        backgroundColor = '#FFFFFF';
+      } else if (displayType === 'line_total') {
+        backgroundColor = '#D6EBF2';
         fontWeight = 'bold';
       } else if (numberRow % 2 === 0) {
         backgroundColor = '#EEF7FA';
@@ -754,6 +784,7 @@ export default defineComponent({
         backgroundColor,
         color: 'black',
         fontWeight,
+        fontStyle,
       };
       return style;
     };
@@ -861,7 +892,8 @@ export default defineComponent({
       let lineSectionIndex = 0;
       if (saleLineIndex !== -1) {
         for (lineSectionIndex = saleLineIndex; lineSectionIndex >= 0; lineSectionIndex -= 1) {
-          if (saleLinesToInvoice.value[lineSectionIndex].displayType === 'line_section') {
+          if (saleLinesToInvoice.value[lineSectionIndex].displayType === 'line_section' ||
+              saleLinesToInvoice.value[lineSectionIndex].displayType === 'line_note') {
             const saleLineDisplayType = {
               id: null,
               name: saleLinesToInvoice.value[lineSectionIndex]?.name,
@@ -1046,6 +1078,18 @@ export default defineComponent({
       }
     };
 
+    const saleLineNotInInvoiceLines = (saleLine: FolioSaleLineInterface) => {
+      let notInInvoiceLines = true;
+      invoices.value.forEach((invoice) => {
+        invoice.moveLines.forEach((moveLine) => {
+          if (moveLine.saleLineId === saleLine.id) {
+            notInInvoiceLines = false;
+          }
+        });
+      });
+      return notInInvoiceLines;
+    };
+
     watch(selectedPartnerId, async () => {
       if (selectedPartnerId.value !== 0) {
         if (isRenderCheckinPartners.value) {
@@ -1111,7 +1155,7 @@ export default defineComponent({
       () => {
         if (props.isRenderInvoiceLines) {
           invoiceLinesToSend.value.forEach((el, index) => {
-            if (el.quantity === 0) {
+            if (el.quantity === 0 && el.displayType !== 'line_note') {
               isLineRemoved.value[index] = false;
             }
           });
@@ -1126,7 +1170,7 @@ export default defineComponent({
       () => {
         if (props.isRenderSaleLines) {
           saleLinesToSend.value.forEach((el, index) => {
-            if (el.qtyToInvoice === 0) {
+            if (el.qtyToInvoice === 0 && el.displayType !== 'line_note') {
               isLineRemoved.value[index] = false;
             }
           });
@@ -1164,7 +1208,7 @@ export default defineComponent({
       if (props.isRenderSaleLines) {
         saleLines.value.forEach((el) => {
           props.saleLineIds?.forEach((idSaleLine) => {
-            if (el.id === idSaleLine && el.qtyToInvoice !== 0) {
+            if (el.id === idSaleLine && (el.qtyToInvoice !== 0 || el.displayType === 'line_note')) {
               linesToSend.value.push(el);
             }
           });
@@ -1208,7 +1252,7 @@ export default defineComponent({
         }
         if (saleLines.value) {
           saleLines.value.forEach((el) => {
-            if (el.qtyToInvoice !== 0) {
+            if (el.qtyToInvoice !== 0 || el.displayType === 'line_note') {
               saleLinesToInvoice.value.push(el);
             }
           });
@@ -1294,6 +1338,7 @@ export default defineComponent({
       amountSaleLineTotal,
       amountInvoiceLineTotal,
       moveLineUnit,
+      saleLineNotInInvoiceLines,
       addPartnerToInvoice,
       checkQtyToInvoiceSaleLines,
       setQtyToInvoice,
@@ -1433,6 +1478,15 @@ export default defineComponent({
         padding: 0.5rem;
         background-color: #d6ebf2;
         font-weight: bold;
+      }
+      .sale-line-note {
+        padding: 0.5rem;
+        font-style: italic;
+        color: black;
+        background-color: #ffffff;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
       .sale-line {
         display: flex;
