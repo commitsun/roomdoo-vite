@@ -888,54 +888,95 @@ export default defineComponent({
     };
 
     const addSaleLinesToInvoice = (saleLineId: number) => {
-      const saleLineIndex = saleLinesToInvoice.value.findIndex((el) => el.id === saleLineId);
-      let lineSectionIndex = 0;
-      if (saleLineIndex !== -1) {
-        for (lineSectionIndex = saleLineIndex; lineSectionIndex >= 0; lineSectionIndex -= 1) {
-          if (saleLinesToInvoice.value[lineSectionIndex].displayType === 'line_section' ||
-              saleLinesToInvoice.value[lineSectionIndex].displayType === 'line_note') {
-            const saleLineDisplayType = {
-              id: null,
-              name: saleLinesToInvoice.value[lineSectionIndex]?.name,
-              quantity: saleLinesToInvoice.value[lineSectionIndex]?.qtyToInvoice,
-              priceUnit: saleLinesToInvoice.value[lineSectionIndex]?.priceUnit,
-              total: saleLinesToInvoice.value[lineSectionIndex]?.priceTotal,
-              displayType: saleLinesToInvoice.value[lineSectionIndex]?.displayType,
-              saleLineId: saleLinesToInvoice.value[lineSectionIndex]?.id,
-              discount: saleLinesToInvoice.value[lineSectionIndex]?.discount,
-            };
-            const isExistsLineSection = invoiceLinesToSend.value.find(
-              (el) => el.name === saleLineDisplayType.name
+      const saleLine = saleLinesToInvoice.value.find((el) => el.id === saleLineId);
+      if (saleLine) {
+        const saleLineSectionToAdd = saleLinesToInvoice.value.find(
+          (el) => el.displayType === 'line_section'
+          && el.sectionId === saleLine.sectionId
+        );
+        if (saleLineSectionToAdd) {
+          const newInvoiceLineSection: InvoiceLineInterface = {
+            id: null,
+            name: saleLineSectionToAdd.name,
+            quantity: saleLineSectionToAdd.qtyToInvoice,
+            priceUnit: saleLineSectionToAdd.priceUnit,
+            total: amountSaleLineTotal(saleLineSectionToAdd.id, true),
+            displayType: saleLineSectionToAdd.displayType,
+            saleLineId: saleLineSectionToAdd.id,
+            discount: saleLineSectionToAdd.discount,
+          };
+          const existsLineSectionInInvoice = invoiceLinesToSend.value.find((el) => el.saleLineId === saleLineSectionToAdd.id)
+          if (!existsLineSectionInInvoice) {
+            invoiceLinesToSend.value.push(newInvoiceLineSection);
+            isLineRemoved.value.push(true);
+          }
+          const hasAnotherLineInSection = saleLinesToInvoice.value.some(
+            (el) =>
+              el.sectionId === saleLineSectionToAdd.sectionId
+              && el.displayType !== 'line_note'
+              && el.id !== saleLineSectionToAdd.id
+              && el.id !== saleLine.id
+          );
+          if (!hasAnotherLineInSection) {
+            saleLinesToInvoice.value.splice(
+              saleLinesToInvoice.value.findIndex((el) => el.id === saleLineSectionToAdd.id),
+              1
             );
-            if (!isExistsLineSection) {
-              invoiceLinesToSend.value.push(saleLineDisplayType);
-              isLineRemoved.value.push(true);
-            }
-            break;
           }
         }
-        const newInvoiceLine = {
-          id: null,
-          name: saleLinesToInvoice.value[saleLineIndex]?.name,
-          quantity: saleLinesToInvoice.value[saleLineIndex]?.qtyToInvoice,
-          priceUnit: saleLinesToInvoice.value[saleLineIndex]?.priceUnit,
-          total: saleLinesToInvoice.value[saleLineIndex]?.priceTotal,
-          displayType: saleLinesToInvoice.value[saleLineIndex]?.displayType,
-          saleLineId: saleLinesToInvoice.value[saleLineIndex]?.id,
-          discount: saleLinesToInvoice.value[saleLineIndex]?.discount,
-        };
-        invoiceLinesToSend.value.push(newInvoiceLine);
-        isLineRemoved.value.push(true);
-        saleLinesToInvoice.value.splice(saleLineIndex, 1);
-      }
-      if (lineSectionIndex === saleLinesToInvoice.value.length - 1) {
-        if (saleLinesToInvoice.value[lineSectionIndex].displayType === 'line_section') {
-          saleLinesToInvoice.value.splice(lineSectionIndex, 1);
+        const saleLineNoteToAdd = saleLinesToInvoice.value.find(
+          (el) => el.displayType === 'line_note' && el.sectionId === saleLine.sectionId
+        );
+        if (saleLineNoteToAdd) {
+          const newInvoiceLineNote: InvoiceLineInterface = {
+            id: null,
+            name: saleLineNoteToAdd.name,
+            quantity: saleLineNoteToAdd.qtyToInvoice,
+            priceUnit: saleLineNoteToAdd.priceUnit,
+            total: amountSaleLineTotal(saleLineNoteToAdd.id, true),
+            displayType: saleLineNoteToAdd.displayType,
+            saleLineId: saleLineNoteToAdd.id,
+            discount: saleLineNoteToAdd.discount,
+          };
+          const existsLineNoteInInvoice = invoiceLinesToSend.value.find((el) => el.saleLineId === saleLineNoteToAdd.id)
+          if (!existsLineNoteInInvoice) {
+            invoiceLinesToSend.value.push(newInvoiceLineNote);
+            isLineRemoved.value.push(true);
+          }
+          const hasAnotherLineInSection = saleLinesToInvoice.value.some(
+            (el) => el.sectionId === saleLineNoteToAdd.sectionId
+            && el.displayType !== 'line_section'
+            && el.id !== saleLineNoteToAdd.id
+            && el.id !== saleLine.id
+          );
+          if (!hasAnotherLineInSection) {
+            saleLinesToInvoice.value.splice(
+              saleLinesToInvoice.value.findIndex((el) => el.id === saleLineNoteToAdd.id),
+              1
+            );
+          }
         }
-      } else if (saleLinesToInvoice.value[lineSectionIndex + 1].displayType === 'line_section') {
-        saleLinesToInvoice.value.splice(lineSectionIndex, 1);
+        const newInvoiceLine: InvoiceLineInterface = {
+            id: null,
+            name: saleLine.name,
+            quantity: saleLine.qtyToInvoice,
+            priceUnit: saleLine.priceUnit,
+            total: amountSaleLineTotal(saleLine.id, true),
+            displayType: saleLine.displayType,
+            saleLineId: saleLine.id,
+            discount: saleLine.discount,
+          };
+          invoiceLinesToSend.value.push(newInvoiceLine);
+          isLineRemoved.value.push(true);
+          saleLinesToInvoice.value.splice(
+            saleLinesToInvoice.value.findIndex((el) => el.id === saleLineId),
+            1
+          );
+
+        }
       }
-    };
+
+
 
     const amountSaleLineTotal = (lineId: number, isToAddInvoice: boolean) => {
       let amount = 0;
@@ -1227,6 +1268,7 @@ export default defineComponent({
             serviceId: el.serviceId,
             displayType: el.displayType,
             defaultInvoiceTo: el.defaultInvoiceTo,
+            sectionId: el.sectionId,
           });
           isLineRemoved.value[index] = true;
         });
@@ -1252,7 +1294,7 @@ export default defineComponent({
         }
         if (saleLines.value) {
           saleLines.value.forEach((el) => {
-            if (el.qtyToInvoice !== 0 || el.displayType === 'line_note') {
+            if (el.qtyToInvoice !== 0 || (el.displayType === 'line_note' && saleLineNotInInvoiceLines(el))) {
               saleLinesToInvoice.value.push(el);
             }
           });

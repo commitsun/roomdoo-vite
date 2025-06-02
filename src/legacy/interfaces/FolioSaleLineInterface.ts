@@ -11,4 +11,5 @@ export interface FolioSaleLineInterface {
   discount:number;
   displayType: string;
   defaultInvoiceTo: number;
+  sectionId: number;
 }
