@@ -1809,12 +1809,6 @@ export default defineComponent({
             availabilityFrom: checkin.value,
             availabilityTo: checkout.value,
           };
-          if (
-            selectedReservationType.value === 'normal' ||
-            selectedReservationType.value === 'group'
-          ) {
-            payload.pricelistId = selectedPricelistId.value;
-          }
           const response = (await store.dispatch(
             'rooms/fetchRoomsByAvailability',
             payload
@@ -1829,10 +1823,11 @@ export default defineComponent({
                 numRoomsToOccupy: 0,
               });
             });
-          const responseFreeRooms = (await store.dispatch('availability/fetchNumFreeRooms', {
+          const responseFreeRooms = (await store.dispatch('availability/fetchNumAvailRooms', {
             pmsPropertyId: store.state.properties.activeProperty.id,
             from: checkin.value,
             to: checkout.value,
+            pricelistId: selectedPricelistId.value,
           })) as AxiosResponse<CountGlobalAvailableRooms[]>;
 
           globalAvailableRooms.value = responseFreeRooms.data;

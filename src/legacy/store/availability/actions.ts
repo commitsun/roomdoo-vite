@@ -38,7 +38,7 @@ const actions: ActionTree<AvailabilityStateInterface, StateInterface> = {
       }
     });
   },
-  async fetchNumFreeRooms(
+  async fetchNumAvailRooms(
     context,
     payload: {
       pmsPropertyId: number;
@@ -58,7 +58,7 @@ const actions: ActionTree<AvailabilityStateInterface, StateInterface> = {
     if (payload.pricelistId) {
       params += `&pricelistId=${payload.pricelistId}`;
     }
-    return api.get(`/avails/count-free-rooms${params}`);
+    return api.get(`/avails/count-avail-rooms${params}`);
   },
 };
 
