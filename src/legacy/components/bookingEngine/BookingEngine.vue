@@ -1570,6 +1570,7 @@ export default defineComponent({
             el.isDefaultBoardService
         )?.id;
 
+        console.log(availRoomIds.map((el) => el.id))
         // create the reservation
         const newReservation: ReservationsToCreateInterface = {
           autoAssignRoom: false,
@@ -1598,11 +1599,12 @@ export default defineComponent({
           boardServices: [],
           availRoomIds: availRoomIds.map((el) => el.id),
         };
+        console.log(newReservation);
+
         // check if room type id index exists
         const reservationsRoomTypeId = reservationsByRoomTypeToCreate.value.find(
           (el) => el.roomTypeId === roomTypeId
         );
-
         // if not exists push room type id
         if (!reservationsRoomTypeId) {
           reservationsByRoomTypeToCreate.value.push({
@@ -1937,7 +1939,6 @@ export default defineComponent({
             pmsPropertyId: store.state.properties.activeProperty?.id,
             availabilityFrom: reservation.checkin,
             availabilityTo: reservation.checkout,
-            pricelistId: selectedPricelistId.value,
           })) as AxiosResponse<RoomInterface[]>;
 
           const availFromApi = resp.data
@@ -2111,7 +2112,6 @@ export default defineComponent({
           pmsPropertyId: store.state.properties.activeProperty?.id,
           availabilityFrom: reservation.checkin,
           availabilityTo: reservation.checkout,
-          pricelistId: selectedPricelistId.value,
         })) as AxiosResponse<RoomInterface[]>;
 
         // filtramos las de la clase de la reserva seleccionada
@@ -2224,7 +2224,6 @@ export default defineComponent({
               pmsPropertyId: store.state.properties.activeProperty?.id,
               availabilityFrom: outter.checkin,
               availabilityTo: outter.checkout,
-              pricelistId: selectedPricelistId.value,
             })) as AxiosResponse<RoomInterface[]>;
 
             outter.availRoomIds = res.data
