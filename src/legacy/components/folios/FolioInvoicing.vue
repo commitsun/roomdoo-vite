@@ -9,7 +9,9 @@
     </div>
     <div v-for="(saleLine, index) in saleLinesWithoutPartner" :key="saleLine.id">
       <div
-        v-if="saleLine.qtyToInvoice > 0 && !saleLine.defaultInvoiceTo"
+        v-if="(saleLine.qtyToInvoice > 0
+          || (saleLine.displayType === 'line_note' && saleLineNotInInvoiceLines(saleLine)))
+          && !saleLine.defaultInvoiceTo"
         class="sale-lines"
         :style="getMoveLineRowStyle(saleLine.displayType, index)"
       >
@@ -17,22 +19,20 @@
           {{ saleLine.name }}
         </div>
         <div
-          v-if="
-            saleLine.reservationId && !saleLine.serviceId && saleLine.displayType !== 'line_section'
-          "
+          v-if="saleLine.reservationId && !saleLine.serviceId && saleLine.displayType !== 'line_section' && saleLine.displayType !== 'line_note'"
           class="sale-line-qty"
         >
           {{ saleLine.qtyToInvoice }} Noche{{ saleLine.qtyToInvoice > 1 ? 's' : '' }}
         </div>
         <div
           v-if="
-            saleLine.reservationId && saleLine.serviceId && saleLine.displayType !== 'line_section'
+            saleLine.reservationId && saleLine.serviceId && saleLine.displayType !== 'line_section' && saleLine.displayType !== 'line_note'
           "
           class="sale-line-qty"
         >
           {{ saleLine.qtyToInvoice }} Ud{{ saleLine.qtyToInvoice > 1 ? 's' : '' }}
         </div>
-        <div v-if="saleLine.displayType !== 'line_section'" class="sale-line-amount">
+        <div v-if="saleLine.displayType !== 'line_section' && saleLine.displayType !== 'line_note'" class="sale-line-amount">
           {{ getAmountLineToInvoice(saleLine.id) }} €
         </div>
       </div>
@@ -55,7 +55,9 @@
     </div>
     <div v-for="(saleLine, index) in partnerSaleLines" :key="saleLine.id">
       <div
-        v-if="saleLine.qtyToInvoice > 0 && saleLine.defaultInvoiceTo === partnerId"
+        v-if="(saleLine.qtyToInvoice > 0
+          || (saleLine.displayType === 'line_note' && saleLineNotInInvoiceLines(saleLine)))
+          && saleLine.defaultInvoiceTo === partnerId"
         class="sale-lines"
         :style="getMoveLineRowStyle(saleLine.displayType, index)"
       >
@@ -64,7 +66,7 @@
         </div>
         <div
           v-if="
-            saleLine.reservationId && !saleLine.serviceId && saleLine.displayType !== 'line_section'
+            saleLine.reservationId && !saleLine.serviceId && saleLine.displayType !== 'line_section' && saleLine.displayType !== 'line_note'
           "
           class="sale-line-qty"
         >
@@ -72,13 +74,13 @@
         </div>
         <div
           v-if="
-            saleLine.reservationId && saleLine.serviceId && saleLine.displayType !== 'line_section'
+            saleLine.reservationId && saleLine.serviceId && saleLine.displayType !== 'line_section' && saleLine.displayType !== 'line_note'
           "
           class="sale-line-qty"
         >
           {{ saleLine.qtyToInvoice }} Ud{{ saleLine.qtyToInvoice > 1 ? 's' : '' }}
         </div>
-        <div v-if="saleLine.displayType !== 'line_section'" class="sale-line-amount">
+        <div v-if="saleLine.displayType !== 'line_section' && saleLine.displayType !== 'line_note'" class="sale-line-amount">
           {{ getAmountLineToInvoice(saleLine.id) }} €
         </div>
       </div>
@@ -147,11 +149,11 @@
       <div class="invoice-line-name">
         {{ draftMoveLine.name }}
       </div>
-      <div class="invoice-line-qty" v-if="draftMoveLine.displayType !== 'line_section'">
+      <div class="invoice-line-qty" v-if="draftMoveLine.displayType !== 'line_section' && draftMoveLine.displayType !== 'line_note'">
         {{ draftMoveLine.quantity }}
         {{ moveLineUnit(draftInvoice.id as number, draftMoveLine.id as number) }}
       </div>
-      <div class="invoice-line-amount" v-if="draftMoveLine.displayType !== 'line_section'">
+      <div class="invoice-line-amount" v-if="draftMoveLine.displayType !== 'line_section' && draftMoveLine.displayType !== 'line_note'">
         {{ draftMoveLine.total }} €
       </div>
     </div>
@@ -219,11 +221,11 @@
       <div class="invoice-line-name">
         {{ postedMoveLine.name }}
       </div>
-      <div class="invoice-line-qty" v-if="postedMoveLine.displayType !== 'line_section'">
+      <div class="invoice-line-qty" v-if="postedMoveLine.displayType !== 'line_section' && postedMoveLine.displayType !== 'line_note'">
         {{ postedMoveLine.quantity }}
         {{ moveLineUnit(postedInvoice.id as number, postedMoveLine.id as number) }}
       </div>
-      <div class="invoice-line-amount" v-if="postedMoveLine.displayType !== 'line_section'">
+      <div class="invoice-line-amount" v-if="postedMoveLine.displayType !== 'line_section' && postedMoveLine.displayType !== 'line_note'">
         {{ postedMoveLine.total }} €
       </div>
     </div>
@@ -371,11 +373,14 @@ export default defineComponent({
       let backgroundColor = '';
       let fontWeight = '';
       let padding = '';
+      let fontStyle = '';
 
       if (displayType === 'line_section') {
         backgroundColor = '#d6ebf2';
         padding = '.2rem 0';
         fontWeight = 'bold';
+      } else if (displayType === 'line_note') {
+        fontStyle = 'italic';
       } else {
         padding = '.5rem 0';
         if (numberRow % 2 === 0) {
@@ -387,6 +392,7 @@ export default defineComponent({
         backgroundColor,
         fontWeight,
         padding,
+        fontStyle,
       };
 
       return style;
@@ -565,6 +571,18 @@ export default defineComponent({
       return unit;
     };
 
+    const saleLineNotInInvoiceLines = (saleLine: FolioSaleLineInterface) => {
+      let notInInvoiceLines = true;
+      invoices.value.forEach((invoice) => {
+        invoice.moveLines.forEach((moveLine) => {
+          if (moveLine.saleLineId === saleLine.id) {
+            notInInvoiceLines = false;
+          }
+        });
+      });
+      return notInInvoiceLines;
+    };
+
     const validateDraftInvoice = async (idInvoice: number) => {
       const invoice = invoices.value.find((el) => el.id === idInvoice);
       if (invoice && invoice.date) {
@@ -720,6 +738,7 @@ export default defineComponent({
       deleteInvoice,
       openMailInvoiceDialog,
       validateDraftInvoice,
+      saleLineNotInInvoiceLines,
       showValidateButton,
       partnerName,
       openInvoiceChanges,
