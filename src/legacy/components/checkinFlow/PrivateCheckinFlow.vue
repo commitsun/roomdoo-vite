@@ -317,19 +317,6 @@
               />
             </template>
           </CheckinFlowDocumentNumber>
-
-          <CheckinFlowDocumentExpeditionDate
-            v-else-if="currentStep === 'documentExpeditionDate' && activeCheckinPartner"
-            v-model="activeCheckinPartner.documentExpeditionDate"
-            @next="nextStep()"
-            @closeCheckinFlow="closeCheckinFlow()"
-            :currentIndexCheckin="currentIndexCheckin"
-            @setIsAllowedNextStep="setIsAllowedNextStep($event)"
-            :step="currentStepNumber"
-            @persistCheckinPartner="persistCheckinPartner"
-            @registerOnEnter="registerOnEnter"
-          />
-
           <CheckinFlowDocumentSupportNumber
             v-else-if="currentStep === 'documentSupportNumber' && activeCheckinPartner"
             v-model="activeCheckinPartner.documentSupportNumber"
@@ -589,7 +576,6 @@ type TypeStep =
   | 'nationality'
   | 'documentType'
   | 'documentNumber'
-  | 'documentExpeditionDate'
   | 'documentSupportNumber'
   | 'name'
   | 'gender'
@@ -781,9 +767,6 @@ export default defineComponent({
       }
       if (currentStep.value === 'documentNumber') {
         return 35;
-      }
-      if (currentStep.value === 'documentExpeditionDate') {
-        return 40;
       }
       if (currentStep.value === 'documentSupportNumber') {
         return 45;
@@ -1023,8 +1006,6 @@ export default defineComponent({
       } else if (currentStep.value === 'documentType') {
         currentStep.value = 'documentNumber';
       } else if (currentStep.value === 'documentNumber') {
-        currentStep.value = 'documentExpeditionDate';
-      } else if (currentStep.value === 'documentExpeditionDate') {
         if (
           activeCheckinPartner.value.documentType === DOCUMENT_TYPE_DNI ||
           activeCheckinPartner.value.documentType === DOCUMENT_TYPE_NIE
@@ -1119,12 +1100,10 @@ export default defineComponent({
         ) {
           currentStep.value = 'documentSupportNumber';
         } else {
-          currentStep.value = 'documentExpeditionDate';
+          currentStep.value = 'documentNumber';
         }
-      } else if (currentStep.value === 'documentExpeditionDate') {
-        currentStep.value = 'documentNumber';
       } else if (currentStep.value === 'documentSupportNumber') {
-        currentStep.value = 'documentExpeditionDate';
+        currentStep.value = 'documentNumber';
       } else if (currentStep.value === 'documentNumber') {
         currentStep.value = 'documentType';
       } else if (currentStep.value === 'documentType') {
@@ -1354,8 +1333,7 @@ export default defineComponent({
         ) {
           dialogService.open({
             header: t('not_scanned'),
-            content:
-              t('enter_data_manually'),
+            content: t('enter_data_manually'),
             btnAccept: t('continue'),
           });
         }
@@ -1415,7 +1393,7 @@ export default defineComponent({
       documentImageBase64Back,
       isFingerSignDisplayed,
       currentStepNumber,
-      registerOnEnter,    
+      registerOnEnter,
       handleAfterEnter,
       yearsFrom,
       deleteNextDocNumberStepValues,
