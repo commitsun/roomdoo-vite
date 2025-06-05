@@ -580,7 +580,7 @@ export default defineComponent({
     const availabilityPlans = computed(() => store.state.availabilityPlans.availabilityPlans);
     // pricelists
     const selectedPricelists: Ref<PricelistInterface[]> = ref([]);
-    const pricelists = computed(() => store.state.pricelists.pricelists);
+    const pricelists = computed(() => store.state.pricelists.dailyPricelists);
     // room types
     const selectedRoomTypeIds: Ref<RoomTypeInterface[]> = ref([]);
     const roomTypes = computed(() => store.state.roomTypes.roomTypes);
