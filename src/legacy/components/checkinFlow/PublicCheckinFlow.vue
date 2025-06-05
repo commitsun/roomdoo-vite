@@ -414,7 +414,6 @@ import CheckinFlowRelationship from '@/legacy/components/checkinFlow/CheckinFlow
 import CheckinFlowCountry from '@/legacy/components/checkinFlow/CheckinFlowCountry.vue';
 import CheckinFlowDocumentType from '@/legacy/components/checkinFlow/CheckinFlowDocumentType.vue';
 import CheckinFlowDocumentNumber from '@/legacy/components/checkinFlow/CheckinFlowDocumentNumber.vue';
-import CheckinFlowDocumentExpeditionDate from '@/legacy/components/checkinFlow/CheckinFlowDocumentExpeditionDate.vue';
 import CheckinFlowDocumentSupportNumber from '@/legacy/components/checkinFlow/CheckinFlowDocumentSupportNumber.vue';
 import CheckinFlowName from '@/legacy/components/checkinFlow/CheckinFlowName.vue';
 import CheckinFlowGender from '@/legacy/components/checkinFlow/CheckinFlowGender.vue';
@@ -462,7 +461,6 @@ export default defineComponent({
     CheckinFlowRelationship,
     CheckinFlowDocumentType,
     CheckinFlowDocumentNumber,
-    CheckinFlowDocumentExpeditionDate,
     CheckinFlowDocumentSupportNumber,
     CheckinFlowName,
     CheckinFlowGender,
