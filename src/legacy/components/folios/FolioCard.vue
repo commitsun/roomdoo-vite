@@ -611,7 +611,7 @@ export default defineComponent({
 
       if (props.folio.reservations.some((el) => el.isBlocked)) {
         let titleDialog = '';
-        const agencyName = store.state.agencies.agencies.find(
+        const agencyDisplayName = store.state.agencies.agencies.find(
           (el) => el.id === props.folio.agencyId
         )?.name;
         if (
@@ -624,15 +624,15 @@ export default defineComponent({
           } else {
             titleDialog = 'Reserva bloqueada';
           }
-          if (agencyName) {
-            titleDialog += ` por ${agencyName}`;
+          if (agencyDisplayName) {
+            titleDialog += ` por ${agencyDisplayName}`;
           }
           dialogService.open({
             iconHeader: '/app-images/icon-lock.svg',
             header: titleDialog,
             content: markRaw(FolioOrReservationCancelBlocked),
             props: {
-              agencyName: agencyName,
+              agencyName: agencyDisplayName,
               isFolio: true,
               moreThanOneReservation: moreThanOneReservation,
             },
@@ -643,9 +643,9 @@ export default defineComponent({
             iconHeader: '/app-images/icon-alert-2.svg',
             iconHeaderColor: 'red',
             header: titleDialog,
-            content: agencyName ? `Esta acción no notifica ni afecta a ${agencyName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyName} para aplicar cambios ahí.` : '',
+            content: agencyDisplayName ? `Esta acción no notifica ni afecta a ${agencyDisplayName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyDisplayName} para aplicar cambios ahí.` : '',
             props: {
-              agencyName: agencyName,
+              agencyName: agencyDisplayName,
             },
             onAccept: () => {
               doCancelReservations();
