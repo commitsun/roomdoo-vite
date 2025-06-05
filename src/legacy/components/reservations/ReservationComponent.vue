@@ -336,7 +336,7 @@ export default defineComponent({
         await store.dispatch('reservations/fetchReservations', folioId);
         await store.dispatch('folios/fetchFolios', payload);
         openReservationOptionsMenu.value = false;
-        if (router.currentRoute.value.path === '/planning/') {
+        if (router.currentRoute.value.name === 'planning') {
           await refreshPlanning();
         }
       } catch {
