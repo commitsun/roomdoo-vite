@@ -208,11 +208,14 @@
       <div class="sale-lines" v-if="isRenderSaleLines">
         <div v-for="(saleLine, index) in saleLinesToSend" :key="saleLine.id">
           <div
-            :class='{
-              "sale-line-section": saleLine.displayType === "line_section",
-              "sale-line-note": saleLine.displayType === "line_note",
-            }'
-            v-if="saleLine.displayType === 'line_section' || (saleLine.displayType === 'line_note' && saleLineNotInInvoiceLines(saleLine))"
+            :class="{
+              'sale-line-section': saleLine.displayType === 'line_section',
+              'sale-line-note': saleLine.displayType === 'line_note',
+            }"
+            v-if="
+              saleLine.displayType === 'line_section' ||
+              (saleLine.displayType === 'line_note' && saleLineNotInInvoiceLines(saleLine))
+            "
           >
             {{ saleLine.name }}
           </div>
@@ -268,11 +271,13 @@
       <div class="sale-lines" v-else-if="isRenderInvoiceLines">
         <div v-for="(invoiceLine, index) in invoiceLinesToSend" :key="invoiceLine.id ?? 0">
           <div
-            :class='{
-              "sale-line-section": invoiceLine.displayType === "line_section",
-              "sale-line-note": invoiceLine.displayType === "line_note",
-            }'
-            v-if="invoiceLine.displayType === 'line_section' || invoiceLine.displayType === 'line_note'"
+            :class="{
+              'sale-line-section': invoiceLine.displayType === 'line_section',
+              'sale-line-note': invoiceLine.displayType === 'line_note',
+            }"
+            v-if="
+              invoiceLine.displayType === 'line_section' || invoiceLine.displayType === 'line_note'
+            "
           >
             {{ invoiceLine.name }}
           </div>
@@ -288,11 +293,9 @@
                   <input
                     class="name-input"
                     type="text"
-                    :value="invoiceLine.name"
+                    v-model="invoiceLine.name"
                     :disabled="!isLineRemoved[index]"
-                    :style="
-                      getSaleLinesToInvoiceRowStyle(invoiceLinesToSend[index]?.displayType, index)
-                    "
+                    :style="getSaleLinesToInvoiceRowStyle(invoiceLine.displayType, index)"
                   />
                 </TooltipComponent>
               </div>
@@ -345,11 +348,14 @@
       <div class="sale-lines" v-if="isRenderInvoiceLines && showFolioSaleLines">
         <div v-for="(saleLine, index) in saleLinesToInvoice" :key="saleLine.id">
           <div
-            :class='{
-              "sale-line-section": saleLine.displayType === "line_section",
-              "sale-line-note": saleLine.displayType === "line_note",
-            }'
-            v-if="saleLine.displayType === 'line_section' || (saleLine.displayType === 'line_note' && saleLineNotInInvoiceLines(saleLine))"
+            :class="{
+              'sale-line-section': saleLine.displayType === 'line_section',
+              'sale-line-note': saleLine.displayType === 'line_note',
+            }"
+            v-if="
+              saleLine.displayType === 'line_section' ||
+              (saleLine.displayType === 'line_note' && saleLineNotInInvoiceLines(saleLine))
+            "
           >
             {{ saleLine.name }}
           </div>
@@ -891,8 +897,7 @@ export default defineComponent({
       const saleLine = saleLinesToInvoice.value.find((el) => el.id === saleLineId);
       if (saleLine) {
         const saleLineSectionToAdd = saleLinesToInvoice.value.find(
-          (el) => el.displayType === 'line_section'
-          && el.sectionId === saleLine.sectionId
+          (el) => el.displayType === 'line_section' && el.sectionId === saleLine.sectionId
         );
         if (saleLineSectionToAdd) {
           const newInvoiceLineSection: InvoiceLineInterface = {
@@ -905,17 +910,19 @@ export default defineComponent({
             saleLineId: saleLineSectionToAdd.id,
             discount: saleLineSectionToAdd.discount,
           };
-          const existsLineSectionInInvoice = invoiceLinesToSend.value.find((el) => el.saleLineId === saleLineSectionToAdd.id)
+          const existsLineSectionInInvoice = invoiceLinesToSend.value.find(
+            (el) => el.saleLineId === saleLineSectionToAdd.id
+          );
           if (!existsLineSectionInInvoice) {
             invoiceLinesToSend.value.push(newInvoiceLineSection);
             isLineRemoved.value.push(true);
           }
           const hasAnotherLineInSection = saleLinesToInvoice.value.some(
             (el) =>
-              el.sectionId === saleLineSectionToAdd.sectionId
-              && el.displayType !== 'line_note'
-              && el.id !== saleLineSectionToAdd.id
-              && el.id !== saleLine.id
+              el.sectionId === saleLineSectionToAdd.sectionId &&
+              el.displayType !== 'line_note' &&
+              el.id !== saleLineSectionToAdd.id &&
+              el.id !== saleLine.id
           );
           if (!hasAnotherLineInSection) {
             saleLinesToInvoice.value.splice(
@@ -938,16 +945,19 @@ export default defineComponent({
             saleLineId: saleLineNoteToAdd.id,
             discount: saleLineNoteToAdd.discount,
           };
-          const existsLineNoteInInvoice = invoiceLinesToSend.value.find((el) => el.saleLineId === saleLineNoteToAdd.id)
+          const existsLineNoteInInvoice = invoiceLinesToSend.value.find(
+            (el) => el.saleLineId === saleLineNoteToAdd.id
+          );
           if (!existsLineNoteInInvoice) {
             invoiceLinesToSend.value.push(newInvoiceLineNote);
             isLineRemoved.value.push(true);
           }
           const hasAnotherLineInSection = saleLinesToInvoice.value.some(
-            (el) => el.sectionId === saleLineNoteToAdd.sectionId
-            && el.displayType !== 'line_section'
-            && el.id !== saleLineNoteToAdd.id
-            && el.id !== saleLine.id
+            (el) =>
+              el.sectionId === saleLineNoteToAdd.sectionId &&
+              el.displayType !== 'line_section' &&
+              el.id !== saleLineNoteToAdd.id &&
+              el.id !== saleLine.id
           );
           if (!hasAnotherLineInSection) {
             saleLinesToInvoice.value.splice(
@@ -957,26 +967,23 @@ export default defineComponent({
           }
         }
         const newInvoiceLine: InvoiceLineInterface = {
-            id: null,
-            name: saleLine.name,
-            quantity: saleLine.qtyToInvoice,
-            priceUnit: saleLine.priceUnit,
-            total: amountSaleLineTotal(saleLine.id, true),
-            displayType: saleLine.displayType,
-            saleLineId: saleLine.id,
-            discount: saleLine.discount,
-          };
-          invoiceLinesToSend.value.push(newInvoiceLine);
-          isLineRemoved.value.push(true);
-          saleLinesToInvoice.value.splice(
-            saleLinesToInvoice.value.findIndex((el) => el.id === saleLineId),
-            1
-          );
-
-        }
+          id: null,
+          name: saleLine.name,
+          quantity: saleLine.qtyToInvoice,
+          priceUnit: saleLine.priceUnit,
+          total: amountSaleLineTotal(saleLine.id, true),
+          displayType: saleLine.displayType,
+          saleLineId: saleLine.id,
+          discount: saleLine.discount,
+        };
+        invoiceLinesToSend.value.push(newInvoiceLine);
+        isLineRemoved.value.push(true);
+        saleLinesToInvoice.value.splice(
+          saleLinesToInvoice.value.findIndex((el) => el.id === saleLineId),
+          1
+        );
       }
-
-
+    };
 
     const amountSaleLineTotal = (lineId: number, isToAddInvoice: boolean) => {
       let amount = 0;
@@ -1294,7 +1301,10 @@ export default defineComponent({
         }
         if (saleLines.value) {
           saleLines.value.forEach((el) => {
-            if (el.qtyToInvoice !== 0 || (el.displayType === 'line_note' && saleLineNotInInvoiceLines(el))) {
+            if (
+              el.qtyToInvoice !== 0 ||
+              (el.displayType === 'line_note' && saleLineNotInInvoiceLines(el))
+            ) {
               saleLinesToInvoice.value.push(el);
             }
           });
