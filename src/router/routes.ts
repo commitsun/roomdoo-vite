@@ -11,6 +11,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/legacy/layouts/LoginLayout.vue'),
     children: [
       { name: 'login', path: '', component: () => import('@/legacy/pages/LoginPage.vue') },
+      {
+        name: 'reset-password',
+        path: 'reset-password',
+        component: () => import('@/pages/ResetPasswordPage.vue'),
+      },
+      {
+        name: 'hotel-not-found',
+        path: 'hotel-not-found',
+        component: () => import('@/pages/HotelNotFoundPage.vue'),
+      },
     ],
   },
   // // -----------------------------------------
