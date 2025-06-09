@@ -1257,7 +1257,7 @@ export default defineComponent({
                 : el?.price,
             discount:
               isFixedPriceByNight.value || isFixedPriceTotalReservation.value ? 0 : el?.discount,
-            roomId: el.roomId,
+            roomId: el?.roomId,
             pmsPropertyId: store.state.properties.activeProperty?.id,
             reservationId: currentReservation.value?.id,
           }));

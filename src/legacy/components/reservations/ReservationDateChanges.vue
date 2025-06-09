@@ -338,13 +338,13 @@
         :disabled="
           isPriceError ||
           isDiscountError ||
-          (someReservationLineInRangeWithNoRoom && currentReservation.isSplitted)
+          (someReservationLineInRangeWithNoRoom && currentReservation?.isSplitted)
         "
         :class="{
           disabled:
             isPriceError ||
             isDiscountError ||
-            (someReservationLineInRangeWithNoRoom && currentReservation.isSplitted),
+            (someReservationLineInRangeWithNoRoom && currentReservation?.isSplitted),
         }"
       />
       <AppButton
