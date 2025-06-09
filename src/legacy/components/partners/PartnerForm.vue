@@ -55,7 +55,7 @@
               size="small"
               v-if="contactType === 'person'"
             />
-            <InputText class="input" v-model="agencyName" size="small" v-else />
+            <InputText class="input" v-model="lastname" size="small" v-else />
           </div>
           <div class="partner-field" v-if="contactType === 'person'">
             <div class="label">Primer apellido</div>
@@ -505,13 +505,13 @@
         :disabled="
           (contactType === 'person' && !(firstname && lastname)) ||
           (contactType === 'company' && !vat) ||
-          (contactType === 'agency' && !agencyName)
+          (contactType === 'agency' && !lastname)
         "
         :class="{
           disabled:
             (contactType === 'person' && !(firstname && lastname)) ||
             (contactType === 'company' && !vat) ||
-            (contactType === 'agency' && !agencyName),
+            (contactType === 'agency' && !lastname),
         }"
       />
       <AppButton class="button cancel" label="Cancelar" size="small" @click="$emit('close')" />
@@ -646,7 +646,6 @@ export default defineComponent({
     // agency data
     const commission = ref(0);
     const invoiceToAgency = ref('always');
-    const agencyName = ref('');
     // internal
     const saleChannel: Ref<null | number> = ref(null);
     const partnerToComplete: Ref<PartnerInterface | null> = ref(null);
@@ -818,19 +817,8 @@ export default defineComponent({
         if (partnerToComplete.value.pricelistId) {
           pricelist.value = partnerToComplete.value.pricelistId;
         }
-        if (partnerToComplete.value.isAgency || partnerToComplete.value.isCompany) {
-          if (partnerToComplete.value?.firstname) {
-            agencyName.value += partnerToComplete.value?.firstname;
-          }
-          if (partnerToComplete.value?.lastname) {
-            agencyName.value += partnerToComplete.value?.lastname;
-          }
-          if (partnerToComplete.value?.lastname2) {
-            agencyName.value += partnerToComplete.value?.lastname2;
-          }
-          if (partnerToComplete.value.isCompany) {
-            useInvoicingAddress.value = true;
-          }
+        if (partnerToComplete.value.isCompany) {
+          useInvoicingAddress.value = true;
         }
         if (partnerToComplete.value.saleChannelId) {
           saleChannel.value = partnerToComplete.value.saleChannelId;
@@ -848,23 +836,19 @@ export default defineComponent({
     const savePartner = async () => {
       let isAgency = false;
       let isCompany = false;
-      let lastnameVal: string | undefined = '';
-      if (contactType.value === 'agency' || contactType.value === 'company') {
-        lastnameVal = agencyName.value;
-        if (contactType.value === 'agency') {
-          isAgency = true;
-        }
-        if (contactType.value === 'company') {
-          isCompany = true;
-        }
-      } else {
-        lastnameVal = lastname.value;
+
+      if (contactType.value === 'agency') {
+        isAgency = true;
       }
+      if (contactType.value === 'company') {
+        isCompany = true;
+      }
+
       let payload = {
         id: -1,
-        firstname: firstname.value,
-        lastname: lastnameVal,
-        lastname2: lastname2.value,
+        firstname: isAgency || isCompany ? '' : firstname.value,
+        lastname: lastname.value,
+        lastname2: isAgency || isCompany ? '' : lastname2.value,
         email: email.value,
         mobile: mobile.value,
         phone: phone.value,
@@ -1294,16 +1278,6 @@ export default defineComponent({
       invoicingMonthDay.value = partner.value?.invoicingMonthDay
         ? partner.value.invoicingMonthDay
         : 0;
-
-      if (partner.value?.firstname) {
-        agencyName.value += partner.value.firstname;
-      }
-      if (partner.value?.lastname) {
-        agencyName.value += partner.value.lastname;
-      }
-      if (partner.value?.lastname2) {
-        agencyName.value += partner.value.lastname2;
-      }
     });
 
     return {
@@ -1350,7 +1324,6 @@ export default defineComponent({
       commission,
       saleChannel,
       invoiceToAgency,
-      agencyName,
       tabSelected,
       setAddressByZip,
       countryStates,
