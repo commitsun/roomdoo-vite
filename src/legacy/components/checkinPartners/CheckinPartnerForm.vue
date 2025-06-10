@@ -682,7 +682,7 @@ export default defineComponent({
           (dt) => dt.id === editingCheckinPartner.value?.documentType
         )?.code;
         if (documentTypeCode && documentNumber && documentNumber.length > 0) {
-          rdo = validateDocumentNumber(documentTypeCode, documentNumber);
+          rdo = validateDocumentNumber(documentTypeCode, documentNumber, editingCheckinPartner.value?.documentCountryId);
         }
       }
       return rdo;
