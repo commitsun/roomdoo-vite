@@ -1571,7 +1571,7 @@ export default defineComponent({
             el.isDefaultBoardService
         )?.id;
 
-        console.log(availRoomIds.map((el) => el.id))
+        console.log(availRoomIds.map((el) => el.id));
         // create the reservation
         const newReservation: ReservationsToCreateInterface = {
           autoAssignRoom: false,
@@ -1629,7 +1629,7 @@ export default defineComponent({
       roomTypeId: number;
       reservationId: number;
       productId: number;
-      boardServiceId?: number;
+      //boardServiceId?: number;
     }) => {
       // obtenemos la reserva
       const reservation = reservationsByRoomTypeToCreate.value
@@ -1646,9 +1646,9 @@ export default defineComponent({
             dateFrom: reservation.checkin,
             dateTo: reservation.checkout,
           };
-          if (value.boardServiceId) {
+          /*if (value.boardServiceId) {
             Object.assign(payloadPrices, { boardServiceId: value.boardServiceId });
-          }
+          }*/
           void store.dispatch('layout/showSpinner', true);
           try {
             await store.dispatch('prices/fetchPrices', payloadPrices);
@@ -1703,7 +1703,7 @@ export default defineComponent({
               name: product.name,
               perPerson: product.perPerson,
               items,
-              isBoardService: !!value.boardServiceId,
+              isBoardService: false,
             });
           }
         }
@@ -2189,12 +2189,15 @@ export default defineComponent({
           });
         reservation.roomPrice = roomPrice;
 
-        // ajustamos el precio de los servicios extra (incluidos los board services)
-        const extraServiceProducts = reservation.extraServices.map((el) => ({
-          productId: el.productId,
-          isBoardService: el.isBoardService,
-          boardServiceId: el.boardServiceLineId,
-        }));
+        // ajustamos el precio de los servicios extra (sin incluir los board services)
+        // obtenemos los productos que son servicios extra y no son board services
+        const extraServiceProducts = reservation.extraServices
+          .filter((el) => !el.isBoardService)
+          .map((el) => ({
+            productId: el.productId,
+            boardServiceId: el.boardServiceLineId,
+          }));
+
         reservation.extraServices = [];
         await Promise.all(
           extraServiceProducts.map(async (p) => {
@@ -2202,10 +2205,17 @@ export default defineComponent({
               roomTypeId: reservation.roomTypeId,
               reservationId: reservation.id,
               productId: p.productId,
-              boardServiceId: p.boardServiceId ?? reservation.boardServiceId,
+              //boardServiceId: p.boardServiceId ?? reservation.boardServiceId,
             });
           })
         );
+
+        // seteamos el board service de nuevo
+        await addReservationBoardServiceLinesAndItems({
+          roomTypeId: reservation.roomTypeId,
+          reservationId: reservation.id,
+          boardServiceId: reservation.boardServiceId,
+        });
 
         // iteramos asíncronamente las reservas que no se solapan con
         // la reserva que estamos procesando
@@ -2269,12 +2279,15 @@ export default defineComponent({
       checkin: Date;
       checkout: Date;
     }) => {
+      console.log('checkin', value.checkin);
+      console.log('checkout', value.checkout);
       const reservation = reservationsByRoomTypeToCreate.value
         .find((el) => el.roomTypeId === value.roomTypeId)
         ?.reservations.find((el) => el.id === value.reservationId);
       if (reservation) {
         reservation.checkin = new Date(value.checkin);
         reservation.checkout = new Date(value.checkout);
+        console.log('reservation', reservation);
         void store.dispatch('layout/showSpinner', true);
         try {
           await adjustAvailableRoomIdsAndPrices(reservation.roomTypeId, reservation.id);
