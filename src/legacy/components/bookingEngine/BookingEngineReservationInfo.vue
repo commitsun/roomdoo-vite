@@ -174,7 +174,7 @@
           selectionMode="range"
           hideOnRangeSelection
           :manualInput="false"
-          :disabled="!reservation.editable"
+          disabled
         />
       </div>
       <hr />
