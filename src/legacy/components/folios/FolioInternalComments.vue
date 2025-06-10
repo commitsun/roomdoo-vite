@@ -1,6 +1,11 @@
 <template>
   <div class="content">
-    <AppTextarea v-model="internalComments" class="textarea" />
+    <AppTextarea
+      v-model="internalComments"
+      rows="6"
+      autoResize
+      class="textarea"
+    />
     <div class="buttons-panel">
       <AppButton
         class="btn"
@@ -73,9 +78,10 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .content {
+  max-height: 80svh;
   .textarea {
     width: 100%;
-    height: 100px;
+    height: 100%;
   }
   .buttons-panel {
     display: flex;
@@ -92,7 +98,7 @@ export default defineComponent({
 }
 @media (min-width: 1024px) {
   .content {
-    width: 500px;
+    width: 550px;
     .buttons-panel {
       flex-direction: row;
       justify-content: flex-end;
