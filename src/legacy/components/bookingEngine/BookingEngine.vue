@@ -1571,7 +1571,6 @@ export default defineComponent({
             el.isDefaultBoardService
         )?.id;
 
-        console.log(availRoomIds.map((el) => el.id));
         // create the reservation
         const newReservation: ReservationsToCreateInterface = {
           autoAssignRoom: false,
@@ -1600,7 +1599,6 @@ export default defineComponent({
           boardServices: [],
           availRoomIds: availRoomIds.map((el) => el.id),
         };
-        console.log(newReservation);
 
         // check if room type id index exists
         const reservationsRoomTypeId = reservationsByRoomTypeToCreate.value.find(
@@ -1629,9 +1627,7 @@ export default defineComponent({
       roomTypeId: number;
       reservationId: number;
       productId: number;
-      //boardServiceId?: number;
     }) => {
-      // obtenemos la reserva
       const reservation = reservationsByRoomTypeToCreate.value
         .find((el) => el.roomTypeId === value.roomTypeId)
         ?.reservations.find((el) => el.id === value.reservationId);
@@ -1646,9 +1642,6 @@ export default defineComponent({
             dateFrom: reservation.checkin,
             dateTo: reservation.checkout,
           };
-          /*if (value.boardServiceId) {
-            Object.assign(payloadPrices, { boardServiceId: value.boardServiceId });
-          }*/
           void store.dispatch('layout/showSpinner', true);
           try {
             await store.dispatch('prices/fetchPrices', payloadPrices);
@@ -2205,7 +2198,6 @@ export default defineComponent({
               roomTypeId: reservation.roomTypeId,
               reservationId: reservation.id,
               productId: p.productId,
-              //boardServiceId: p.boardServiceId ?? reservation.boardServiceId,
             });
           })
         );
@@ -2279,15 +2271,12 @@ export default defineComponent({
       checkin: Date;
       checkout: Date;
     }) => {
-      console.log('checkin', value.checkin);
-      console.log('checkout', value.checkout);
       const reservation = reservationsByRoomTypeToCreate.value
         .find((el) => el.roomTypeId === value.roomTypeId)
         ?.reservations.find((el) => el.id === value.reservationId);
       if (reservation) {
         reservation.checkin = new Date(value.checkin);
         reservation.checkout = new Date(value.checkout);
-        console.log('reservation', reservation);
         void store.dispatch('layout/showSpinner', true);
         try {
           await adjustAvailableRoomIdsAndPrices(reservation.roomTypeId, reservation.id);
