@@ -178,7 +178,7 @@ export default defineComponent({
       default: true,
     },
   },
-  emits: ['transactionCreated', 'close'],
+  emits: ['transactionCreated', 'close', 'accept'],
   setup(props, context) {
     const store = useStore();
     const { fetchPartners } = usePartner();
@@ -194,7 +194,7 @@ export default defineComponent({
     const itemsAutocompleteCustomer = ref([] as { value: number; name: string }[]);
     const selectedPartnerId = ref(0);
     const selectedPartner: Ref<PartnerInterface | null> = ref(null);
-    const chargeDate = ref();
+    const chargeDate: Ref<Date | null> = ref(null);
 
     const activeProperty = computed(() => store.state.properties.activeProperty);
     const currentPartner = computed(() => store.state.partners.currentPartner);
@@ -221,9 +221,17 @@ export default defineComponent({
 
     const createOrEditTransaction = async () => {
       let partnerId = null;
-      const year = chargeDate.value.getFullYear();
-      const month = String(chargeDate.value.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
-      const day = String(chargeDate.value.getDate()).padStart(2, '0');
+      if (!chargeDate.value) {
+        dialogService.open({
+          header: 'Error',
+          content: 'La fecha es obligatoria',
+          btnAccept: 'Ok',
+        });
+        return;
+      }
+      const year = chargeDate.value?.getFullYear();
+      const month = String(chargeDate.value?.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+      const day = String(chargeDate.value?.getDate()).padStart(2, '0');
 
       if (partnerName.value && store.state.partners.currentPartner) {
         partnerId = store.state.partners.currentPartner?.id;
@@ -264,7 +272,7 @@ export default defineComponent({
         });
       } finally {
         void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
+        context.emit('accept', true);
       }
     };
 
@@ -356,7 +364,7 @@ export default defineComponent({
         if (journal) {
           accountJournal.value = journal.value;
         }
-        chargeDate.value = props.transaction.date;
+        chargeDate.value = new Date(props.transaction.date);
         isReconcilied.value = props.transaction.isReconcilied;
         if (props.transaction.partnerId) {
           void store.dispatch('layout/showSpinner', true);

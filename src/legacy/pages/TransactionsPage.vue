@@ -749,6 +749,18 @@ export default defineComponent({
                 transaction: currentTransaction.value,
                 isCustomer: false,
               },
+              onAccept: async (refresh?: unknown) => {
+                if (refresh) {
+                  await store.dispatch('transactions/removeTransactions');
+                  await store.dispatch('transactions/fetchTransactions', {
+                    limit,
+                    offset: 0,
+                    pmsPropertyId: activeProperty.value?.id,
+                    dateStart: transactionDateRange.value[0],
+                    dateEnd: transactionDateRange.value[1],
+                  });
+                }
+              },
             });
           } else if (
             selectedTransaction.transactionType === 'customer_inbound' ||
@@ -764,6 +776,18 @@ export default defineComponent({
               props: {
                 transaction: currentTransaction.value,
                 isRefund: isCustomerRefund,
+              },
+              onAccept: async (refresh?: unknown) => {
+                if (refresh) {
+                  await store.dispatch('transactions/removeTransactions');
+                  await store.dispatch('transactions/fetchTransactions', {
+                    limit,
+                    offset: 0,
+                    pmsPropertyId: activeProperty.value?.id,
+                    dateStart: transactionDateRange.value[0],
+                    dateEnd: transactionDateRange.value[1],
+                  });
+                }
               },
             });
           }
@@ -905,6 +929,18 @@ export default defineComponent({
         closable: true,
         props: {
           isCustomer: false,
+        },
+        onAccept: async (refresh?: unknown) => {
+          if (refresh) {
+            await store.dispatch('transactions/removeTransactions');
+            await store.dispatch('transactions/fetchTransactions', {
+              limit,
+              offset: 0,
+              pmsPropertyId: activeProperty.value?.id,
+              dateStart: transactionDateRange.value[0],
+              dateEnd: transactionDateRange.value[1],
+            });
+          }
         },
       });
     };
