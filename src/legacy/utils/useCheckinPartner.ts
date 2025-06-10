@@ -36,10 +36,31 @@ export const DEFAULT_CHECKIN_PARTNER_VALUES = {
   zip: '',
 };
 
+function isValidNIE(nie: string): boolean {
+  const controlLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
+  nie = nie.trim().toUpperCase();
+
+  const nieRegex = /^[XYZ][0-9]{7}[A-Z]$/;
+  if (!nieRegex.test(nie)) return false;
+
+  const prefix = nie[0];
+  const numberPart = nie.slice(1, -1);
+  const controlChar = nie.slice(-1);
+
+  let numericPrefix = { X: "0", Y: "1", Z: "2" }[prefix];
+  const fullNumber = parseInt(numericPrefix + numberPart, 10);
+  const expectedLetter = controlLetters[fullNumber % 23];
+
+  return controlChar === expectedLetter;
+}
+
 export function useCheckinPartner() {
   const store = useStore();
   const router = useRouter();
   const { yearsFrom } = utilsDates;
+  const NATIONALITY_CODE_SPAIN = store.state.countries.countries.find(
+    (el) => el.code === 'ES'
+  )?.id;
 
   const saveCheckinPartner = async (checkinPartner: CheckinPartnerInterface) => {
     void store.dispatch('layout/showSpinner', true);
@@ -268,13 +289,13 @@ export function useCheckinPartner() {
     }
   };
 
-  const validateDocumentNumber = (documentType: string, documentNumber: string) => {
+  const validateDocumentNumber = (documentType: string, documentNumber: string, documentCountryId: number) => {
     let result = false;
-    const residencePermitRegex = /^[XYxy][0-9]{7}[A-Za-z]$/;
     if (
-      (documentType === 'D' && isNIF(documentNumber)) ||
-      (documentType === 'X' && residencePermitRegex.test(documentNumber)) ||
-      (documentType === 'N' && residencePermitRegex.test(documentNumber)) ||
+      (documentType === 'D' && isNIF(documentNumber) && documentCountryId === NATIONALITY_CODE_SPAIN) ||
+      (documentType === 'D' && documentCountryId !== NATIONALITY_CODE_SPAIN) ||
+      (documentType === 'X' && isValidNIE(documentNumber)) ||
+      (documentType === 'N' && isValidNIE(documentNumber)) ||
       documentType === 'P' ||
       documentType === 'I' ||
       documentType === 'C'
@@ -283,6 +304,7 @@ export function useCheckinPartner() {
     }
     return result;
   };
+
   const validateSupportNumber = (supportNumber: string) => {
     const regex = /^[A-Za-z]{3}\d{6}$/;
     return regex.test(supportNumber);

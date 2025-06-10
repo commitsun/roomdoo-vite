@@ -96,7 +96,7 @@
         @click="processDocumentNumber()"
         v-if="
           !existingCheckinPartner &&
-          isValidDocumentNumber &&
+          validateDocumentNumber(documentTypeCode, documentNumber, documentCountryId) &&
           documentNumber !== '' &&
           !isDocumentNumberAlreadyInReservation
         "
@@ -293,30 +293,11 @@ export default defineComponent({
       return result;
     });
 
-    const isValidDocumentNumber = computed(() => {
-      let result = false;
-      const residencePermitRegex = /^[XYxy][0-9]{7}[A-Za-z]$/;
-      if (
-        (documentTypeCode.value === 'D' &&
-          isNIF(documentNumber.value) &&
-          props.documentCountryId === NATIONALITY_CODE_SPAIN) ||
-        (documentTypeCode.value === 'D' && props.documentCountryId !== NATIONALITY_CODE_SPAIN) ||
-        (documentTypeCode.value === 'X' && residencePermitRegex.test(documentNumber.value)) ||
-        (documentTypeCode.value === 'N' && residencePermitRegex.test(documentNumber.value)) ||
-        documentTypeCode.value === 'P' ||
-        documentTypeCode.value === 'I' ||
-        documentTypeCode.value === 'C'
-      ) {
-        result = true;
-      }
-      return result;
-    });
-
     const validDocumentNumber = () => {
       let rdo = true;
       if (props.documentType) {
         if (documentTypeCode.value && documentNumber.value && documentNumber.value.length > 0) {
-          rdo = validateDocumentNumber(documentTypeCode.value, documentNumber.value);
+          rdo = validateDocumentNumber(documentTypeCode.value, documentNumber.value, props.documentCountryId);
         }
       }
       return rdo;
@@ -460,7 +441,6 @@ export default defineComponent({
       documentTypeCode,
       documentNumberInputRef,
       btnAcceptExistingCheckinPartnerRef,
-      isValidDocumentNumber,
       existingCheckinPartner,
       isExistingCheckinPartnerMandatoryDataComplete,
       isDocumentNumberAlreadyInReservation,
@@ -468,6 +448,7 @@ export default defineComponent({
       processDocumentNumber,
       handleKeypress,
       performSaveCheckinPartner,
+      validateDocumentNumber,
     };
   },
 });
