@@ -335,6 +335,9 @@ export default defineComponent({
         await store.dispatch('reservations/fetchReservation', reservationId);
         await store.dispatch('reservations/fetchReservations', folioId);
         await store.dispatch('folios/fetchFolios', payload);
+        if (store.state.folios.currentFolio) {
+          await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);
+        }
         openReservationOptionsMenu.value = false;
         if (router.currentRoute.value.name === 'planning') {
           await refreshPlanning();
@@ -401,8 +404,10 @@ export default defineComponent({
 
         await store.dispatch('reservations/fetchReservation', reservationId);
         await store.dispatch('reservations/fetchReservations', folioId);
-        await store.dispatch('reservations/fetchReservations', folioId);
         await store.dispatch('folios/fetchFolios', payload);
+        if (store.state.folios.currentFolio) {
+          await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);
+        }
         openReservationOptionsMenu.value = false;
         if (router.currentRoute.value.name === 'planning') {
           await refreshPlanning();

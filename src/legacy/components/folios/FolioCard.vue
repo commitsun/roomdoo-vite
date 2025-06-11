@@ -315,6 +315,7 @@ import FolioBatchChanges from '@/legacy/components/folios//FolioBatchChanges.vue
 import { usePlanning } from '@/legacy/utils/usePlanning';
 import Reservation from '@/legacy/components/reservations/ReservationComponent.vue';
 import FolioOrReservationCancelBlocked from '@/legacy/components/alerts/FolioOrReservationCancelBlocked.vue';
+import { useRouter } from 'vue-router';
 
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import {
@@ -343,6 +344,7 @@ export default defineComponent({
   emits: ['moveToFirstReservation'],
   setup(props, context) {
     const store = useStore();
+    const router = useRouter();
     const { refreshPlanning } = usePlanning();
 
     const isOpen = ref(true);
@@ -555,6 +557,7 @@ export default defineComponent({
           propertyId: store.state.properties.activeProperty?.id,
           dateStart: store.state.planning.dateStart,
           dateEnd: store.state.planning.dateEnd,
+          limit: store.state.folios.folios.length,
         };
         await store.dispatch('folios/fetchFolios', payload);
         isOpenMenu.value = false;
@@ -585,11 +588,14 @@ export default defineComponent({
             propertyId: store.state.properties.activeProperty?.id,
             dateStart: store.state.planning.dateStart,
             dateEnd: store.state.planning.dateEnd,
+            limit: store.state.folios.folios.length,
           };
           await store.dispatch('folios/fetchFolios', payload);
           isOpenMenu.value = false;
           isOpen.value = true;
-          await refreshPlanning();
+          if (router.currentRoute.value.name === 'planning') {
+            await refreshPlanning();
+          }
         } catch {
           dialogService.open({
             header: 'Error',

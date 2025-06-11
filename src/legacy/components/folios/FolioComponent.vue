@@ -504,6 +504,7 @@ import FolioInvoicing from '@/legacy/components/folios/FolioInvoicing.vue';
 import { selectedLang } from '@/plugins/locale';
 
 import { usePlanning } from '@/legacy/utils/usePlanning';
+import { useRouter } from 'vue-router';
 import {
   isAllowedAddRooms,
   isAllowedBatchChanges,
@@ -514,7 +515,6 @@ import {
 import { dialogService } from '@/legacy/services/DialogService';
 import type { roomTypeClassesInterface } from '@/legacy/interfaces/roomTypeClassesInterface';
 import type { FolioInterface } from '@/legacy/interfaces/FolioInterface';
-import utilsDates from '@/legacy/utils/dates';
 
 export default defineComponent({
   components: {
@@ -532,6 +532,7 @@ export default defineComponent({
     const { refreshPlanning } = usePlanning();
 
     const store = useStore();
+    const router = useRouter();
     const today = (): Date => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -820,7 +821,9 @@ export default defineComponent({
         });
         await store.dispatch('folios/fetchFolio', currentFolio.value?.id);
         await store.dispatch('reservations/fetchReservations', currentFolio.value?.id);
-        await refreshPlanning();
+        if (router.currentRoute.value.name === 'planning') {
+          await refreshPlanning();
+        }
         if (store.state.reservations.currentReservation) {
           await store.dispatch(
             'reservations/fetchReservation',
@@ -858,7 +861,9 @@ export default defineComponent({
           );
         }
         isOpenMenu.value = false;
-        await refreshPlanning();
+        if (router.currentRoute.value.name === 'planning') {
+          await refreshPlanning();
+        }
       } catch {
         dialogService.open({
           header: 'Error',
