@@ -96,6 +96,9 @@
         @click="processDocumentNumber()"
         v-if="
           !existingCheckinPartner &&
+          documentTypeCode &&
+          documentNumber &&
+          documentCountryId &&
           validateDocumentNumber(documentTypeCode, documentNumber, documentCountryId) &&
           documentNumber !== '' &&
           !isDocumentNumberAlreadyInReservation
