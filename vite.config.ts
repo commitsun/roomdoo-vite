@@ -1,19 +1,34 @@
 import { fileURLToPath, URL } from 'node:url';
 import autoprefixer from 'autoprefixer';
 
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin } from 'vite';
+import { execSync } from 'child_process';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import vueI18n from '@intlify/unplugin-vue-i18n/vite';
 import path from 'path';
 
+function commitHashPlugin(): Plugin {
+  const commitHash = execSync('git rev-parse HEAD').toString().trim();
+  const commitDate = execSync('git log -1 --format=%cd').toString().trim();
+
+  return {
+    name: 'inject-commit-hash',
+    transformIndexHtml(html) {
+      const comment = `<!-- Build commit: ${commitHash} | Date: ${commitDate} -->\n`;
+      return comment + html;
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
-    vue(), 
+    vue(),
     tailwindcss(),
     vueI18n({
       include: path.resolve(__dirname, './src/locales/**'),
     }),
+    commitHashPlugin(),
   ],
   resolve: {
     alias: {
