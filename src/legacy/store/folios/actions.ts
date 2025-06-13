@@ -142,6 +142,13 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
         });
       });
     });
+    if (payload.reservations && Array.isArray(payload.reservations)) {
+      payload.reservations.forEach((reservation) => {
+        if ('id' in reservation) {
+          delete (reservation as { id?: number }).id;
+        }
+      });
+    }
     return api.post('/folios', payload);
   },
   async updateFolio(context, payload: { folioId: number; internalComment: string }) {
@@ -163,7 +170,14 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
     return api.patch(`/folios/p/${payload.folioId}`, payload);
   },
   async addReservationsToFolio(context, payload: FolioApiInterface) {
-    return api.patch(`folios/p/${payload.id ?? 0}`, payload);
+    if (payload.reservations && Array.isArray(payload.reservations)) {
+      payload.reservations.forEach((reservation) => {
+        if ('id' in reservation) {
+          delete (reservation as { id?: number }).id;
+        }
+      });
+    }
+    return api.post(`/folios/${payload.id ?? 0}/reservations`, payload);
   },
   async createFolioInvoice(context, payload: PayloadAccountMoveInterface) {
     return api.post(`/folios/${payload.folioId}/invoices`, payload);
