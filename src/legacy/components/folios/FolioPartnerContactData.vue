@@ -8,9 +8,8 @@
       v-model="selectedPartnerId"
       :items="itemsAutocompleteCustomer"
       placeholderShowingOptions="Busqueda por Nombre, DNI, NIF..."
-      placeholderValue="Busqueda por Nombre, DNI, NIF..."
+      :placeholderValue="selectedPartnerId ? partnerName : 'Busqueda por Nombre, DNI, NIF...'"
       isItemToRemove
-      keepResultAfterChoose
       @removeItem="clearData()"
     >
       <template #icon>
@@ -161,13 +160,22 @@ export default defineComponent({
         partnerEmailPhoneError.value = true;
         return;
       }
-      const payload = {
+      let payload: {
+        folioId: number | undefined;
+        partnerName: string;
+        partnerEmail: string;
+        partnerPhone: string;
+        partnerId?: number;
+      } = {
         folioId: currentFolio.value?.id,
         partnerName: partnerName.value,
         partnerEmail: partnerEmail.value,
         partnerPhone: partnerPhone.value,
-        partnerId: selectedPartnerId.value ? selectedPartnerId.value : '0',
       };
+
+      if (selectedPartnerId.value) {
+        payload.partnerId = selectedPartnerId.value;
+      }
       const payloadLang = {
         folioId: currentFolio.value?.id,
         language: languageSelected.value,
@@ -179,13 +187,22 @@ export default defineComponent({
         if (currentReservations.value) {
           await Promise.all(
             currentReservations.value.map(async (reservation) => {
-              await store.dispatch('reservations/updateReservation', {
+              let payloadReservation: {
+                reservationId: number;
+                partnerName: string;
+                partnerEmail: string;
+                partnerPhone: string;
+                partnerId?: number;
+              } = {
                 reservationId: reservation.id,
                 partnerName: partnerName.value,
                 partnerEmail: partnerEmail.value,
                 partnerPhone: partnerPhone.value,
-                partnerId: selectedPartnerId.value ? selectedPartnerId.value : '0',
-              });
+              };
+              if (selectedPartnerId.value) {
+                payloadReservation.partnerId = selectedPartnerId.value;
+              }
+              await store.dispatch('reservations/updateReservation', payloadReservation);
             })
           );
         }
@@ -250,8 +267,23 @@ export default defineComponent({
       }
     });
 
-    onMounted(() => {
+    onMounted(async() => {
       if (currentFolio.value) {
+        void store.dispatch('layout/showSpinner', true);
+        try {
+          await getGuestFromVatDocNumber(
+            currentFolio.value.partnerName ?? ''
+          );
+
+        } catch {
+          dialogService.open({
+            header: 'Error',
+            content: 'Algo ha ido mal',
+            btnAccept: 'Ok',
+          });
+        } finally {
+          void store.dispatch('layout/showSpinner', false);
+        }
         selectedPartnerId.value = currentFolio.value.partnerId ?? 0;
         partnerName.value = currentFolio.value.partnerName ?? '';
         partnerEmail.value = currentFolio.value.partnerEmail ?? '';
