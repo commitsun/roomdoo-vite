@@ -252,10 +252,7 @@ export default defineComponent({
     };
 
     const sendMail = () => {
-      context.emit(
-        'accept',
-        partners.value.map((el) => el.email)
-      );
+      context.emit('accept', [...emails.value, ...partners.value.map((el) => el.email)]);
     };
 
     const addMailToPartner = async () => {
