@@ -1,49 +1,38 @@
 <template>
-  <div class="login-layout">
-    <div class="login-container">
-      <div class="login-content">
-        <div class="login-header">
-          <img src="/logos/logo-black-new.svg" alt="Roomdoo Logo" class="logo debug-box" />
-        </div>
-        <router-view />
-      </div>
+  <div class="login-layout debug-box">
+    <div class="left debug-box">a</div>
+    <div class="right debug-box">
+      <router-view />
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-// No additional setup needed for now
-</script>
-
 <style lang="scss" scoped>
 .login-layout {
-  min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
-}
+  flex-direction: column; // Mobile-first: columna por defecto
+  height: 100vh;
 
-.login-container {
-  width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-}
+  .left {
+    display: none; // Oculto en móviles y tablets por defecto
+  }
 
-.login-content {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
+  .right {
+    flex: 1;
+  }
 
-.login-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
+  @media (min-width: 1024px) {
+    // Desktop en adelante
+    flex-direction: row;
 
-.logo {
-  height: 40px;
-  width: auto;
+    .left {
+      display: block;
+      width: 33.33%; // Un tercio
+      background: linear-gradient(to bottom left, #2a0a58, #081b2b, #0e96c8);
+    }
+
+    .right {
+      width: 66.67%; // Dos tercios
+    }
+  }
 }
 </style>
