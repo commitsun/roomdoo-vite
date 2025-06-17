@@ -4,11 +4,13 @@ import axiosPlugin from '@/plugins/axios';
 import App from './App.vue';
 import PrimeVue, { defaultOptions } from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
+
+import { createPinia } from 'pinia';
 import 'primeicons/primeicons.css';
 import { store } from '@/legacy/store';
 import { i18n } from '@/plugins/i18n';
 import { locale } from '@/plugins/locale';
-
+const pinia = createPinia();
 
 import '@/assets/style.css';
 import { createHead } from '@vueuse/head';
@@ -47,7 +49,7 @@ app.use(axiosPlugin);
 app.use(head);
 app.use(store);
 app.use(i18n);
+app.use(pinia);
 
 app.mount('#app');
 export const appLocale = locale;
-
