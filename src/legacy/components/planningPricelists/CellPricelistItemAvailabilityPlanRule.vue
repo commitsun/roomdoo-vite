@@ -34,7 +34,15 @@
         />
       </div>
     </div>
-    <hr :class="(quota === 0 || maxAvail === 0 || closed) && (freeRooms > 0) ? 'red' : (freeRooms === 0) ? 'grey' : ''" />
+    <hr
+      :class="
+        (quota === 0 || maxAvail === 0 || closed) && freeRooms > 0
+          ? 'red'
+          : freeRooms === 0
+          ? 'grey'
+          : ''
+      "
+    />
     <!-- QUOTA -->
     <div
       v-if="activeUser?.availabilityRuleFields?.includes('quota')"
@@ -52,6 +60,33 @@
           type="number"
           class="restriction-input"
           v-model="quota"
+          @input="updateAvailabilityPlanRule"
+          :class="{ active: showAdvancedPricelistItem }"
+        />
+      </div>
+    </div>
+
+    <!-- MAX AVAIL -->
+    <div
+      v-if="activeUser?.availabilityRuleFields?.includes('max_avail')"
+      class="pricelist-avail-rule-item-row"
+      :class="
+        validator.maxAvail.$error ? 'not-valid' : maxAvail !== initialMaxAvail ? 'modified' : ''
+      "
+      @click="($refs.inputMaxAvail as HTMLInputElement).focus()"
+    >
+      <div class="label">Máx. dispo.</div>
+      <div
+        class="rule-value"
+        :class="
+          validator.maxAvail.$error ? 'not-valid' : maxAvail !== initialMaxAvail ? 'modified' : ''
+        "
+      >
+        <input
+          ref="inputMaxAvail"
+          type="number"
+          class="restriction-input"
+          v-model="maxAvail"
           @input="updateAvailabilityPlanRule"
           :class="{ active: showAdvancedPricelistItem }"
         />
@@ -102,33 +137,6 @@
           type="number"
           class="restriction-input"
           v-model="maxStay"
-          @input="updateAvailabilityPlanRule"
-          :class="{ active: showAdvancedPricelistItem }"
-        />
-      </div>
-    </div>
-
-    <!-- MAX AVAIL -->
-    <div
-      v-if="activeUser?.availabilityRuleFields?.includes('max_avail')"
-      class="pricelist-avail-rule-item-row"
-      :class="
-        validator.maxAvail.$error ? 'not-valid' : maxAvail !== initialMaxAvail ? 'modified' : ''
-      "
-      @click="($refs.inputMaxAvail as HTMLInputElement).focus()"
-    >
-      <div class="label">Máx. dispo.</div>
-      <div
-        class="rule-value"
-        :class="
-          validator.maxAvail.$error ? 'not-valid' : maxAvail !== initialMaxAvail ? 'modified' : ''
-        "
-      >
-        <input
-          ref="inputMaxAvail"
-          type="number"
-          class="restriction-input"
-          v-model="maxAvail"
           @input="updateAvailabilityPlanRule"
           :class="{ active: showAdvancedPricelistItem }"
         />

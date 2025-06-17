@@ -77,6 +77,32 @@
           <label for="quotaItem" class="label"> Cupo </label>
         </div>
 
+        <!-- max availability -->
+        <div
+          :class="
+            validator.currentMaxAvailability.$error
+              ? 'text-red'
+              : currentMaxAvailability !== oldAvailabilityPlanRule.maxAvailability
+              ? 'modified'
+              : ''
+          "
+        >
+          <input
+            class="input-item-rule-value"
+            :class="
+              validator.currentMaxAvailability.$error
+                ? 'not-valid'
+                : currentMaxAvailability !== oldAvailabilityPlanRule.maxAvailability
+                ? 'modified'
+                : ''
+            "
+            type="number"
+            v-model="currentMaxAvailability"
+            @input="validator.currentMaxAvailability.$touch"
+          />
+          <label class="label"> Max. dispo. </label>
+        </div>
+
         <!-- min stay -->
         <div
           :class="
@@ -126,31 +152,6 @@
             @input="validator.currentMaxStay.$touch"
           />
           <label for="maxStayItem" class="label"> Estancia máx. </label>
-        </div>
-        <!-- max availability -->
-        <div
-          :class="
-            validator.currentMaxAvailability.$error
-              ? 'text-red'
-              : currentMaxAvailability !== oldAvailabilityPlanRule.maxAvailability
-              ? 'modified'
-              : ''
-          "
-        >
-          <input
-            class="input-item-rule-value"
-            :class="
-              validator.currentMaxAvailability.$error
-                ? 'not-valid'
-                : currentMaxAvailability !== oldAvailabilityPlanRule.maxAvailability
-                ? 'modified'
-                : ''
-            "
-            type="number"
-            v-model="currentMaxAvailability"
-            @input="validator.currentMaxAvailability.$touch"
-          />
-          <label class="label"> Max. dispo. </label>
         </div>
       </div>
       <div class="right-inputs-edit">
@@ -535,7 +536,6 @@ export default defineComponent({
       } else {
         style += 'left: 144px;';
       }
-
 
       let heightPosition = 'top: 0;';
 
