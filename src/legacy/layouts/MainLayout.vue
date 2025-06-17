@@ -58,6 +58,7 @@
 <script lang="ts">
 import {
   defineComponent,
+  defineAsyncComponent,
   computed,
   ref,
   watch,
@@ -68,17 +69,30 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/legacy/store';
+
+const BookingEngine = defineAsyncComponent(
+  () => import('@/legacy/components/bookingEngine/BookingEngine.vue')
+);
+const FoliosList = defineAsyncComponent(() => import('@/legacy/components/folios/FoliosList.vue'));
+const FolioComponent = defineAsyncComponent(
+  () => import('@/legacy/components/folios/FolioComponent.vue')
+);
+const PartnerDetail = defineAsyncComponent(
+  () => import('@/legacy/components/partners/PartnerDetail.vue')
+);
+const AutocompleteMobile = defineAsyncComponent(
+  () => import('@/legacy/components/roomdooComponents/AutocompleteMobile.vue')
+);
+const TransactionDetailMobile = defineAsyncComponent(
+  () => import('@/legacy/components/transactions/TransactionDetailMobile.vue')
+);
+const UserSettingsModal = defineAsyncComponent(
+  () => import('@/legacy/components/users/UserSettings.vue')
+);
+
 import LeftDrawerSlide from '@/legacy/components/leftDrawer/LeftDrawerSlide.vue';
 import LeftDrawerFixed from '@/legacy/components/leftDrawer/LeftDrawerFixed.vue';
-import FoliosList from '@/legacy/components/folios/FoliosList.vue';
-import FolioComponent from '@/legacy/components/folios/FolioComponent.vue';
-import PartnerDetail from '@/legacy/components/partners/PartnerDetail.vue';
-import AutocompleteMobile from '@/legacy/components/roomdooComponents/AutocompleteMobile.vue';
-import TransactionDetailMobile from '@/legacy/components/transactions/TransactionDetailMobile.vue';
 import Spinner from '@/legacy/components/roomdooComponents/SpinnerComponent.vue';
-import UserSettingsModal from '@/legacy/components/users/UserSettings.vue';
-
-import BookingEngine from '@/legacy/components/bookingEngine/BookingEngine.vue';
 
 export default defineComponent({
   components: {

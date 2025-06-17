@@ -65,4 +65,27 @@ export default defineConfig({
       plugins: [autoprefixer()],
     },
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('primevue')) return 'primevue';
+            if (id.includes('primeicons')) return 'primeicons';
+            if (id.includes('@primeuix/themes') || id.includes('@primevue/themes'))
+              return 'primevue-theme';
+            if (id.includes('vue')) return 'vue';
+            if (id.includes('vue-i18n')) return 'i18n';
+            if (id.includes('pinia')) return 'pinia';
+            if (id.includes('axios')) return 'vendor';
+            if (id.includes('@vueuse/head')) return 'head';
+            if (id.includes('quill')) return 'editor';
+            if (id.includes('pdfjs')) return 'pdf';
+            if (id.includes('fullcalendar')) return 'calendar';
+          }
+        },
+      },
+    },
+  },
 });
