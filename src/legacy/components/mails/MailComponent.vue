@@ -158,7 +158,7 @@ export default defineComponent({
     },
   },
 
-  setup(props) {
+  setup(props, context) {
     const store = useStore();
     const { fetchPartners } = usePartner();
     const rules = {
@@ -312,6 +312,7 @@ export default defineComponent({
           btnAccept: 'Ok',
         });
       } finally {
+        context.emit('accept');
         void store.dispatch('layout/showSpinner', false);
         void store.dispatch('layout/setForceMoveFolioTab', 'messages');
       }

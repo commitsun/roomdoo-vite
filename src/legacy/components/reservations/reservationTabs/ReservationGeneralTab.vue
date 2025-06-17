@@ -526,6 +526,7 @@ export default defineComponent({
             dialogService.open({
               header: 'Enviar correo de confirmación',
               content: markRaw(MailComponent),
+              closable: true,
               props: {
                 template: bodyMail.value,
                 defaultSubject: subject.value,

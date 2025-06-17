@@ -170,6 +170,7 @@ export default defineComponent({
         dialogService.open({
           header: title,
           content: markRaw(MailComponent),
+          closable: true,
           props: {
             template: template.value,
             stateReservation: state.value,
