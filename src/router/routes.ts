@@ -8,9 +8,9 @@ const routes: RouteRecordRaw[] = [
   // login
   {
     path: '/login/:pmsPropertyId(\\d+)?',
-    component: () => import('@/legacy/layouts/LoginLayout.vue'),
+    component: () => import('@/layouts/LoginLayout.vue'),
     children: [
-      { name: 'login', path: '', component: () => import('@/legacy/pages/LoginPage.vue') },
+      { name: 'login', path: '', component: () => import('@/pages/LoginPage.vue') },
       {
         name: 'reset-password',
         path: 'reset-password',
@@ -23,6 +23,7 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+
   // // -----------------------------------------
   // // reset password
   // {
