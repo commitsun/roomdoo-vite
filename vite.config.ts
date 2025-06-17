@@ -9,13 +9,14 @@ import vueI18n from '@intlify/unplugin-vue-i18n/vite';
 import path from 'path';
 
 function commitHashPlugin(): Plugin {
-  const commitHash = execSync('git rev-parse HEAD').toString().trim();
+  const commitHash = execSync('git rev-parse --short HEAD').toString().trim(); // hash corto (7 chars)
   const commitDate = execSync('git log -1 --format=%cd').toString().trim();
+  const message = execSync('git log -1 --format=%s').toString().trim();
 
   return {
-    name: 'inject-commit-hash',
+    name: 'inject-commit-info',
     transformIndexHtml(html) {
-      const comment = `<!-- Build commit: ${commitHash} | Date: ${commitDate} -->\n`;
+      const comment = `<!-- Build: ${commitDate} | ${message} | ${commitHash} -->\n`;
       return comment + html;
     },
   };
