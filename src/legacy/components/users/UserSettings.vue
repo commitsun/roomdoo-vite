@@ -395,6 +395,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .mask {
   .main-content {
+    z-index: 5;
     position: absolute;
     width: 100vw;
     height: 100%;
@@ -724,6 +725,7 @@ export default defineComponent({
     display: flex;
     transition: opacity 0.3s ease;
     .main-content {
+      z-index: 20000;
       position: relative;
       width: 800px;
       height: fit-content;
