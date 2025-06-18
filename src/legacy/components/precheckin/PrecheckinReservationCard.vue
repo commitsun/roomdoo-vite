@@ -28,7 +28,7 @@
           class="reservation-title"
           v-else-if="checkinNamesCompleted.length < adults && checkinNamesCompleted.length > 0"
         >
-          {{ t('guests_missing', { count: adults - checkinNamesCompleted.length })}}
+          {{ t('guests_missing', { count: adults - checkinNamesCompleted.length }) }}
         </div>
 
         <!-- all checkins completed -->
@@ -36,9 +36,7 @@
           {{ t('checkin_completed') }}
         </div>
         <div class="reservation-title" v-else>
-          {{
-            t('checkin_for_guests', { count: adults + children })
-          }}
+          {{ t('checkin_for_guests', { count: adults + children }) }}
         </div>
 
         <!-- room type name or guest names -->
@@ -53,16 +51,16 @@
         <CustomIcon
           v-if="adults > checkinNamesCompleted.length"
           color="white"
-          :imagePath="'/app-images/share.svg'"
-          :width="'24px'"
-          :height="'24px'"
+          imagePath="/app-images/share.svg"
+          width="24px"
+          height="24px"
         />
         <CustomIcon
           v-else
           color="#008000"
-          :imagePath="'/app-images/icon-checkin.svg'"
-          :width="'24px'"
-          :height="'24px'"
+          imagePath="/app-images/icon-checkin.svg"
+          width="24px"
+          height="24px"
         />
       </div>
     </div>
@@ -77,9 +75,9 @@
           {{ nights }} &nbsp;
           <CustomIcon
             color="primary"
-            :imagePath="'/app-images/icon-nights.svg'"
-            :width="'10px'"
-            :height="'10px'"
+            imagePath="/app-images/icon-nights.svg"
+            width="10px"
+            height="10px"
           />
         </div>
         <div class="dates">
@@ -110,9 +108,9 @@
           <CustomIcon
             class="icon-people"
             color="primary"
-            :imagePath="'/app-images/icon-users-blue.svg'"
-            :width="'10px'"
-            :height="'10px'"
+            imagePath="/app-images/icon-users-blue.svg"
+            width="10px"
+            height="10px"
           />
         </div>
       </div>
@@ -125,7 +123,7 @@ import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import ShareLinkModal from '@/legacy/components/precheckin/ShareLinkModal.vue';
 import { dialogService } from '@/legacy/services/DialogService';
 import { useI18n } from 'vue-i18n';
-import {useRoute, useRouter} from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { selectedLang } from '@/plugins/locale';
 export default defineComponent({
   components: {

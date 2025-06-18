@@ -16,11 +16,11 @@
         <CustomIcon
           @click="closePopup"
           class="close"
-          :imagePath="'/app-images/close.svg'"
-          :color="'#000000'"
-          :colorHover="'primary'"
-          :width="'13px'"
-          :height="'13px'"
+          imagePath="/app-images/close.svg"
+          color="#000000"
+          colorHover="primary"
+          width="13px"
+          height="13px"
         />
       </div>
     </div>

@@ -39,10 +39,10 @@
       <div class="reservation-blocked" v-if="currentReservation?.isBlocked">
         <div class="first-row">
           <CustomIcon
-            :imagePath="'/app-images/icon-lock.svg'"
-            :color="'primary'"
-            :width="'13px'"
-            :height="'13px'"
+            imagePath="/app-images/icon-lock.svg"
+            color="primary"
+            width="13px"
+            height="13px"
           />
           <span class="feedback-title"> Reserva bloqueada por {{ agencyName }} </span>
         </div>
@@ -685,13 +685,13 @@
     </div>
     <div class="buttons">
       <AppButton
-        :label="'Guardar'"
+        label="Guardar"
         @click="saveChanges()"
         class="button"
         :disabled="isFixedPriceError || isTotalPriceError"
       />
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

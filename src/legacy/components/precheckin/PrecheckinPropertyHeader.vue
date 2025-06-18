@@ -16,22 +16,14 @@
     >
       <template #option="slotProps">
         <div class="flex items-center gap-2">
-          <img
-            :src="slotProps.option.flag"
-            alt=""
-            class="w-5 h-5 rounded-full"
-          />
+          <img :src="slotProps.option.flag" alt="" class="w-5 h-5 rounded-full" />
           <span>{{ slotProps.option.label }}</span>
         </div>
       </template>
 
       <template #value="slotProps">
         <div class="flex items-center gap-2">
-          <img
-            :src="slotProps.value?.flag"
-            alt=""
-            class="w-5 h-5 rounded-full"
-          />
+          <img :src="slotProps.value?.flag" alt="" class="w-5 h-5 rounded-full" />
           <span>{{ slotProps.value?.label }}</span>
         </div>
       </template>
@@ -47,9 +39,9 @@
         <CustomIcon
           class="arrow-back"
           color="black"
-          :imagePath="'/app-images/share2.svg'"
-          :width="'22px'"
-          :height="'22px'"
+          imagePath="/app-images/share2.svg"
+          width="22px"
+          height="22px"
         />
       </div>
     </div>
@@ -122,7 +114,7 @@ export default defineComponent({
       { label: 'Español', value: 'es', flag: '/country-flags/es.svg' },
       { label: 'English', value: 'en', flag: '/country-flags/gb.svg' },
     ]);
-    const selectedLocale = ref(locales.value.find(l => l.value === locale.value));
+    const selectedLocale = ref(locales.value.find((l) => l.value === locale.value));
 
     const currentPath = `${window.location.href}`;
     const pmsPropertyLocation = computed(() => {
@@ -189,12 +181,10 @@ export default defineComponent({
         languageCode = ['es', 'gl', 'ca'].includes(browserLang) ? 'es' : 'en';
       }
 
-      const selected = locales.value.find(l => l.value === languageCode);
+      const selected = locales.value.find((l) => l.value === languageCode);
       selectedLocale.value = selected ?? locales.value[1]; // fallback a 'en'
       locale.value = selectedLocale.value.value;
     });
-
-
 
     return {
       currentPath,

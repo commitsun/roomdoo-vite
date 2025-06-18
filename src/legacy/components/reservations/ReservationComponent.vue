@@ -151,18 +151,24 @@
             @click="cancelReservation(folio.id ?? 0, reservation.id)"
           >
             <CustomIcon
-              :imagePath="'/app-images/icon-lock.svg'"
-              :color="'primary'"
-              :width="'12px'"
-              :height="'12px'"
-              v-if="reservation?.isBlocked && new Date(reservation.checkin).getTime() >= today().getTime()"
+              imagePath="/app-images/icon-lock.svg"
+              color="primary"
+              width="12px"
+              height="12px"
+              v-if="
+                reservation?.isBlocked &&
+                new Date(reservation.checkin).getTime() >= today().getTime()
+              "
             />
             <CustomIcon
-              :imagePath="'/app-images/icon-alert-2.svg'"
-              :color="'red'"
-              :width="'12px'"
-              :height="'12px'"
-              v-else-if="reservation?.isBlocked && new Date(reservation.checkin).getTime() < today().getTime()"
+              imagePath="/app-images/icon-alert-2.svg"
+              color="red"
+              width="12px"
+              height="12px"
+              v-else-if="
+                reservation?.isBlocked &&
+                new Date(reservation.checkin).getTime() < today().getTime()
+              "
             />
             <span> Cancelar reserva </span>
           </div>
@@ -322,7 +328,7 @@ export default defineComponent({
       store.state.agencies.agencies.find((el) => el.id === currentReservation.value?.agencyId)
         ?.name;
 
-    const doCancelReservation = async(folioId: number, reservationId: number) => {
+    const doCancelReservation = async (folioId: number, reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
       try {
         await store.dispatch('reservations/cancelReservation', reservationId);
@@ -379,7 +385,9 @@ export default defineComponent({
             iconHeader: '/app-images/icon-alert-2.svg',
             iconHeaderColor: 'red',
             header: messageDialog,
-            content: agencyName ? `Esta acción no notifica ni afecta a ${agencyName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyName} para aplicar cambios ahí.` : '',
+            content: agencyName
+              ? `Esta acción no notifica ni afecta a ${agencyName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyName} para aplicar cambios ahí.`
+              : '',
             onAccept: () => {
               doCancelReservation(folioId, reservationId);
             },

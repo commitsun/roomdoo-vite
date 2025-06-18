@@ -259,9 +259,9 @@
     </div>
 
     <div class="buttons">
-      <AppButton :label="'Guardar'" @click="saveChanges()" class="button" />
+      <AppButton label="Guardar" @click="saveChanges()" class="button" />
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

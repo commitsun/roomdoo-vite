@@ -48,27 +48,17 @@
           <div class="user-input-row">
             <div class="user-input-column">
               <span> Nombre </span>
-              <InputText
-                class="input"
-                v-model="firstname"
-                @input="onUserDataInput"
-                :tabIndex="'10'"
-              />
+              <InputText class="input" v-model="firstname" @input="onUserDataInput" tabIndex="10" />
               <span> Teléfono </span>
-              <InputText class="input" v-model="phone" @input="onUserDataInput" :tabIndex="'12'" />
+              <InputText class="input" v-model="phone" @input="onUserDataInput" tabIndex="12" />
             </div>
           </div>
           <div class="user-input-row">
             <div class="user-input-column">
               <span> Apellidos </span>
-              <InputText
-                class="input"
-                v-model="lastname"
-                @input="onUserDataInput"
-                :tabIndex="'11'"
-              />
+              <InputText class="input" v-model="lastname" @input="onUserDataInput" tabIndex="11" />
               <span> Email </span>
-              <InputText class="input" v-model="email" @input="onUserDataInput" :tabIndex="'13'" />
+              <InputText class="input" v-model="email" @input="onUserDataInput" tabIndex="13" />
             </div>
           </div>
         </div>

@@ -36,7 +36,7 @@
     </div>
     <div class="bottom">
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"
@@ -44,7 +44,7 @@
       />
       <AppButton
         class="ml-3"
-        :label="'Generar informe'"
+        label="Generar informe"
         raised
         size="small"
         @click="downloadReport()"

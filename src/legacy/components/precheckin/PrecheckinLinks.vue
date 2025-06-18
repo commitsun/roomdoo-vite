@@ -6,9 +6,9 @@
     <div class="icon">
       <CustomIcon
         color="#008000"
-        :imagePath="'/app-images/check-mark.svg'"
-        :width="'24px'"
-        :height="'24px'"
+        imagePath="/app-images/check-mark.svg"
+        width="24px"
+        height="24px"
       />
     </div>
     <div class="text">
@@ -29,9 +29,9 @@
     <div class="icon">
       <CustomIcon
         color="#008000"
-        :imagePath="'/app-images/check-mark.svg'"
-        :width="'24px'"
-        :height="'24px'"
+        imagePath="/app-images/check-mark.svg"
+        width="24px"
+        height="24px"
       />
     </div>
     <div class="text">
@@ -44,12 +44,7 @@
 
   <div class="menu-button checkin-button" v-else @click="clickOnCheckinButton()">
     <div class="icon">
-      <CustomIcon
-        color="white"
-        :imagePath="'/app-images/check-mark.svg'"
-        :width="'24px'"
-        :height="'24px'"
-      />
+      <CustomIcon color="white" imagePath="/app-images/check-mark.svg" width="24px" height="24px" />
     </div>
     <div class="text">
       <div class="main-text">{{ $t('menu_checkin_action') }}</div>
@@ -62,12 +57,7 @@
     @click="$emit('showReservationsForSharing')"
   >
     <div class="icon">
-      <CustomIcon
-        color="#3F4443"
-        :imagePath="'/app-images/share.svg'"
-        :width="'24px'"
-        :height="'24px'"
-      />
+      <CustomIcon color="#3F4443" imagePath="/app-images/share.svg" width="24px" height="24px" />
     </div>
     <div class="text">
       <div class="main-text">{{ $t('menu_invite_others') }}</div>
@@ -79,9 +69,9 @@
       <div class="icon">
         <CustomIcon
           color="white"
-          :imagePath="'/app-images/credit-card.svg'"
-          :width="'24px'"
-          :height="'24px'"
+          imagePath="/app-images/credit-card.svg"
+          width="24px"
+          height="24px"
         />
       </div>
       <div class="text">
@@ -99,12 +89,7 @@
     @click="openLocation()"
   >
     <div class="icon">
-      <CustomIcon
-        color="#3F4443"
-        :imagePath="'/app-images/location.svg'"
-        :width="'24px'"
-        :height="'24px'"
-      />
+      <CustomIcon color="#3F4443" imagePath="/app-images/location.svg" width="24px" height="24px" />
     </div>
     <div class="text">
       <div class="main-text">{{ $t('menu_how_to_arrive') }}</div>
@@ -112,12 +97,7 @@
   </div>
   <div class="menu-button" @click="callPhoneNumber()">
     <div class="icon">
-      <CustomIcon
-        color="#3F4443"
-        :imagePath="'/app-images/phone.svg'"
-        :width="'24px'"
-        :height="'24px'"
-      />
+      <CustomIcon color="#3F4443" imagePath="/app-images/phone.svg" width="24px" height="24px" />
     </div>
     <div class="text">
       <div class="main-text">{{ $t('menu_contact') }}</div>
@@ -143,7 +123,7 @@
 import { defineComponent, computed } from 'vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import { useStore } from '@/legacy/store';
-import {useRoute, useRouter} from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { selectedLang } from '@/plugins/locale';
 
 export default defineComponent({

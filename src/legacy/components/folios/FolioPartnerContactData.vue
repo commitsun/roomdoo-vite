@@ -50,8 +50,8 @@
         size="small"
         v-model="languageSelected"
         :disabled="selectedPartnerId !== 0"
-        :optionValue="'id'"
-        :optionLabel="'text'"
+        optionValue="id"
+        optionLabel="text"
         :options="
           languages.map((el) => ({
             id: el.code,
@@ -267,14 +267,11 @@ export default defineComponent({
       }
     });
 
-    onMounted(async() => {
+    onMounted(async () => {
       if (currentFolio.value) {
         void store.dispatch('layout/showSpinner', true);
         try {
-          await getGuestFromVatDocNumber(
-            currentFolio.value.partnerName ?? ''
-          );
-
+          await getGuestFromVatDocNumber(currentFolio.value.partnerName ?? '');
         } catch {
           dialogService.open({
             header: 'Error',

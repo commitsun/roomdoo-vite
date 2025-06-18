@@ -504,7 +504,7 @@
 
     <div class="buttons">
       <AppButton
-        :label="'Guardar y salir'"
+        label="Guardar y salir"
         @click="
           saveItemsRules();
           $emit('close');
@@ -516,7 +516,7 @@
         :class="{ disabled: disallowSave }"
       />
       <AppButton
-        :label="'Guardar y continuar'"
+        label="Guardar y continuar"
         @click="saveItemsRules"
         raised
         size="small"
@@ -525,7 +525,7 @@
         :class="{ disabled: disallowSave }"
       />
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

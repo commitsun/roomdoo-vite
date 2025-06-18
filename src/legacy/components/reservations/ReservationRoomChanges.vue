@@ -247,7 +247,7 @@
     </div>
     <div class="buttons">
       <AppButton
-        :label="'Guardar'"
+        label="Guardar"
         @click="save()"
         raised
         size="small"
@@ -256,7 +256,7 @@
         :class="{ disabled: !selectedRoom }"
       />
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

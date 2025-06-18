@@ -14,9 +14,9 @@
       <div class="icon">
         <CustomIcon
           color="#3F4443"
-          :imagePath="'/app-images/whatsapp.svg'"
-          :width="'24px'"
-          :height="'24px'"
+          imagePath="/app-images/whatsapp.svg"
+          width="24px"
+          height="24px"
         />
       </div>
       <div class="text">
@@ -27,9 +27,9 @@
       <div class="icon">
         <CustomIcon
           color="#3F4443"
-          :imagePath="'/app-images/telegram.svg'"
-          :width="'24px'"
-          :height="'24px'"
+          imagePath="/app-images/telegram.svg"
+          width="24px"
+          height="24px"
         />
       </div>
       <div class="text">
@@ -38,12 +38,7 @@
     </div>
     <div class="share-media" @click="shareLinkViaMail()">
       <div class="icon">
-        <CustomIcon
-          color="#3F4443"
-          :imagePath="'/app-images/mail.svg'"
-          :width="'24px'"
-          :height="'24px'"
-        />
+        <CustomIcon color="#3F4443" imagePath="/app-images/mail.svg" width="24px" height="24px" />
       </div>
       <div class="text">
         <div class="main-text">{{ t('share_email') }}</div>

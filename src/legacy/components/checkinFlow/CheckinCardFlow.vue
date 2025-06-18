@@ -12,10 +12,10 @@
     >
       <CustomIcon
         v-if="isCollapsible && checkinPartnerState !== undefined"
-        :imagePath="'/app-images/dropdown.svg'"
+        imagePath="/app-images/dropdown.svg"
         :color="stateColor(checkinPartnerState)"
-        :width="'12px'"
-        :height="'12px'"
+        width="12px"
+        height="12px"
         :class="!isBodyOpen ? 'dropdown-icon' : 'dropdown-icon-rotate'"
       />
       <span v-if="isPreCheckin && isFromStart">
@@ -23,15 +23,15 @@
         <sup>
           {{
             checkinPartnerIndex === 0
-            ? $t('ordinal_1')
-            : checkinPartnerIndex === 1
-            ? $t('ordinal_2')
-            : checkinPartnerIndex === 2
-            ? $t('ordinal_3')
-            : $t('ordinal_4')
+              ? $t('ordinal_1')
+              : checkinPartnerIndex === 1
+              ? $t('ordinal_2')
+              : checkinPartnerIndex === 2
+              ? $t('ordinal_3')
+              : $t('ordinal_4')
           }}
-        </sup> 
-        {{$t('completed')}}
+        </sup>
+        {{ $t('completed') }}
       </span>
       <span
         class="checkin-partner-existing-name"
@@ -59,10 +59,10 @@
       </span>
       <CustomIcon
         v-if="isFromDrawer"
-        :imagePath="'/app-images/three-dots-white.svg'"
+        imagePath="/app-images/three-dots-white.svg"
         :color="stateColor(checkinPartnerState ?? '')"
-        :width="'25px'"
-        :height="'25px'"
+        width="25px"
+        height="25px"
         tabindex="1"
         @click.stop="openCheckinMenu = !openCheckinMenu"
         @blur="openCheckinMenu = false"
@@ -145,7 +145,7 @@
             @mouseleave="hideTooltip()"
           >
             <CustomIcon
-              :imagePath="'/app-images/copy-to-clipboard-icon.svg'"
+              imagePath="/app-images/copy-to-clipboard-icon.svg"
               color="primary"
               width="20px"
               height="20px"
@@ -177,9 +177,7 @@
               src="/app-images/icon-alert.svg"
             />
             {{
-              isExistingCheckinPartnerMandatoryDataComplete
-                ? $t('edit_data')
-                : $t('complete_data')
+              isExistingCheckinPartnerMandatoryDataComplete ? $t('edit_data') : $t('complete_data')
             }}
           </button>
           <div class="print-btns" v-if="!isFromDrawer && !isPreCheckin">
@@ -190,10 +188,10 @@
             >
               <CustomIcon
                 v-if="!checkinSignature"
-                :imagePath="'/app-images/icon-signature.svg'"
+                imagePath="/app-images/icon-signature.svg"
                 color="primary"
-                :width="'18px'"
-                :height="'18px'"
+                width="18px"
+                height="18px"
                 class="icon-print-sign"
               />
               {{ checkinSignature ? $t('signed') : $t('sign') }}
@@ -204,10 +202,10 @@
               @click="$emit('printCheckin')"
             >
               <CustomIcon
-                :imagePath="'/app-images/icon-pdf.svg'"
+                imagePath="/app-images/icon-pdf.svg"
                 color="primary"
-                :width="'18px'"
-                :height="'18px'"
+                width="18px"
+                height="18px"
                 class="icon-print-sign"
               />
               {{ $t('print') }}
@@ -218,10 +216,10 @@
               @click="$emit('viewPDFCheckin')"
             >
               <CustomIcon
-                :imagePath="'/app-images/visibility-on.svg'"
+                imagePath="/app-images/visibility-on.svg"
                 color="primary"
-                :width="'18px'"
-                :height="'18px'"
+                width="18px"
+                height="18px"
                 class="icon-print-sign"
               />
               {{ $t('view_checkin') }}
@@ -234,10 +232,10 @@
             ref="doCheckinButton"
           >
             <CustomIcon
-              :imagePath="'/app-images/icon-check-light.svg'"
-              :color="'#FFFFFF'"
-              :width="'20px'"
-              :height="'20px'"
+              imagePath="/app-images/icon-check-light.svg"
+              color="#FFFFFF"
+              width="20px"
+              height="20px"
               class="icon-checkin"
             />
             {{ $t('mark_arrival') }}
@@ -254,7 +252,6 @@
     </Transition>
   </div>
 </template>
-
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
@@ -380,7 +377,6 @@ export default defineComponent({
       }
       return t('checkin_incomplete');
     };
-
 
     const headerStateColor = (checkinState: string) => {
       let color = '#FF8A001A';

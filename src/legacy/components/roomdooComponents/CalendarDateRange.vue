@@ -5,27 +5,27 @@
         <div class="change-one-day-container">
           <div class="change-one-day-first-date">
             <CustomIcon
-              :imagePath="'/app-images/icon-calendar-blue.svg'"
-              :width="'18px'"
-              :height="'18px'"
-              :color="'#a6a6a6'"
+              imagePath="/app-images/icon-calendar-blue.svg"
+              width="18px"
+              height="18px"
+              color="#a6a6a6"
               class="icon-calendar"
             />
             <input placeholder="Inicio" v-model="firstDayInRangeFormatted" disabled />
             <button class="btn-change-one-day-previous" @click="removeOneDayToFirstDayInRange()">
               <CustomIcon
-                :imagePath="'/app-images/arrow_forward_ios.svg'"
-                :width="'12px'"
-                :height="'12px'"
-                :color="'#a6a6a6'"
+                imagePath="/app-images/arrow_forward_ios.svg"
+                width="12px"
+                height="12px"
+                color="#a6a6a6"
               />
             </button>
             <button class="btn-change-one-day-next" @click="addOneDayToFirstDayInRange()">
               <CustomIcon
-                :imagePath="'/app-images/arrow_forward_ios.svg'"
-                :width="'12px'"
-                :height="'12px'"
-                :color="'#a6a6a6'"
+                imagePath="/app-images/arrow_forward_ios.svg"
+                width="12px"
+                height="12px"
+                color="#a6a6a6"
               />
             </button>
           </div>
@@ -33,18 +33,18 @@
             <input placeholder="Fin" v-model="lastDayInRangeFormatted" disabled />
             <button class="btn-change-one-day-previous" @click="removeOneDayToLastDayInRange()">
               <CustomIcon
-                :imagePath="'/app-images/arrow_forward_ios.svg'"
-                :width="'12px'"
-                :height="'12px'"
-                :color="'#a6a6a6'"
+                imagePath="/app-images/arrow_forward_ios.svg"
+                width="12px"
+                height="12px"
+                color="#a6a6a6"
               />
             </button>
             <button class="btn-change-one-day-next" @click="addOneDayToLastDayInRange()">
               <CustomIcon
-                :imagePath="'/app-images/arrow_forward_ios.svg'"
-                :width="'12px'"
-                :height="'12px'"
-                :color="'#a6a6a6'"
+                imagePath="/app-images/arrow_forward_ios.svg"
+                width="12px"
+                height="12px"
+                color="#a6a6a6"
               />
             </button>
           </div>

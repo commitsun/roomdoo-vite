@@ -1,12 +1,7 @@
 <template>
   <div class="price-total">
     <div class="title">
-      <CustomIcon
-        :imagePath="'/app-images/payments.svg'"
-        :color="'primary'"
-        :width="'22px'"
-        :height="'16px'"
-      />
+      <CustomIcon imagePath="/app-images/payments.svg" color="primary" width="22px" height="16px" />
       <span>Precio total</span>
     </div>
     <div class="prices-settings" @click="openPricesChanges()">Ajustar precios</div>
@@ -80,10 +75,10 @@
   <div class="price-detail">
     <div class="title">
       <CustomIcon
-        :imagePath="'/app-images/receipt_long.svg'"
-        :color="'primary'"
-        :width="'18px'"
-        :height="'20px'"
+        imagePath="/app-images/receipt_long.svg"
+        color="primary"
+        width="18px"
+        height="20px"
       />
       <span>Precios desglosados</span>
     </div>
@@ -103,10 +98,10 @@
         <span> Precio de {{ reservationRoomTypeClassName() }} </span>
         <div class="units">
           <CustomIcon
-            :imagePath="'/app-images/icon-nights.svg'"
-            :color="'#263941'"
-            :width="'10px'"
-            :height="'10px'"
+            imagePath="/app-images/icon-nights.svg"
+            color="#263941"
+            width="10px"
+            height="10px"
             class="night-icon"
           />
           <span
@@ -121,10 +116,10 @@
         </div>
         <div class="three-dots">
           <CustomIcon
-            :imagePath="'/app-images/three-dots-white.svg'"
-            :color="'primary'"
-            :width="'20px'"
-            :height="'20px'"
+            imagePath="/app-images/three-dots-white.svg"
+            color="primary"
+            width="20px"
+            height="20px"
             @click.stop="openBoardServiceOptions = !openBoardServiceOptions"
             @blur="openBoardServiceOptions = false"
             tabindex="1"
@@ -196,10 +191,10 @@
         </div>
         <div class="three-dots">
           <CustomIcon
-            :imagePath="'/app-images/three-dots-white.svg'"
-            :color="'primary'"
-            :width="'20px'"
-            :height="'20px'"
+            imagePath="/app-images/three-dots-white.svg"
+            color="primary"
+            width="20px"
+            height="20px"
             @click.stop="openServicesOptions = !openServicesOptions"
             @blur="openServicesOptions = false"
             tabindex="1"

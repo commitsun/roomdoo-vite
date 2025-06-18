@@ -14,8 +14,8 @@
       <AutocompleteComponent
         id="properties-autocomplete"
         :placeholderValue="activeProperty?.name ?? ''"
-        :placeholderShowingOptions="'Buscar propiedad'"
-        :placeholderColor="'000000'"
+        placeholderShowingOptions="Buscar propiedad"
+        placeholderColor="#000000"
         icon="apartment"
         v-model="selectedPropertyId"
         :items="sortedProperties.map((el) => ({ value: el?.id ?? 0, name: el?.name ?? '' }))"

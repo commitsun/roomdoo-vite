@@ -94,7 +94,7 @@
           </CheckinFlowStart>
           <ReservationSegmentation
             v-else-if="currentStep === 'segmentation'"
-            :parentName="'CheckinFlow'"
+            parentName="CheckinFlow"
             :checkinPartner="checkinPartnerSegmentation"
             @close="nextStep()"
             @closeAfterDoCheckin="continueCheckinFlow()"

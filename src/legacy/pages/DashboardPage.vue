@@ -28,10 +28,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="occupancyToday > occupancyLastWeek ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: occupancyToday < occupancyLastWeek }"
           />
           <span
@@ -70,10 +70,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="occupancyToday > occupancyLastYear ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: occupancyToday < occupancyLastYear }"
           />
           <span
@@ -118,10 +118,10 @@
             {{ overbookings }} overbooking{{ overbookings === 1 ? '' : 's' }}
             <CustomIcon
               class="icon"
-              :imagePath="'/app-images/icon-warning-white.svg'"
-              :color="'#FF4E00'"
-              :width="'15px'"
-              :height="'15px'"
+              imagePath="/app-images/icon-warning-white.svg"
+              color="#FF4E00"
+              width="15px"
+              height="15px"
             />
           </div>
         </div>
@@ -145,10 +145,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="billingToday > billingLastWeek ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: billingToday < billingLastWeek }"
           />
           <span
@@ -192,10 +192,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="billingToday > billingLastYear ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: billingToday < billingLastYear }"
           />
           <span
@@ -248,10 +248,10 @@
           <CustomIcon
             v-if="newFoliosToday != newFoliosLastWeek"
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="newFoliosToday > newFoliosLastWeek ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: newFoliosToday < newFoliosLastWeek }"
           />
           <span
@@ -295,10 +295,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="newFoliosToday > newFoliosLastYear ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: newFoliosToday < newFoliosLastYear }"
           />
           <span
@@ -350,10 +350,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="ADRToday >= ADRLastWeek ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: ADRToday < ADRLastWeek }"
           />
           <span
@@ -395,10 +395,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="ADRToday >= ADRLastYear ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: ADRToday < ADRLastYear }"
           />
           <span
@@ -448,10 +448,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="RevPARToday > RevPARLastWeek ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: RevPARToday < RevPARLastWeek }"
           />
           <span
@@ -493,10 +493,10 @@
         >
           <CustomIcon
             class="icon"
-            :imagePath="'/app-images/icon-arrow-up.svg'"
+            imagePath="/app-images/icon-arrow-up.svg"
             :color="RevPARToday > RevPARLastYear ? '#27C153' : '#C82626'"
-            :width="'15px'"
-            :height="'15px'"
+            width="15px"
+            height="15px"
             :class="{ rotate: RevPARToday < RevPARLastYear }"
           />
           <span

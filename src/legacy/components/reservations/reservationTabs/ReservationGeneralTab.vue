@@ -4,9 +4,9 @@
       <div class="header">
         <CustomIcon
           imagePath="/app-images/magic_button.svg"
-          :color="'#2563EB'"
-          :width="'17px'"
-          :height="'17px'"
+          color="#2563EB"
+          width="17px"
+          height="17px"
         />
         <span>Asistente</span>
         <div class="div-icon-close">
@@ -43,10 +43,10 @@
       </div>
       <div class="right" @click="openChangeDatesModal()">
         <CustomIcon
-          :imagePath="'/app-images/icon-lock.svg'"
-          :color="'primary'"
-          :width="'12px'"
-          :height="'12px'"
+          imagePath="/app-images/icon-lock.svg"
+          color="primary"
+          width="12px"
+          height="12px"
           v-if="currentReservation?.isBlocked"
         />
         <span class="change-dates-text"> Cambiar fechas </span>

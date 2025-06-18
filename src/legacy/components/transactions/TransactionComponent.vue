@@ -67,8 +67,8 @@
           v-model="selectedPartnerId"
           :items="itemsAutocompleteCustomer"
           :disable="transaction && isReconcilied"
-          :placeholderValue="'Busqueda por DNI, NIF...'"
-          :placeholderShowingOptions="'Busqueda por DNI, NIF...'"
+          placeholderValue="Busqueda por DNI, NIF..."
+          placeholderShowingOptions="Busqueda por DNI, NIF..."
         >
           <template #icon>
             <img src="/app-images/search.svg" />
@@ -107,7 +107,7 @@
     </div>
     <div class="buttons">
       <AppButton
-        :label="'Guardar'"
+        label="Guardar"
         raised
         size="small"
         class="button"
@@ -119,7 +119,7 @@
       />
       <AppButton
         @click="$emit('close')"
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

@@ -7,10 +7,10 @@
       </div>
       <div class="right-link" @click="openServiceModal()">
         <CustomIcon
-          :imagePath="'/app-images/icon-lock.svg'"
-          :color="'primary'"
-          :width="'12px'"
-          :height="'12px'"
+          imagePath="/app-images/icon-lock.svg"
+          color="primary"
+          width="12px"
+          height="12px"
           v-if="currentReservation?.isBlocked"
         />
         <span class="link-title"> Gestionar régimen </span>

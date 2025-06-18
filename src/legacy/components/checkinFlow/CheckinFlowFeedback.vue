@@ -14,29 +14,29 @@
           :key="checkinPartner.id"
         >
           <CustomIcon
-            :imagePath="'/app-images/icon-user-light-blue.svg'"
+            imagePath="/app-images/icon-user-light-blue.svg"
             :color="getIconColor(checkinPartner)"
-            :width="'20px'"
-            :height="'20px'"
+            width="20px"
+            height="20px"
             class="icon-checkin"
           />
         </div>
         <div class="feedback-wrapper">
           <div
             class="feedback"
-            v-if="checkinPartners.every(
-              (checkinPartner) =>
-                checkinPartner.checkinPartnerState === 'onboard' ||
-                checkinPartner.checkinPartnerState === 'precheckin'
-            )"
+            v-if="
+              checkinPartners.every(
+                (checkinPartner) =>
+                  checkinPartner.checkinPartnerState === 'onboard' ||
+                  checkinPartner.checkinPartnerState === 'precheckin'
+              )
+            "
           >
             {{ $t('all_checkins_completed') }}
           </div>
           <div class="feedback" v-else>
             {{
-              currentIndexCheckin === 0
-                ? $t('checkin_first_label')
-                : `${currentIndexCheckin + 1}º`
+              currentIndexCheckin === 0 ? $t('checkin_first_label') : `${currentIndexCheckin + 1}º`
             }}
             check-in
             {{

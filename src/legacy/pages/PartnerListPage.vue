@@ -5,11 +5,11 @@
         <div class="left">
           <img src="/app-images/icon-burger.svg" @click="openLeftDrawer" class="icon-menu" />
           <CustomIcon
-            :image-path="'/app-images/search.svg'"
+            image-path="/app-images/search.svg"
             class="input-icon"
             color="primary"
-            :height="'1.5rem'"
-            :width="'1.5rem'"
+            height="1.5rem"
+            width="1.5rem"
           />
           <input placeholder="Buscar contacto" class="input-search" v-model="partnerTextSearch" />
           <div
@@ -66,20 +66,20 @@
           </div>
         </div>
         <CustomIcon
-          :image-path="'/app-images/icon-filters.svg'"
+          image-path="/app-images/icon-filters.svg"
           class="icon-filters"
           color="primary"
-          :height="'20px'"
-          :width="'20px'"
+          height="20px"
+          width="20px"
           @click="showFilters = !showFilters"
         />
         <button class="btn-new-partner" @click="openCreatePartner()">
           <CustomIcon
-            :imagePath="'/app-images/icon-add-white.svg'"
+            imagePath="/app-images/icon-add-white.svg"
             class="icon"
             color="white"
-            :height="'22px'"
-            :width="'22px'"
+            height="22px"
+            width="22px"
           />
           <span class="text"> Nuevo contacto </span>
         </button>

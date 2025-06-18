@@ -47,10 +47,10 @@
         class="circle-icon"
       >
         <CustomIcon
-          :imagePath="'/app-images/back-arrow-black.svg'"
-          :color="'#263941'"
-          :width="'13px'"
-          :height="'13px'"
+          imagePath="/app-images/back-arrow-black.svg"
+          color="#263941"
+          width="13px"
+          height="13px"
           class="icon-right"
         />
       </div>

@@ -8,7 +8,7 @@
             <AutocompleteComponent
               id="properties-autocomplete"
               :placeholderValue="activeProperty?.name ?? ''"
-              :placeholderShowingOptions="'Buscar propiedad'"
+              placeholderShowingOptions="Buscar propiedad"
               placeholderColor="#000000"
               icon="apartment"
               v-model="selectedPropertyId"
@@ -227,19 +227,19 @@
       <div class="transaction-creation-buttons">
         <button @click="createNewSupplierTransaction()">
           <CustomIcon
-            :imagePath="'/app-images/icon-add-white.svg'"
-            :color="'#FFFFFF'"
-            :width="'21px'"
-            :height="'21px'"
+            imagePath="/app-images/icon-add-white.svg"
+            color="#FFFFFF"
+            width="21px"
+            height="21px"
           />
           <span> Pago a proveedor </span>
         </button>
         <button @click="createNewTransfer">
           <CustomIcon
-            :imagePath="'/app-images/icon-add-white.svg'"
-            :color="'#FFFFFF'"
-            :width="'21px'"
-            :height="'21px'"
+            imagePath="/app-images/icon-add-white.svg"
+            color="#FFFFFF"
+            width="21px"
+            height="21px"
           />
           <span class="text-creation-button-small"> Transf. interna </span>
           <span class="text-creation-button-big"> Transferencia interna </span>
@@ -322,7 +322,7 @@
       />
       <div class="buttons-container">
         <AppButton
-          :label="'Cerrar caja'"
+          label="Cerrar caja"
           v-if="cashRegister?.state === 'open'"
           raised
           size="small"
@@ -330,7 +330,7 @@
           @click="actionOpenCloseCash('open')"
         />
         <AppButton
-          :label="'Abrir caja'"
+          label="Abrir caja"
           v-else
           raised
           size="small"
@@ -338,7 +338,7 @@
           @click="actionOpenCloseCash('close')"
         />
         <AppButton
-          :label="'Cancelar'"
+          label="Cancelar"
           raised
           size="small"
           severity="secondary"
@@ -363,7 +363,7 @@
 
       <div class="buttons-container">
         <AppButton
-          :label="'Forzar caja'"
+          label="Forzar caja"
           raised
           size="small"
           class="button"
@@ -371,7 +371,7 @@
         />
 
         <AppButton
-          :label="'Cancelar'"
+          label="Cancelar"
           raised
           size="small"
           severity="secondary"

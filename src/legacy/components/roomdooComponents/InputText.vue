@@ -75,8 +75,8 @@
           v-if="modelValue"
           imagePath="/app-images/close.svg"
           color="primary"
-          :width="'15px'"
-          :height="'15px'"
+          width="15px"
+          height="15px"
         />
       </div>
     </div>

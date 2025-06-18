@@ -7,7 +7,7 @@
           <AutocompleteComponent
             id="partners-autocomplete"
             :placeholderValue="activeProperty?.name ?? ''"
-            :placeholderShowingOptions="'Buscar propiedad'"
+            placeholderShowingOptions="Buscar propiedad"
             placeholderColor="#000000"
             icon="apartment"
             v-model="selectedPropertyId"

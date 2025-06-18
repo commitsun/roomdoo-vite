@@ -83,7 +83,7 @@
           errorsPricelistItems.length > 0 ||
           errorsAvailabilityPlanRules.length > 0
         "
-        :label="'DESCARTAR'"
+        label="DESCARTAR"
         raised
         size="small"
         severity="secondary"
@@ -104,7 +104,7 @@
           errorsPricelistItems.length > 0 ||
           errorsAvailabilityPlanRules.length > 0
         "
-        :label="'GUARDAR CAMBIOS'"
+        label="GUARDAR CAMBIOS"
         raised
         size="small"
         severity="secondary"

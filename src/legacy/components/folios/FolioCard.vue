@@ -140,23 +140,27 @@
                 @mousedown="cancelReservations()"
               >
                 <CustomIcon
-                  :imagePath="'/app-images/icon-lock.svg'"
-                  :color="'primary'"
-                  :width="'12px'"
-                  :height="'12px'"
-                  v-if="folio.reservations.some((el) => el.isBlocked)
-                  && folio.firstCheckin
-                  && new Date(folio.firstCheckin).getTime() >= today().getTime()"
+                  imagePath="/app-images/icon-lock.svg"
+                  color="primary"
+                  width="12px"
+                  height="12px"
+                  v-if="
+                    folio.reservations.some((el) => el.isBlocked) &&
+                    folio.firstCheckin &&
+                    new Date(folio.firstCheckin).getTime() >= today().getTime()
+                  "
                   class="icon-cancel"
                 />
                 <CustomIcon
-                  :imagePath="'/app-images/icon-alert-2.svg'"
-                  :color="'red'"
-                  :width="'12px'"
-                  :height="'12px'"
-                  v-else-if="folio.reservations.some((el) => el.isBlocked)
-                  && folio.firstCheckin
-                  && new Date(folio.firstCheckin).getTime() < today().getTime()"
+                  imagePath="/app-images/icon-alert-2.svg"
+                  color="red"
+                  width="12px"
+                  height="12px"
+                  v-else-if="
+                    folio.reservations.some((el) => el.isBlocked) &&
+                    folio.firstCheckin &&
+                    new Date(folio.firstCheckin).getTime() < today().getTime()
+                  "
                   class="icon-cancel"
                 />
                 <span class="cancel-text"> Cancelar reservas </span>
@@ -577,38 +581,37 @@ export default defineComponent({
     const getAgencyName = (agencyId: number) =>
       store.state.agencies.agencies.find((el) => el.id === agencyId)?.name;
 
-    const doCancelReservations = async() => {
+    const doCancelReservations = async () => {
       void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('folios/cancelFolioReservations', {
-            folioId: props.folio.id,
-            cancelReservations: true,
-          });
-          const payload = {
-            propertyId: store.state.properties.activeProperty?.id,
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            limit: store.state.folios.folios.length,
-          };
-          await store.dispatch('folios/fetchFolios', payload);
-          isOpenMenu.value = false;
-          isOpen.value = true;
-          if (router.currentRoute.value.name === 'planning') {
-            await refreshPlanning();
-          }
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('reservations/setCurrentReservations', null);
-          void store.dispatch('folios/setCurrentFolio', null);
-          void store.dispatch('layout/showSpinner', false);
+      try {
+        await store.dispatch('folios/cancelFolioReservations', {
+          folioId: props.folio.id,
+          cancelReservations: true,
+        });
+        const payload = {
+          propertyId: store.state.properties.activeProperty?.id,
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          limit: store.state.folios.folios.length,
+        };
+        await store.dispatch('folios/fetchFolios', payload);
+        isOpenMenu.value = false;
+        isOpen.value = true;
+        if (router.currentRoute.value.name === 'planning') {
+          await refreshPlanning();
         }
+      } catch {
+        dialogService.open({
+          header: 'Error',
+          content: 'Algo ha ido mal',
+          btnAccept: 'Ok',
+        });
+      } finally {
+        void store.dispatch('reservations/setCurrentReservations', null);
+        void store.dispatch('folios/setCurrentFolio', null);
+        void store.dispatch('layout/showSpinner', false);
       }
-
+    };
 
     const cancelReservations = async () => {
       await store.dispatch('folios/fetchFolio', props.folio.id);
@@ -621,8 +624,8 @@ export default defineComponent({
           (el) => el.id === props.folio.agencyId
         )?.name;
         if (
-          props.folio.firstCheckin
-          && new Date(props.folio.firstCheckin).getTime() >= today().getTime()
+          props.folio.firstCheckin &&
+          new Date(props.folio.firstCheckin).getTime() >= today().getTime()
         ) {
           const moreThanOneReservation = props.folio.reservations.length > 1;
           if (moreThanOneReservation) {
@@ -649,7 +652,9 @@ export default defineComponent({
             iconHeader: '/app-images/icon-alert-2.svg',
             iconHeaderColor: 'red',
             header: titleDialog,
-            content: agencyDisplayName ? `Esta acción no notifica ni afecta a ${agencyDisplayName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyDisplayName} para aplicar cambios ahí.` : '',
+            content: agencyDisplayName
+              ? `Esta acción no notifica ni afecta a ${agencyDisplayName}, solo se aplicará en Roomdoo.<br>Si procede penalización o gestión de comisiones, debes gestionarlo también desde la extranet de la OTA.<br><br>Accede al panel de ${agencyDisplayName} para aplicar cambios ahí.`
+              : '',
             props: {
               agencyName: agencyDisplayName,
             },
@@ -662,7 +667,7 @@ export default defineComponent({
         }
       } else {
         doCancelReservations();
-      };
+      }
     };
 
     const agencyImage = (agencyId: number) =>

@@ -79,10 +79,10 @@
                 @click="cancelReservations(currentFolio.id)"
               >
                 <CustomIcon
-                  :imagePath="'/app-images/icon-lock.svg'"
-                  :color="'primary'"
-                  :width="'12px'"
-                  :height="'12px'"
+                  imagePath="/app-images/icon-lock.svg"
+                  color="primary"
+                  width="12px"
+                  height="12px"
                   v-if="
                     isSomeFolioReservationBlocked() &&
                     currentFolio.firstCheckin &&
@@ -91,10 +91,10 @@
                   class="icon-cancel"
                 />
                 <CustomIcon
-                  :imagePath="'/app-images/icon-alert-2.svg'"
-                  :color="'red'"
-                  :width="'12px'"
-                  :height="'12px'"
+                  imagePath="/app-images/icon-alert-2.svg"
+                  color="red"
+                  width="12px"
+                  height="12px"
                   v-else-if="
                     isSomeFolioReservationBlocked() &&
                     currentFolio.firstCheckin &&
@@ -241,10 +241,10 @@
                   @click="cancelReservations(currentFolio.id)"
                 >
                   <CustomIcon
-                    :imagePath="'/app-images/icon-lock.svg'"
-                    :color="'primary'"
-                    :width="'12px'"
-                    :height="'12px'"
+                    imagePath="/app-images/icon-lock.svg"
+                    color="primary"
+                    width="12px"
+                    height="12px"
                     v-if="
                       isSomeFolioReservationBlocked() &&
                       currentFolio.firstCheckin &&
@@ -253,10 +253,10 @@
                     class="icon-cancel"
                   />
                   <CustomIcon
-                    :imagePath="'/app-images/icon-alert-2.svg'"
-                    :color="'red'"
-                    :width="'12px'"
-                    :height="'12px'"
+                    imagePath="/app-images/icon-alert-2.svg"
+                    color="red"
+                    width="12px"
+                    height="12px"
                     v-else-if="
                       isSomeFolioReservationBlocked() &&
                       currentFolio.firstCheckin &&

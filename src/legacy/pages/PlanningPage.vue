@@ -29,7 +29,7 @@
           <AutocompleteComponent
             id="partners-autocomplete"
             :placeholderValue="activeProperty?.name ?? ''"
-            :placeholderShowingOptions="'Buscar propiedad'"
+            placeholderShowingOptions="Buscar propiedad"
             placeholderColor="#000000"
             v-model="selectedPropertyId"
             :items="sortedProperties.map((el) => ({ value: el?.id ?? 0, name: el?.name ?? '' }))"
@@ -64,10 +64,10 @@
               Filtro{{ numFiltersApplied === 1 ? '' : 's' }} del planning
             </span>
             <CustomIcon
-              :imagePath="'/app-images/icon-dropdown-black.svg'"
-              :color="'#000000'"
-              :width="'11px'"
-              :height="'11px'"
+              imagePath="/app-images/icon-dropdown-black.svg"
+              color="#000000"
+              width="11px"
+              height="11px"
               class="dropdown-img"
             />
           </div>
@@ -136,10 +136,10 @@
         <div class="button-new-reservation" @click="openBookingEngine">
           <div>
             <CustomIcon
-              :imagePath="'/app-images/icon-add-white.svg'"
-              :color="'#FFFFFF'"
-              :width="'21px'"
-              :height="'21px'"
+              imagePath="/app-images/icon-add-white.svg"
+              color="#FFFFFF"
+              width="21px"
+              height="21px"
             />
           </div>
           <span class="text-new-reservation">Nueva reserva</span>
@@ -207,10 +207,10 @@
       <div class="first-bottom">
         <div class="btn-open-pricelist-planning" @click="openPlanningPricelists">
           <CustomIcon
-            :imagePath="'/app-images/icon_blue_double_arrow_up.svg'"
-            :color="'#000000'"
-            :width="'23px'"
-            :height="'23px'"
+            imagePath="/app-images/icon_blue_double_arrow_up.svg"
+            color="#000000"
+            width="23px"
+            height="23px"
             :class="isDownExpanded ? 'icon-arrow-rotate' : ''"
           />
           <span> Cambiar precios y restricciones </span>

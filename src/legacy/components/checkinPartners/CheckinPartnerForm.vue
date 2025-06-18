@@ -436,7 +436,7 @@
           :emptyResultsAfterClick="false"
           keepResultAfterChoose
           iconExpandCollapse
-          :orientation="'up'"
+          orientation="up"
           isRoundedIcons
           :isError="validatorCheckin.editingCheckinPartner.countryId.$error"
         />
@@ -467,7 +467,7 @@
           :emptyResultsAfterClick="false"
           keepResultAfterChoose
           iconExpandCollapse
-          :orientation="'up'"
+          orientation="up"
           :isError="validatorCheckin.editingCheckinPartner.countryState.$error"
         />
         <div class="error-message">
@@ -634,7 +634,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const optionsRelationship = [
-    { id: 1, code: 'PM', text: t('parent') },
+      { id: 1, code: 'PM', text: t('parent') },
       { id: 2, code: 'TU', text: t('guardian') },
       { id: 3, code: 'TI', text: t('uncle_aunt') },
       { id: 4, code: 'HR', text: t('sibling') },
@@ -645,7 +645,7 @@ export default defineComponent({
       { id: 9, code: 'SB', text: t('nephew_niece') },
       { id: 10, code: 'SG', text: t('parent_in_law') },
       { id: 11, code: 'YN', text: t('son_daughter_in_law') },
-      { id: 12, code: 'OT', text: t('other') }
+      { id: 12, code: 'OT', text: t('other') },
     ];
 
     const selectedRelationShip = ref(0);
@@ -682,7 +682,11 @@ export default defineComponent({
           (dt) => dt.id === editingCheckinPartner.value?.documentType
         )?.code;
         if (documentTypeCode && documentNumber && documentNumber.length > 0) {
-          rdo = validateDocumentNumber(documentTypeCode, documentNumber, editingCheckinPartner.value?.documentCountryId);
+          rdo = validateDocumentNumber(
+            documentTypeCode,
+            documentNumber,
+            editingCheckinPartner.value?.documentCountryId
+          );
         }
       }
       return rdo;
@@ -832,27 +836,21 @@ export default defineComponent({
         },
         birthdate: {
           required: helpers.withMessage(t('birthdate_required'), required),
-          minValue: helpers.withMessage(
-            t('birthdate_invalid'),
-            (value: Date | undefined) => {
-              if (value) {
-                const dateToTest = new Date();
-                dateToTest.setHours(0, 0, 0, 0);
-                dateToTest.setFullYear(dateToTest.getFullYear() - 120);
-                return value.getTime() > dateToTest.getTime();
-              }
-              return true;
+          minValue: helpers.withMessage(t('birthdate_invalid'), (value: Date | undefined) => {
+            if (value) {
+              const dateToTest = new Date();
+              dateToTest.setHours(0, 0, 0, 0);
+              dateToTest.setFullYear(dateToTest.getFullYear() - 120);
+              return value.getTime() > dateToTest.getTime();
             }
-          ),
-          maxValue: helpers.withMessage(
-            t('birthdate_invalid'),
-            (value: Date | undefined) => {
-              if (value) {
-                return value.getTime() < new Date().getTime();
-              }
-              return true;
+            return true;
+          }),
+          maxValue: helpers.withMessage(t('birthdate_invalid'), (value: Date | undefined) => {
+            if (value) {
+              return value.getTime() < new Date().getTime();
             }
-          ),
+            return true;
+          }),
         },
         responsibleCheckinPartnerId: {
           required: helpers.withMessage(t('responsible_adult_required'), (value: number) => {

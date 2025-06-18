@@ -25,7 +25,7 @@
     </div>
     <div class="buttons-save">
       <AppButton
-        :label="'Guardar'"
+        label="Guardar"
         @click="saveAdultsAndChildren()"
         raised
         size="small"
@@ -33,7 +33,7 @@
         :disabled="numberAdults === adults && numberChildren === children"
       />
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

@@ -30,9 +30,9 @@
           <CustomIcon
             class="arrow-back"
             color="black"
-            :imagePath="'/app-images/arrow_forward_ios.svg'"
-            :width="'22px'"
-            :height="'22px'"
+            imagePath="/app-images/arrow_forward_ios.svg"
+            width="22px"
+            height="22px"
           />
         </div>
         <div class="right">

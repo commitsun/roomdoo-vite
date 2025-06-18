@@ -332,7 +332,7 @@
 
     <div class="buttons">
       <AppButton
-        :label="'Guardar'"
+        label="Guardar"
         @click="saveChanges()"
         class="button"
         :disabled="
@@ -348,7 +348,7 @@
         }"
       />
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

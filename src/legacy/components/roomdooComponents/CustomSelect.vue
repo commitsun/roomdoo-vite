@@ -29,8 +29,8 @@
         <CustomIcon
           :imagePath="iconBefore"
           :color="!disabled ? 'primary' : 'grey'"
-          :width="'25px'"
-          :height="'25px'"
+          width="25px"
+          height="25px"
           v-if="iconBefore !== ''"
         />
         <div class="text-container" :style="{ marginLeft: iconBefore !== '' ? '8px' : '0' }">
@@ -55,8 +55,8 @@
       <CustomIcon
         :imagePath="iconDropdown"
         :color="!disabled ? (rightArrowColor === '' ? 'primary' : rightArrowColor) : 'grey'"
-        :width="'12px'"
-        :height="'12px'"
+        width="12px"
+        height="12px"
         :class="isOptionsDisplayed ? 'dropdown-img-up' : 'dropdown-img'"
       />
     </div>

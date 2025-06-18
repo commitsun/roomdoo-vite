@@ -495,7 +495,7 @@
 
     <div class="buttons">
       <AppButton
-        :label="'Guardar'"
+        label="Guardar"
         @click="saveChanges(true)"
         raised
         size="small"
@@ -504,7 +504,7 @@
         :class="{ disabled: !isThereAnyChange }"
       />
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

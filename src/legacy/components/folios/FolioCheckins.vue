@@ -88,10 +88,10 @@
               :key="checkinPartner.id"
             >
               <CustomIcon
-                :imagePath="'/app-images/icon-user-light-blue.svg'"
+                imagePath="/app-images/icon-user-light-blue.svg"
                 :color="getIconColor(checkinPartner)"
-                :width="'13px'"
-                :height="'17px'"
+                width="13px"
+                height="17px"
               />
             </div>
             <span v-if="reservation?.pendingCheckinData && reservation?.pendingCheckinData > 0">
@@ -103,10 +103,10 @@
             <span v-else> {{ reservation?.adults }} huéspedes </span>
             <div class="three-dots-icon">
               <CustomIcon
-                :imagePath="'/app-images/three-dots-white.svg'"
-                :color="'#71797C'"
-                :width="'22px'"
-                :height="'22px'"
+                imagePath="/app-images/three-dots-white.svg"
+                color="#71797C"
+                width="22px"
+                height="22px"
                 @click="isCheckinMenuOpen[index] = !isCheckinMenuOpen[index]"
                 @blur="isCheckinMenuOpen[index] = false"
                 tabindex="1"

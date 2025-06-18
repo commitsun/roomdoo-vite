@@ -3,8 +3,8 @@
     <div class="title">
       <div class="title-left">
         <CustomIcon
-          :imagePath="'/app-images/users.svg'"
-          :color="'primary'"
+          imagePath="/app-images/users.svg"
+          color="primary"
           :width="titleIconSize()"
           :height="titleIconSize()"
         />
@@ -63,10 +63,10 @@
       <div class="checkins-data-info-up">
         <div class="icons" v-for="checkinPartner in allCheckinPartners" :key="checkinPartner.id">
           <CustomIcon
-            :imagePath="'/app-images/icon-user-light-blue.svg'"
+            imagePath="/app-images/icon-user-light-blue.svg"
             :color="getIconColor(checkinPartner)"
-            :width="'13px'"
-            :height="'17px'"
+            width="13px"
+            height="17px"
           />
         </div>
         <span v-if="reservation?.pendingCheckinData && reservation?.pendingCheckinData > 0">
@@ -78,10 +78,10 @@
         <span v-else> {{ reservation?.adults }} huéspedes </span>
         <div class="three-dots-icon">
           <CustomIcon
-            :imagePath="'/app-images/three-dots-white.svg'"
-            :color="'#71797C'"
-            :width="'22px'"
-            :height="'22px'"
+            imagePath="/app-images/three-dots-white.svg"
+            color="#71797C"
+            width="22px"
+            height="22px"
             @click="isCheckinMenuOpen = !isCheckinMenuOpen"
             @blur="isCheckinMenuOpen = false"
             tabindex="1"

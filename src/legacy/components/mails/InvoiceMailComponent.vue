@@ -8,8 +8,8 @@
             class="autocomplete"
             v-model="selectedPartnerId"
             :items="itemsAutocompleteCustomer"
-            :placeholderValue="'Busqueda por DNI, NIF, Email...'"
-            :placeholderShowingOptions="'Busqueda por DNI, NIF, Email...'"
+            placeholderValue="Busqueda por DNI, NIF, Email..."
+            placeholderShowingOptions="Busqueda por DNI, NIF, Email..."
             :keepResultAfterChoose="false"
             :emptyResultsAfterClick="true"
             @textSearchChanges="getGuestFromVatDocNumber($event)"
@@ -105,7 +105,7 @@
         @click="sendMail()"
       />
       <AppButton
-        :label="'Cancelar'"
+        label="Cancelar"
         raised
         size="small"
         severity="secondary"

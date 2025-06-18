@@ -12,47 +12,47 @@
           <button @click="previousMonth" :disabled="showMonthTable || showYearTable">
             <CustomIcon
               class="arrow-back"
-              :imagePath="'/app-images/arrow_forward_ios.svg'"
-              :width="'16px'"
-              :height="'16px'"
-              :color="'#263941'"
+              imagePath="/app-images/arrow_forward_ios.svg"
+              width="16px"
+              height="16px"
+              color="#263941"
             />
           </button>
           <span class="current-month-year" @click="openMonthTable()">{{ currentMonth }}</span>
           <button @click="nextMonth" :disabled="showMonthTable || showYearTable">
             <CustomIcon
               class="arrow-next"
-              :imagePath="'/app-images/arrow_forward_ios.svg'"
-              :width="'16px'"
-              :height="'16px'"
-              :color="'#263941'"
+              imagePath="/app-images/arrow_forward_ios.svg"
+              width="16px"
+              height="16px"
+              color="#263941"
             />
           </button>
           <button @click="previousYear" :disabled="showMonthTable || showYearTable">
             <CustomIcon
               class="arrow-back"
-              :imagePath="'/app-images/arrow_forward_ios.svg'"
-              :width="'16px'"
-              :height="'16px'"
-              :color="'#263941'"
+              imagePath="/app-images/arrow_forward_ios.svg"
+              width="16px"
+              height="16px"
+              color="#263941"
             />
           </button>
           <span class="current-month-year" @click="openYearTable()">{{ currentYear }}</span>
           <button @click="nextYear" :disabled="showMonthTable || showYearTable">
             <CustomIcon
               class="arrow-next"
-              :imagePath="'/app-images/arrow_forward_ios.svg'"
-              :width="'16px'"
-              :height="'16px'"
-              :color="'#263941'"
+              imagePath="/app-images/arrow_forward_ios.svg"
+              width="16px"
+              height="16px"
+              color="#263941"
             />
           </button>
           <button class="close-icon" @click="hideCalendar">
             <CustomIcon
-              :imagePath="'/app-images/icon-close.svg'"
-              :width="'18px'"
-              :height="'18px'"
-              :color="'primary'"
+              imagePath="/app-images/icon-close.svg"
+              width="18px"
+              height="18px"
+              color="primary"
             />
           </button>
         </div>
@@ -104,10 +104,10 @@
                 <button>
                   <CustomIcon
                     class="arrow-back"
-                    :imagePath="'/app-images/arrow_forward_ios.svg'"
-                    :width="'16px'"
-                    :height="'16px'"
-                    :color="'#263941'"
+                    imagePath="/app-images/arrow_forward_ios.svg"
+                    width="16px"
+                    height="16px"
+                    color="#263941"
                   />
                 </button>
               </div>
@@ -130,10 +130,10 @@
                 <button>
                   <CustomIcon
                     class="arrow-next"
-                    :imagePath="'/app-images/arrow_forward_ios.svg'"
-                    :width="'16px'"
-                    :height="'16px'"
-                    :color="'#263941'"
+                    imagePath="/app-images/arrow_forward_ios.svg"
+                    width="16px"
+                    height="16px"
+                    color="#263941"
                   />
                 </button>
               </div>
