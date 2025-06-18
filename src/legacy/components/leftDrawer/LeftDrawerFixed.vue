@@ -225,11 +225,13 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, computed, markRaw } from 'vue';
+import { defineComponent, ref, computed, markRaw, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/legacy/store';
 import ReportComponent from '@/legacy/components/reports/ReportComponent.vue';
-import UserSettingsModal from '@/legacy/components/users/UserSettings.vue';
+const UserSettingsModal = defineAsyncComponent(
+  () => import('@/legacy/components/users/UserSettings.vue')
+);
 import { useSupport } from '@/legacy/utils/useSupport';
 import { dialogService } from '@/legacy/services/DialogService';
 
