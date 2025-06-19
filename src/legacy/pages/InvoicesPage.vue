@@ -1066,6 +1066,7 @@ export default defineComponent({
         height: 40px;
         width: 300px;
         font-size: 15px;
+        z-index: 8;
         display: none;
       }
 

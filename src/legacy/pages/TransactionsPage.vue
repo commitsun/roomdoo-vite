@@ -1656,6 +1656,7 @@ export default defineComponent({
             height: 43px;
             width: 375px;
             margin-right: 10px;
+            z-index: 8;
           }
           .cash-selection {
             border: 1px solid #d2ecf2;

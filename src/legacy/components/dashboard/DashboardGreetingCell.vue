@@ -158,6 +158,7 @@ export default defineComponent({
     margin-top: 12px;
     height: 39px;
     font-size: 15px !important;
+    z-index: 8;
   }
 }
 
