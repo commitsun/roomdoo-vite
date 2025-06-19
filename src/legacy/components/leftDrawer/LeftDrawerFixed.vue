@@ -58,6 +58,13 @@
         <div class="item-container">
           <div class="item icon-reports" />
         </div>
+        <!-- links -->
+        <div
+          class="item-container"
+          v-if="activeProperty?.linksRoomdoo && activeProperty?.linksRoomdoo.length > 0"
+        >
+          <div class="item icon-link" />
+        </div>
       </div>
     </div>
     <div class="support-menu-collapsed" v-if="!isOpen">
@@ -154,6 +161,43 @@
             <span @click="openReportsDialog('transactions')"> Pagos </span>
             <span @click="openReportsDialog('INE')"> INE </span>
           </div>
+          <template
+            v-if="activeProperty?.linksRoomdoo && activeProperty?.linksRoomdoo.length === 1"
+          >
+            <a
+              class="item-container"
+              :href="activeProperty?.linksRoomdoo[0].url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div class="item icon-link" />
+              <span> {{ activeProperty.linksRoomdoo[0].label }}</span>
+            </a>
+          </template>
+          <template
+            v-else-if="activeProperty?.linksRoomdoo && activeProperty?.linksRoomdoo.length > 1"
+          >
+            <div
+              class="item-container"
+              :class="isLinksOpened ? 'links-opened' : ''"
+              @click="isLinksOpened = !isLinksOpened"
+            >
+              <div class="item icon-link" :class="isLinksOpened ? 'selected' : ''" />
+              <span :class="isLinksOpened ? 'links-opened' : ''"> Enlaces </span>
+              <div :class="isLinksOpened ? 'rotate' : ''" class="dropdown-icon" />
+            </div>
+            <div class="link-options" v-if="isLinksOpened">
+              <a
+                v-for="link in activeProperty.linksRoomdoo"
+                :key="link.url"
+                :href="link.url"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ link.label }}
+              </a>
+            </div>
+          </template>
           <div
             class="item-container hidden"
             :class="route.fullPath === '/settings' ? 'selected' : ''"
@@ -164,10 +208,15 @@
           </div>
         </div>
       </div>
-      <div class="support-menu" @click="openSupportTab()">
+      <a
+        class="support-menu"
+        :href="activeProperty?.supportUrl.url"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <img src="/app-images/support-icon.svg" />
-        <span>Soporte de Roomdoo</span>
-      </div>
+        <span>{{ activeProperty?.supportUrl.label }}</span>
+      </a>
       <div
         class="bottom-expanded"
         :style="{ backgroundImage: `url(${activeProperty?.hotelImageUrl})` }"
@@ -232,7 +281,6 @@ import ReportComponent from '@/legacy/components/reports/ReportComponent.vue';
 const UserSettingsModal = defineAsyncComponent(
   () => import('@/legacy/components/users/UserSettings.vue')
 );
-import { useSupport } from '@/legacy/utils/useSupport';
 import { dialogService } from '@/legacy/services/DialogService';
 
 export default defineComponent({
@@ -245,10 +293,10 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
-    const { openSupportTab } = useSupport();
 
     const isOpen = ref(false);
     const isReportsOpened = ref(false);
+    const isLinksOpened = ref(false);
     const isSettingsOpened = ref(false);
     const showUserSettingsModal = ref(false);
 
@@ -304,6 +352,7 @@ export default defineComponent({
     const closeExpanded = () => {
       isOpen.value = false;
       isReportsOpened.value = false;
+      isLinksOpened.value = false;
       isSettingsOpened.value = false;
     };
 
@@ -330,8 +379,8 @@ export default defineComponent({
       navigateTo,
       openSettingsModal,
       endPath,
-      openSupportTab,
       hash,
+      isLinksOpened,
     };
   },
 });
@@ -409,6 +458,9 @@ export default defineComponent({
           &.icon-billing {
             mask: url(/app-images/bill.svg) no-repeat center / contain;
           }
+          &.icon-link {
+            mask: url(/app-images/link-2.svg) no-repeat center / contain;
+          }
           &.icon-settings {
             mask: url(/app-images/settings.svg) no-repeat center / contain;
           }
@@ -416,6 +468,12 @@ export default defineComponent({
         span {
           color: #4f4f4f;
           margin-left: 0.8rem;
+
+          white-space: nowrap; // evita que se haga multilinea
+          overflow: hidden; // oculta lo que se desborda
+          text-overflow: ellipsis; // pone los "..."
+          max-width: 160px; // ¡ajusta este valor a lo que necesites!
+          display: inline-block; // importante para que funcione bien
         }
         .dropdown-icon {
           margin-left: 0.5rem;
@@ -429,7 +487,8 @@ export default defineComponent({
           margin-top: 0.3rem;
           transform: rotate(-180deg);
         }
-        .reports-opened {
+        .reports-opened,
+        .links-opened {
           font-weight: bold;
         }
         &.selected {
@@ -492,6 +551,13 @@ export default defineComponent({
     }
     &:hover {
       font-weight: bold;
+    }
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+      display: inline-block;
     }
   }
   .support-menu-collapsed {
@@ -565,7 +631,8 @@ export default defineComponent({
     margin: 0.5rem 0 0.5rem 0.48rem;
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.25);
     margin-top: 15px;
-    .report-options {
+    .report-options,
+    .link-options {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -574,7 +641,8 @@ export default defineComponent({
       transition: all 0.5s;
       padding-top: -10px;
       font-size: 13px;
-      span {
+      span,
+      a {
         padding-left: 1rem;
         margin-bottom: 0.5rem;
         width: 100%;
