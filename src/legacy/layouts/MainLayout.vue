@@ -337,7 +337,7 @@ export default defineComponent({
     z-index: 100;
     background-color: white;
     margin: 0.5rem 0 0.5rem 0.5rem;
-    height: 97vh;
+    height: 96svh;
     border-radius: 18px;
     margin-top: 15px;
   }
