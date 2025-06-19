@@ -1,3 +1,5 @@
+import type { RoomdooLink } from './RoomdooLink';
+
 export interface PropertyInterface {
   id: number | null;
   name: string | null;
@@ -32,4 +34,6 @@ export interface PropertyInterface {
   canDownloadIneReport: boolean;
   companyName: string | null;
   maxAmountSimplifiedInvoice: number | null;
+  supportUrl: RoomdooLink;
+  linksRoomdoo: RoomdooLink[];
 }
