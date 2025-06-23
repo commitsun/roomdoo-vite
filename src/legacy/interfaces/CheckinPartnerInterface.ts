@@ -11,7 +11,6 @@ export interface CheckinPartnerInterface {
   documentCountryId: number;
   documentType: number;
   documentNumber: string;
-  documentExpeditionDate: Date | null,
   documentSupportNumber: string;
 
   // name data

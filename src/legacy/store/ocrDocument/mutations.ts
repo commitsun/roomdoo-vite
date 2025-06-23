@@ -10,9 +10,6 @@ const mutation: MutationTree<OcrDocumentStateInterface> = {
     if (checkinPartnerOcr.birthdate) {
       checkinPartnerOcr.birthdate = new Date(checkinPartnerOcr.birthdate);
     }
-    if (checkinPartnerOcr.documentExpeditionDate) {
-      checkinPartnerOcr.documentExpeditionDate = new Date(checkinPartnerOcr.documentExpeditionDate);
-    }
     state.documentData = checkinPartnerOcr;
   },
 
@@ -26,7 +23,6 @@ const mutation: MutationTree<OcrDocumentStateInterface> = {
       gender: '',
       birthdate: null,
       documentType: 0,
-      documentExpeditionDate: null,
       documentSupportNumber: '',
       documentNumber: '',
       residenceStreet: '',

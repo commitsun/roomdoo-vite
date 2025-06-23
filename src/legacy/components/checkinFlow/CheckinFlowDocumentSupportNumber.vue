@@ -38,7 +38,7 @@
       @keydown="validator.$reset()"
       @keydown.enter="nextAndSave()"
       @keydown.esc="$emit('closeCheckinFlow')"
-      placeholder="AAA123456"
+      :placeholder="documentType === 'D' ? 'AAA123456' : 'E12345678'"
       :isBorder="false"
       placeholderBlue
       textColor="primary"
@@ -100,6 +100,10 @@ export default defineComponent({
       type: Number,
       required: true,
     },
+    documentType: {
+      type: String,
+      required: true,
+    },
     step: {
       type: Number,
       required: true,
@@ -107,6 +111,10 @@ export default defineComponent({
   },
 
   setup(props, context) {
+    const REGEX_SUPPORT_NUMBER_DNI = /^[A-Za-z]{3}\d{6}$/;
+    const REGEX_SUPPORT_NUMBER_NIE = /^E\d{8}$/;
+
+
     const { t } = useI18n();
     let hasEmittedNext = false;
     const supportNumber = ref('');
@@ -115,8 +123,11 @@ export default defineComponent({
     const validSupportNumber = () => {
       let result = false;
 
-      const regex = /^[A-Za-z]{3}\d{6}$/;
-      if (supportNumber.value.length === 9 && regex.test(supportNumber.value)) {
+      if (supportNumber.value.length === 9 &&
+        (props.documentType === 'D' && REGEX_SUPPORT_NUMBER_DNI.test(supportNumber.value) ||
+          props.documentType === 'N' && REGEX_SUPPORT_NUMBER_NIE.test(supportNumber.value)
+        )
+      ) {
         result = true;
       }
       return result;
@@ -145,18 +156,11 @@ export default defineComponent({
     };
 
     watch(supportNumber, () => {
-      const regex1 = /^[A-Za-z]{1,3}$/;
-      const regex2 = /^[A-Za-z]{3}\d{1,5}$/;
-      const regex3 = /^[A-Za-z]{3}\d{6}$/;
-
-      if (
-        supportNumber.value.length === 0 ||
-        (supportNumber.value.length < 4 && regex1.test(supportNumber.value)) ||
-        (supportNumber.value.length < 9 && regex2.test(supportNumber.value))
+      if (supportNumber.value.length === 9 &&
+        (props.documentType === 'D' && REGEX_SUPPORT_NUMBER_DNI.test(supportNumber.value) ||
+          props.documentType === 'N' && REGEX_SUPPORT_NUMBER_NIE.test(supportNumber.value)
+        )
       ) {
-        context.emit('update:modelValue', '');
-        context.emit('setIsAllowedNextStep', false);
-      } else if (supportNumber.value.length === 9 && regex3.test(supportNumber.value)) {
         context.emit('update:modelValue', supportNumber.value);
         context.emit('setIsAllowedNextStep', true);
       } else {

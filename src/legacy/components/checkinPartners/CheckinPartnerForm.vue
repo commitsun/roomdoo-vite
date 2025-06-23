@@ -63,6 +63,8 @@
           </span>
         </div>
       </div>
+    </div>
+    <div class="form-row">
       <div class="item item-2">
         <span>
           {{ t('document_number_short') }}
@@ -85,35 +87,6 @@
         <div class="error-message">
           <span v-if="validatorCheckin.editingCheckinPartner.documentNumber.$error">
             {{ validatorCheckin.editingCheckinPartner.documentNumber.$errors[0].$message }}
-          </span>
-        </div>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="item item-3">
-        <span>
-          {{ t('expedition_date_title') }}
-          <span class="asterisk" v-if="!isUnderFourteen"> * </span>
-        </span>
-        <InputDate
-          class="input"
-          :includeCalendar="true"
-          v-model="editingCheckinPartner.documentExpeditionDate"
-          @badFormatting="badFormattingDocumentExpeditionDate = $event"
-          @input="
-            validatorCheckin.editingCheckinPartner.documentExpeditionDate.$reset();
-            validatorCheckin.editingCheckinPartner.documentExpeditionDate.$reset();
-          "
-          :isError="
-            badFormattingDocumentExpeditionDate ||
-            validatorCheckin.editingCheckinPartner.documentExpeditionDate.$error ||
-            validatorCheckin.editingCheckinPartner.documentExpeditionDate.$error
-          "
-        />
-        <div class="error-message">
-          <span v-if="badFormattingDocumentExpeditionDate"> Formato de fecha no válido </span>
-          <span v-else-if="validatorCheckin.editingCheckinPartner.documentExpeditionDate.$error">
-            {{ validatorCheckin.editingCheckinPartner.documentExpeditionDate.$errors[0].$message }}
           </span>
         </div>
       </div>
@@ -661,7 +634,6 @@ export default defineComponent({
     const COUNTRY_ID_SPAIN = store.state.countries.countries.find((c) => c.code === 'ES')?.id;
 
     const isLoadingData = ref(false);
-    const badFormattingDocumentExpeditionDate = ref(false);
     const badFormattingBirthdate = ref(false);
     const countries = computed(() => store.state.countries.countries);
     const residenceStates = computed(() => store.state.countryStates.countryStates);
@@ -699,9 +671,13 @@ export default defineComponent({
         editingCheckinPartner.value.documentType &&
         editingCheckinPartner.value.documentSupportNumber &&
         editingCheckinPartner.value.documentSupportNumber.length > 0 &&
-        editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI
+        (
+          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI ||
+          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE
+        )
       ) {
-        rdo = validateSupportNumber(editingCheckinPartner.value?.documentSupportNumber);
+        rdo = validateSupportNumber(editingCheckinPartner.value?.documentSupportNumber,
+          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE ? 'N' : 'D');
       }
       return rdo;
     };
@@ -789,21 +765,6 @@ export default defineComponent({
           isDuplicateCheckinPartner: helpers.withMessage(
             t('guest_reservation_exists'),
             isDuplicateCheckinPartner
-          ),
-        },
-        documentExpeditionDate: {
-          required: helpers.withMessage(
-            t('expedition_date_required'),
-            requiredIf(!isUnderFourteen.value)
-          ),
-          maxValue: helpers.withMessage(
-            t('expedition_date_invalid_future'),
-            (value: Date | undefined) => {
-              if (value) {
-                return value.getTime() < new Date().getTime();
-              }
-              return true;
-            }
           ),
         },
         documentSupportNumber: {
@@ -909,7 +870,6 @@ export default defineComponent({
         countryId: 0,
         countryState: 0,
         documentCountryId: 0,
-        documentExpeditionDate: null,
         documentNumber: '',
         documentSupportNumber: '',
         documentType: 0,
@@ -933,7 +893,6 @@ export default defineComponent({
       };
 
       badFormattingBirthdate.value = false;
-      badFormattingDocumentExpeditionDate.value = false;
       validatorCheckin.value.editingCheckinPartner.$reset();
     };
 
@@ -1123,7 +1082,6 @@ export default defineComponent({
         countryId: props.checkinPartner.countryId ?? 0,
         countryState: props.checkinPartner.countryState ?? 0,
         documentCountryId: props.checkinPartner.documentCountryId ?? 0,
-        documentExpeditionDate: props.checkinPartner.documentExpeditionDate ?? null,
         documentNumber: props.checkinPartner.documentNumber,
         documentSupportNumber: props.checkinPartner.documentSupportNumber,
         documentType:
@@ -1178,7 +1136,6 @@ export default defineComponent({
       editingCheckinPartner,
       countries,
       documentTypes,
-      badFormattingDocumentExpeditionDate,
       badFormattingBirthdate,
       DOCUMENT_TYPE_DNI,
       DOCUMENT_TYPE_NIE,

@@ -11,7 +11,6 @@ function state(): OcrDocumentStateInterface {
       gender: '',
       birthdate: null,
       documentType: 0,
-      documentExpeditionDate: null,
       documentSupportNumber: '',
       documentNumber: '',
       residenceStreet: '',

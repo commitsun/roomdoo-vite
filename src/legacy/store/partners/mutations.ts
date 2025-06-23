@@ -21,12 +21,6 @@ const mutation: MutationTree<PartnerStateInterface> = {
           partner.birthdate = null;
         }
       }
-      if (partner.documentExpeditionDate) {
-        partner.documentExpeditionDate = new Date(partner.documentExpeditionDate);
-        if (!Number(partner.documentExpeditionDate)) {
-          partner.documentExpeditionDate = null;
-        }
-      }
     });
     state.partners = partners;
   },

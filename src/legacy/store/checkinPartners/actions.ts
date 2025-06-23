@@ -32,7 +32,6 @@ const actions: ActionTree<CheckinPartnerStateInterface, StateInterface> = {
 
   async updateCheckinPartner(context, payload: CheckinPartnerInterface) {
     let birthdate = '';
-    let documentExpeditionDate = '';
     if (payload.birthdate) {
       birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(
         payload.birthdate.getMonth() + 1
@@ -40,19 +39,10 @@ const actions: ActionTree<CheckinPartnerStateInterface, StateInterface> = {
         .toString()
         .padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
     }
-    if (payload.documentExpeditionDate) {
-      documentExpeditionDate = `${payload.documentExpeditionDate
-        .getDate()
-        .toString()
-        .padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
-    }
 
     const send = {
       ...payload,
       birthdate,
-      documentExpeditionDate,
       nationality: payload.nationality !== 0 ? payload.nationality : null,
       documentType: payload.documentType !== 0 ? payload.documentType : null,
       countryId: payload.countryId !== 0 ? payload.countryId : null,

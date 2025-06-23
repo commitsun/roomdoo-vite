@@ -191,6 +191,7 @@
             v-model="activeCheckinPartner.documentSupportNumber"
             @next="nextStep()"
             :currentIndexCheckin="currentIndexCheckin"
+            :documentType="activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI ? 'D' : activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE ? 'N' : ''"
             :step="currentStepNumber"
             @setIsAllowedNextStep="isAllowedNextStep = $event"
           />
@@ -869,7 +870,6 @@ export default defineComponent({
       // steps for existing checkin partner
       const existingCheckinPartnerSteps = [
         'documentNumber',
-        'documentExpeditionDate',
         'documentSupportNumber',
         'name',
         'nationality',
@@ -1236,7 +1236,6 @@ export default defineComponent({
           countryId: checkinPartnerOcr.value.countryId ?? 0,
           countryState: checkinPartnerOcr.value.countryState ?? 0,
           documentCountryId: checkinPartnerOcr.value.documentCountryId ?? 0,
-          documentExpeditionDate: checkinPartnerOcr.value.documentExpeditionDate ?? null,
           documentNumber: checkinPartnerOcr.value.documentNumber ?? '',
           documentSupportNumber: checkinPartnerOcr.value.documentSupportNumber ?? '',
           documentType: checkinPartnerOcr.value.documentType ?? 0,

@@ -15,12 +15,6 @@ const mutation: MutationTree<CheckinPartnerStateInterface> = {
           checkinPartner.birthdate = null;
         }
       }
-      if (checkinPartner.documentExpeditionDate) {
-        checkinPartner.documentExpeditionDate = new Date(checkinPartner.documentExpeditionDate);
-        if (!Number(checkinPartner.documentExpeditionDate)) {
-          checkinPartner.documentExpeditionDate = null;
-        }
-      }
     });
     state.checkinpartners = checkinpartners;
   },
@@ -36,12 +30,6 @@ const mutation: MutationTree<CheckinPartnerStateInterface> = {
           checkinPartner.birthdate = null;
         }
       }
-      if (checkinPartner.documentExpeditionDate) {
-        checkinPartner.documentExpeditionDate = new Date(checkinPartner.documentExpeditionDate);
-        if (!Number(checkinPartner.documentExpeditionDate)) {
-          checkinPartner.documentExpeditionDate = null;
-        }
-      }
     });
     state.folioCheckinPartners = folioCheckinPartners;
   },
@@ -55,12 +43,6 @@ const mutation: MutationTree<CheckinPartnerStateInterface> = {
         checkinPartner.birthdate = new Date(checkinPartner.birthdate);
         if (!Number(checkinPartner.birthdate)) {
           checkinPartner.birthdate = null;
-        }
-      }
-      if (checkinPartner.documentExpeditionDate) {
-        checkinPartner.documentExpeditionDate = new Date(checkinPartner.documentExpeditionDate);
-        if (!Number(checkinPartner.documentExpeditionDate)) {
-          checkinPartner.documentExpeditionDate = null;
         }
       }
     }

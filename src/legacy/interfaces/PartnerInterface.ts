@@ -10,7 +10,6 @@ export interface PartnerInterface {
   documentCountryId: number;
   documentType: number;
   documentNumber: string;
-  documentExpeditionDate: Date | null;
   documentSupportNumber: string;
   gender: string;
   birthdate: Date | null;

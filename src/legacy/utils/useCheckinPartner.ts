@@ -12,7 +12,6 @@ export const DEFAULT_CHECKIN_PARTNER_VALUES = {
   countryId: 0,
   countryState: 0,
   documentCountryId: 0,
-  documentExpeditionDate: null,
   documentLegalRepresentative: '',
   documentNumber: '',
   documentSupportNumber: '',
@@ -305,8 +304,13 @@ export function useCheckinPartner() {
     return result;
   };
 
-  const validateSupportNumber = (supportNumber: string) => {
-    const regex = /^[A-Za-z]{3}\d{6}$/;
+  const validateSupportNumber = (supportNumber: string, documentType: string) => {
+    let regex;
+    if (documentType === 'D') {
+      regex = /^[A-Za-z]{3}\d{6}$/;
+    } else {
+      regex = /^E\d{8}$/;
+    }
     return regex.test(supportNumber);
   };
 
@@ -364,8 +368,7 @@ export function useCheckinPartner() {
             partner.documentCountryId !== 0 &&
             partner.documentType &&
             partner.documentType !== 0 &&
-            partner.documentNumber &&
-            partner.documentExpeditionDate)) &&
+            partner.documentNumber)) &&
         checkSpanishDocument(partner, isDNI, isNIE) &&
         checkSpanishResidence(partner, livesInSpain)
     );

@@ -124,7 +124,7 @@ export default defineComponent({
     iconDropdown: {
       type: String,
       required: false,
-      default: 'app-images/icon-dropdown-black.svg',
+      default: '/app-images/icon-dropdown-black.svg',
     },
     textBeforeOptionSelected: {
       type: String,

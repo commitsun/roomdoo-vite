@@ -18,18 +18,9 @@ const mutation: MutationTree<PrecheckinStateInterface> = {
   ) {
     state.existingCheckinPartner = checkinPartner;
 
-    if (checkinPartner?.documentExpeditionDate) {
-      state.existingCheckinPartner.documentExpeditionDate = new Date(
-        checkinPartner.documentExpeditionDate
-      );
-    }
     if (checkinPartner?.birthdate) {
       state.existingCheckinPartner.birthdate = new Date(checkinPartner.birthdate);
     }
-
-    // state.existingCheckinPartner.documentExpeditionDate = checkinPartner?.documentExpeditionDate
-    //   ? new Date(checkinPartner.documentExpeditionDate)
-    //   : null;
   },
   SET_ANY_ADULTS_IN_FOLIO(state: PrecheckinStateInterface, someAdults: boolean) {
     state.areThereAnyAdultsInFolio = someAdults;

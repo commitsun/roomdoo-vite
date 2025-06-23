@@ -323,6 +323,7 @@
             @next="nextStep()"
             @closeCheckinFlow="closeCheckinFlow()"
             :currentIndexCheckin="currentIndexCheckin"
+            :documentType="activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI ? 'D' : activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE ? 'N' : ''"
             @setIsAllowedNextStep="setIsAllowedNextStep($event)"
             :step="currentStepNumber"
             @persistCheckinPartner="persistCheckinPartner"
@@ -696,7 +697,6 @@ export default defineComponent({
         countryId: cp.countryId ?? 0,
         countryState: cp.countryState ?? 0,
         documentCountryId: cp.documentCountryId ?? 0,
-        documentExpeditionDate: cp.documentExpeditionDate ?? null,
         documentLegalRepresentative: cp.documentLegalRepresentative ?? '',
         documentNumber: cp.documentNumber ?? '',
         documentSupportNumber: cp.documentSupportNumber ?? '',

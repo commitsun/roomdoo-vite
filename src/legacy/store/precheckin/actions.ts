@@ -90,14 +90,6 @@ const actions: ActionTree<PrecheckinStateInterface, StateInterface> = {
       });
     }
     if (
-      payload.checkinPartner.documentExpeditionDate &&
-      payload.checkinPartner.documentExpeditionDate.getTime() !== 0
-    ) {
-      Object.assign(checkinPartner, {
-        documentExpeditionDate: payload.checkinPartner.documentExpeditionDate,
-      });
-    }
-    if (
       payload.checkinPartner.firstname &&
       payload.checkinPartner.firstname !== '' &&
       payload.checkinPartner.firstname !== '#'

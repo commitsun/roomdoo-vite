@@ -21,7 +21,6 @@ const actions: ActionTree<PartnerStateInterface, StateInterface> = {
 
   async createPartner(context, payload: PartnerInterface) {
     let birthdate = '';
-    let documentExpeditionDate = '';
     if (payload.birthdate) {
       birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(
         payload.birthdate.getMonth() + 1
@@ -29,18 +28,9 @@ const actions: ActionTree<PartnerStateInterface, StateInterface> = {
         .toString()
         .padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
     }
-    if (payload.documentExpeditionDate) {
-      documentExpeditionDate = `${payload.documentExpeditionDate
-        .getDate()
-        .toString()
-        .padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
-    }
     const send = {
       ...payload,
       birthdate,
-      documentExpeditionDate,
     };
     return api.post('/partners', send);
   },
@@ -55,7 +45,6 @@ const actions: ActionTree<PartnerStateInterface, StateInterface> = {
 
   async updatePartner(context, payload: PartnerInterface) {
     let birthdate = '';
-    let documentExpeditionDate = '';
     if (payload.birthdate) {
       birthdate = `${payload.birthdate.getDate().toString().padStart(2, '0')}/${(
         payload.birthdate.getMonth() + 1
@@ -63,18 +52,9 @@ const actions: ActionTree<PartnerStateInterface, StateInterface> = {
         .toString()
         .padStart(2, '0')}/${payload.birthdate.getFullYear()}`;
     }
-    if (payload.documentExpeditionDate) {
-      documentExpeditionDate = `${payload.documentExpeditionDate
-        .getDate()
-        .toString()
-        .padStart(2, '0')}/${(payload.documentExpeditionDate.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}/${payload.documentExpeditionDate.getFullYear()}`;
-    }
     const send = {
       ...payload,
       birthdate,
-      documentExpeditionDate,
     };
     return api.patch(`/partners/p/${payload.id}`, send);
   },
