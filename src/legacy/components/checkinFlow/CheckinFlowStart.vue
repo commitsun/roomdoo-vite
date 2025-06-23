@@ -7,7 +7,7 @@
     ref="firstPageContainerRef"
   >
     <img src="/app-images/icon-check-blue.svg" class="check-icon" />
-    <span class="first-page-title"> {{ t('checkin_assistant') }} </span>
+    <span class="first-page-title"> {{ t('checkin_wizard') }} </span>
     <span class="partner-name"> {{ t('reservation_for') }} {{ partnerName }} </span>
     <span class="property">
       {{ propertyName }}

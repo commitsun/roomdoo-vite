@@ -98,8 +98,8 @@
       <div v-if="results.length === 0" class="no-results">
         {{
           search.length >= minChars
-            ? 'No hay coincidencias'
-            : `Introduzca al menos ${minChars} caracter${minChars > 1 ? 'es' : ''}`
+            ? t('no_coincidences')
+            : t('autocomplete_min_chars', { minChars: minChars })
         }}
       </div>
       <div class="results" v-else>
@@ -142,6 +142,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, type Ref, computed, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   props: {
@@ -266,6 +267,8 @@ export default defineComponent({
     },
   },
   setup(props, context) {
+    const { t } = useI18n();
+
     const isOpen = ref(false);
     const results = ref([] as { value: number; name: string; image?: string }[]);
     const search = ref('');
@@ -479,6 +482,7 @@ export default defineComponent({
       lostFocus,
       isComponentFocused,
       clickInput,
+      t,
       autocompleteInput,
       isSomeImage,
       selectedImagePath,

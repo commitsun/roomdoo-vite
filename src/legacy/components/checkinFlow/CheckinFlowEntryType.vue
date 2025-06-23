@@ -56,7 +56,7 @@
               <span> A </span>
             </div>
             <div class="second">
-              {{ $t('checkin_assistant') }}
+              {{ $t('checkin_wizard') }}
             </div>
           </div>
         </div>
