@@ -130,7 +130,18 @@
         :style="`background-color:${reservationColor(reservation, folio.pendingAmount || 0)}`"
       />
       <transition name="menu-reservation">
-        <div class="reservation-menu" v-if="openReservationOptionsMenu">
+        <div
+          class="reservation-menu"
+          v-if="
+            openReservationOptionsMenu &&
+            !(
+              reservation.stateCode === 'done' ||
+              reservation.stateCode === 'onboard' ||
+              reservation.stateCode === 'departure_delayed' ||
+              (reservation.stateCode === 'done' && reservation.reservationType === 'out')
+            )
+          "
+        >
           <div
             v-if="
               (reservation.stateCode === 'draft' || reservation.stateCode === 'cancel') && folio.id
@@ -567,6 +578,10 @@ export default defineComponent({
     flex-direction: column;
     align-items: center;
     margin: 0 10px;
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
     .circle {
       width: 4px;
       height: 4px;
