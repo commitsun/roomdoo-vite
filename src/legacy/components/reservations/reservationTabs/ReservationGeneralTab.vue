@@ -554,6 +554,9 @@ export default defineComponent({
             content: '¿Estás seguro de que quieres eliminar la penalización?',
             btnAccept: 'Eliminar penalización',
             btnCancel: 'Cancelar',
+            onAccept: () => {
+              deleteCancelPenalty();
+            },
           });
           showDeleteCancelPenalty.value = true;
         }
@@ -662,21 +665,16 @@ export default defineComponent({
 
     const deleteCancelPenalty = async () => {
       const serviceIsCancelPenalty = store.state.services.services.find((s) => s.isCancelPenalty);
-      const serviceLines = serviceIsCancelPenalty?.serviceLines.map((sl) => ({
-        ...sl,
-        discount: 100,
-      }));
       if (serviceIsCancelPenalty) {
-        void store.dispatch('services/updateService', {
-          reservationId: currentReservation.value?.id,
-          serviceId: serviceIsCancelPenalty.id,
-          serviceLines,
-        });
-        showDeleteCancelPenalty.value = false;
+        await store.dispatch('services/deleteService', serviceIsCancelPenalty.id);
         await store.dispatch(
           'reservations/fetchReservationWizardState',
           store.state.reservations.currentReservation?.id
         );
+        await store.dispatch('reservations/fetchReservation', store.state.reservations.currentReservation?.id);
+        await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
+        await store.dispatch('services/fetchServices', store.state.reservations.currentReservation?.id);
+        showDeleteCancelPenalty.value = false;
       }
     };
 

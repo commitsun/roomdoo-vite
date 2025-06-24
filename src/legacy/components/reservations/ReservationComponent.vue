@@ -188,7 +188,6 @@ import type { FolioInterface } from '@/legacy/interfaces/FolioInterface';
 import { usePlanning } from '@/legacy/utils/usePlanning';
 import { dialogService } from '@/legacy/services/DialogService';
 import FolioOrReservationCancelBlocked from '@/legacy/components/alerts/FolioOrReservationCancelBlocked.vue';
-import utilsDates from '@/legacy/utils/dates';
 
 export default defineComponent({
   components: {
@@ -340,6 +339,7 @@ export default defineComponent({
         };
         await store.dispatch('reservations/fetchReservation', reservationId);
         await store.dispatch('reservations/fetchReservations', folioId);
+        await store.dispatch('reservations/fetchReservationWizardState', reservationId);
         await store.dispatch('folios/fetchFolios', payload);
         if (store.state.folios.currentFolio) {
           await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);
@@ -412,6 +412,7 @@ export default defineComponent({
 
         await store.dispatch('reservations/fetchReservation', reservationId);
         await store.dispatch('reservations/fetchReservations', folioId);
+        await store.dispatch('reservations/fetchReservationWizardState', reservationId);
         await store.dispatch('folios/fetchFolios', payload);
         if (store.state.folios.currentFolio) {
           await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);

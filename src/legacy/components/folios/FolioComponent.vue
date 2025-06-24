@@ -833,6 +833,7 @@ export default defineComponent({
             'services/fetchServices',
             store.state.reservations.currentReservation?.id
           );
+          await store.dispatch('reservations/fetchReservationWizardState', store.state.reservations.currentReservation.id);
         }
       } catch {
         dialogService.open({
@@ -859,6 +860,7 @@ export default defineComponent({
             'reservations/fetchReservation',
             store.state.reservations.currentReservation.id
           );
+          await store.dispatch('reservations/fetchReservationWizardState', store.state.reservations.currentReservation.id);
         }
         isOpenMenu.value = false;
         if (router.currentRoute.value.name === 'planning') {
