@@ -36,7 +36,7 @@ export const DEFAULT_CHECKIN_PARTNER_VALUES = {
 };
 
 function isValidNIE(nie: string): boolean {
-  const controlLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
+  const controlLetters = 'TRWAGMYFPDXBNJZSQVHLCKE';
   nie = nie.trim().toUpperCase();
 
   const nieRegex = /^[XYZ][0-9]{7}[A-Z]$/;
@@ -46,7 +46,7 @@ function isValidNIE(nie: string): boolean {
   const numberPart = nie.slice(1, -1);
   const controlChar = nie.slice(-1);
 
-  let numericPrefix = { X: "0", Y: "1", Z: "2" }[prefix];
+  let numericPrefix = { X: '0', Y: '1', Z: '2' }[prefix];
   const fullNumber = parseInt(numericPrefix + numberPart, 10);
   const expectedLetter = controlLetters[fullNumber % 23];
 
@@ -57,9 +57,7 @@ export function useCheckinPartner() {
   const store = useStore();
   const router = useRouter();
   const { yearsFrom } = utilsDates;
-  const NATIONALITY_CODE_SPAIN = store.state.countries.countries.find(
-    (el) => el.code === 'ES'
-  )?.id;
+  const NATIONALITY_CODE_SPAIN = store.state.countries.countries.find((el) => el.code === 'ES')?.id;
 
   const saveCheckinPartner = async (checkinPartner: CheckinPartnerInterface) => {
     void store.dispatch('layout/showSpinner', true);
@@ -288,18 +286,19 @@ export function useCheckinPartner() {
     }
   };
 
-  const validateDocumentNumber = (documentType: string, documentNumber: string, documentCountryId: number) => {
-    let result = false;
+  const validateDocumentNumber = (
+    documentType: string,
+    documentNumber: string,
+    documentCountryId: number
+  ) => {
+    let result = true;
     if (
-      (documentType === 'D' && isNIF(documentNumber) && documentCountryId === NATIONALITY_CODE_SPAIN) ||
-      (documentType === 'D' && documentCountryId !== NATIONALITY_CODE_SPAIN) ||
-      (documentType === 'X' && isValidNIE(documentNumber)) ||
-      (documentType === 'N' && isValidNIE(documentNumber)) ||
-      documentType === 'P' ||
-      documentType === 'I' ||
-      documentType === 'C'
+      (documentType === 'D' &&
+        !isNIF(documentNumber) &&
+        documentCountryId === NATIONALITY_CODE_SPAIN) ||
+      (documentType === 'N' && !isValidNIE(documentNumber))
     ) {
-      result = true;
+      result = false;
     }
     return result;
   };
