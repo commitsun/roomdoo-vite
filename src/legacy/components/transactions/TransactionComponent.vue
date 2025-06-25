@@ -152,6 +152,7 @@ import { type TransactionInterface } from '@/legacy/interfaces/TransactionInterf
 import { useStore } from '@/legacy/store';
 import { usePartner } from '@/legacy/utils/usePartner';
 import { dialogService } from '@/legacy/services/DialogService';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   components: {
@@ -177,10 +178,16 @@ export default defineComponent({
       required: false,
       default: true,
     },
+    folioId: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   emits: ['transactionCreated', 'close', 'accept'],
   setup(props, context) {
     const store = useStore();
+    const router = useRouter();
     const { fetchPartners } = usePartner();
 
     const accountJournal = ref(0);
@@ -255,6 +262,23 @@ export default defineComponent({
           await store.dispatch('transactions/editTransaction', payload);
         } else {
           await store.dispatch('transactions/createTransaction', payload);
+        }
+        if (router.currentRoute.value.name === 'planning') {
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+          await store.dispatch('folios/fetchFolio', props.folioId);
+          await store.dispatch('folios/fetchFolioTransactions', props.folioId);
+          await store.dispatch('folios/fetchFolioSaleLines', props.folioId);
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
         }
 
         dialogService.open({

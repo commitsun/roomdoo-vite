@@ -4,10 +4,7 @@
     v-for="saleLine in saleLinesToPay"
     :key="saleLine.defaultInvoiceTo ?? 0"
   >
-    <div
-      class="pending-amount-section"
-      :class="{ 'has-charges': saleLine.pendingToPay > 0 }"
-    >
+    <div class="pending-amount-section" :class="{ 'has-charges': saleLine.pendingToPay > 0 }">
       <div class="pending-title">Pdte. de cobrar a {{ saleLine.partnerName }}:</div>
       <div class="pending-amount">
         {{ saleLine.pendingToPay ? saleLine.pendingToPay.toFixed(2) : '0' }} €
@@ -330,6 +327,7 @@ export default defineComponent({
           partnerId: partnerId.value,
           chargeAmount: chargeAmount.value,
           transactionId: transactionId.value,
+          folioId: folio.value?.id,
         },
       });
     };
@@ -363,6 +361,7 @@ export default defineComponent({
         props: {
           isRefund: isRefund.value,
           transaction: currentTransaction.value,
+          folioId: folio.value?.id,
         },
       });
     };
@@ -651,10 +650,10 @@ export default defineComponent({
     }
     .pending-title {
       max-width: 75%;
-      margin-left: .5rem;
+      margin-left: 0.5rem;
     }
     .pending-amount {
-      margin-right: .5rem;
+      margin-right: 0.5rem;
     }
   }
   .charge-section {
@@ -699,7 +698,7 @@ export default defineComponent({
   margin-top: 1rem;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
     0 3px 1px -2px rgba(0, 0, 0, 0.12);
-    border-radius: 4px !important;
+  border-radius: 4px !important;
   .recorded-transactions-title {
     font-weight: bold;
     background: #899b9e;
@@ -731,7 +730,6 @@ export default defineComponent({
       position: absolute;
       width: 1px;
       user-select: none;
-      
     }
     tr {
       padding: 0.5rem;
@@ -862,7 +860,6 @@ export default defineComponent({
       padding: 0 1.5rem;
       font-weight: bold;
       cursor: pointer;
-      
     }
   }
 
@@ -997,11 +994,11 @@ export default defineComponent({
               margin-top: 0 !important;
               font-size: 14px;
             }
-
           }
         }
       }
-      th,td {
+      th,
+      td {
         width: 25%;
         text-align: center;
         padding: 0.5em;
@@ -1017,7 +1014,6 @@ export default defineComponent({
         white-space: normal;
         width: 155px;
       }
-
     }
     .repay-container {
       display: flex;
