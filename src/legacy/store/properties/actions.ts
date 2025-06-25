@@ -29,25 +29,6 @@ const actions: ActionTree<PropertyStateInterface, StateInterface> = {
     context.commit('SET_ACTIVE_PROPERTY', activeProperty);
   },
 
-  async travellerReport(context, payload: PayloadTransactionReport) {
-    let params = '';
-    let to = '';
-    let from = '';
-    if (payload.pmsPropertyId) {
-      params += `?pmsPropertyId=${payload.pmsPropertyId}`;
-    }
-    if (payload.dateFrom && payload.dateTo) {
-      from = `${payload.dateFrom.getFullYear()}-${(payload.dateFrom.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}-${payload.dateFrom.getDate().toString().padStart(2, '0')}`;
-      to = `${payload.dateTo.getFullYear()}-${(payload.dateTo.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}-${payload.dateTo.getDate().toString().padStart(2, '0')}`;
-      params += `&dateFrom=${from}&dateTo=${to}`;
-    }
-    return api.get(`properties/traveller-report${params}`);
-  },
-
   reset(context) {
     deleteCookie('activePropertyId');
     context.commit('CLEAR_ACTIVE_PROPERTY');

@@ -97,8 +97,6 @@ export default defineComponent({
         path = 'transactions/transactionReport';
       } else if (props.reportType === 'services') {
         path = 'services/servicesReport';
-      } else if (props.reportType === 'traveller') {
-        path = 'properties/travellerReport';
       } else if (props.reportType === 'INE') {
         if (!activeProperty.value?.canDownloadIneReport) {
           dialogService.open({

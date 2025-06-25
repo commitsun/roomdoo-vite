@@ -152,7 +152,6 @@
             <span @click="openReportsDialog('departures')"> Salidas </span>
             <span @click="openReportsDialog('services')"> Servicios </span>
             <span @click="openReportsDialog('transactions')"> Pagos </span>
-            <span @click="openReportsDialog('traveller')"> Parte de viajeros </span>
             <span @click="openReportsDialog('INE')"> INE </span>
           </div>
           <div
@@ -278,8 +277,6 @@ export default defineComponent({
         title = 'INFORME DE SERVICIOS';
       } else if (reportType === 'transactions') {
         title = 'INFORME DE PAGOS';
-      } else if (reportType === 'traveller') {
-        title = 'INFORME DE PARTE DE VIAJEROS';
       } else if (reportType === 'INE') {
         title = 'INE';
       } else {
