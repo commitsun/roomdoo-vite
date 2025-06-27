@@ -1,55 +1,48 @@
-import { createApp } from 'vue';
-import router from './router';
-import axiosPlugin from '@/plugins/axios';
-import App from './App.vue';
-import PrimeVue, { defaultOptions } from 'primevue/config';
-import Aura from '@primeuix/themes/aura';
-
-import { createPinia } from 'pinia';
+// — Styles
+import '@/ui/assets/style.css';
 import 'primeicons/primeicons.css';
-import { store } from '@/legacy/store';
-import { i18n } from '@/plugins/i18n';
-import { locale } from '@/plugins/locale';
-const pinia = createPinia();
 
-import '@/assets/style.css';
+// — Vue core
+import { createApp } from 'vue';
+import App from './App.vue';
+
+// — State management
+import { createPinia } from 'pinia';
+import { store as vuexStore } from '@/legacy/store';
+
+// — Routing
+import router from '@/ui/router';
+
+// — Head management
 import { createHead } from '@vueuse/head';
-import { definePreset } from '@primevue/themes';
 
-const myPreset = definePreset(Aura, {
-  semantic: {
-    primary: {
-      50: '#e3f3fc',
-      100: '#bde3f8',
-      200: '#8dd1f3',
-      300: '#5cbced',
-      400: '#33ace7',
-      500: '#1e9ed9',
-      600: '#1a89c0',
-      700: '#156e99',
-      800: '#115377',
-      900: '#0c3752',
-      950: '#08212f',
-    },
-  },
-});
-const head = createHead();
+// — Plugins
+import axiosPlugin from '@/plugins/axios';
+import { i18n, locale } from '@/plugins/i18n';
+import primevuePlugin from '@/plugins/primevue';
+
+// — Create app
 const app = createApp(App);
-app.use(PrimeVue, {
-  theme: {
-    preset: myPreset,
-    options: {
-      darkModeSelector: false || 'none',
-    },
-  },
-  locale,
-});
-app.use(router);
-app.use(axiosPlugin);
-app.use(head);
-app.use(store);
-app.use(i18n);
-app.use(pinia);
 
-app.mount('#app');
-export const appLocale = locale;
+app
+  // 1. state
+  .use(createPinia())
+  .use(vuexStore)
+
+  // 2. internationalization
+  .use(i18n)
+
+  // 3. routing
+  .use(router)
+
+  // 4. meta tags
+  .use(createHead())
+
+  // 5. http client
+  .use(axiosPlugin)
+
+  // 6. UI framework
+  .use(primevuePlugin, { locale }) // <— así instalas PrimeVue con tu preset y locale
+
+  // 7. mount
+  .mount('#app');
