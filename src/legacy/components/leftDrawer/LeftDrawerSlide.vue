@@ -99,7 +99,11 @@
       <!-- OVERLAY WHEN DRAWER IS EXPANDED -->
       <div class="left-drawer-overlay" />
       <!-- PROPERTY INFO  -->
-      <div class="property-info" :class="showUserSettingsModal ? 'user-settings-open' : ''">
+      <div
+        class="property-info"
+        :class="showUserSettingsModal ? 'user-settings-open' : ''"
+        @click="showVersionContIncrement()"
+      >
         <span>
           {{ activeProperty?.name }}
         </span>
@@ -150,6 +154,7 @@
           </div>
         </div>
       </div>
+      <div v-if="showVersionCont > 5" class="version-info">{{ hash }}</div>
     </div>
   </div>
 </template>
@@ -163,6 +168,8 @@ import { dialogService } from '@/legacy/services/DialogService';
 
 export default defineComponent({
   setup() {
+    const hash = import.meta.env.VITE_COMMIT_HASH || 'dev';
+
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
@@ -170,6 +177,7 @@ export default defineComponent({
     const isReportsOpened = ref(false);
     const isSettingsOpened = ref(false);
     const showUserSettingsModal = ref(false);
+    const showVersionCont = ref(0);
 
     const activeProperty = computed(() => store.state.properties.activeProperty);
     const activeUser = computed(() => store.state.user.activeUser);
@@ -228,7 +236,13 @@ export default defineComponent({
       void router.push('/login');
     };
 
+    const showVersionContIncrement = () => {
+      showVersionCont.value += 1;
+    };
+
     return {
+      showVersionCont,
+      hash,
       route,
       activeProperty,
       activeUser,
@@ -241,6 +255,7 @@ export default defineComponent({
       showUserSettingsModal,
       endPath,
       openSupportTab,
+      showVersionContIncrement,
     };
   },
 });
@@ -522,6 +537,14 @@ export default defineComponent({
           text-overflow: ellipsis;
         }
       }
+    }
+    .version-info {
+      position: absolute;
+      left: 15px;
+      bottom: 5px;
+      color: white;
+      font-size: 12px;
+      user-select: text;
     }
     .user-settings-open {
       z-index: 0;

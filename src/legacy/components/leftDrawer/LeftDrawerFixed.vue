@@ -216,6 +216,7 @@
             {{ activeProperty?.name }}
           </span>
         </div>
+        <div class="version-info">{{ hash }}</div>
       </div>
     </div>
   </div>
@@ -239,6 +240,8 @@ export default defineComponent({
     UserSettingsModal,
   },
   setup() {
+    const hash = import.meta.env.VITE_COMMIT_HASH || 'dev';
+
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
@@ -328,6 +331,7 @@ export default defineComponent({
       openSettingsModal,
       endPath,
       openSupportTab,
+      hash,
     };
   },
 });
@@ -606,6 +610,15 @@ export default defineComponent({
         span {
           font-weight: bold;
         }
+      }
+      .version-info {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        color: white;
+        font-size: 10px;
+        user-select: text;
+        opacity: 0.2;
       }
       .user-options {
         color: black;

@@ -8,6 +8,8 @@ import tailwindcss from '@tailwindcss/vite';
 import vueI18n from '@intlify/unplugin-vue-i18n/vite';
 import path from 'path';
 
+const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+
 function commitHashPlugin(): Plugin {
   const commitHash = execSync('git rev-parse --short HEAD').toString().trim(); // hash corto (7 chars)
   const commitDate = execSync('git log -1 --format=%cd').toString().trim();
@@ -31,6 +33,9 @@ export default defineConfig({
     }),
     commitHashPlugin(),
   ],
+  define: {
+    'import.meta.env.VITE_COMMIT_HASH': JSON.stringify(commitHash),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
