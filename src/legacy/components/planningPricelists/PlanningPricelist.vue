@@ -4,7 +4,7 @@
       <div
         class="room-left"
         :class="{ hidden: !roomTypeIdsToFilter.includes(el.roomTypeId) }"
-        v-for="el in planningPricesRules"
+        v-for="el in planningPricesRules.filter((el, index) => index <= 4)"
         :key="el.roomTypeId"
         :style="{
           'min-height': `${70 + numRulesToView * 20}px`,
@@ -25,7 +25,7 @@
     <div class="calendar" ref="calendarElement" id="calendar-pricelists">
       <div
         class="row-planning"
-        v-for="(el, indexRoomType) in planningPricesRules"
+        v-for="(el, indexRoomType) in planningPricesRules.filter((el, index) => index <= 4)"
         :key="el.roomTypeId"
         :class="{ hidden: !roomTypeIdsToFilter.includes(el.roomTypeId) }"
       >
