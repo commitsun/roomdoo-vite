@@ -737,7 +737,7 @@ export default defineComponent({
       }
       .disabled-tab {
         cursor: not-allowed;
-        color: #848484;
+        color: #c8c8c8;
       }
     }
     .slider {

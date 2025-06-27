@@ -173,9 +173,9 @@
     </div>
     <transition name="accordion-transition">
       <div class="folio-body" v-if="isOpen">
-        <div class="body-info">
+        <div class="body-info" v-if="folio.reservationType !== 'out'">
           <div class="body-info-left">
-            <div class="folio-info" v-if="folio.reservationType !== 'out'">
+            <div class="folio-info">
               <img src="/app-images/icon-folio.svg" />
               <div>
                 <span>
