@@ -8,18 +8,18 @@ const routes: RouteRecordRaw[] = [
   // login
   {
     path: '/login/:pmsPropertyId(\\d+)?',
-    component: () => import('@/layouts/LoginLayout.vue'),
+    component: () => import('@/legacy/layouts/LoginLayout.vue'),
     children: [
-      { name: 'login', path: '', component: () => import('@/pages/LoginPage.vue') },
+      { name: 'login', path: '', component: () => import('@/legacy/pages/LoginPage.vue') },
       {
         name: 'reset-password',
         path: 'reset-password',
-        component: () => import('@/pages/ResetPasswordPage.vue'),
+        component: () => import('@/ui/pages/ResetPasswordPage.vue'),
       },
       {
         name: 'hotel-not-found',
         path: 'hotel-not-found',
-        component: () => import('@/pages/HotelNotFoundPage.vue'),
+        component: () => import('@/ui/pages/HotelNotFoundPage.vue'),
       },
     ],
   },
