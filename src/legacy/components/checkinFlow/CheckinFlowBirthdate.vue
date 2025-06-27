@@ -1,9 +1,7 @@
 <template>
   <div class="page-container">
     <div class="prev-title">
-      {{
-        $t('guest_data_title', { index: currentIndexCheckin + 1 })
-      }}
+      {{ $t('guest_data_title', { index: currentIndexCheckin + 1 }) }}
       <sup>
         {{
           currentIndexCheckin === 0
@@ -36,13 +34,13 @@
         v-model="birthdate"
         :placeholder="appLocale?.dateFormat.replace('yy', 'yyyy')"
         :maxDate="new Date()"
-        :inputStyle="{ 
+        :inputStyle="{
           color: '#51B2DD',
           fontSize: '30px',
           borderTop: 'none',
           borderLeft: 'none',
           borderRight: 'none',
-          borderBottom: '1px solid #51B2DD', 
+          borderBottom: '1px solid #51B2DD',
           borderRadius: '0px',
           width: '100%',
         }"
@@ -107,7 +105,7 @@ import {
   type ComponentPublicInstance,
 } from 'vue';
 import DatePicker from 'primevue/datepicker';
-import { appLocale } from '@/main';
+import { locale as appLocale } from '@/plugins/i18n';
 
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import utilsDates from '@/legacy/utils/dates';
@@ -217,7 +215,7 @@ export default defineComponent({
           newValue = `${digits.slice(0, 4)}/${digits.slice(4)}`;
         } else if (digits.length < 8) {
           newValue = `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6, 8)}`;
-        } else if(digits.length === 8) {
+        } else if (digits.length === 8) {
           const datepickerComponent = birthDateInputRef.value as any;
           datepickerComponent.overlayVisible = false;
         }
@@ -228,7 +226,7 @@ export default defineComponent({
           newValue = `${digits.slice(0, 2)}/${digits.slice(2)}`;
         } else if (digits.length < 8) {
           newValue = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
-        } else if(digits.length === 8) {
+        } else if (digits.length === 8) {
           const datepickerComponent = birthDateInputRef.value as any;
           datepickerComponent.overlayVisible = false;
         }
@@ -243,7 +241,7 @@ export default defineComponent({
       input.setSelectionRange((cursorPosition ?? 0) + delta, (cursorPosition ?? 0) + delta);
     };
 
-    const onAfterEnterHandler =  () => {
+    const onAfterEnterHandler = () => {
       if (!birthdate.value) {
         const datepicker = birthDateInputRef.value as any;
         datepicker?.$el?.querySelector('input')?.focus();
@@ -274,7 +272,7 @@ export default defineComponent({
       }
     });
 
-    onMounted(async() => {
+    onMounted(async () => {
       context.emit('registerOnEnter', onAfterEnterHandler);
       if (props.modelValue) {
         birthdate.value = props.modelValue;

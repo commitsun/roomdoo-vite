@@ -12,7 +12,7 @@
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
 import DialogContainer from '@/legacy/components/dialogs/DialogContainer.vue';
-import { useUIStore } from '@/stores/ui';
+import { useUIStore } from '@/ui/stores/ui';
 import ProgressSpinner from 'primevue/progressspinner';
 
 export default defineComponent({

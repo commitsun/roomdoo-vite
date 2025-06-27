@@ -62,8 +62,8 @@ export default defineConfig({
       scss: {
         api: 'modern-compiler',
         additionalData: `
-          @use "@/assets/variables.scss" as *;
-          @use "@/assets/global.scss" as *;
+          @use "@/ui/assets/variables.scss" as *;
+          @use "@/ui/assets/global.scss" as *;
         `,
       },
     },
