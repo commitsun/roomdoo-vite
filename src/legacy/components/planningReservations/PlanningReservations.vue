@@ -1033,6 +1033,7 @@ export default defineComponent({
       selectedReservationId: number
     ) => {
       if (store.state.reservations.currentReservation?.id === selectedReservationId) {
+        console.log('Already selected reservation');
         event.stopPropagation();
         return;
       }

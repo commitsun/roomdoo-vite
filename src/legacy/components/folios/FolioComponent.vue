@@ -1070,7 +1070,7 @@ export default defineComponent({
       if (currentFolio.value?.partnerId) {
         void store.dispatch('partners/fetchCurrentPartner', currentFolio.value?.partnerId);
       }
-      if (reservation.value && reservation.value.reservationType !== 'out') {
+      if (reservation.value) {
         setTabValue('reservations');
       }
       if (
