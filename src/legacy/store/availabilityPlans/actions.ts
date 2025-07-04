@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import type { AvailabilityPlanInterface } from '@/legacy/interfaces/AvailabilityPlanInterface';
 import type { AvailabilityPlanRuleInterface } from '@/legacy/interfaces/AvailabilityPlanRuleInterface';
 

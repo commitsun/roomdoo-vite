@@ -1,7 +1,7 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
 import type { ProductInterface } from '@/legacy/interfaces/ProductInterface';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 
 import type { StateInterface } from '../index';
 import type { ProductsStateInterface } from '.';
