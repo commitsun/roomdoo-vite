@@ -124,7 +124,7 @@ import ShareLinkModal from '@/legacy/components/precheckin/ShareLinkModal.vue';
 import { dialogService } from '@/legacy/services/DialogService';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { selectedLang } from '@/plugins/locale';
+import { selectedLang } from '@/ui/plugins/i18n';
 export default defineComponent({
   components: {
     CustomIcon,

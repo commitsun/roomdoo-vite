@@ -4,7 +4,7 @@ import type { ReservationLineInterface } from '@/legacy/interfaces/ReservationLi
 import type { PayloadReservationDeletion } from '@/legacy/interfaces/PayloadReservationDeletion';
 import type { PayloadReservationCreation } from '@/legacy/interfaces/PayloadReservationCreation';
 import type { ReservationInterface } from '@/legacy/interfaces/ReservationInterface';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 
 import type { StateInterface } from '../index';
 import type { ReservationLinesStateInterface } from '.';

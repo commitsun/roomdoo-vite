@@ -3,7 +3,7 @@ import type { AxiosResponse } from 'axios';
 import type { ServiceInterface } from '@/legacy/interfaces/ServiceInterface';
 import type { ServiceLineInterface } from '@/legacy/interfaces/ServiceLineInterface';
 import type { PayloadTransactionReport } from '@/legacy/interfaces/PayloadTransactionReport';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 
 import type { StateInterface } from '../index';
 import type { ServiceStateInterface } from '.';
