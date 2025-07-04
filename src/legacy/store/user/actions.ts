@@ -1,5 +1,5 @@
 import type { ActionTree } from 'vuex';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import type { CredentialsInterface } from '@/legacy/interfaces/UserInterfaces';
 import type { AxiosResponse } from 'axios';
 import type { ApiRestErrorInterface } from '@/legacy/interfaces/ApiRestErrorInterface';
@@ -23,7 +23,6 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
         if (response.data && response.data.token) {
           if (!response.data.code) {
             const jwt = `Bearer ${response.data.token}`;
-            Object.assign(api.defaults, { headers: { Authorization: jwt } });
             context.commit('SET_CURRENT_USER', response.data);
             setCookie('jwt', jwt);
             setCookie('expirationDate', response.data.expirationDate.toString());

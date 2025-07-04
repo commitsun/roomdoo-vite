@@ -1,4 +1,4 @@
-import { createI18n, type I18nOptions } from 'vue-i18n';
+import { createI18n } from 'vue-i18n';
 import messages from '@intlify/unplugin-vue-i18n/messages';
 import { en_GB } from 'primelocale/js/en_GB.js';
 import { en } from 'primelocale/js/en.js';
@@ -7,11 +7,11 @@ import { es } from 'primelocale/js/es.js';
 const browserLang = window.navigator.language.toLowerCase();
 const baseLang = browserLang.substring(0, 2);
 
-export const selectedLang = ['es', 'gl', 'ca'].includes(baseLang) ? 'es' : 'en';
+export const selectedLang = ['es', 'gl', 'ca', 'eu'].includes(baseLang) ? 'es' : 'en';
 
 export const locale = (() => {
   const area = browserLang.split('-')[1]?.toUpperCase();
-  if (selectedLang === 'es' || baseLang === 'gl' || baseLang === 'ca') {
+  if (selectedLang === 'es' || baseLang === 'gl' || baseLang === 'ca' || baseLang === 'eu') {
     return es;
   }
   return area === 'GB' ? en_GB : en;

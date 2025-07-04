@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+
 @font-face {
   font-family: 'Rethink Sans';
   src: url('/fonts/rethink/RethinkSans-VariableFont_wght.ttf') format('truetype');

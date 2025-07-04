@@ -1,4 +1,4 @@
-@use '@/ui/assets/variables' as *;
+@use '@/legacy/assets/variables' as *;
 
 .debug-box {
   border: 2px solid red;
@@ -35,6 +35,7 @@
 }
 
 body {
+  border: 3px solid blue;
   font-family: 'rethink-sans', sans-serif;
   letter-spacing: 0.01px;
   overflow: hidden;
