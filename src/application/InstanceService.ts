@@ -4,6 +4,13 @@ export class InstanceService {
   constructor(private instanceRepository: InstanceRepository) {}
   async getInstance() {
     const instance = await this.instanceRepository.getInstance();
-    return instance;
+    if (!instance) {
+      return null;
+    }
+    const languages = await this.instanceRepository.getLanguages();
+    return {
+      ...instance,
+      languages,
+    };
   }
 }
