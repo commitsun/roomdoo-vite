@@ -117,12 +117,6 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
-  // test
-  {
-    path: '/test',
-    component: () => import('@/legacy/layouts/MainLayout.vue'),
-    children: [{ name: 'test', path: '', component: () => import('@/legacy/pages/TestPage.vue') }],
-  },
   // // Always leave this as last one,
   { path: '/:catchAll(.*)*', component: () => import('@/ui/pages/Error404Page.vue') },
 ];
