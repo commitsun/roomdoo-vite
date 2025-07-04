@@ -1,5 +1,5 @@
 import type { ActionTree } from 'vuex';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import type { PropertyInterface } from '@/legacy/interfaces/PropertyInterface';
 import type { AxiosResponse } from 'axios';
 import type { PayloadTransactionReport } from '@/legacy/interfaces/PayloadTransactionReport';

@@ -1,5 +1,5 @@
 import type { ActionTree } from 'vuex';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import type { StateInterface } from '../index';
 import type { PaymentTermStateInterface } from '.';
 

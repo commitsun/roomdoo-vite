@@ -6,7 +6,7 @@ import type { AlertsPerDayInterface } from '@/legacy/interfaces/AlertsPerDayInte
 import type { PayloadReservationLineChangeInterface } from '@/legacy/interfaces/PayloadReservationLineChangeInterface';
 import type { PayloadReservationFragmentSwap } from '@/legacy/interfaces/PayloadReservationFragmentSwap';
 import type { DateRangeInterface } from '@/legacy/interfaces/DateRangeInterface';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import { ONE_DAY_IN_MS } from '@/legacy/utils/dates';
 
 import type { StateInterface } from '../index';

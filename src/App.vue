@@ -1,7 +1,9 @@
 <template>
+  <Toast @close="consumeNotification" @life-end="consumeNotification" />
   <router-view />
-  <!-- remove this dialog componente when removing legacy folder  -->
+  <!-- start  remove this dialog component when removing legacy folder  -->
   <DialogContainer />
+  <!-- end  remove this dialog component when removing legacy folder / -->
   <teleport to="body">
     <div v-if="uiStore.isLoading" class="overlay-spinner">
       <ProgressSpinner />
@@ -10,32 +12,48 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent, computed, watch } from 'vue';
 import DialogContainer from '@/legacy/components/dialogs/DialogContainer.vue';
-import { useUIStore } from '@/ui/stores/ui';
+import Toast from 'primevue/toast';
+import { useUIStore } from '@/infrastructure/stores/ui';
 import ProgressSpinner from 'primevue/progressspinner';
+import { useNotificationStore } from '@/infrastructure/stores/notification';
+import { useToast } from 'primevue/usetoast';
 
 export default defineComponent({
   name: 'App',
   components: {
     DialogContainer,
     ProgressSpinner,
+    Toast,
   },
   setup() {
+    const toast = useToast();
+    const notificationStore = useNotificationStore();
     const uiStore = useUIStore();
-    const simulateLoading = async () => {
-      uiStore.startLoading();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      uiStore.stopLoading();
+    const notifications = computed(() => notificationStore.messages);
+    const consumeNotification = () => {
+      notificationStore.remove();
     };
-    onMounted(() => {
-      uiStore.startLoading();
-      setTimeout(() => uiStore.stopLoading(), 3000);
-    });
+
+    watch(
+      () => notifications.value.length,
+      (newLength, oldLength) => {
+        if (newLength > oldLength && newLength > 0) {
+          toast.add({
+            severity: 'error',
+            summary: 'Info',
+            detail: notifications.value[0].text,
+            life: 3000,
+          });
+        }
+      }
+    );
 
     return {
       uiStore,
-      simulateLoading,
+      notifications,
+      consumeNotification,
     };
   },
 });

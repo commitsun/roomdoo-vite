@@ -1,48 +1,24 @@
-// — Styles
-import '@/ui/assets/style.css';
+import '@/ui/assets/style.css'; // Legacy styles
 import 'primeicons/primeicons.css';
-
-// — Vue core
 import { createApp } from 'vue';
 import App from './App.vue';
-
-// — State management
 import { createPinia } from 'pinia';
-import { store as vuexStore } from '@/legacy/store';
-
-// — Routing
+import { store as legacyStore } from '@/legacy/store';
 import router from '@/ui/router';
-
-// — Head management
 import { createHead } from '@vueuse/head';
+import { i18n, locale } from '@/ui/plugins/i18n';
+import primevuePlugin from '@/ui/primevue/primevue';
+import ToastService from 'primevue/toastservice';
+import DialogService from 'primevue/dialogservice';
 
-// — Plugins
-import axiosPlugin from '@/plugins/axios';
-import { i18n, locale } from '@/plugins/i18n';
-import primevuePlugin from '@/plugins/primevue';
-
-// — Create app
-const app = createApp(App);
-
-app
-  // 1. state
-  .use(createPinia())
-  .use(vuexStore)
-
-  // 2. internationalization
-  .use(i18n)
-
-  // 3. routing
+const pinia = createPinia();
+createApp(App)
   .use(router)
-
-  // 4. meta tags
+  .use(pinia)
+  .use(legacyStore)
+  .use(i18n)
   .use(createHead())
-
-  // 5. http client
-  .use(axiosPlugin)
-
-  // 6. UI framework
-  .use(primevuePlugin, { locale }) // <— así instalas PrimeVue con tu preset y locale
-
-  // 7. mount
+  .use(primevuePlugin, { locale })
+  .use(DialogService)
+  .use(ToastService)
   .mount('#app');
