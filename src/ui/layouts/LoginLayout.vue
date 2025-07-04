@@ -1,7 +1,9 @@
 <template>
-  <div class="login-layout debug-box">
-    <div class="left debug-box">esto solo se muestra en desktop</div>
-    <div class="right debug-box">
+  <div class="login-layout-container">
+    <div class="image-container">
+      <!-- <img src="/app-images/property-white.svg" /> -->
+    </div>
+    <div class="form-container">
       <router-view />
     </div>
   </div>
@@ -17,14 +19,11 @@ const router = useRouter();
 
 onMounted(async () => {
   try {
-    console.log('000');
     await instanceStore.getInstance();
-    console.log('000');
     // await languageStore.getLanguages();
   } catch (error) {
     console.error('Error fetching instance:', error);
     if (error instanceof NotFoundError) {
-      console.error('Instance not found, redirecting to hotel not found page');
       router.push({ name: 'hotel-not-found' });
     } else {
       // console.error('Unexpected error:', error);
@@ -34,24 +33,33 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-.login-layout {
+.login-layout-container {
+  height: 100svh;
+  background-color: #eeeeee;
   display: flex;
-  height: 100vh;
-  .left {
-    color: white;
+  .image-container {
     display: none;
-    background: linear-gradient(to bottom left, #2a0a58, #081b2b, #0e96c8);
   }
-  .right {
-    flex: 1;
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background-color: #F9FAFB;
   }
-  @media (min-width: 1024px) {
-    .left {
-      width: 33.33%;
-      display: block;
+}
+@media(min-width: 1024px) {
+  .login-layout-container {
+    .image-container {
+      display: flex;
+      width: 33.3%;
+      height: 100%;
+      background: linear-gradient(to bottom left, #2a0a58, #081b2b, #0e96c8);
     }
-    .right {
-      width: 66.67%;
+    .form-container {
+      width: 66.6%;
     }
   }
 }
