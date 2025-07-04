@@ -1,6 +1,6 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import type { PricelistInterface } from '@/legacy/interfaces/PricelistInterface';
 import type { PayloadPricelistItemsInterface } from '@/legacy/interfaces/PayloadPricelistItemsInterface';
 import type { PricelistItemInterface } from '@/legacy/interfaces/PricelistItemInterface';

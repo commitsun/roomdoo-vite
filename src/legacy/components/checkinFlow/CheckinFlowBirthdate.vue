@@ -105,7 +105,7 @@ import {
   type ComponentPublicInstance,
 } from 'vue';
 import DatePicker from 'primevue/datepicker';
-import { locale as appLocale } from '@/plugins/i18n';
+import { locale as appLocale } from '@/ui/plugins/i18n';
 
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import utilsDates from '@/legacy/utils/dates';

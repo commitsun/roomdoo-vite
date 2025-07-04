@@ -1,6 +1,6 @@
 import { dialogService } from '@/legacy/services/DialogService';
 import axios, { type AxiosInstance } from 'axios';
-import type { App } from 'vue';
+import { useRouter } from 'vue-router';
 
 // Crear la instancia de Axios
 const endPoint = import.meta.env.DEV
@@ -20,8 +20,7 @@ api.interceptors.response.use(
       console.error('Axios interceptor error:', error.response);
       if (error.response.status === 401) {
         // 'Redirecting to login...';
-        window.location.href = '/login';
-        // Reemplaza con un router push si usas Vue Router
+        useRouter().push('/login');
       } else {
         dialogService.open({
           header: 'Algo ha ido mal',
@@ -36,11 +35,3 @@ api.interceptors.response.use(
 
 // Exportar la instancia de Axios
 export { api };
-
-// Crear el plugin para integrarlo globalmente
-export default {
-  install: (app: App) => {
-    app.config.globalProperties.$axios = axios;
-    app.config.globalProperties.$api = api;
-  },
-};
