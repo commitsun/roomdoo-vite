@@ -10,7 +10,7 @@ import type { DashboardOccupiedRoomsInterface } from '@/legacy/interfaces/Dashbo
 import type { DashboardDailyBillingsInterface } from '@/legacy/interfaces/DashboardDailyBillingsInterface';
 import type { DashboardRssPostInterface } from '@/legacy/interfaces/DashboardRssPostInterface';
 import type { FolioInterface } from '@/legacy/interfaces/FolioInterface';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 
 import type { StateInterface } from '../index';
 import type { DashboardStateInterface } from '.';
