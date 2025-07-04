@@ -1,25 +1,37 @@
 import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
-  // -----------------------------------------
-  // index dummy
-
-  // -----------------------------------------
   // login
   {
-    path: '/login/:pmsPropertyId(\\d+)?',
-    component: () => import('@/legacy/layouts/LoginLayout.vue'),
+    path: '',
+    component: () => import('@/ui/layouts/LoginLayout.vue'),
     children: [
-      { name: 'login', path: '', component: () => import('@/legacy/pages/LoginPage.vue') },
+      {
+        name: 'login',
+        path: '/login/:pmsPropertyId(\\d+)?',
+        component: () => import('@/ui/pages/LoginPage.vue'),
+      },
       {
         name: 'reset-password',
-        path: 'reset-password',
+        path: '/reset-password/:pmsPropertyId(\\d+)?',
         component: () => import('@/ui/pages/ResetPasswordPage.vue'),
       },
       {
         name: 'hotel-not-found',
-        path: 'hotel-not-found',
+        path: '/hotel-not-found',
         component: () => import('@/ui/pages/HotelNotFoundPage.vue'),
+      },
+    ],
+  },
+  // legacy login
+  {
+    path: '/legacy/login/:pmsPropertyId(\\d+)?',
+    component: () => import('@/legacy/layouts/LoginLayout.vue'),
+    children: [
+      {
+        name: 'legacy-login',
+        path: '',
+        component: () => import('@/legacy/pages/LoginPage.vue'),
       },
     ],
   },
@@ -111,11 +123,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/legacy/layouts/MainLayout.vue'),
     children: [{ name: 'test', path: '', component: () => import('@/legacy/pages/TestPage.vue') }],
   },
-  // // 404
-  // { path: '/404', component: () => import('@/pages/Error404Page.vue') },
   // // Always leave this as last one,
-  // // but you can also remove it
-  // { path: '/:catchAll(.*)*', component: () => import('@/pages/Error404Page.vue') },
+  { path: '/:catchAll(.*)*', component: () => import('@/ui/pages/Error404Page.vue') },
 ];
 
 export default routes;

@@ -1,5 +1,5 @@
 import type { ActionTree } from 'vuex';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import axios from 'axios';
 import type { FolioApiInterface, FolioInterface } from '@/legacy/interfaces/FolioInterface';
 import type { PayloadFolioInterface } from '@/legacy/interfaces/PayloadFolioInterface';

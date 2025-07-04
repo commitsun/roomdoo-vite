@@ -15,15 +15,15 @@
       placeholder="Select Language"
     >
       <template #option="slotProps">
-        <div class="flex items-center gap-2">
-          <img :src="slotProps.option.flag" alt="" class="w-5 h-5 rounded-full" />
+        <div class="flag">
+          <img :src="slotProps.option.flag" />
           <span>{{ slotProps.option.label }}</span>
         </div>
       </template>
 
       <template #value="slotProps">
-        <div class="flex items-center gap-2">
-          <img :src="slotProps.value?.flag" alt="" class="w-5 h-5 rounded-full" />
+        <div class="flag">
+          <img :src="slotProps.value?.flag" />
           <span>{{ slotProps.value?.label }}</span>
         </div>
       </template>
@@ -221,6 +221,7 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
   }
+
   .link-share-row {
     position: absolute;
     top: 20px;
@@ -355,6 +356,16 @@ export default defineComponent({
         }
       }
     }
+  }
+}
+.flag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
   }
 }
 @media (min-width: 768px) {
