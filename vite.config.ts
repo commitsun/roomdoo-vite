@@ -4,8 +4,8 @@ import autoprefixer from 'autoprefixer';
 import { defineConfig, Plugin } from 'vite';
 import { execSync } from 'child_process';
 import vue from '@vitejs/plugin-vue';
-import tailwindcss from '@tailwindcss/vite';
 import vueI18n from '@intlify/unplugin-vue-i18n/vite';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
@@ -29,7 +29,7 @@ export default defineConfig({
     vue(),
     tailwindcss(),
     vueI18n({
-      include: path.resolve(__dirname, './src/locales/**'),
+      include: path.resolve(__dirname, './src/infrastructure/i18n/locales/**'),
     }),
     commitHashPlugin(),
   ],
@@ -62,8 +62,8 @@ export default defineConfig({
       scss: {
         api: 'modern-compiler',
         additionalData: `
-          @use "@/ui/assets/variables.scss" as *;
-          @use "@/ui/assets/global.scss" as *;
+          @use "@/legacy/assets/variables.scss" as *;
+          @use "@/legacy/assets/global.scss" as *;
         `,
       },
     },

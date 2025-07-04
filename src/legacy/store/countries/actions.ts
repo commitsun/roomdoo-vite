@@ -1,5 +1,5 @@
 import type { ActionTree } from 'vuex';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import type { CountryInterface } from '@/legacy/interfaces/CountryInterface';
 import type { AxiosResponse } from 'axios';
 import type { StateInterface } from '../index';

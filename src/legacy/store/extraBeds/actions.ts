@@ -2,7 +2,7 @@ import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
 import type { ExtraBedInterface } from '@/legacy/interfaces/ExtraBedInterface';
 import type { ExtraBedsPayloadInterface } from '@/legacy/interfaces/ExtraBedsPayloadInterface';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 
 import type { StateInterface } from '../index';
 import type { ExtraBedsStateInterface } from '.';
