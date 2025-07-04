@@ -1,7 +1,7 @@
 import type { ActionTree } from 'vuex';
 import type { AxiosResponse } from 'axios';
 import type { AvailabilityInterface } from '@/legacy/interfaces/AvailabilityInterface';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import type { StateInterface } from '../index';
 import type { AvailabilityStateInterface } from '.';
 

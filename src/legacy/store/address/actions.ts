@@ -2,7 +2,7 @@ import type { ActionTree } from 'vuex';
 import axios, { type AxiosResponse } from 'axios';
 
 import type { AddressInterface } from '@/legacy/interfaces/AddressInterface';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 
 import type { StateInterface } from '../index';
 import type { AddressStateInterface } from '.';

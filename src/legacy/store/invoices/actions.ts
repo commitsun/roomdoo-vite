@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import { api } from '@/plugins/axios';
+import { api } from '@/legacy/http/axios';
 import type { InvoiceResultInterface } from '@/legacy/interfaces/InvoiceResultInterface';
 import type { PayloadInvoiceRequestInterface } from '@/legacy/interfaces/PayloadInvoiceRequestInterface';
 import type { ActionTree } from 'vuex';
