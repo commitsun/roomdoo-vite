@@ -26,10 +26,6 @@
           <div class="icon-planning" />
           <span> Planning de reservas </span>
         </div>
-        <div class="hidden">
-          <div class="icon-planning" />
-          <span> Planning de precios y restricciones </span>
-        </div>
 
         <div
           @click="navigateTo('/partners' + endPath)"
