@@ -1619,6 +1619,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+$header_desktop_height: 100px;
+$header_mobile_height: 65px;
+$left_column_mobile_width: 80px;
+$left_column_desktop_width: 235px;
+$cell_mobile_width: 50px;
+$cell_width: 140px;
+$cell_mobile_height: 40px;
+$cell_desktop_width: 140px;
+$cell_desktop_height: 46px;
+
 .main-container {
   height: 100%;
   width: 100%;
@@ -1883,7 +1893,6 @@ export default defineComponent({
             right: 0;
             z-index: 1;
             height: 1px;
-            // background-color: $roomdoo_lightgray;
             background-color: red;
           }
           .room-info {
@@ -2274,7 +2283,6 @@ export default defineComponent({
 }
 
 @media (min-width: 1024px) {
-  $cell_width: 140px;
   .main-container {
     .top {
       min-height: $header_desktop_height;

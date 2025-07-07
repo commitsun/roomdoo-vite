@@ -1,58 +1,60 @@
 <template>
-  <Transition name="left-drawer-transition">
-    <LeftDrawerSlide
-      class="left-drawer"
-      v-if="leftDrawerExpanded"
-      @showUserSettingsModal="peformShowUserSettingsModal"
-    />
-  </Transition>
-  <div class="layout-container" v-if="activeUser && activeProperty">
-    <div class="left-drawer-fixed">
-      <LeftDrawerFixed />
-    </div>
-    <div class="overlay" @click="closeLeftDrawer" v-if="leftDrawerExpanded" />
-    <div class="main-container" :class="rightDrawerExpanded ? 'main-container-shrinked' : ''">
-      <router-view />
-    </div>
-    <div class="button-open-drawer" @click="openFolioList" v-if="route.name === 'planning'">
-      <img src="/app-images/icon-menu.svg" class="arrow-left-img" />
-    </div>
-  </div>
-  <Transition name="right-drawer-transition">
-    <div class="right-drawer" id="right-drawer" v-if="rightDrawerExpanded">
-      <div class="button-close-drawer" @click="closeRightDrawer">
-        <img src="/app-images/icon-menu.svg" class="arrow-right-img" />
+  <div id="legacy">
+    <Transition name="left-drawer-transition">
+      <LeftDrawerSlide
+        class="left-drawer"
+        v-if="leftDrawerExpanded"
+        @showUserSettingsModal="peformShowUserSettingsModal"
+      />
+    </Transition>
+    <div class="layout-container" v-if="activeUser && activeProperty">
+      <div class="left-drawer-fixed">
+        <LeftDrawerFixed />
       </div>
-      <BookingEngine v-if="currentRightDrawerView === 'NewFolioStep1'" />
-      <FoliosList
-        v-else-if="currentRightDrawerView === 'FolioList' && isRightDrawer"
-        @moveToFirstReservation="moveToFirstReservation()"
-      />
-      <FolioComponent
-        v-else-if="currentRightDrawerView === 'FolioDetail' && currentFolio"
-        @moveToReservation="moveToReservation()"
-      />
-      <AutocompleteMobile
-        v-if="currentRightDrawerView === 'PropertySelector'"
-        v-model="selectedPropertyId"
-        :items="
-          sortedProperties.map((el) => ({
-            value: el?.id ?? 0,
-            name: el?.name ?? '',
-            logo: el.hotelImageUrl ?? '',
-          }))
-        "
-        placeholder="Buscar propiedad"
-        :logoSelectedOption="initialsSelectedProperty()"
-        showLogoOptions
-      />
-      <PartnerDetail v-else-if="currentRightDrawerView === 'PartnerDetail'" />
-      <TransactionDetailMobile v-else-if="currentRightDrawerView === 'TransactionDetailMobile'" />
+      <div class="overlay" @click="closeLeftDrawer" v-if="leftDrawerExpanded" />
+      <div class="main-container" :class="rightDrawerExpanded ? 'main-container-shrinked' : ''">
+        <router-view />
+      </div>
+      <div class="button-open-drawer" @click="openFolioList" v-if="route.name === 'planning'">
+        <img src="/app-images/icon-menu.svg" class="arrow-left-img" />
+      </div>
     </div>
-  </Transition>
-  <Spinner :show="showSpinner" />
-  <div>
-    <UserSettingsModal v-if="showUserSettingsModal" @close="showUserSettingsModal = false" />
+    <Transition name="right-drawer-transition">
+      <div class="right-drawer" id="right-drawer" v-if="rightDrawerExpanded">
+        <div class="button-close-drawer" @click="closeRightDrawer">
+          <img src="/app-images/icon-menu.svg" class="arrow-right-img" />
+        </div>
+        <BookingEngine v-if="currentRightDrawerView === 'NewFolioStep1'" />
+        <FoliosList
+          v-else-if="currentRightDrawerView === 'FolioList' && isRightDrawer"
+          @moveToFirstReservation="moveToFirstReservation()"
+        />
+        <FolioComponent
+          v-else-if="currentRightDrawerView === 'FolioDetail' && currentFolio"
+          @moveToReservation="moveToReservation()"
+        />
+        <AutocompleteMobile
+          v-if="currentRightDrawerView === 'PropertySelector'"
+          v-model="selectedPropertyId"
+          :items="
+            sortedProperties.map((el) => ({
+              value: el?.id ?? 0,
+              name: el?.name ?? '',
+              logo: el.hotelImageUrl ?? '',
+            }))
+          "
+          placeholder="Buscar propiedad"
+          :logoSelectedOption="initialsSelectedProperty()"
+          showLogoOptions
+        />
+        <PartnerDetail v-else-if="currentRightDrawerView === 'PartnerDetail'" />
+        <TransactionDetailMobile v-else-if="currentRightDrawerView === 'TransactionDetailMobile'" />
+      </div>
+    </Transition>
+    <Spinner :show="showSpinner" />
+    <div>
+      <UserSettingsModal v-if="showUserSettingsModal" @close="showUserSettingsModal = false" />
+    </div>
   </div>
 </template>
 <script lang="ts">
