@@ -40,7 +40,10 @@
         </IconField>
       </div>
       <div class="button">
-        <Button :label="t('sign_in')" />
+        <Button
+          :label="t('sign_in')"
+          :disabled="!username || !password"
+        />
       </div>
       <div class="link">
         <a href="#">
