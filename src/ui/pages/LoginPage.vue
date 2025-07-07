@@ -11,24 +11,28 @@
         Hotel Puente de la Toja
       </div>
       <div class="first-input">
-        <label class="label">Usuario</label>
+        <label class="label">
+          {{ t('username') }}
+        </label>
         <IconField>
           <InputIcon class="pi pi-user" />
           <InputText
             v-model="username"
-            placeholder="Email"
+            :placeholder="t('email_label')"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
             />
         </IconField>
       </div>
       <div class="second-input">
-        <label class="label">Contraseña</label>
+        <label class="label">
+          {{ t('password') }}
+        </label>
         <IconField>
           <InputIcon class="pi pi-lock" />
           <Password
             v-model="password"
-            placeholder="Contraseña"
+            :placeholder="t('password')"
             :feedback="false"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
@@ -36,12 +40,12 @@
         </IconField>
       </div>
       <div class="button">
-        <Button
-          label="Iniciar sesión"
-        />
+        <Button :label="t('sign_in')" />
       </div>
       <div class="link">
-        <a href="#">¿Has olvidado tu contraseña?</a>
+        <a href="#">
+          {{ t('forgot_password') }}
+        </a>
       </div>
     </div>
     <AppSelect
@@ -53,7 +57,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { IconField, InputIcon, InputText, Password, Button, Select } from 'primevue';
 
@@ -77,12 +81,18 @@ export default defineComponent({
     ]);
     const selectedLocale = ref(locales.value.find((l) => l.value === locale.value));
 
+    watch(selectedLocale, (newLocale) => {
+      if (newLocale) {
+        locale.value = newLocale.value;
+      }
+    });
 
     return {
       username,
       password,
       locales,
       selectedLocale,
+      t,
     };
   },
 });
