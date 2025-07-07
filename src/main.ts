@@ -1,4 +1,4 @@
-import '@/ui/assets/style.css'; // Legacy styles
+import '@/ui/assets/style.css';
 import 'primeicons/primeicons.css';
 import { createApp } from 'vue';
 import App from './App.vue';

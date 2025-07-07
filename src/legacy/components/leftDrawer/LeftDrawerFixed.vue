@@ -154,14 +154,6 @@
             <span @click="openReportsDialog('transactions')"> Pagos </span>
             <span @click="openReportsDialog('INE')"> INE </span>
           </div>
-          <div
-            class="item-container hidden"
-            :class="route.fullPath === '/settings' ? 'selected' : ''"
-            @click="navigateTo('/settings' + endPath)"
-          >
-            <div class="item icon-settings" />
-            <span>Ajustes</span>
-          </div>
         </div>
       </div>
       <div class="support-menu" @click="openSupportTab()">
