@@ -64,6 +64,7 @@ body {
   #partners-page,
   #page-transactions,
   #invoices-page {
+    border: 1px solid red;
     zoom: 80%;
   }
 
@@ -85,41 +86,3 @@ input[type='number'] {
   appearance: textfield;
   -moz-appearance: textfield;
 }
-
-/**
-  Custom styles for PrimeVue Datepicker Range
-*/
-
-// table {
-//   border-collapse: separate !important;
-//   border-spacing: 0 10px !important;
-// }
-
-// td {
-//   margin-bottom: 20px !important;
-// }
-
-// td {
-//   &:has(.p-datepicker-day-selected-range),
-//   &:has(.p-datepicker-day-selected[tabindex="-1"]),
-//   &:has(.p-datepicker-day-selected[tabindex="0"]) {
-//     background-color: $primary !important;
-
-//     span {
-//       background-color: $primary !important;
-//       color: white !important;
-//       font-weight: bold;
-
-//       &:hover {
-//         background-color: $primary !important;
-//         color: white !important;
-//       }
-//     }
-//   }
-// }
-// .p-dialog {
-//   background-color: white !important;
-//   color: black !important;
-//   border: 1px solid #ccc !important;
-//   padding: 20px !important;
-// }
