@@ -19,7 +19,7 @@ const router = useRouter();
 
 onMounted(async () => {
   try {
-    await instanceStore.getInstance();
+    await instanceStore.fetchInstance();
     // await languageStore.getLanguages();
   } catch (error) {
     console.error('Error fetching instance:', error);
@@ -47,10 +47,10 @@ onMounted(async () => {
     justify-content: center;
     height: 100%;
     width: 100%;
-    background-color: #F9FAFB;
+    background-color: #f9fafb;
   }
 }
-@media(min-width: 1024px) {
+@media (min-width: 1024px) {
   .login-layout-container {
     .image-container {
       display: flex;
