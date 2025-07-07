@@ -1,0 +1,51 @@
+@use '@/ui/assets/variables' as *;
+.debug-box {
+  border: 2px solid red;
+}
+/* Works on Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: $secondary;
+}
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: #{$scrollbar_width};
+  height: #{$scrollbar_height};
+}
+*::-webkit-scrollbar-thumb {
+  background-color: lightgray;
+  border-radius: 4px;
+}
+
+// TODO: remove from here when new UI is ready
+@media (min-width: 768px) and (min-resolution: 1.25dppx) {
+  .legacy {
+    #right-drawer,
+    #index-container,
+    .button-open-drawer,
+    .login-container,
+    #page-dashboard,
+    #partners-page,
+    #page-transactions,
+    #invoices-page {
+      zoom: 80%;
+    }
+    @media (min-width: 1024px) {
+      #full-screen-stepper {
+        height: 90% !important;
+      }
+    }
+  }
+}
+/* input number without arrows (up/down)*/
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* input type number same behavior as input text*/
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}

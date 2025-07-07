@@ -547,6 +547,9 @@ export default defineComponent({
       display: flex;
       align-items: center;
       width: 100%;
+      &.hidden {
+        display: none;
+      }
       .room-info {
         display: flex;
         justify-content: space-between;
@@ -571,6 +574,9 @@ export default defineComponent({
     .row-planning {
       display: flex;
       max-width: 900px;
+      &.hidden {
+        display: none;
+      }
       .date {
         min-width: 140px;
         padding: 0.3rem;

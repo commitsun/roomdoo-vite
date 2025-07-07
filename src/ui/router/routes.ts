@@ -117,6 +117,8 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  // test route
+  { path: '/test', component: () => import('@/legacy/components/Test.vue') },
   // // Always leave this as last one,
   { path: '/:catchAll(.*)*', component: () => import('@/ui/pages/Error404Page.vue') },
 ];
