@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import LoginPage from '../src/ui/pages/LoginPage.vue';
+import LoginPage from './LoginPage.vue';
 import PrimeVue from 'primevue/config';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
