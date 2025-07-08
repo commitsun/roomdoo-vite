@@ -120,13 +120,17 @@ export default defineComponent({
     background-color: #FFFFFF;
     width: 100%;
     height: 100svh;
+
     padding: 2rem;
     margin-top: 2.5rem;
+    font-size: 16px;
+
     .instance-name {
       font-weight: bold;
       margin-bottom: 1rem;
       font-size: 20px;
       margin-bottom: 1.5rem;
+      color: #334155;
     }
     .first-input {
       margin-bottom: 1rem;
@@ -149,6 +153,7 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       width: 100%;
+      font-size: 16px;
       .p-button {
         width: 100%;
         background-color: #1D4ED8;
@@ -187,6 +192,7 @@ export default defineComponent({
       width: 480px;
       height: auto;
       border-radius: 8px;
+      box-shadow: 0px 1px 3px 0px #0000001A;
     }
     .select-language {
       bottom: 2rem;
