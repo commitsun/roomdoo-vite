@@ -5,7 +5,7 @@ import type { Language } from '@/domain/entities/Language';
 import { api } from '@/infrastructure/http/axios';
 
 export class InstanceRepositoryImpl implements InstanceRepository {
-  getInstance(): Promise<Instance | undefined> {
+  getInstance(): Promise<Instance | null> {
     return api.get<Instance>('/instance').then((response) => response.data);
   }
 
