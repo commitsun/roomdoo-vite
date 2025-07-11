@@ -8,16 +8,8 @@ const userService = new UserService(userRepository);
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);
-
   const login = async (email: string, password: string) => {
-    await userService.doLogin(email, password);
+    user.value = await userService.loginAndGetUser(email, password);
   };
-
-  const fetchUser = async () => {
-    user.value = await userService.getUser();
-    if (!user.value) {
-      throw new Error('User not found');
-    }
-  };
-  return { user, login, fetchUser };
+  return { user, login };
 });
