@@ -1,68 +1,66 @@
 <template>
   <div class="login-container">
     <div class="login-form-header">
-      <img
-        src="/logos/logo-black-new.svg"
-        class="logo"
-        alt="Roomdoo Logo" />
+      <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
     </div>
     <div class="login-form-container">
-      <div class="instance-name">
-        Hotel Puente de la Toja
-      </div>
+      <div class="instance-name">{{ instanceName }}</div>
       <div class="first-input">
         <label class="label">
-          {{ t('username') }}
+          {{ t('login.username') }}
         </label>
         <IconField>
           <InputIcon class="pi pi-user" />
           <InputText
             v-model="username"
-            :placeholder="t('email_label')"
+            :placeholder="t('login.email')"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
-            />
+          />
         </IconField>
+        <!-- this is an example of how to use it, but here it's not necessary -->
+        <!-- <small v-if="usernameError" class="p-error">{{ t(usernameError) }}</small> -->
       </div>
       <div class="second-input">
         <label class="label">
-          {{ t('password') }}
+          {{ t('login.password') }}
         </label>
         <IconField>
           <InputIcon class="pi pi-lock" />
           <Password
             v-model="password"
-            :placeholder="t('password')"
+            :placeholder="t('login.password')"
             :feedback="false"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
-            />
+          />
         </IconField>
+        <!-- this is an example of how to use it, but here it's not necessary -->
+        <!-- <small v-if="passwordError" class="p-error">{{ t(passwordError) }}</small> -->
       </div>
       <div class="button">
         <Button
-          :label="t('sign_in')"
+          :label="t('login.loginButton')"
           :disabled="!username || !password"
+          @click="() => handleSubmit(onSubmit)()"
         />
       </div>
       <div class="link">
         <a href="#">
-          {{ t('forgot_password') }}
+          {{ t('login.forgotPassword') }}
         </a>
       </div>
     </div>
-    <AppSelect
-      v-model="selectedLocale"
-      :options="locales"
-      class="select-language"
-      optionLabel="label"
-    />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IconField, InputIcon, InputText, Password, Button, Select } from 'primevue';
+import { IconField, InputIcon, InputText, Password, Button } from 'primevue';
+import { useForm, useField } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import { loginSchema } from '@/application/validation/UserSchemas';
+import { useInstanceStore } from '@/infrastructure/stores/instance';
 
 export default defineComponent({
   components: {
@@ -71,31 +69,47 @@ export default defineComponent({
     InputIcon,
     Password,
     Button,
-    AppSelect: Select,
   },
   setup() {
-    const { t, locale } = useI18n();
-
-    const username = ref('');
-    const password = ref('');
-    const locales = ref([
-      { label: 'Español', value: 'es' },
-      { label: 'English', value: 'en' },
-    ]);
-    const selectedLocale = ref(locales.value.find((l) => l.value === locale.value));
-
-    watch(selectedLocale, (newLocale) => {
-      if (newLocale) {
-        locale.value = newLocale.value;
-      }
+    const { t } = useI18n();
+    const instanceStore = useInstanceStore();
+    // not necessary to use validations here but just an example
+    const { handleSubmit } = useForm({
+      validationSchema: toTypedSchema(loginSchema),
     });
+    // not necessary to use validations here but just an example
+    const { value: username, errorMessage: usernameError } = useField('username', undefined, {
+      validateOnValueUpdate: false,
+    }) as {
+      value: Ref<string>;
+      errorMessage: Ref<string>;
+    };
+    // not necessary to use validations here but just an example
+    const { value: password, errorMessage: passwordError } = useField('password', undefined, {
+      validateOnValueUpdate: false,
+    }) as {
+      value: Ref<string>;
+      errorMessage: Ref<string>;
+    };
+    const instanceName = computed(() => instanceStore.instance?.name ?? '');
 
     return {
       username,
+      usernameError,
       password,
-      locales,
-      selectedLocale,
+      passwordError,
+      instanceName,
       t,
+      handleSubmit,
+      // not necessary to use validations here but just an example
+      onSubmit: () => {
+        console.log('Form submitted with:', {
+          username: username.value,
+          password: password.value,
+        });
+        // Here you would typically handle the login logic, e.g., calling an API
+        // call to api login
+      },
     };
   },
 });
@@ -107,7 +121,7 @@ export default defineComponent({
   align-items: center;
   height: 100svh;
   width: 100%;
-  background-color: #F9FAFB;
+  background-color: #f9fafb;
   padding-top: 2rem;
   position: relative;
   .login-form-header {
@@ -117,7 +131,7 @@ export default defineComponent({
     }
   }
   .login-form-container {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     width: 100%;
     height: 100svh;
 
@@ -131,6 +145,9 @@ export default defineComponent({
       font-size: 20px;
       margin-bottom: 1.5rem;
       color: #334155;
+    }
+    .p-error {
+      color: red;
     }
     .first-input {
       margin-bottom: 1rem;
@@ -156,27 +173,19 @@ export default defineComponent({
       font-size: 16px;
       .p-button {
         width: 100%;
-        background-color: #1D4ED8;
+        background-color: #1d4ed8;
         border: none;
       }
     }
     .link {
       margin-top: 2rem;
       a {
-        color: #64748B;
+        color: #64748b;
         &:hover {
           text-decoration: underline;
         }
       }
     }
-  }
-  .select-language {
-    position: absolute;
-    bottom: 2.5rem;
-    right: 2rem;
-    width: 200px;
-    z-index: 10;
-    background-color: #F8FAFC;
   }
 }
 @media (min-width: 640px) {
@@ -192,11 +201,7 @@ export default defineComponent({
       width: 480px;
       height: auto;
       border-radius: 8px;
-      box-shadow: 0px 1px 3px 0px #0000001A;
-    }
-    .select-language {
-      bottom: 2rem;
-      right: 5rem;
+      box-shadow: 0px 1px 3px 0px #0000001a;
     }
   }
 }
