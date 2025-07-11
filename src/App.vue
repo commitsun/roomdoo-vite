@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, watch } from 'vue';
-import DialogContainer from '@/legacy/components/dialogs/DialogContainer.vue';
+import DialogContainer from '@/_legacy/components/dialogs/DialogContainer.vue';
 import Toast from 'primevue/toast';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import ProgressSpinner from 'primevue/progressspinner';
