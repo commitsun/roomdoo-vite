@@ -1,13 +1,21 @@
 import type { InstanceRepository } from '@/domain/repositories/InstanceRepository';
+import { AppError } from './AppError';
 
 export class InstanceService {
   constructor(private instanceRepository: InstanceRepository) {}
-  async getInstance() {
-    const instance = await this.instanceRepository.getInstance();
-    if (!instance) {
-      return null;
+  async fetchInstance() {
+    let instance;
+    let languages;
+    try {
+      instance = await this.instanceRepository.fetchInstance();
+    } catch (err) {
+      throw new AppError('INSTANCE_NOT_FOUND');
     }
-    const languages = await this.instanceRepository.getLanguages();
+    try {
+      languages = await this.instanceRepository.fetchLanguages();
+    } catch (err) {
+      throw new AppError('UNKNOWN_ERROR');
+    }
     return {
       ...instance,
       languages,

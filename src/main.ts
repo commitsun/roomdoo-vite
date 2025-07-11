@@ -3,7 +3,7 @@ import 'primeicons/primeicons.css';
 import { createApp } from 'vue';
 import App from './App.vue';
 import { createPinia } from 'pinia';
-import { store as legacyStore } from '@/legacy/store';
+import { store as legacyStore } from '@/_legacy/store';
 import router from '@/ui/router';
 import { createHead } from '@vueuse/head';
 import { i18n, locale } from '@/ui/plugins/i18n';
