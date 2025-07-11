@@ -1,69 +1,86 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { UserService } from './UserService';
-import type { UserRepository } from '@/domain/repositories/UserRepository';
+import { AppError } from './AppError';
+import { HttpError } from '@/infrastructure/http/HttpError';
 import type { User } from '@/domain/entities/User';
 
-describe('UserService', () => {
-  const mockUser: User = {
-    id: '123',
-    email: 'roomdoo@example.com',
-    firstName: 'Roomdoo',
-    lastName: 'Tester',
-    defaultPropertyId: 'prop-001',
+// Mock realista del usuario conforme a la entidad
+const mockUser = (): User => ({
+  id: 'user-1',
+  email: 'test@roomdoo.com',
+  firstName: 'Test',
+  lastName: 'User',
+  defaultPropertyId: 'property-123',
+  availabilityRuleFields: ['field-1'],
+});
+
+// Usamos vi.fn() directamente sin forzar a cumplir una interfaz
+const createMockRepo = () => {
+  return {
+    login: vi.fn<() => Promise<void>>(),
+    fetchUser: vi.fn<() => Promise<User>>(),
+    fetchAvailabilityRuleFields: vi.fn<() => Promise<string[]>>(),
   };
+};
 
-  let userRepository: Mocked<UserRepository>;
-  let service: UserService;
+describe('UserService', () => {
+  const email = 'test@roomdoo.com';
+  const password = '1234';
+  const user = mockUser();
+  const fields = ['rule-a', 'rule-b'];
 
-  beforeEach(() => {
-    userRepository = {
-      login: vi.fn(),
-      getUser: vi.fn(),
-      getAvailabilityRuleFields: vi.fn(),
-    };
-    service = new UserService(userRepository);
+  it('returns user with availabilityRuleFields on success', async () => {
+    const repo = createMockRepo();
+    repo.login.mockResolvedValue();
+    repo.fetchUser.mockResolvedValue(user);
+    repo.fetchAvailabilityRuleFields.mockResolvedValue(fields);
+
+    const service = new UserService(repo);
+    const result = await service.loginAndGetUser(email, password);
+
+    expect(result).toEqual({ ...user, availabilityRuleFields: fields });
   });
 
-  it('should return enriched user after successful login', async () => {
-    userRepository.login.mockResolvedValue();
-    userRepository.getUser.mockResolvedValue(mockUser);
-    userRepository.getAvailabilityRuleFields.mockResolvedValue(['rule1', 'rule2']);
+  it('throws WRONG_CREDENTIALS if login fails with 401', async () => {
+    const repo = createMockRepo();
+    repo.login.mockRejectedValue(new HttpError(401, '/login', 'post', {}));
 
-    const result = await service.loginAndGetUser('roomdoo@example.com', 'password');
-
-    expect(userRepository.login).toHaveBeenCalledWith('roomdoo@example.com', 'password');
-    expect(result).toEqual({
-      ...mockUser,
-      availabilityRuleFields: ['rule1', 'rule2'],
+    const service = new UserService(repo);
+    await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
+      code: 'WRONG_CREDENTIALS',
     });
   });
 
-  it('should return null if getUser returns null', async () => {
-    userRepository.login.mockResolvedValue();
-    userRepository.getUser.mockResolvedValue(null);
+  it('throws USER_NOT_FOUND if fetchUser fails with 404', async () => {
+    const repo = createMockRepo();
+    repo.login.mockResolvedValue();
+    repo.fetchUser.mockRejectedValue(new HttpError(404, '/me', 'get', {}));
 
-    const result = await service.loginAndGetUser('roomdoo@example.com', 'password');
-
-    expect(result).toBeNull();
-    expect(userRepository.getAvailabilityRuleFields).not.toHaveBeenCalled();
+    const service = new UserService(repo);
+    await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
+      code: 'USER_NOT_FOUND',
+    });
   });
 
-  it('should throw if login fails', async () => {
-    userRepository.login.mockRejectedValue(new Error('Login failed'));
+  it('throws AVAILABILITY_RULE_FIELDS_NOT_FOUND if fetchAvailabilityRuleFields fails with 404', async () => {
+    const repo = createMockRepo();
+    repo.login.mockResolvedValue();
+    repo.fetchUser.mockResolvedValue(user);
+    repo.fetchAvailabilityRuleFields.mockRejectedValue(new HttpError(404, '/fields', 'get', {}));
 
-    await expect(service.loginAndGetUser('roomdoo@example.com', 'password')).rejects.toThrow(
-      'Login failed'
-    );
+    const service = new UserService(repo);
+    await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
+      code: 'AVAILABILITY_RULE_FIELDS_NOT_FOUND',
+    });
   });
 
-  it('should throw if getAvailabilityRuleFields fails', async () => {
-    userRepository.login.mockResolvedValue();
-    userRepository.getUser.mockResolvedValue(mockUser);
-    userRepository.getAvailabilityRuleFields.mockRejectedValue(new Error('Field error'));
+  it('throws UNKNOWN_ERROR on unexpected login error', async () => {
+    const repo = createMockRepo();
+    repo.login.mockRejectedValue(new Error('boom'));
 
-    await expect(service.loginAndGetUser('roomdoo@example.com', 'password')).rejects.toThrow(
-      'Field error'
-    );
+    const service = new UserService(repo);
+    await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
+      code: 'UNKNOWN_ERROR',
+    });
   });
 });
