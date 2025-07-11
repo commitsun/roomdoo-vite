@@ -8,10 +8,10 @@ const instanceRepository = new InstanceRepositoryImpl();
 const instanceService = new InstanceService(instanceRepository);
 
 export const useInstanceStore = defineStore('instance', () => {
-  const instance: Ref<Instance|null> = ref(null);
+  const instance: Ref<Instance | null> = ref(null);
 
   async function fetchInstance() {
-    instance.value = await instanceService.getInstance()
+    instance.value = await instanceService.fetchInstance();
   }
 
   return { instance, fetchInstance };

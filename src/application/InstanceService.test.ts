@@ -1,63 +1,58 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Mocked } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { InstanceService } from './InstanceService';
+import { AppError } from './AppError';
 import type { InstanceRepository } from '@/domain/repositories/InstanceRepository';
-import type { Instance } from '@/domain/entities/Instance';
-import type { Language } from '@/domain/entities/Language';
+
+const mockRepo = (): InstanceRepository => ({
+  fetchInstance: vi.fn(),
+  fetchLanguages: vi.fn(),
+});
 
 describe('InstanceService', () => {
-  const mockInstance: Instance = {
-    name: 'Roomdoo Default',
-    languages: [],
-  };
+  it('should return instance and languages when both calls succeed', async () => {
+    const repo = mockRepo();
+    const mockInstance = { name: 'Test Instance' };
+    const mockLanguages = [{ id: 'en', name: 'English' }];
 
-  const mockLanguages: Language[] = [
-    { id: 'lang-en', name: 'English' },
-    { id: 'lang-es', name: 'Español' },
-  ];
+    repo.fetchInstance = vi.fn().mockResolvedValue(mockInstance);
+    repo.fetchLanguages = vi.fn().mockResolvedValue(mockLanguages);
 
-  let instanceRepository: Mocked<InstanceRepository>;
-  let service: InstanceService;
+    const service = new InstanceService(repo);
+    const result = await service.fetchInstance();
 
-  beforeEach(() => {
-    instanceRepository = {
-      getInstance: vi.fn(),
-      getLanguages: vi.fn(),
-    };
-    service = new InstanceService(instanceRepository);
+    expect(result).toEqual({ ...mockInstance, languages: mockLanguages });
   });
 
-  it('should return enriched instance with languages', async () => {
-    instanceRepository.getInstance.mockResolvedValue(mockInstance);
-    instanceRepository.getLanguages.mockResolvedValue(mockLanguages);
+  it('should throw INSTANCE_NOT_FOUND if fetchInstance fails with error code 404', async () => {
+    const repo = mockRepo();
+    repo.fetchInstance = vi.fn().mockRejectedValue(new Error('404'));
+    repo.fetchLanguages = vi.fn();
 
-    const result = await service.getInstance();
+    const service = new InstanceService(repo);
 
-    expect(result).toEqual({
-      ...mockInstance,
-      languages: mockLanguages,
-    });
+    await expect(service.fetchInstance()).rejects.toThrowError(AppError);
+    await expect(service.fetchInstance()).rejects.toMatchObject({ code: 'INSTANCE_NOT_FOUND' });
   });
 
-  it('should return null if getInstance returns null', async () => {
-    instanceRepository.getInstance.mockResolvedValue(null);
+  it('should throw INSTANCE_NOT_FOUND if fetchInstance fails with error code 500', async () => {
+    const repo = mockRepo();
+    repo.fetchInstance = vi.fn().mockRejectedValue(new Error('500'));
+    repo.fetchLanguages = vi.fn();
 
-    const result = await service.getInstance();
+    const service = new InstanceService(repo);
 
-    expect(result).toBeNull();
-    expect(instanceRepository.getLanguages).not.toHaveBeenCalled();
+    await expect(service.fetchInstance()).rejects.toThrowError(AppError);
+    await expect(service.fetchInstance()).rejects.toMatchObject({ code: 'INSTANCE_NOT_FOUND' });
   });
 
-  it('should throw if getInstance fails', async () => {
-    instanceRepository.getInstance.mockRejectedValue(new Error('Instance fetch error'));
+  it('should throw UNKNOWN_ERROR if fetchLanguages fails with error code 500', async () => {
+    const repo = mockRepo();
+    repo.fetchInstance = vi.fn().mockResolvedValue({ name: 'Test' });
+    repo.fetchLanguages = vi.fn().mockRejectedValue(new Error('500'));
 
-    await expect(service.getInstance()).rejects.toThrow('Instance fetch error');
-  });
+    const service = new InstanceService(repo);
 
-  it('should throw if getLanguages fails', async () => {
-    instanceRepository.getInstance.mockResolvedValue(mockInstance);
-    instanceRepository.getLanguages.mockRejectedValue(new Error('Languages error'));
-
-    await expect(service.getInstance()).rejects.toThrow('Languages error');
+    await expect(service.fetchInstance()).rejects.toThrowError(AppError);
+    await expect(service.fetchInstance()).rejects.toMatchObject({ code: 'UNKNOWN_ERROR' });
   });
 });
