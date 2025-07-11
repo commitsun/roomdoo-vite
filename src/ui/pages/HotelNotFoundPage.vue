@@ -1,14 +1,11 @@
 <template>
   <div class="login-container">
     <div class="login-form-header">
-      <img
-        src="/logos/logo-black-new.svg"
-        class="logo"
-        alt="Roomdoo Logo" />
+      <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
     </div>
     <div class="login-form-container">
       <div class="instance-not-found">
-        {{ t('hotel_not_found', { instanceName: "hotel de Brais" }) }}
+        {{ t('instanceNotFound.title', { instance: instanceName }) }}
       </div>
       <div>
         {{ t('hotel_not_found_description') }}
@@ -18,51 +15,33 @@
       </div>
       <div>{{ t('hotel_not_found_contact_description') }}</div>
       <div class="button">
-        <Button
-          :label="t('sign_up')"
-        />
+        <Button :label="t('sign_up')" />
       </div>
     </div>
-    <AppSelect
-      v-model="selectedLocale"
-      :options="locales"
-      class="select-language"
-      optionLabel="label"
-    />
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, watch } from 'vue';
-  import { useI18n } from 'vue-i18n';
-  import {  Button, Select } from 'primevue';
+import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { Button } from 'primevue';
 
-  export default defineComponent({
-    components: {
-      Button,
-      AppSelect: Select,
-    },
-    setup() {
-    const { t, locale } = useI18n();
-    const locales = ref([
-      { label: 'Español', value: 'es' },
-      { label: 'English', value: 'en' },
-    ]);
-    const selectedLocale = ref(locales.value.find((l) => l.value === locale.value));
-
-    watch(selectedLocale, (newLocale) => {
-      if (newLocale) {
-        locale.value = newLocale.value;
-      }
-    });
-
-      return {
-        t,
-        selectedLocale,
-        locales,
-      };
-    },
-  });
-
+export default defineComponent({
+  components: {
+    Button,
+  },
+  setup() {
+    const instanceName = window.location.href
+      .split('/')
+      .filter((el) => el)[1]
+      .split('.roomdoo.com')[0]
+      .split(':')[0];
+    const { t } = useI18n();
+    return {
+      t,
+      instanceName,
+    };
+  },
+});
 </script>
 <style scoped lang="scss">
 .login-container {
@@ -71,7 +50,7 @@
   align-items: center;
   height: 100svh;
   width: 100%;
-  background-color: #F9FAFB;
+  background-color: #f9fafb;
   padding-top: 2rem;
   position: relative;
   .login-form-header {
@@ -81,7 +60,7 @@
     }
   }
   .login-form-container {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     width: 100%;
     height: 100svh;
     padding: 2rem;
@@ -108,20 +87,11 @@
       margin-top: 3rem;
       .p-button {
         width: 100%;
-        background-color: #1D4ED8;
+        background-color: #1d4ed8;
         border: none;
         font-size: 16px;
       }
     }
-
-  }
-  .select-language {
-    position: absolute;
-    bottom: 2.5rem;
-    right: 2rem;
-    width: 200px;
-    z-index: 10;
-    background-color: #F8FAFC;
   }
 }
 @media (min-width: 640px) {
@@ -137,16 +107,10 @@
       width: 480px;
       height: auto;
       border-radius: 8px;
-      box-shadow: 0px 1px 3px 0px #0000001A;
-
+      box-shadow: 0px 1px 3px 0px #0000001a;
     }
     .button {
       margin-top: 4rem !important;
-    }
-
-    .select-language {
-      bottom: 2rem;
-      right: 5rem;
     }
   }
 }

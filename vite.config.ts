@@ -29,7 +29,7 @@ export default defineConfig({
     vue(),
     tailwindcss(),
     vueI18n({
-      include: path.resolve(__dirname, './src/ui/locales/**'),
+      include: path.resolve(__dirname, './src/**/locales/**'),
     }),
     commitHashPlugin(),
   ],
