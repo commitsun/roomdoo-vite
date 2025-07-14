@@ -36,13 +36,13 @@
         v-model="birthdate"
         :placeholder="appLocale?.dateFormat.replace('yy', 'yyyy')"
         :maxDate="new Date()"
-        :inputStyle="{ 
+        :inputStyle="{
           color: '#51B2DD',
           fontSize: '30px',
           borderTop: 'none',
           borderLeft: 'none',
           borderRight: 'none',
-          borderBottom: '1px solid #51B2DD', 
+          borderBottom: '1px solid #51B2DD',
           borderRadius: '0px',
           width: '100%',
         }"
@@ -274,13 +274,19 @@ export default defineComponent({
       }
     });
 
-    onMounted(async() => {
+    onMounted(async () => {
       context.emit('registerOnEnter', onAfterEnterHandler);
       if (props.modelValue) {
         birthdate.value = props.modelValue;
         context.emit('setIsAllowedNextStep', true);
       } else {
         context.emit('setIsAllowedNextStep', false);
+      }
+      const datepicker = birthDateInputRef.value as any;
+      const inputEl: HTMLInputElement | null = datepicker?.$el?.querySelector('input');
+      if (inputEl) {
+        inputEl.removeAttribute('readonly');
+        inputEl.setAttribute('inputmode', 'numeric');
       }
     });
 
