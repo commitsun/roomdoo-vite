@@ -190,48 +190,35 @@ export default defineComponent({
     };
 
     const calculateDifferenceDate = (dateString: string | undefined): string => {
-      if (dateString) {
-        const date = new Date(dateString);
-        const today = new Date();
+      if (!dateString) return '';
 
-        const differenceMilliseconds = date.getTime() - today.getTime();
-        const differenceDays = Math.floor(differenceMilliseconds / (1000 * 60 * 60 * 24));
+      const date = new Date(`${dateString}T00:00:00`);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-        if (differenceDays === 0) {
-          return 'Para hoy';
-        }
+      const diffTime = date.getTime() - today.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-        if (differenceDays === 1) {
-          return 'Para mañana';
-        }
-
-        if (differenceDays > 1 && differenceDays < 7) {
-          return `Faltan ${differenceDays} días`;
-        }
-
-        if (differenceDays >= 7 && differenceDays < 14) {
-          return 'Próxima semana';
-        }
-
-        if (differenceDays >= 14 && differenceDays < 31) {
-          const weeks = Math.floor(differenceDays / 7);
-          return `Faltan ${weeks} semanas`;
-        }
-
-        if (date.getMonth() === today.getMonth()) {
-          return 'Próximo mes';
-        }
-
-        if (date > today) {
-          const differenceMonths = date.getMonth() - today.getMonth();
-          return `Faltan ${differenceMonths} meses`;
-        }
-
-        const differenceYears = date.getFullYear() - today.getFullYear();
-        return `Faltan ${differenceYears} años`;
+      if (diffDays === 0) return 'Para hoy';
+      if (diffDays === 1) return 'Para mañana';
+      if (diffDays > 1 && diffDays < 7) return `Faltan ${diffDays} días`;
+      if (diffDays >= 7 && diffDays < 14) return 'Próxima semana';
+      if (diffDays >= 14 && diffDays < 31) {
+        const weeks = Math.floor(diffDays / 7);
+        return `Faltan ${weeks} semanas`;
       }
-      return '';
+
+      const diffMonths =
+        (date.getFullYear() - today.getFullYear()) * 12 +
+        (date.getMonth() - today.getMonth());
+
+      if (diffMonths === 1) return 'Próximo mes';
+      if (diffMonths > 1 && diffMonths < 12) return `Faltan ${diffMonths} meses`;
+
+      const diffYears = Math.floor(diffMonths / 12);
+      return `Faltan ${diffYears} años`;
     };
+
     const calculatePastDifferenceDate = (date: Date | undefined): string => {
       if (date) {
         const today = new Date();
