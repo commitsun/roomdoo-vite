@@ -71,6 +71,8 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/_legacy/store';
+import { useUserStore } from '@/infrastructure/stores/user';
+
 
 const BookingEngine = defineAsyncComponent(
   () => import('@/_legacy/components/bookingEngine/BookingEngine.vue')
@@ -114,6 +116,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const userStore = useUserStore();
     const showUserSettingsModal = ref(false);
     const peformShowUserSettingsModal = () => {
       showUserSettingsModal.value = true;
@@ -130,7 +133,7 @@ export default defineComponent({
     provide('moveToFirstReservation', isMoveToFirstReservation);
     provide('selectedPropertyIdFromRightSelector', selectedPropertyId);
 
-    const activeUser = computed(() => store.state.user.activeUser);
+    const activeUser = computed(() => userStore.user);
     const activeProperty = computed(() => store.state.properties.activeProperty);
     const activePricelist = computed(() => store.state.pricelists.activePricelist);
     const rightDrawerExpanded = computed(() => store.state.layout.rightDrawerExpanded);
@@ -144,10 +147,10 @@ export default defineComponent({
 
     const sortedProperties = computed(() => {
       const result = store.state.properties.properties.filter(
-        (el) => el.id !== activeUser.value?.defaultPropertyId
+        (el) => el.id !== (activeUser.value?.defaultProperty?.id as number | undefined)
       );
       const defaultProperty = store.state.properties.properties.find(
-        (el) => el.id === activeUser.value?.defaultPropertyId
+        (el) => el.id === (activeUser.value?.defaultProperty?.id as number | undefined)
       );
       if (defaultProperty) {
         result.unshift(defaultProperty);
@@ -238,15 +241,25 @@ export default defineComponent({
       }
     });
 
+    watch(() =>activeUser.value, (newUser, oldUser) => {
+      if (oldUser && !newUser) {
+        void store.dispatch('layout/showSpinner', false);
+        router.push({
+          name: 'login',
+          params: { pmsPropertyId: route.params.pmsPropertyId },
+        });
+      }
+    });
+
     onBeforeMount(async () => {
       console.log(
         'onBeforeMount MainLayout before recovering cookies',
-        store.state.user.activeUser
+        activeUser.value
       );
-      if (!store.state.user.activeUser) {
-        await store.dispatch('user/recoverCookies');
+      if (!activeUser.value) {
+        userStore.recoverFromCookies();
       }
-      console.log('onBeforeMount MainLayout after recovering cookies', store.state.user.activeUser);
+      console.log('onBeforeMount MainLayout after recovering cookies', activeUser.value);
       console.log('*****');
       if (!activeUser.value) {
         console.log('onBeforeMount MainLayout before redirect to login');
@@ -275,7 +288,7 @@ export default defineComponent({
           parseInt(route.params.pmsPropertyId as string, 10)
         );
       } else {
-        await store.dispatch('properties/setActiveProperty', activeUser.value?.defaultPropertyId);
+        await store.dispatch('properties/setActiveProperty', activeUser.value?.defaultProperty);
       }
     });
 
@@ -296,6 +309,7 @@ export default defineComponent({
     });
 
     return {
+      userStore,
       showUserSettingsModal,
       peformShowUserSettingsModal,
       closeRightDrawer,

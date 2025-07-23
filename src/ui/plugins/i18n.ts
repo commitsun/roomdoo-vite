@@ -3,6 +3,7 @@ import messages from '@intlify/unplugin-vue-i18n/messages';
 import { en_GB } from 'primelocale/js/en_GB.js';
 import { en } from 'primelocale/js/en.js';
 import { es } from 'primelocale/js/es.js';
+import { getPrimeVueApp } from '@/ui/plugins/primevue';
 
 const browserLang = window.navigator.language.toLowerCase();
 const baseLang = browserLang.substring(0, 2);
@@ -17,11 +18,37 @@ export const locale = (() => {
   return area === 'GB' ? en_GB : en;
 })();
 
+export const SUPPORTED_LOCALES = [
+  { label: 'Español', value: 'es' },
+  { label: 'English', value: 'en' },
+];
+
 export const i18n = createI18n({
   legacy: false,
   globalInjection: true,
   locale: selectedLang,
   fallbackLocale: 'en',
-  availableLocales: ['es', 'en'],
+  availableLocales: SUPPORTED_LOCALES.map(locale => locale.value),
   messages,
 });
+
+export const getLocale = () => {
+  return i18n.global.locale.value
+};
+
+export function updateI18nLocale(newLocale: string) {
+  i18n.global.locale.value = newLocale;
+}
+
+export function updateI18nAvailableLocales(languages?: Array<{ code: string }>) {
+  let availableLocales = SUPPORTED_LOCALES;
+  if (languages && languages.length > 0) {
+    const codes = languages.map(l => l.code.split('_')[0]);
+    availableLocales = SUPPORTED_LOCALES.filter(locale => codes.includes(locale.value));
+  }
+  return availableLocales;
+}
+
+
+
+
