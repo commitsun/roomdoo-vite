@@ -4,12 +4,54 @@
     "email": "Correo electrónico",
     "password": "Contraseña",
     "forgotPassword": "¿Has olvidado tu contraseña?",
-    "loginButton": "Iniciar sesión"
+    "loginButton": "Iniciar sesión",
+    "invalidCredentials": "Credenciales no válidas",
+    "sessionExpiredTitle": "Sesión caducada. Por favor, vuelve a iniciar sesión.",
+    "accept": "Aceptar"
   },
   "instanceNotFound": {
     "title": "Ups! Parece que {instance} todavía no existe en Roomdoo",
     "message": "Revisa el enlace de acceso y vuélvelo a intentar",
     "joinTittle": "¿Quieres gestionar tu hotel con Roomdoo?",
     "joinMessage": "Contacta con nosotros para darte de alta"
-  }
+  },
+  "resetPassword": {
+    "title": "Restablecer contraseña",
+    "new_password": "Nueva contraseña",
+    "password": "Contraseña",
+    "enter_password": "Introduce una contraseña",
+    "choose_new_password": "Elige una nueva contraseña",
+    "minimum_chars": "Mínimo {count} caracteres",
+    "password_letter_required": "Al menos una letra",
+    "password_number_required": "Al menos un número",
+    "repeat_new_password": "Repetir contraseña",
+    "save_password": "Guardar contraseña",
+    "back_to_login": "Volver al inicio de sesión",
+    "password_changed": "La contraseña se ha cambiado correctamente"
+  },
+  "request_password": {
+    "title": "Introduce tu correo o nombre de usuario para restablecer tu contraseña",
+    "username": "Nombre de usuario",
+    "email": "Correo electrónico",
+    "send_request": "Enviar solicitud",
+    "back_to_login": "Volver al inicio de sesión",
+    "request_sent": "Se ha enviado un correo para restablecer tu contraseña"
+  },
+  "error404": {
+    "title": "Página no encontrada",
+    "message": "Lo sentimos, la página que estás buscando no existe o ha sido movida.",
+    "button": "Volver al inicio"
+  },
+  "validation": {
+    "WRONG_CREDENTIALS": "Credenciales no válidas",
+    "UNKNOWN_ERROR": "Se ha producido un error desconocido",
+    "INVALID_TOKEN": "El token ha caducado o no es válido"
+  },
+  "REQUIRED_PASSWORD": "La contraseña es requerida",
+  "MINIMUM_CHARS": "Mínimo 8 caracteres",
+  "PASSWORD_LETTER_REQUIRED": "La contraseña debe contener al menos una letra",
+  "PASSWORD_NUMBER_REQUIRED": "La contraseña debe contener al menos un número",
+  "REQUIRED_CONFIRM_PASSWORD": "La confirmación de contraseña es requerida",
+  "PASSWORDS_DO_NOT_MATCH": "Las contraseñas no coinciden"
+  
 }

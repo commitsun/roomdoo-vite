@@ -15,7 +15,10 @@
       </div>
       <div>{{ t('hotel_not_found_contact_description') }}</div>
       <div class="button">
-        <Button :label="t('sign_up')" />
+        <Button
+          :label="t('sign_up')"
+          @click="openRoomdoo"
+        />
       </div>
     </div>
   </div>
@@ -36,9 +39,14 @@ export default defineComponent({
       .split('.roomdoo.com')[0]
       .split(':')[0];
     const { t } = useI18n();
+
+    const openRoomdoo = () => {
+      window.open('https://roomdoo.com', '_blank');
+    };
     return {
-      t,
       instanceName,
+      openRoomdoo,
+      t,
     };
   },
 });
