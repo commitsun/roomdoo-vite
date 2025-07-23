@@ -552,7 +552,7 @@ import FolioMessagesComponent from '@/_legacy/components/folios/FolioMessagesCom
 import FolioTransactions from '@/_legacy/components/folios/FolioTransactions.vue';
 import FolioCheckins from '@/_legacy/components/folios/FolioCheckins.vue';
 import FolioInvoicing from '@/_legacy/components/folios/FolioInvoicing.vue';
-import { selectedLang } from '@/ui/plugins/i18n';
+import { getLocale } from '@/ui/plugins/i18n';
 
 import { usePlanning } from '@/_legacy/utils/usePlanning';
 import { useRouter } from 'vue-router';
@@ -599,7 +599,7 @@ export default defineComponent({
       () =>
         `${window.location.origin}/${currentFolio.value?.id ?? 0}/precheckin/${
           currentFolio.value?.accessToken ?? ''
-        }/${selectedLang}`,
+        }/${getLocale()}`,
     );
 
     const computedFolioClass = computed(() => {
