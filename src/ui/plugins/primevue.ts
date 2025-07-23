@@ -2,6 +2,8 @@ import { type App } from 'vue';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primevue/themes';
+import { es } from 'primelocale/js/es.js';
+import { en } from 'primelocale/js/en.js';
 
 export const RoomdooPreset = definePreset(Aura, {
   semantic: {
@@ -20,11 +22,33 @@ export const RoomdooPreset = definePreset(Aura, {
     },
   },
 });
+
+let primevueApp: App | null = null;
+
+export function getPrimeVueApp(): App | null {
+  return primevueApp;
+}
+
+function getPrimeVueLocale(newLocale: string) {
+  if (newLocale === 'es') return es;
+  return en;
+}
+
+export function updatePrimevueLocale(newLocale: string) {
+  const app = getPrimeVueApp();
+  const primevueLocale = getPrimeVueLocale(newLocale);
+  if (app?.config.globalProperties.$primevue?.config?.locale) {
+    Object.assign(app.config.globalProperties.$primevue.config.locale, primevueLocale);
+  }
+}
+
 export default {
   install(app: App, options: any = {}) {
+    primevueApp = app;
+
     app.use(PrimeVue, {
       theme: { preset: RoomdooPreset, options: { darkModeSelector: false } },
-      locale: options.locale,
+      locale: options.locale || {},
     });
   },
 };

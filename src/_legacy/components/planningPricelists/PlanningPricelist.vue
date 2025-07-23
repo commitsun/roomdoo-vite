@@ -132,6 +132,7 @@ import { type AvailabilityPlanRuleInterface } from '@/_legacy/interfaces/Availab
 import CellPricelistItemAvailabilityPlanRule from './CellPricelistItemAvailabilityPlanRule.vue';
 
 import { useStore } from '@/_legacy/store';
+import { useUserStore } from '@/infrastructure/stores/user';
 import { dialogService } from '@/_legacy/services/DialogService';
 
 export default defineComponent({
@@ -152,7 +153,7 @@ export default defineComponent({
   },
   setup(props, context) {
     const store = useStore();
-
+    const userStore = useUserStore();
     let contReset = 0;
 
     const reset = ref(false);
@@ -205,7 +206,7 @@ export default defineComponent({
     });
 
     const numRulesToView = computed(
-      () => store.state.user.activeUser?.availabilityRuleFields?.length || 0
+      () => userStore.user?.availabilityRuleFields?.length || 0
     );
 
     const roomTypes = computed(() =>
