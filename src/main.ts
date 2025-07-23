@@ -7,7 +7,7 @@ import { store as legacyStore } from '@/_legacy/store';
 import router from '@/ui/router';
 import { createHead } from '@vueuse/head';
 import { i18n, locale } from '@/ui/plugins/i18n';
-import primevuePlugin from '@/ui/primevue/primevue';
+import primevuePlugin from '@/ui/plugins/primevue';
 import ToastService from 'primevue/toastservice';
 import DialogService from 'primevue/dialogservice';
 
