@@ -8,6 +8,7 @@
       <router-view />
     </div>
     <AppSelect
+      v-if="locales.length > 1"
       class="select-language"
       v-model="selectedLocale"
       :options="locales"
@@ -18,36 +19,38 @@
 <script lang="ts" setup>
 import { type Ref, onMounted, ref, watch } from 'vue';
 import AppSelect from 'primevue/select';
-import { i18n } from '@/ui/plugins/i18n';
-
+import { i18n, updateI18nAvailableLocales, SUPPORTED_LOCALES } from '@/ui/plugins/i18n';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useRouter } from 'vue-router';
 import { AppError } from '@/application/AppError';
+import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
 const router = useRouter();
 const instanceStore = useInstanceStore();
 const uiStore = useUIStore();
 
-const selectedLanguage = ref(null);
-
-const locales = ref([
-  { label: 'Español', value: 'es' },
-  { label: 'English', value: 'en' },
-]);
+const locales = ref(SUPPORTED_LOCALES);
 
 const selectedLocale = ref(locales.value.find((l) => l.value === i18n.global.locale.value));
 const instanceImage: Ref<string | undefined> = ref('');
 
 watch(selectedLocale, (newLocale) => {
   if (newLocale) {
-    i18n.global.locale.value = newLocale.value;
+    updateAppLocale(newLocale.value);
+    localStorage.setItem('roomdoo-locale', newLocale.value);
   }
 });
+
 onMounted(async () => {
   try {
     uiStore.startLoading();
     await instanceStore.fetchInstance();
     instanceImage.value = instanceStore.instance?.image;
+    locales.value = updateI18nAvailableLocales(instanceStore.instance?.languages);
+    const savedLocale = localStorage.getItem('roomdoo-locale');
+    const foundLocale = locales.value.find((l) => l.value === (savedLocale || i18n.global.locale.value));
+    selectedLocale.value = foundLocale || locales.value[0];
+    updateAppLocale(selectedLocale.value.value);
   } catch (err) {
     if (err instanceof AppError) {
       router.push({ name: 'hotel-not-found' });
