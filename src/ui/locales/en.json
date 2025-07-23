@@ -4,12 +4,53 @@
     "email": "Email",
     "password": "Password",
     "forgotPassword": "Forgot your password?",
-    "loginButton": "Log in"
+    "loginButton": "Log in",
+    "invalidCredentials": "Invalid credentials",
+    "sessionExpiredTitle": "Session expired. Please log in again.",
+    "accept": "Accept"
   },
   "instanceNotFound": {
     "title": "Oops! It seems that {instance} does not exist in Roomdoo yet",
     "message": "Check the access link and try again",
     "joinTitle": "Do you want to manage your hotel with Roomdoo?",
     "joinMessage": "Contact us to sign up"
-  }
+  },
+  "resetPassword": {
+    "title": "Reset password",
+    "new_password": "New password",
+    "password": "Password",
+    "enter_password": "Enter a password",
+    "choose_new_password": "Choose a new password",
+    "minimum_chars": "Minimum {count} characters",
+    "password_letter_required": "Password must contain at least one letter",
+    "password_number_required": "Password must contain at least one number",
+    "repeat_new_password": "Repeat password",
+    "save_password": "Save password",
+    "back_to_login": "Back to login",
+    "password_changed": "The password has been changed successfully"
+  },
+  "request_password": {
+    "title": "Introduce your email or username to reset your password",
+    "username": "Username",
+    "email": "Email",
+    "send_request": "Send request",
+    "back_to_login": "Back to login",
+    "request_sent": "An email has been sent to reset your password"
+  },
+  "error404": {
+    "title": "Page not found",
+    "message": "Sorry, the page you are looking for does not exist or has been moved.",
+    "button": "Go to home"
+  },
+  "validation": {
+    "WRONG_CREDENTIALS": "Invalid credentials",
+    "UNKNOWN_ERROR": "An unexpected error occurred.",
+    "INVALID_TOKEN": "The token has expired or is not valid"
+  },
+  "REQUIRED_PASSWORD": "Password is required",
+  "MINIMUM_CHARS": "Minimum 8 characters",
+  "PASSWORD_LETTER_REQUIRED": "Password must contain at least one letter",
+  "PASSWORD_NUMBER_REQUIRED": "Password must contain at least one number",
+  "REQUIRED_CONFIRM_PASSWORD": "Password confirmation is required",
+  "PASSWORDS_DO_NOT_MATCH": "Passwords do not match"
 }

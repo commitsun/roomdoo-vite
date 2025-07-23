@@ -10,16 +10,18 @@ const mockUser = (): User => ({
   email: 'test@roomdoo.com',
   firstName: 'Test',
   lastName: 'User',
-  defaultPropertyId: 'property-123',
+  defaultProperty: { id: 'property-123', name: 'Property 123' },
   availabilityRuleFields: ['field-1'],
 });
 
 // Usamos vi.fn() directamente sin forzar a cumplir una interfaz
 const createMockRepo = () => {
   return {
-    login: vi.fn<() => Promise<void>>(),
+    login: vi.fn<(_: string, __: string) => Promise<void>>(),
     fetchUser: vi.fn<() => Promise<User>>(),
     fetchAvailabilityRuleFields: vi.fn<() => Promise<string[]>>(),
+    requestPassword: vi.fn<() => Promise<void>>(),
+    resetPassword: vi.fn<() => Promise<void>>(),
   };
 };
 

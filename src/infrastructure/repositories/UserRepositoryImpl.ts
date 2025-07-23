@@ -4,12 +4,31 @@ import { api } from '@/infrastructure/http/axios';
 
 export class UsersRepositoryImpl implements UserRepository {
   async login(email: string, password: string): Promise<void> {
-    return await api.post('/api/login', { email, password });
+    await api.post('/login', { username: email, password });
   }
+
   async fetchUser(): Promise<User> {
-    return await api.get(`/api/users/me`);
+    const response = await api.get('user');
+    const user = response.data;
+    user.avatar = user.image;
+    delete user.image;
+    return user;
   }
+
   async fetchAvailabilityRuleFields(): Promise<string[]> {
-    return await api.get(`/api/users/availability_rule_fields`);
+    const response = await api.get('user/availability-rule-fields');
+    return response.data.map((field: { name: string }) => field.name);
+  }
+
+  async requestPassword(email: string): Promise<void> {
+    await api.post('/send-mail-reset-password', { email });
+  }
+
+  async resetPassword(password: string, token: string): Promise<void> {
+    await api.patch('/reset-password', { newPassword: password, resetToken: token });
+  }
+
+  async refreshToken(): Promise<void> {
+    await api.post('/refresh-token');
   }
 }
