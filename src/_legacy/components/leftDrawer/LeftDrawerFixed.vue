@@ -73,11 +73,7 @@
     <div class="bottom" v-if="!isOpen">
       <div class="user-container">
         <div class="avatar-container">
-          <img
-            class="user-avatar"
-            :src="activeUser?.userImageUrl"
-            v-if="activeUser?.userImageUrl && activeUser?.userImageUrl !== 'null'"
-          />
+          <img class="user-avatar" :src="activeUser?.avatar" v-if="activeUser?.avatar" />
           <img v-else class="user-avatar" src="/app-images/avatar.png" />
         </div>
       </div>
@@ -233,20 +229,16 @@
           tabindex="1"
         >
           <div class="avatar-container-expanded">
-            <img
-              class="user-avatar-expanded"
-              :src="activeUser?.userImageUrl"
-              v-if="activeUser?.userImageUrl && activeUser?.userImageUrl !== 'null'"
-            />
+            <img class="user-avatar-expanded" :src="activeUser?.avatar" v-if="activeUser?.avatar" />
             <img class="user-avatar-expanded" src="/app-images/avatar.png" v-else />
           </div>
           <div class="user-info">
             <div class="user-name">
-              {{ activeUser?.userName }}
+              {{ activeUser?.firstName }} {{ activeUser?.lastName }} {{ activeUser?.lastName2 }}
             </div>
             <div class="user-email">
               <span>
-                {{ activeUser?.userEmail }}
+                {{ activeUser?.email }}
               </span>
             </div>
           </div>
@@ -275,6 +267,7 @@ const UserSettingsModal = defineAsyncComponent(
 );
 import { useSupport } from '@/_legacy/utils/useSupport';
 import { dialogService } from '@/_legacy/services/DialogService';
+import { useUserStore } from '@/infrastructure/stores/user';
 
 export default defineComponent({
   components: {
@@ -286,7 +279,8 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
-
+    const { openSupportTab } = useSupport();
+    const userStore = useUserStore();
     const isOpen = ref(false);
     const isReportsOpened = ref(false);
     const isLinksOpened = ref(false);
@@ -294,7 +288,7 @@ export default defineComponent({
     const showUserSettingsModal = ref(false);
 
     const activeProperty = computed(() => store.state.properties.activeProperty);
-    const activeUser = computed(() => store.state.user.activeUser);
+    const activeUser = computed(() => userStore.user);
 
     const endPath = computed(() => {
       let result = '';
@@ -337,9 +331,8 @@ export default defineComponent({
     };
 
     const logout = async () => {
-      await store.dispatch('user/reset', {});
+      userStore.logout();
       await store.dispatch('properties/reset', {});
-      void router.push('/login');
     };
 
     const closeExpanded = () => {

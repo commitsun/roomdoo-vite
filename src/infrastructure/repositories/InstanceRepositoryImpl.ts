@@ -5,11 +5,13 @@ import type { Language } from '@/domain/entities/Language';
 import { api } from '@/infrastructure/http/axios';
 
 export class InstanceRepositoryImpl implements InstanceRepository {
-  fetchInstance(): Promise<Instance> {
-    return api.get<Instance>('/instance/').then((response) => response.data);
+  async fetchInstance(): Promise<Instance> {
+    const response = await api.get<Instance>('/instance');
+    return response.data;
   }
 
-  fetchLanguages(): Promise<Language[]> {
-    return api.get<Language[]>('/languages/').then((response) => response.data);
+  async fetchLanguages(): Promise<Language[]> {
+    const response = await api.get<Language[]>('/languages');
+    return response.data;
   }
 }
