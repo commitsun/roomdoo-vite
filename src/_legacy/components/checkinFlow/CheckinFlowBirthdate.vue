@@ -32,7 +32,7 @@
       <DatePicker
         ref="birthDateInputRef"
         v-model="birthdate"
-        :placeholder="appLocale?.dateFormat.replace('yy', 'yyyy')"
+        :placeholder="$t('date_format')"
         :maxDate="new Date()"
         :inputStyle="{
           color: '#51B2DD',
@@ -105,11 +105,11 @@ import {
   type ComponentPublicInstance,
 } from 'vue';
 import DatePicker from 'primevue/datepicker';
-import { locale as appLocale } from '@/ui/plugins/i18n';
 
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 import utilsDates from '@/_legacy/utils/dates';
 import { useStore } from '@/_legacy/store';
+import { getLocale } from '@/ui/plugins/i18n';
 
 export default defineComponent({
   components: {
@@ -201,7 +201,8 @@ export default defineComponent({
     const inputDate = (event: Event) => {
       const input = event.target as HTMLInputElement;
 
-      const format = appLocale?.dateFormat?.toLowerCase() || 'dd/mm/yyyy';
+      //format of primevue datepicker
+      const format = getLocale() === 'es' ? 'dd/mm/yyyy' : 'mm/dd/yyyy';
 
       const digits = input.value.replace(/\D/g, '');
 
@@ -290,7 +291,6 @@ export default defineComponent({
       areThereAnyAdultsInFolio,
       canProceedToNextStep,
       birthDateInputRef,
-      appLocale,
       nextAndSave,
       inputDate,
     };

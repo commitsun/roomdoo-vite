@@ -4,7 +4,7 @@
       <span> {{ numReservationsToAssign }} </span>
     </div>
     <div class="name-notifications">
-      <div class="greeting-name">{{ greeting }} {{ activeUser?.userFirstName ?? '' }},</div>
+      <div class="greeting-name">{{ greeting }} {{ activeUser?.firstName ?? '' }},</div>
       <div v-if="numReservationsToAssign > 0" class="greeting-notifications">
         tienes {{ numReservationsToAssign }} notificaciones pendientes.
       </div>
@@ -38,6 +38,7 @@
 import { defineComponent, computed, ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from '@/_legacy/store';
+import { useUserStore } from '@/infrastructure/stores/user';
 import AutocompleteComponent from '@/_legacy/components/roomdooComponents/AutocompleteComponent.vue';
 
 export default defineComponent({
@@ -48,17 +49,18 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const selectedPropertyId = ref(1);
+    const userStore = useUserStore();
 
     const properties = computed(() => store.state.properties.properties);
-    const activeUser = computed(() => store.state.user.activeUser);
+    const activeUser = computed(() => userStore.user);
     const activeProperty = computed(() => store.state.properties.activeProperty);
 
     const sortedProperties = computed(() => {
       const result = store.state.properties.properties.filter(
-        (el) => el.id !== activeUser.value?.defaultPropertyId
+        (el) => el.id !== (activeUser?.value?.defaultProperty?.id as number | undefined)
       );
       const defaultProperty = store.state.properties.properties.find(
-        (el) => el.id === activeUser.value?.defaultPropertyId
+        (el) => el.id === (activeUser?.value?.defaultProperty?.id as number | undefined)
       );
       if (defaultProperty) {
         result.unshift(defaultProperty);

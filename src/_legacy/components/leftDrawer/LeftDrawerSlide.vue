@@ -129,18 +129,18 @@
         <div class="avatar-container">
           <img
             class="user-avatar"
-            :src="activeUser?.userImageUrl"
-            v-if="activeUser?.userImageUrl && activeUser?.userImageUrl !== 'null'"
+            :src="activeUser?.avatar"
+            v-if="activeUser?.avatar"
           />
           <img class="user-avatar" src="/app-images/avatar.png" v-else />
         </div>
         <div class="user-info">
           <div class="user-name">
-            {{ activeUser?.userName }}
+            {{ activeUser?.firstName }} {{ activeUser?.lastName }} {{ activeUser?.lastName2 }}
           </div>
           <div class="user-email">
             <span class="link">
-              {{ activeUser?.userEmail }}
+              {{ activeUser?.email }}
             </span>
           </div>
         </div>
@@ -156,6 +156,7 @@ import ReportComponent from '@/_legacy/components/reports/ReportComponent.vue';
 import { useStore } from '@/_legacy/store';
 import { useSupport } from '@/_legacy/utils/useSupport';
 import { dialogService } from '@/_legacy/services/DialogService';
+import { useUserStore } from '@/infrastructure/stores/user';
 
 export default defineComponent({
   setup() {
@@ -165,13 +166,14 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     const { openSupportTab } = useSupport();
+    const userStore = useUserStore();
     const isReportsOpened = ref(false);
     const isSettingsOpened = ref(false);
     const showUserSettingsModal = ref(false);
     const showVersionCont = ref(0);
 
     const activeProperty = computed(() => store.state.properties.activeProperty);
-    const activeUser = computed(() => store.state.user.activeUser);
+    const activeUser = computed(() => userStore.user);
 
     const numReservationsToAssign = computed(
       () => store.state.notifications.numReservationsToAssign
@@ -222,9 +224,8 @@ export default defineComponent({
     };
 
     const logout = async () => {
-      await store.dispatch('user/reset', {});
+      userStore.logout();
       await store.dispatch('properties/reset', {});
-      void router.push('/login');
     };
 
     const showVersionContIncrement = () => {
