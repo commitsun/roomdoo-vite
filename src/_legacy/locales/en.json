@@ -40,6 +40,7 @@
   "copy": "Copy",
   "copy_link": "Copy link",
   "country": "Country",
+  "date_format": "mm/dd/yyyy",
   "dates": "Dates",
   "delete_data": "Delete data",
   "delete_guest": "Delete guest",

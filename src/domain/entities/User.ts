@@ -1,5 +1,6 @@
 import { type Id } from '@/domain/types/Id';
 import { type ImageUrl } from '@/domain/types/ImageUrl';
+import type { PmsProperty } from './PmsProperty';
 
 export interface User {
   id: Id;
@@ -7,7 +8,7 @@ export interface User {
   firstName: string;
   lastName: string;
   lastName2?: string;
-  defaultPropertyId: Id;
+  defaultProperty: PmsProperty;
   phone?: string;
   avatar?: ImageUrl;
   availabilityRuleFields?: string[];

@@ -41,10 +41,9 @@ export default defineComponent({
       (newLength, oldLength) => {
         if (newLength > oldLength && newLength > 0) {
           toast.add({
-            severity: 'error',
-            summary: 'Info',
-            detail: notifications.value[0].text,
-            life: 3000,
+            summary: notifications.value[0].text,
+            severity: notifications.value[0].severity || 'success',
+            life: 5000,
           });
         }
       }

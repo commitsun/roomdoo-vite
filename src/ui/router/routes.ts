@@ -5,6 +5,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '',
     component: () => import('@/ui/layouts/LoginLayout.vue'),
+    redirect: '/login',
     children: [
       {
         name: 'login',
@@ -13,13 +14,18 @@ const routes: RouteRecordRaw[] = [
       },
       {
         name: 'reset-password',
-        path: '/reset-password/:pmsPropertyId(\\d+)?',
+        path: '/reset-password/:token([^/]+)?',
         component: () => import('@/ui/pages/ResetPasswordPage.vue'),
       },
       {
         name: 'hotel-not-found',
         path: '/hotel-not-found',
         component: () => import('@/ui/pages/HotelNotFoundPage.vue'),
+      },
+      {
+        name: 'request-password',
+        path: '/request-password/:pmsPropertyId(\\d+)?',
+        component: () => import('@/ui/pages/RequestPasswordPage.vue'),
       },
     ],
   },

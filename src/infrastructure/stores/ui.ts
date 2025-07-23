@@ -12,5 +12,6 @@ export const useUIStore = defineStore('ui', {
     stopLoading() {
       this.isLoading = false;
     },
+
   },
 });

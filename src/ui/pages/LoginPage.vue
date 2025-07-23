@@ -18,8 +18,6 @@
             :inputStyle="{ width: '100%' }"
           />
         </IconField>
-        <!-- this is an example of how to use it, but here it's not necessary -->
-        <!-- <small v-if="usernameError" class="p-error">{{ t(usernameError) }}</small> -->
       </div>
       <div class="second-input">
         <label class="label">
@@ -33,20 +31,22 @@
             :feedback="false"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
+            toggleMask
           />
         </IconField>
-        <!-- this is an example of how to use it, but here it's not necessary -->
-        <!-- <small v-if="passwordError" class="p-error">{{ t(passwordError) }}</small> -->
+        <Message v-if="errorMessage" severity="error" style="margin-top: 8px;">
+          {{ errorMessage }}
+        </Message>
       </div>
       <div class="button">
         <Button
           :label="t('login.loginButton')"
           :disabled="!username || !password"
-          @click="() => handleSubmit(onSubmit)()"
+          @click="onSubmit"
         />
       </div>
       <div class="link">
-        <a href="#">
+        <a href="/request-password">
           {{ t('login.forgotPassword') }}
         </a>
       </div>
@@ -54,13 +54,14 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, computed, type Ref } from 'vue';
+import { defineComponent, computed, type Ref, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IconField, InputIcon, InputText, Password, Button } from 'primevue';
-import { useForm, useField } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import { loginSchema } from '@/application/validation/UserSchemas';
+import { IconField, InputIcon, InputText, Password, Button, Message } from 'primevue';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useUserStore } from '@/infrastructure/stores/user';
+import { useRouter } from 'vue-router';
+import { useTranslatedError } from '@/ui/composables/useTranslatedValidationError';
+import { useNotificationStore } from '@/infrastructure/stores/notification';
 
 export default defineComponent({
   components: {
@@ -69,47 +70,61 @@ export default defineComponent({
     InputIcon,
     Password,
     Button,
+    Message,
   },
   setup() {
     const { t } = useI18n();
     const instanceStore = useInstanceStore();
-    // not necessary to use validations here but just an example
-    const { handleSubmit } = useForm({
-      validationSchema: toTypedSchema(loginSchema),
-    });
-    // not necessary to use validations here but just an example
-    const { value: username, errorMessage: usernameError } = useField('username', undefined, {
-      validateOnValueUpdate: false,
-    }) as {
-      value: Ref<string>;
-      errorMessage: Ref<string>;
-    };
-    // not necessary to use validations here but just an example
-    const { value: password, errorMessage: passwordError } = useField('password', undefined, {
-      validateOnValueUpdate: false,
-    }) as {
-      value: Ref<string>;
-      errorMessage: Ref<string>;
-    };
+    const userStore = useUserStore();
+    const notificationStore = useNotificationStore();
+    const router = useRouter();
+    const { translate } = useTranslatedError();
+
+    const username = ref('');
+    const password = ref('');
+    const errorCode = ref<string | null>(null);
+
     const instanceName = computed(() => instanceStore.instance?.name ?? '');
+    const errorMessage = computed(() => {
+     if (!errorCode.value){
+      return '';
+     };
+     return translate(errorCode.value) ;
+   });
+    const onSubmit = async () => {
+      try {
+        await userStore.login(username.value, password.value);
+        if (userStore.user) {
+          const propertyId = parseInt(userStore.user.defaultProperty.id, 10);
+          await router.push({
+            name: 'dashboard',
+            params: { pmsPropertyId: propertyId },
+          });
+        }
+      } catch (error: any) {
+        errorCode.value = error.code;
+      }
+    };
+
+    watch([username, password], () => {
+      if (errorMessage.value) {
+        errorCode.value = null;      }
+    });
+
+    onMounted(async () => {
+      if (userStore.isSessionExpired) {
+        notificationStore.add(t('login.sessionExpired'), 'error');
+        userStore.setSessionExpired(false);
+      }
+    });
 
     return {
       username,
-      usernameError,
       password,
-      passwordError,
       instanceName,
+      errorMessage,
       t,
-      handleSubmit,
-      // not necessary to use validations here but just an example
-      onSubmit: () => {
-        console.log('Form submitted with:', {
-          username: username.value,
-          password: password.value,
-        });
-        // Here you would typically handle the login logic, e.g., calling an API
-        // call to api login
-      },
+      onSubmit,
     };
   },
 });
@@ -178,6 +193,7 @@ export default defineComponent({
       }
     }
     .link {
+      font-size: 14px;
       margin-top: 2rem;
       a {
         color: #64748b;
