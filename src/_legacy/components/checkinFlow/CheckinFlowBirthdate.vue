@@ -281,6 +281,12 @@ export default defineComponent({
       } else {
         context.emit('setIsAllowedNextStep', false);
       }
+      const datepicker = birthDateInputRef.value as any;
+      const inputEl: HTMLInputElement | null = datepicker?.$el?.querySelector('input');
+      if (inputEl) {
+        inputEl.removeAttribute('readonly');
+        inputEl.setAttribute('inputmode', 'numeric');
+      }
     });
 
     return {
