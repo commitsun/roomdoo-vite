@@ -50,6 +50,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/pmsApi': {
+        target: 'http://localhost:8016',
+        changeOrigin: true,
+        secure: false,
+      },
     },
     hmr: {
       protocol: 'ws',

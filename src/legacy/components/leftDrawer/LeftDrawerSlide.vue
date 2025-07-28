@@ -86,10 +86,12 @@
         </div>
         <!-- links -->
         <template v-if="activeProperty?.linksRoomdoo && activeProperty?.linksRoomdoo.length === 1">
-          <a :href="activeProperty?.linksRoomdoo[0].url" target="_blank" rel="noopener noreferrer">
+          <div
+            @click="openLinkInNewTab(activeProperty.linksRoomdoo[0].id)"
+          >
             <div class="icon-link" />
             <span> {{ activeProperty.linksRoomdoo[0].label }}</span>
-          </a>
+          </div>
         </template>
         <template
           v-else-if="activeProperty?.linksRoomdoo && activeProperty?.linksRoomdoo.length > 1"
@@ -104,15 +106,14 @@
             />
           </div>
           <div class="link-options" v-if="isLinksOpened">
-            <a
+            <div
               v-for="link in activeProperty.linksRoomdoo"
-              :key="link.url"
-              :href="link.url"
-              target="_blank"
-              rel="noopener noreferrer"
+              :key="link.id"
+              @click="openLinkInNewTab(link.id)"
+              class="link-item"
             >
               {{ link.label }}
-            </a>
+            </div>
           </div>
         </template>
         <div class="hidden">
@@ -120,15 +121,13 @@
           <span> Ajustes </span>
         </div>
       </div>
-      <a
+      <div
         class="support-menu"
-        :href="activeProperty?.supportUrl.url"
-        target="_blank"
-        rel="noopener noreferrer"
+        @click="openLinkInNewTab(activeProperty?.supportUrl.id || 0)"
       >
         <img src="/app-images/support-icon.svg" />
         <span>{{ activeProperty?.supportUrl.label }}</span>
-      </a>
+      </div>
     </div>
     <!-- BOTTOM MENU -->
     <div class="left-drawer-bottom">
@@ -200,6 +199,7 @@ import { useRoute, useRouter } from 'vue-router';
 import ReportComponent from '@/legacy/components/reports/ReportComponent.vue';
 import { useStore } from '@/legacy/store';
 import { dialogService } from '@/legacy/services/DialogService';
+import { getCookie } from '@/legacy/utils/cookies';
 
 export default defineComponent({
   setup() {
@@ -275,6 +275,53 @@ export default defineComponent({
       showVersionCont.value += 1;
     };
 
+    const openLinkInNewTab = (menuId: number) => {
+      void store.dispatch('layout/showSpinner', true);
+
+      const url = `/pmsApi/properties/${activeProperty.value?.id}/menus/${menuId}`;
+      const jwt = getCookie('authorization') ?? '';
+
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`,
+          'Cache-Control': 'no-cache',
+        },
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            const error = await response.json();
+            dialogService.open({
+              header: 'Error',
+              content: error.message || 'Error al abrir el enlace',
+              btnAccept: 'Ok',
+            });
+            return;
+          }
+          const data = await response.json();
+          if (data) {
+            window.open(data, '_blank', 'noopener,noreferrer');
+          } else {
+            dialogService.open({
+              header: 'Error',
+              content: 'No se pudo abrir el enlace',
+              btnAccept: 'Ok',
+            });
+          }
+        })
+        .catch((err) => {
+          dialogService.open({
+          header: 'Error',
+          content: err.message || 'Error al abrir el enlace',
+          btnAccept: 'Ok',
+        });
+        })
+        .finally(() => {
+          void store.dispatch('layout/showSpinner', false);
+        });
+    };
+
     return {
       showVersionCont,
       hash,
@@ -291,6 +338,7 @@ export default defineComponent({
       showUserSettingsModal,
       endPath,
       showVersionContIncrement,
+      openLinkInNewTab,
     };
   },
 });
@@ -413,11 +461,12 @@ export default defineComponent({
         margin-left: 0 2rem 0 0;
         margin-bottom: 0.75rem;
         span,
-        a {
+        .link-item {
           margin-top: 0.5rem;
           margin-bottom: 0.5rem;
           width: 100%;
           margin-left: 2.35rem;
+          background-color: #f0f0f0;
         }
       }
     }
