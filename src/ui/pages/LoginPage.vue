@@ -42,7 +42,7 @@
         <Button
           :label="t('login.loginButton')"
           :disabled="!username || !password"
-          @click="onSubmit"
+          @click="doLogin()"
         />
       </div>
       <div class="link">
@@ -60,8 +60,8 @@ import { IconField, InputIcon, InputText, Password, Button, Message } from 'prim
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useRouter } from 'vue-router';
-import { useTranslatedError } from '@/ui/composables/useTranslatedValidationError';
 import { useNotificationStore } from '@/infrastructure/stores/notification';
+import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 
 export default defineComponent({
   components: {
@@ -78,20 +78,14 @@ export default defineComponent({
     const userStore = useUserStore();
     const notificationStore = useNotificationStore();
     const router = useRouter();
-    const { translate } = useTranslatedError();
 
     const username = ref('');
     const password = ref('');
-    const errorCode = ref<string | null>(null);
+    const errorMessage = ref('');
 
     const instanceName = computed(() => instanceStore.instance?.name ?? '');
-    const errorMessage = computed(() => {
-     if (!errorCode.value){
-      return '';
-     };
-     return translate(errorCode.value) ;
-   });
-    const onSubmit = async () => {
+
+    const doLogin = async () => {
       try {
         await userStore.login(username.value, password.value);
         if (userStore.user) {
@@ -101,15 +95,15 @@ export default defineComponent({
             params: { pmsPropertyId: propertyId },
           });
         }
-      } catch (error: any) {
-        errorCode.value = error.code;
+      } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          errorMessage.value = t('login.invalidCredentials');
+        } else {
+          errorMessage.value = t('error.unknownError');
+        }
       }
     };
 
-    watch([username, password], () => {
-      if (errorMessage.value) {
-        errorCode.value = null;      }
-    });
 
     onMounted(async () => {
       if (userStore.isSessionExpired) {
@@ -124,7 +118,7 @@ export default defineComponent({
       instanceName,
       errorMessage,
       t,
-      onSubmit,
+      doLogin,
     };
   },
 });
