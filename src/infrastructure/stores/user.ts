@@ -14,6 +14,19 @@ export const useUserStore = defineStore('user', () => {
 
   const login = async (email: string, password: string) => {
     user.value = await userService.loginAndGetUser(email, password);
+    if (user.value) {
+      CookieService.setUserCookies({
+        id: user.value.id,
+        email: user.value.email,
+        firstName: user.value.firstName,
+        defaultProperty: user.value.defaultProperty,
+        lastName: user.value.lastName,
+        lastName2: user.value.lastName2,
+        phone: user.value.phone,
+        avatar: user.value.avatar,
+        availabilityRuleFields: user.value.availabilityRuleFields || [],
+      });
+    }
   };
 
   const logout = () => {
