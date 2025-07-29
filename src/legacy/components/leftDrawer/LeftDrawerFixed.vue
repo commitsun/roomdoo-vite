@@ -205,10 +205,7 @@
           </div>
         </div>
       </div>
-      <div
-        class="support-menu"
-        @click="openLinkInNewTab(activeProperty?.supportUrl.id || 0)"
-      >
+      <div class="support-menu" @click="openLinkInNewTab(activeProperty?.supportUrl.id || 0)">
         <img src="/app-images/support-icon.svg" />
         <span>{{ activeProperty?.supportUrl.label }}</span>
       </div>
@@ -364,14 +361,15 @@ export default defineComponent({
     const openLinkInNewTab = (menuId: number) => {
       void store.dispatch('layout/showSpinner', true);
 
-      const url = `/pmsApi/properties/${activeProperty.value?.id}/menus/${menuId}`;
-      const jwt = getCookie('authorization') ?? '';
+      const url = `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi/properties/${
+        activeProperty.value?.id
+      }/menus/${menuId}`;
 
       fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${jwt}`,
+          Authorization: getCookie('jwt') || '',
           'Cache-Control': 'no-cache',
         },
       })
@@ -398,16 +396,15 @@ export default defineComponent({
         })
         .catch((err) => {
           dialogService.open({
-          header: 'Error',
-          content: err.message || 'Error al abrir el enlace',
-          btnAccept: 'Ok',
-        });
+            header: 'Error',
+            content: err.message || 'Error al abrir el enlace',
+            btnAccept: 'Ok',
+          });
         })
         .finally(() => {
           void store.dispatch('layout/showSpinner', false);
         });
     };
-
 
     return {
       route,
