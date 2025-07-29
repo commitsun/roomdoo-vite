@@ -228,6 +228,7 @@
 import { defineComponent, ref, computed, markRaw, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/_legacy/store';
+import { useUserStore } from '@/infrastructure/stores/user';
 import ReportComponent from '@/_legacy/components/reports/ReportComponent.vue';
 const UserSettingsModal = defineAsyncComponent(
   () => import('@/_legacy/components/users/UserSettings.vue')
@@ -245,6 +246,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+    const userStore = useUserStore();
     const { openSupportTab } = useSupport();
 
     const isOpen = ref(false);
@@ -298,6 +300,7 @@ export default defineComponent({
     const logout = async () => {
       await store.dispatch('user/reset', {});
       await store.dispatch('properties/reset', {});
+      void userStore.logout();
       void router.push('/login');
     };
 

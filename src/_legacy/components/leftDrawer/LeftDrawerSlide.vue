@@ -163,6 +163,7 @@ import { defineComponent, computed, ref, markRaw } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ReportComponent from '@/_legacy/components/reports/ReportComponent.vue';
 import { useStore } from '@/_legacy/store';
+import { useUserStore } from '@/infrastructure/stores/user';
 import { useSupport } from '@/_legacy/utils/useSupport';
 import { dialogService } from '@/_legacy/services/DialogService';
 
@@ -173,6 +174,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+    const userStore = useUserStore();
     const { openSupportTab } = useSupport();
     const isReportsOpened = ref(false);
     const isSettingsOpened = ref(false);
@@ -233,6 +235,7 @@ export default defineComponent({
     const logout = async () => {
       await store.dispatch('user/reset', {});
       await store.dispatch('properties/reset', {});
+      void userStore.logout();
       void router.push('/login');
     };
 
