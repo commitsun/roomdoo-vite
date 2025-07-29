@@ -6,7 +6,7 @@
         <div class="user-info">
           <span>Perfil de usuario</span>
           <span class="two-dots">:</span>
-          <span class="title-email">{{ activeUser?.email }}</span>
+          <span class="title-email">{{ activeUser?.userEmail }}</span>
         </div>
         <div class="user-settings-title-right">
           <button class="btn-save" v-if="isSomeUserDataChange" @click="saveChanges">Guardar</button>
@@ -157,7 +157,7 @@ import { defineComponent, computed, ref, onMounted, watch } from 'vue';
 import InputText from '@/_legacy/components/roomdooComponents/InputText.vue';
 import { useStore } from '@/_legacy/store';
 import { dialogService } from '@/_legacy/services/DialogService';
-import { useUserStore } from '@/infrastructure/stores/user';
+
 export default defineComponent({
   components: {
     InputText,
@@ -165,7 +165,7 @@ export default defineComponent({
 
   setup() {
     const store = useStore();
-    const userStore = useUserStore();
+
     const firstname = ref('');
     const lastname = ref('');
     const phone = ref('');
@@ -189,7 +189,7 @@ export default defineComponent({
       email: '',
     });
 
-    const activeUser = computed(() => userStore.user);
+    const activeUser = computed(() => store.state.user.activeUser);
 
     const onUserDataInput = () => {
       if (
@@ -231,15 +231,16 @@ export default defineComponent({
       void store.dispatch('layout/showSpinner', true);
       try {
         await store.dispatch('user/updateUser', {
-          userId: activeUser.value?.id,
+          userId: activeUser.value?.userId,
           userName: `${firstname.value} ${lastname.value}`,
           userPhone: phone.value,
           userEmail: email.value,
           userImageBase64: imageUrl.value ? imageUrl.value.split(',')[1] : null,
-          defaultPropertyId: activeUser.value?.defaultProperty?.id,
+          defaultPropertyId: activeUser.value?.defaultPropertyId,
+          expirationDate: activeUser.value?.expirationDate,
           availabilityRuleFields: activeUser.value?.availabilityRuleFields,
         });
-        await store.dispatch('user/fetchUser', activeUser.value?.id);
+        await store.dispatch('user/fetchUser', activeUser.value?.userId);
         await store.dispatch('user/recoverCookies');
       } catch {
         dialogService.open({
@@ -280,7 +281,7 @@ export default defineComponent({
         if (currentPassword.value && newPassword.value && repeatedPassword.value) {
           if (newPassword.value === repeatedPassword.value) {
             await store.dispatch('user/changePassword', {
-              userId: activeUser.value?.id,
+              userId: activeUser.value?.userId,
               password: currentPassword.value,
               newPassword: newPassword.value,
             });
@@ -328,10 +329,15 @@ export default defineComponent({
 
     onMounted(() => {
       if (activeUser.value) {
-        firstname.value = activeUser.value?.firstName ?? '';
-        lastname.value = [activeUser.value?.lastName, activeUser.value?.lastName2].filter(Boolean).join(' ');
-        phone.value = activeUser.value?.phone ?? '';
-        email.value = activeUser.value?.email ?? '';
+        const userName = activeUser.value.userName.split(' ');
+        const [firstName] = userName;
+        firstname.value = firstName;
+        if (userName.length > 1) {
+          const lastName = userName.slice(1).join(' ');
+          lastname.value = lastName;
+        }
+        phone.value = activeUser.value?.userPhone ?? '';
+        email.value = activeUser.value?.userEmail ?? '';
       }
       initialUserData.value = {
         firstname: firstname.value,
@@ -339,7 +345,12 @@ export default defineComponent({
         phone: phone.value,
         email: email.value,
       };
-      imageUrl.value = activeUser.value?.avatar ?? null;
+      if (activeUser.value?.userImageBase64) {
+        imageUrl.value =
+          activeUser.value?.userImageBase64 !== 'null'
+            ? `data:image/png;base64,${activeUser.value?.userImageBase64}`
+            : null;
+      }
     });
 
     return {
