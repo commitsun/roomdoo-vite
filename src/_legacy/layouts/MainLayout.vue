@@ -1,60 +1,58 @@
 <template>
-  <div id="legacy">
-    <Transition name="left-drawer-transition">
-      <LeftDrawerSlide
-        class="left-drawer"
-        v-if="leftDrawerExpanded"
-        @showUserSettingsModal="peformShowUserSettingsModal"
+  <Transition name="left-drawer-transition">
+    <LeftDrawerSlide
+      class="left-drawer"
+      v-if="leftDrawerExpanded"
+      @showUserSettingsModal="peformShowUserSettingsModal"
+    />
+  </Transition>
+  <div class="layout-container" v-if="activeUser && activeProperty">
+    <div class="left-drawer-fixed">
+      <LeftDrawerFixed />
+    </div>
+    <div class="overlay" @click="closeLeftDrawer" v-if="leftDrawerExpanded" />
+    <div class="main-container" :class="rightDrawerExpanded ? 'main-container-shrinked' : ''">
+      <router-view />
+    </div>
+    <div class="button-open-drawer" @click="openFolioList" v-if="route.name === 'planning'">
+      <img src="/app-images/icon-menu.svg" class="arrow-left-img" />
+    </div>
+  </div>
+  <Transition name="right-drawer-transition">
+    <div class="right-drawer" id="right-drawer" v-if="rightDrawerExpanded">
+      <div class="button-close-drawer" @click="closeRightDrawer">
+        <img src="/app-images/icon-menu.svg" class="arrow-right-img" />
+      </div>
+      <BookingEngine v-if="currentRightDrawerView === 'NewFolioStep1'" />
+      <FoliosList
+        v-else-if="currentRightDrawerView === 'FolioList' && isRightDrawer"
+        @moveToFirstReservation="moveToFirstReservation()"
       />
-    </Transition>
-    <div class="layout-container" v-if="activeUser && activeProperty">
-      <div class="left-drawer-fixed">
-        <LeftDrawerFixed />
-      </div>
-      <div class="overlay" @click="closeLeftDrawer" v-if="leftDrawerExpanded" />
-      <div class="main-container" :class="rightDrawerExpanded ? 'main-container-shrinked' : ''">
-        <router-view />
-      </div>
-      <div class="button-open-drawer" @click="openFolioList" v-if="route.name === 'planning'">
-        <img src="/app-images/icon-menu.svg" class="arrow-left-img" />
-      </div>
+      <FolioComponent
+        v-else-if="currentRightDrawerView === 'FolioDetail' && currentFolio"
+        @moveToReservation="moveToReservation()"
+      />
+      <AutocompleteMobile
+        v-if="currentRightDrawerView === 'PropertySelector'"
+        v-model="selectedPropertyId"
+        :items="
+          sortedProperties.map((el) => ({
+            value: el?.id ?? 0,
+            name: el?.name ?? '',
+            logo: el.hotelImageUrl ?? '',
+          }))
+        "
+        placeholder="Buscar propiedad"
+        :logoSelectedOption="initialsSelectedProperty()"
+        showLogoOptions
+      />
+      <PartnerDetail v-else-if="currentRightDrawerView === 'PartnerDetail'" />
+      <TransactionDetailMobile v-else-if="currentRightDrawerView === 'TransactionDetailMobile'" />
     </div>
-    <Transition name="right-drawer-transition">
-      <div class="right-drawer" id="right-drawer" v-if="rightDrawerExpanded">
-        <div class="button-close-drawer" @click="closeRightDrawer">
-          <img src="/app-images/icon-menu.svg" class="arrow-right-img" />
-        </div>
-        <BookingEngine v-if="currentRightDrawerView === 'NewFolioStep1'" />
-        <FoliosList
-          v-else-if="currentRightDrawerView === 'FolioList' && isRightDrawer"
-          @moveToFirstReservation="moveToFirstReservation()"
-        />
-        <FolioComponent
-          v-else-if="currentRightDrawerView === 'FolioDetail' && currentFolio"
-          @moveToReservation="moveToReservation()"
-        />
-        <AutocompleteMobile
-          v-if="currentRightDrawerView === 'PropertySelector'"
-          v-model="selectedPropertyId"
-          :items="
-            sortedProperties.map((el) => ({
-              value: el?.id ?? 0,
-              name: el?.name ?? '',
-              logo: el.hotelImageUrl ?? '',
-            }))
-          "
-          placeholder="Buscar propiedad"
-          :logoSelectedOption="initialsSelectedProperty()"
-          showLogoOptions
-        />
-        <PartnerDetail v-else-if="currentRightDrawerView === 'PartnerDetail'" />
-        <TransactionDetailMobile v-else-if="currentRightDrawerView === 'TransactionDetailMobile'" />
-      </div>
-    </Transition>
-    <Spinner :show="showSpinner" />
-    <div>
-      <UserSettingsModal v-if="showUserSettingsModal" @close="showUserSettingsModal = false" />
-    </div>
+  </Transition>
+  <Spinner :show="showSpinner" />
+  <div>
+    <UserSettingsModal v-if="showUserSettingsModal" @close="showUserSettingsModal = false" />
   </div>
 </template>
 <script lang="ts">
@@ -71,8 +69,6 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/_legacy/store';
-import { useUserStore } from '@/infrastructure/stores/user';
-
 
 const BookingEngine = defineAsyncComponent(
   () => import('@/_legacy/components/bookingEngine/BookingEngine.vue')
@@ -116,7 +112,6 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
-    const userStore = useUserStore();
     const showUserSettingsModal = ref(false);
     const peformShowUserSettingsModal = () => {
       showUserSettingsModal.value = true;
@@ -133,7 +128,7 @@ export default defineComponent({
     provide('moveToFirstReservation', isMoveToFirstReservation);
     provide('selectedPropertyIdFromRightSelector', selectedPropertyId);
 
-    const activeUser = computed(() => userStore.user);
+    const activeUser = computed(() => store.state.user.activeUser);
     const activeProperty = computed(() => store.state.properties.activeProperty);
     const activePricelist = computed(() => store.state.pricelists.activePricelist);
     const rightDrawerExpanded = computed(() => store.state.layout.rightDrawerExpanded);
@@ -147,10 +142,10 @@ export default defineComponent({
 
     const sortedProperties = computed(() => {
       const result = store.state.properties.properties.filter(
-        (el) => el.id !== (activeUser.value?.defaultProperty?.id as number | undefined)
+        (el) => el.id !== activeUser.value?.defaultPropertyId
       );
       const defaultProperty = store.state.properties.properties.find(
-        (el) => el.id === (activeUser.value?.defaultProperty?.id as number | undefined)
+        (el) => el.id === activeUser.value?.defaultPropertyId
       );
       if (defaultProperty) {
         result.unshift(defaultProperty);
@@ -241,25 +236,15 @@ export default defineComponent({
       }
     });
 
-    watch(() =>activeUser.value, (newUser, oldUser) => {
-      if (oldUser && !newUser) {
-        void store.dispatch('layout/showSpinner', false);
-        router.push({
-          name: 'login',
-          params: { pmsPropertyId: route.params.pmsPropertyId },
-        });
-      }
-    });
-
     onBeforeMount(async () => {
       console.log(
         'onBeforeMount MainLayout before recovering cookies',
-        activeUser.value
+        store.state.user.activeUser
       );
-      if (!activeUser.value) {
-        userStore.recoverFromCookies();
+      if (!store.state.user.activeUser) {
+        await store.dispatch('user/recoverCookies');
       }
-      console.log('onBeforeMount MainLayout after recovering cookies', activeUser.value);
+      console.log('onBeforeMount MainLayout after recovering cookies', store.state.user.activeUser);
       console.log('*****');
       if (!activeUser.value) {
         console.log('onBeforeMount MainLayout before redirect to login');
@@ -288,7 +273,7 @@ export default defineComponent({
           parseInt(route.params.pmsPropertyId as string, 10)
         );
       } else {
-        await store.dispatch('properties/setActiveProperty', activeUser.value?.defaultProperty);
+        await store.dispatch('properties/setActiveProperty', activeUser.value?.defaultPropertyId);
       }
     });
 
@@ -309,7 +294,6 @@ export default defineComponent({
     });
 
     return {
-      userStore,
       showUserSettingsModal,
       peformShowUserSettingsModal,
       closeRightDrawer,
