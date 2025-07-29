@@ -62,6 +62,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import { useRouter } from 'vue-router';
 import { useNotificationStore } from '@/infrastructure/stores/notification';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
+import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 
 export default defineComponent({
   components: {
@@ -88,6 +89,7 @@ export default defineComponent({
     const doLogin = async () => {
       try {
         await userStore.login(username.value, password.value);
+        await useLegacyStore().doVuexLogin(username.value, password.value);
         if (userStore.user) {
           const propertyId = parseInt(userStore.user.defaultProperty.id, 10);
           await router.push({
