@@ -1,6 +1,5 @@
 import type { User } from '@/domain/entities/User';
 import type { UserRepository } from '@/domain/repositories/UserRepository';
-import { CookieService } from '@/infrastructure/cookies/CookieService';
 
 export class UserService {
   constructor(private userRepository: UserRepository) {}
@@ -21,7 +20,6 @@ export class UserService {
       availabilityRuleFields,
     };
 
-    CookieService.setUserCookies(userWithFields);
     return userWithFields;
   }
 
