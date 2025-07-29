@@ -116,17 +116,6 @@ export default {
       } catch {
         void store.dispatch('layout/showSpinner', false);
       }
-      // need this fetch to get /pmsApi bearer token
-        fetch('/pmsApi/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: email.value,
-            password: password.value,
-          }),
-        });
     };
 
     const sendMailToResetPassword = () => {
