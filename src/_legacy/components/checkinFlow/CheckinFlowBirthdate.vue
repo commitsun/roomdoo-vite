@@ -109,7 +109,7 @@ import DatePicker from 'primevue/datepicker';
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 import utilsDates from '@/_legacy/utils/dates';
 import { useStore } from '@/_legacy/store';
-import { getLocale } from '@/ui/plugins/i18n';
+import { getLocale } from '@/infrastructure/plugins/i18n';
 
 export default defineComponent({
   components: {
