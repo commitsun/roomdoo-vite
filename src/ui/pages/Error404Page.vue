@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { SUPPORTED_LOCALES, i18n } from '@/ui/plugins/i18n';
+import { SUPPORTED_LOCALES, i18n } from '@/infrastructure/plugins/i18n';
 import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
 import AppSelect from 'primevue/select';
 
