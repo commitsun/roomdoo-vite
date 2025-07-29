@@ -42,15 +42,12 @@
     "message": "Sorry, the page you are looking for does not exist or has been moved.",
     "button": "Go to home"
   },
+  "error": {
+    "unknownError": "An unknown error occurred"
+  },
   "validation": {
     "WRONG_CREDENTIALS": "Invalid credentials",
     "UNKNOWN_ERROR": "An unexpected error occurred.",
     "INVALID_TOKEN": "The token has expired or is not valid"
-  },
-  "REQUIRED_PASSWORD": "Password is required",
-  "MINIMUM_CHARS": "Minimum 8 characters",
-  "PASSWORD_LETTER_REQUIRED": "Password must contain at least one letter",
-  "PASSWORD_NUMBER_REQUIRED": "Password must contain at least one number",
-  "REQUIRED_CONFIRM_PASSWORD": "Password confirmation is required",
-  "PASSWORDS_DO_NOT_MATCH": "Passwords do not match"
+  }
 }

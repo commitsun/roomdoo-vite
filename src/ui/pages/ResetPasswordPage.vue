@@ -18,13 +18,13 @@
         <IconField>
           <InputIcon class="pi pi-lock" />
           <Password
-            v-model="password"
+            v-model="firstPassword"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
             :placeholder="t('resetPassword.password')"
             :promptLabel="t('resetPassword.enter_password')"
             toggleMask
-            @blur="passwordBlur"
+            @blur="firstPasswordBlur"
           >
             <template #header>
               <div class="font-semibold text-xm mb-4">
@@ -49,13 +49,13 @@
         <IconField>
           <InputIcon class="pi pi-lock" />
           <Password
-            v-model="confirmPassword"
+            v-model="secondPassword"
             :placeholder="t('resetPassword.password')"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
             :promptLabel="t('resetPassword.enter_password')"
             toggleMask
-            @blur="confirmPasswordBlur"
+            @blur="secondPasswordBlur"
           >
             <template #header>
               <div class="font-semibold text-xm mb-4">
@@ -74,16 +74,19 @@
         </IconField>
       </div>
       <Message
-        v-if="passwordError || confirmPasswordError"
+        v-if="firstPasswordError || secondPasswordError"
         severity="error"
       >
-        {{ t(passwordError || confirmPasswordError) }}
+        {{ t(firstPasswordError || secondPasswordError) }}
+      </Message>
+      <Message v-if="errorMessage" severity="error">
+        {{ errorMessage }}
       </Message>
       <div class="button">
         <Button
           :label="t('resetPassword.save_password')"
           :disabled="!isFormValid"
-          @click="() => handleSubmit(onSubmit)()"
+          @click="() => handleSubmit(resetPassword)()"
         />
       </div>
       <div class="back-link">
@@ -100,11 +103,11 @@ import { useI18n } from 'vue-i18n';
 import { IconField, InputIcon, InputText, Password, Button, Select, Divider, Message } from 'primevue';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { resetPasswordSchema } from '@/application/validation/UserSchemas';
+import { resetPasswordSchema } from '@/application/user/UserSchemas';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from '@/infrastructure/stores/notification';
-import { useTranslatedError } from '@/ui/composables/useTranslatedValidationError';
+import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 
 export default defineComponent({
   components: {
@@ -123,13 +126,13 @@ export default defineComponent({
     const router = useRouter();
     const userStore = useUserStore();
     const notificationStore = useNotificationStore();
-    const { translate } = useTranslatedError();
+    const errorMessage = ref('');
 
     const { handleSubmit } = useForm({
       validationSchema: toTypedSchema(resetPasswordSchema),
     });
 
-    const { value: password, errorMessage: passwordError, handleBlur: passwordBlur } = useField('password', undefined, {
+    const { value: firstPassword, errorMessage: firstPasswordError, handleBlur: firstPasswordBlur } = useField('firstPassword', undefined, {
       validateOnValueUpdate: false,
     }) as {
       value: Ref<string>;
@@ -137,7 +140,7 @@ export default defineComponent({
       handleBlur: () => void;
     };
 
-    const { value: confirmPassword, errorMessage: confirmPasswordError, handleBlur: confirmPasswordBlur } = useField('confirmPassword', undefined, {
+    const { value: secondPassword, errorMessage: secondPasswordError, handleBlur: secondPasswordBlur } = useField('secondPassword', undefined, {
       validateOnValueUpdate: false,
     }) as {
       value: Ref<string>;
@@ -145,32 +148,37 @@ export default defineComponent({
       handleBlur: () => void;
     };
 
-    const onSubmit = async () => {
+    const resetPassword = async () => {
       try {
-        await userStore.resetPassword(password.value, route.query.token as string);
+        await userStore.resetPassword(firstPassword.value, route.query.token as string);
         notificationStore.add(t('resetPassword.password_changed'), 'success');
         router.push('/login');
-      } catch (error: any) {
-        notificationStore.add(translate(error.code) || t('UNKNOWN_ERROR'), 'error');
+      } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          errorMessage.value = t('resetPassword.invalidToken');
+        } else {
+          errorMessage.value = t('error.unknownError');
+        }
       }
     };
 
     const isFormValid = computed(() => {
-      return password.value && confirmPassword.value;
+      return firstPassword.value && secondPassword.value;
     });
 
 
     return {
-      password,
-      passwordError,
-      confirmPassword,
-      confirmPasswordError,
+      firstPassword,
+      firstPasswordError,
+      secondPassword,
+      secondPasswordError,
       isFormValid,
       handleSubmit,
+      errorMessage,
       t,
-      passwordBlur,
-      confirmPasswordBlur,
-      onSubmit,
+      firstPasswordBlur,
+      secondPasswordBlur,
+      resetPassword,
     };
   },
 });
