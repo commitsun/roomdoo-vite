@@ -349,7 +349,6 @@ import { usePlanning } from '@/_legacy/utils/usePlanning';
 import { localeSpain } from '@/_legacy/utils/dates';
 import utils from '@/_legacy/utils/utils';
 import { dialogService } from '@/_legacy/services/DialogService';
-import { useUserStore } from '@/infrastructure/stores/user';
 
 export default defineComponent({
   components: {
@@ -367,7 +366,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { refreshPlanning } = usePlanning();
-    const userStore = useUserStore();
+
     const optionsCapacities = [
       {
         id: 1,
@@ -431,7 +430,7 @@ export default defineComponent({
         rightDrawerExpanded.value
     );
 
-    const activeUser = computed(() => userStore.user);
+    const activeUser = computed(() => store.state.user.activeUser);
     const activeProperty = computed(() => store.state.properties.activeProperty);
     const properties = computed(() => store.state.properties.properties);
     const pricelists = computed(() => store.state.pricelists.dailyPricelists);
@@ -475,10 +474,10 @@ export default defineComponent({
 
     const sortedProperties = computed(() => {
       const result = store.state.properties.properties.filter(
-        (el) => el.id !== (activeUser.value?.defaultProperty?.id as number | undefined)
+        (el) => el.id !== activeUser.value?.defaultPropertyId
       );
       const defaultProperty = store.state.properties.properties.find(
-        (el) => el.id === (activeUser.value?.defaultProperty?.id as number | undefined)
+        (el) => el.id === activeUser.value?.defaultPropertyId
       );
       if (defaultProperty) {
         result.unshift(defaultProperty);
