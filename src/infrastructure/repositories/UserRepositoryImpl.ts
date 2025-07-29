@@ -8,7 +8,7 @@ export class UsersRepositoryImpl implements UserRepository {
   }
 
   async fetchUser(): Promise<User> {
-    const response = await api.get('user');
+    const response = await api.get('/user');
     const user = response.data;
     user.avatar = user.image;
     delete user.image;
@@ -16,7 +16,7 @@ export class UsersRepositoryImpl implements UserRepository {
   }
 
   async fetchAvailabilityRuleFields(): Promise<string[]> {
-    const response = await api.get('user/availability-rule-fields');
+    const response = await api.get('/user/availability-rule-fields');
     return response.data.map((field: { name: string }) => field.name);
   }
 

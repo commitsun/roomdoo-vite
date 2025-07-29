@@ -23,8 +23,9 @@ import { i18n, updateI18nAvailableLocales, SUPPORTED_LOCALES } from '@/infrastru
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useRouter } from 'vue-router';
-import { AppError } from '@/application/AppError';
 import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
+import { InternalServerError } from '@/application/shared/InternalServerError';
+import { UnknownError } from '@/application/shared/UnknownError';
 const router = useRouter();
 const instanceStore = useInstanceStore();
 const uiStore = useUIStore();
@@ -52,9 +53,7 @@ onMounted(async () => {
     selectedLocale.value = foundLocale || locales.value[0];
     updateAppLocale(selectedLocale.value.value);
   } catch (err) {
-    if (err instanceof AppError) {
-      router.push({ name: 'hotel-not-found' });
-    }
+    router.push({ name: 'hotel-not-found' });
   } finally {
     uiStore.stopLoading();
   }
