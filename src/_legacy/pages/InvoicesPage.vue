@@ -248,7 +248,6 @@ import { usePartner } from '@/_legacy/utils/usePartner';
 import { useInvoices } from '@/_legacy/utils/useInvoices';
 import { dialogService } from '@/_legacy/services/DialogService';
 import { useStore } from '@/_legacy/store';
-import { useUserStore } from '@/infrastructure/stores/user';
 import InvoiceMailComponent from '@/_legacy/components/mails/InvoiceMailComponent.vue';
 
 export default defineComponent({
@@ -269,7 +268,7 @@ export default defineComponent({
     const router = useRouter();
     const { fetchPartners } = usePartner();
     const { fetchInvoices } = useInvoices();
-    const userStore = useUserStore();
+
     const rules = {
       email: {
         email,
@@ -331,16 +330,16 @@ export default defineComponent({
     const totalInvoices = computed(() => store.state.invoices.totalInvoices);
     const agencies = computed(() => store.state.agencies.agencies);
     const total = computed(() => store.state.invoices.total);
-    const activeUser = computed(() => userStore.user);
+    const activeUser = computed(() => store.state.user.activeUser);
     const properties = computed(() => store.state.properties.properties);
     const imageActiveProperty = computed(() => activeProperty.value?.hotelImageUrl);
     const partnersComputed = computed(() => store.state.partners.partners);
     const sortedProperties = computed(() => {
       const result = store.state.properties.properties.filter(
-        (el) => el.id !== (activeUser.value?.defaultProperty?.id as number | undefined)
+        (el) => el.id !== activeUser.value?.defaultPropertyId
       );
       const defaultProperty = store.state.properties.properties.find(
-        (el) => el.id === (activeUser.value?.defaultProperty?.id as number | undefined)
+        (el) => el.id === activeUser.value?.defaultPropertyId
       );
       if (defaultProperty) {
         result.unshift(defaultProperty);
