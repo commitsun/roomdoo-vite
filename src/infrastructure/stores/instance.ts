@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, type Ref } from 'vue';
 import { InstanceRepositoryImpl } from '../repositories/InstanceRepositoryImpl';
-import { InstanceService } from '@/application/InstanceService';
+import { InstanceService } from '@/application/instance/InstanceService';
 import type { Instance } from '@/domain/entities/Instance';
 
 const instanceRepository = new InstanceRepositoryImpl();
