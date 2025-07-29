@@ -3,7 +3,6 @@ import messages from '@intlify/unplugin-vue-i18n/messages';
 import { en_GB } from 'primelocale/js/en_GB.js';
 import { en } from 'primelocale/js/en.js';
 import { es } from 'primelocale/js/es.js';
-import { getPrimeVueApp } from '@/ui/plugins/primevue';
 
 const browserLang = window.navigator.language.toLowerCase();
 const baseLang = browserLang.substring(0, 2);
