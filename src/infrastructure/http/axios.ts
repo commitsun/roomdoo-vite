@@ -1,6 +1,7 @@
 import axios, { AxiosError, type AxiosInstance } from 'axios';
-import { HttpError } from './HttpError';
-import { useUserStore } from '@/infrastructure/stores/user';
+import { InternalServerError } from '@/application/shared/InternalServerError';
+import { UnknownError } from '@/application/shared/UnknownError';
+import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 
 const endPoint = import.meta.env.DEV
   ? '/pmsApi'
@@ -14,29 +15,17 @@ const api: AxiosInstance = axios.create({
 api.interceptors.response.use(
   (res) => res,
   async (err: AxiosError) => {
-    const status = err.response?.status ?? 500;
-    const originalRequest = err.config;
-    console.error(originalRequest);
-    const userStore = useUserStore();
-    if (
-      status === 401 &&
-      originalRequest &&
-      !(originalRequest as any)._retry &&
-      !originalRequest.url?.includes('refresh-token') &&
-      !originalRequest.url?.includes('login')
-    ) {
-      (originalRequest as any)._retry = true;
-
-      try {
-        await userStore.refreshToken();
-        return api(originalRequest);
-      } catch (refreshErr) {
-        userStore.logout();
-        userStore.setSessionExpired(true);
+    switch (err.response?.status) {
+      case 401: {
+        throw new UnauthorizedError();
+      }
+      case 500: {
+        throw new InternalServerError();
+      }
+      default: {
+        throw new UnknownError();
       }
     }
-
-    throw new HttpError(status);
   }
 );
 
