@@ -501,7 +501,7 @@ import FolioMessagesComponent from '@/_legacy/components/folios/FolioMessagesCom
 import FolioTransactions from '@/_legacy/components/folios/FolioTransactions.vue';
 import FolioCheckins from '@/_legacy/components/folios/FolioCheckins.vue';
 import FolioInvoicing from '@/_legacy/components/folios/FolioInvoicing.vue';
-import { getLocale } from '@/infrastructure/plugins/i18n';
+import { getLocale } from '@/ui/plugins/i18n';
 
 import { usePlanning } from '@/_legacy/utils/usePlanning';
 import { useRouter } from 'vue-router';
