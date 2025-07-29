@@ -1,7 +1,6 @@
 import { dialogService } from '@/_legacy/services/DialogService';
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { HttpError } from '@/infrastructure/http/HttpError';
 
 // Crear la instancia de Axios
 const endPoint = import.meta.env.DEV
@@ -46,7 +45,6 @@ api.interceptors.response.use(
         const userStore = useUserStore();
         userStore.logout();
         userStore.setSessionExpired(true);
-        throw new HttpError(401);
       }
     } else {
         dialogService.open({

@@ -42,16 +42,12 @@
     "message": "Lo sentimos, la página que estás buscando no existe o ha sido movida.",
     "button": "Volver al inicio"
   },
+  "error": {
+    "unknownError": "Se ha producido un error desconocido"
+  },
   "validation": {
     "WRONG_CREDENTIALS": "Credenciales no válidas",
     "UNKNOWN_ERROR": "Se ha producido un error desconocido",
     "INVALID_TOKEN": "El token ha caducado o no es válido"
-  },
-  "REQUIRED_PASSWORD": "La contraseña es requerida",
-  "MINIMUM_CHARS": "Mínimo 8 caracteres",
-  "PASSWORD_LETTER_REQUIRED": "La contraseña debe contener al menos una letra",
-  "PASSWORD_NUMBER_REQUIRED": "La contraseña debe contener al menos un número",
-  "REQUIRED_CONFIRM_PASSWORD": "La confirmación de contraseña es requerida",
-  "PASSWORDS_DO_NOT_MATCH": "Las contraseñas no coinciden"
-  
+  }
 }
