@@ -68,8 +68,8 @@
         <div class="avatar-container">
           <img
             class="user-avatar"
-            :src="activeUser?.avatar"
-            v-if="activeUser?.avatar"
+            :src="activeUser?.userImageUrl"
+            v-if="activeUser?.userImageUrl && activeUser?.userImageUrl !== 'null'"
           />
           <img v-else class="user-avatar" src="/app-images/avatar.png" />
         </div>
@@ -154,6 +154,14 @@
             <span @click="openReportsDialog('transactions')"> Pagos </span>
             <span @click="openReportsDialog('INE')"> INE </span>
           </div>
+          <div
+            class="item-container hidden"
+            :class="route.fullPath === '/settings' ? 'selected' : ''"
+            @click="navigateTo('/settings' + endPath)"
+          >
+            <div class="item icon-settings" />
+            <span>Ajustes</span>
+          </div>
         </div>
       </div>
       <div class="support-menu" @click="openSupportTab()">
@@ -186,18 +194,18 @@
           <div class="avatar-container-expanded">
             <img
               class="user-avatar-expanded"
-              :src="activeUser?.avatar"
-              v-if="activeUser?.avatar"
+              :src="activeUser?.userImageUrl"
+              v-if="activeUser?.userImageUrl && activeUser?.userImageUrl !== 'null'"
             />
             <img class="user-avatar-expanded" src="/app-images/avatar.png" v-else />
           </div>
           <div class="user-info">
             <div class="user-name">
-              {{ activeUser?.firstName }} {{ activeUser?.lastName }} {{ activeUser?.lastName2 }}
+              {{ activeUser?.userName }}
             </div>
             <div class="user-email">
               <span>
-                {{ activeUser?.email }}
+                {{ activeUser?.userEmail }}
               </span>
             </div>
           </div>
@@ -226,7 +234,6 @@ const UserSettingsModal = defineAsyncComponent(
 );
 import { useSupport } from '@/_legacy/utils/useSupport';
 import { dialogService } from '@/_legacy/services/DialogService';
-import { useUserStore } from '@/infrastructure/stores/user';
 
 export default defineComponent({
   components: {
@@ -239,14 +246,14 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     const { openSupportTab } = useSupport();
-    const userStore = useUserStore();
+
     const isOpen = ref(false);
     const isReportsOpened = ref(false);
     const isSettingsOpened = ref(false);
     const showUserSettingsModal = ref(false);
 
     const activeProperty = computed(() => store.state.properties.activeProperty);
-    const activeUser = computed(() => userStore.user);
+    const activeUser = computed(() => store.state.user.activeUser);
 
     const endPath = computed(() => {
       let result = '';
@@ -289,8 +296,9 @@ export default defineComponent({
     };
 
     const logout = async () => {
-      userStore.logout();
+      await store.dispatch('user/reset', {});
       await store.dispatch('properties/reset', {});
+      void router.push('/login');
     };
 
     const closeExpanded = () => {

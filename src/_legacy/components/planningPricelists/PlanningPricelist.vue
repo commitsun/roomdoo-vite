@@ -4,7 +4,7 @@
       <div
         class="room-left"
         :class="{ hidden: !roomTypeIdsToFilter.includes(el.roomTypeId) }"
-        v-for="el in planningPricesRules.filter((el, index) => index <= 4)"
+        v-for="el in planningPricesRules"
         :key="el.roomTypeId"
         :style="{
           'min-height': `${70 + numRulesToView * 20}px`,
@@ -25,7 +25,7 @@
     <div class="calendar" ref="calendarElement" id="calendar-pricelists">
       <div
         class="row-planning"
-        v-for="(el, indexRoomType) in planningPricesRules.filter((el, index) => index <= 4)"
+        v-for="(el, indexRoomType) in planningPricesRules"
         :key="el.roomTypeId"
         :class="{ hidden: !roomTypeIdsToFilter.includes(el.roomTypeId) }"
       >
@@ -132,7 +132,6 @@ import { type AvailabilityPlanRuleInterface } from '@/_legacy/interfaces/Availab
 import CellPricelistItemAvailabilityPlanRule from './CellPricelistItemAvailabilityPlanRule.vue';
 
 import { useStore } from '@/_legacy/store';
-import { useUserStore } from '@/infrastructure/stores/user';
 import { dialogService } from '@/_legacy/services/DialogService';
 
 export default defineComponent({
@@ -153,7 +152,7 @@ export default defineComponent({
   },
   setup(props, context) {
     const store = useStore();
-    const userStore = useUserStore();
+
     let contReset = 0;
 
     const reset = ref(false);
@@ -206,7 +205,7 @@ export default defineComponent({
     });
 
     const numRulesToView = computed(
-      () => userStore.user?.availabilityRuleFields?.length || 0
+      () => store.state.user.activeUser?.availabilityRuleFields?.length || 0
     );
 
     const roomTypes = computed(() =>
@@ -548,9 +547,6 @@ export default defineComponent({
       display: flex;
       align-items: center;
       width: 100%;
-      &.hidden {
-        display: none;
-      }
       .room-info {
         display: flex;
         justify-content: space-between;
@@ -575,9 +571,6 @@ export default defineComponent({
     .row-planning {
       display: flex;
       max-width: 900px;
-      &.hidden {
-        display: none;
-      }
       .date {
         min-width: 140px;
         padding: 0.3rem;
