@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import { type Ref, onMounted, ref, watch } from 'vue';
 import AppSelect from 'primevue/select';
-import { i18n, updateI18nAvailableLocales, SUPPORTED_LOCALES } from '@/ui/plugins/i18n';
+import { i18n, updateI18nAvailableLocales, SUPPORTED_LOCALES } from '@/infrastructure/plugins/i18n';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useRouter } from 'vue-router';
