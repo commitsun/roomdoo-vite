@@ -326,7 +326,6 @@ import useVuelidate from '@vuelidate/core';
 import { required, integer, decimal, minValue } from '@vuelidate/validators';
 import AdvancedPricelistItemEdit from '@/_legacy/components/planningPricelists/AdvancedPricelistItemEdit.vue';
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
-import { useUserStore } from '@/infrastructure/stores/user';
 
 import { useStore } from '@/_legacy/store';
 
@@ -428,8 +427,7 @@ export default defineComponent({
     const closedDeparture = ref(false);
     const showEditOption = ref(false);
 
-    const userStore = useUserStore();
-    const activeUser = computed(() => userStore.user);
+    const activeUser = computed(() => store.state.user.activeUser);
     const availabilityRuleFields = activeUser.value?.availabilityRuleFields;
 
     const activePricelist = computed(() => store.state.pricelists.activePricelist);
@@ -477,55 +475,55 @@ export default defineComponent({
       let rdo = 0;
       if (
         props.initialQuota !== -1 &&
-        !activeUser.value?.availabilityRuleFields?.includes('quota')
+        !activeUser.value?.availabilityRuleFields.includes('quota')
       ) {
         rdo += 1;
       }
       if (
         props.initialMaxAvail !== -1 &&
-        !activeUser.value?.availabilityRuleFields?.includes('max_avail')
+        !activeUser.value?.availabilityRuleFields.includes('max_avail')
       ) {
         rdo += 1;
       }
       if (
         props.initialMinStay !== 0 &&
-        !activeUser.value?.availabilityRuleFields?.includes('min_stay')
+        !activeUser.value?.availabilityRuleFields.includes('min_stay')
       ) {
         rdo += 1;
       }
       if (
         props.initialMaxStay !== 0 &&
-        !activeUser.value?.availabilityRuleFields?.includes('max_stay')
+        !activeUser.value?.availabilityRuleFields.includes('max_stay')
       ) {
         rdo += 1;
       }
       if (
         props.initialMinStayArrival !== 0 &&
-        !activeUser.value?.availabilityRuleFields?.includes('min_stay_arrival')
+        !activeUser.value?.availabilityRuleFields.includes('min_stay_arrival')
       ) {
         rdo += 1;
       }
       if (
         props.initialMaxStayArrival !== 0 &&
-        !activeUser.value?.availabilityRuleFields?.includes('max_stay_arrival')
+        !activeUser.value?.availabilityRuleFields.includes('max_stay_arrival')
       ) {
         rdo += 1;
       }
       if (
         props.initialClosed !== false &&
-        !activeUser.value?.availabilityRuleFields?.includes('closed')
+        !activeUser.value?.availabilityRuleFields.includes('closed')
       ) {
         rdo += 1;
       }
       if (
         props.initialClosedArrival !== false &&
-        !activeUser.value?.availabilityRuleFields?.includes('closed_arrival')
+        !activeUser.value?.availabilityRuleFields.includes('closed_arrival')
       ) {
         rdo += 1;
       }
       if (
         props.initialClosedDeparture !== false &&
-        !activeUser.value?.availabilityRuleFields?.includes('closed_departure')
+        !activeUser.value?.availabilityRuleFields.includes('closed_departure')
       ) {
         rdo += 1;
       }

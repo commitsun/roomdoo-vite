@@ -409,7 +409,6 @@ import { useStore } from '@/_legacy/store';
 
 import { dialogService } from '@/_legacy/services/DialogService';
 import InternalTransfer from '@/_legacy/components/transactions/InternalTransfer.vue';
-import { useUserStore } from '@/infrastructure/stores/user';
 
 export default defineComponent({
   components: {
@@ -426,7 +425,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const router = useRouter();
-    const userStore = useUserStore();
+
     const limit = 20;
     const transactionTypes = [
       { id: 0, name: 'Cobro cliente' },
@@ -473,7 +472,7 @@ export default defineComponent({
     const total = computed(() => store.state.transactions.total);
     const cashRegister = computed(() => store.state.cashRegister.cashRegister);
     const cashRegisterResult = computed(() => store.state.cashRegister.cashRegisterResult);
-    const activeUser = computed(() => userStore.user);
+    const activeUser = computed(() => store.state.user.activeUser);
 
     const numFiltersApplied = computed(() => {
       const numFilters = selectedJournalIds.value.length + selectedTransactionTypesIds.value.length;
@@ -497,10 +496,10 @@ export default defineComponent({
 
     const sortedProperties = computed(() => {
       const result = store.state.properties.properties.filter(
-        (el) => el.id !== (activeUser.value?.defaultProperty?.id as number | undefined)
+        (el) => el.id !== activeUser.value?.defaultPropertyId
       );
       const defaultProperty = store.state.properties.properties.find(
-        (el) => el.id === (activeUser.value?.defaultProperty?.id as number | undefined)
+        (el) => el.id === activeUser.value?.defaultPropertyId
       );
       if (defaultProperty) {
         result.unshift(defaultProperty);
