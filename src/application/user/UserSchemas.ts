@@ -1,24 +1,24 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  username: z.string().min(1, 'REQUIRED_USERNAME'),
-  password: z.string().min(1, 'REQUIRED_PASSWORD'),
+  username: z.string().min(1, 'validation.requiredUsername'),
+  password: z.string().min(1, 'validation.requiredPassword'),
 });
 
 export const resetPasswordSchema = z.object({
   firstPassword: z
     .string()
-    .min(1, 'REQUIRED_PASSWORD')
-    .min(8, 'MINIMUM_CHARS')
-    .regex(/[a-zA-Z]/, 'PASSWORD_LETTER_REQUIRED')
-    .regex(/\d/, 'PASSWORD_NUMBER_REQUIRED'),
+    .min(1, 'validation.requiredPassword')
+    .min(8, { message: `validation.minimumChars:${8}` })
+    .regex(/[a-zA-Z]/, 'validation.passwordLetterRequired')
+    .regex(/\d/, 'validation.passwordNumberRequired'),
   secondPassword: z
     .string()
-    .min(1, 'REQUIRED_CONFIRM_PASSWORD')
-    .min(8, 'MINIMUM_CHARS')
-    .regex(/[a-zA-Z]/, 'PASSWORD_LETTER_REQUIRED')
-    .regex(/\d/, 'PASSWORD_NUMBER_REQUIRED'),
+    .min(1, 'validation.requiredPassword')
+    .min(8, { message: `validation.minimumChars:${8}` })
+    .regex(/[a-zA-Z]/, 'validation.passwordLetterRequired')
+    .regex(/\d/, 'validation.passwordNumberRequired'),
 }).refine((data) => data.firstPassword === data.secondPassword, {
-  message: 'PASSWORDS_DO_NOT_MATCH',
+  message: 'validation.passwordsDontMatch',
   path: ['secondPassword'],
 });

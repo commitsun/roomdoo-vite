@@ -31,7 +31,5 @@ export class UserService {
       await this.userRepository.resetPassword(password, token);
 
   }
-  refreshToken(): Promise<void> {
-    return this.userRepository.refreshToken();
-  }
+
 }

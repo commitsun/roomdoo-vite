@@ -17,9 +17,9 @@ export const authRoutes: RouteRecordRaw[] = [
         component: () => import('@/ui/pages/ResetPasswordPage.vue'),
       },
       {
-        name: 'request-password',
-        path: '/request-password/:pmsPropertyId(\\d+)?',
-        component: () => import('@/ui/pages/RequestPasswordPage.vue'),
+        name: 'request-reset-password',
+        path: '/request-reset-password/:pmsPropertyId(\\d+)?',
+        component: () => import('@/ui/pages/RequestResetPasswordPage.vue'),
       },
     ],
   },

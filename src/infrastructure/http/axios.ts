@@ -2,6 +2,7 @@ import axios, { AxiosError, type AxiosInstance } from 'axios';
 import { InternalServerError } from '@/application/shared/InternalServerError';
 import { UnknownError } from '@/application/shared/UnknownError';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
+import { BadRequestError } from '@/application/shared/BadRequestError';
 
 const endPoint = import.meta.env.DEV
   ? '/pmsApi'
@@ -16,6 +17,9 @@ api.interceptors.response.use(
   (res) => res,
   async (err: AxiosError) => {
     switch (err.response?.status) {
+      case 400: {
+        throw new BadRequestError();
+      }
       case 401: {
         throw new UnauthorizedError();
       }
