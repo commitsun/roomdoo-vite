@@ -46,7 +46,7 @@
         />
       </div>
       <div class="link">
-        <a href="/request-password">
+        <a href="/request-reset-password">
           {{ t('login.forgotPassword') }}
         </a>
       </div>
@@ -105,14 +105,6 @@ export default defineComponent({
         }
       }
     };
-
-
-    onMounted(async () => {
-      if (userStore.isSessionExpired) {
-        notificationStore.add(t('login.sessionExpired'), 'error');
-        userStore.setSessionExpired(false);
-      }
-    });
 
     return {
       username,
