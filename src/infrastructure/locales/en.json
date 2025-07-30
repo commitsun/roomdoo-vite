@@ -17,25 +17,26 @@
   },
   "resetPassword": {
     "title": "Reset password",
-    "new_password": "New password",
+    "newPassword": "New password",
     "password": "Password",
-    "enter_password": "Enter a password",
-    "choose_new_password": "Choose a new password",
-    "minimum_chars": "Minimum {count} characters",
-    "password_letter_required": "Password must contain at least one letter",
-    "password_number_required": "Password must contain at least one number",
-    "repeat_new_password": "Repeat password",
-    "save_password": "Save password",
-    "back_to_login": "Back to login",
-    "password_changed": "The password has been changed successfully"
+    "enterPassword": "Enter a password",
+    "chooseNewPassword": "Choose a new password",
+    "minimumChars": "Minimum {count} characters",
+    "passwordLetterRequired": "Password must contain at least one letter",
+    "passwordNumberRequired": "Password must contain at least one number",
+    "repeatNewPassword": "Repeat password",
+    "savePassword": "Save password",
+    "backToLogin": "Back to login",
+    "passwordChanged": "The password has been changed successfully",
+    "invalidToken": "The link has expired or is invalid"
   },
-  "request_password": {
+  "requestResetPassword": {
     "title": "Introduce your email or username to reset your password",
     "username": "Username",
     "email": "Email",
-    "send_request": "Send request",
-    "back_to_login": "Back to login",
-    "request_sent": "An email has been sent to reset your password"
+    "sendRequest": "Send request",
+    "backToLogin": "Back to login",
+    "requestSent": "An email has been sent to reset your password"
   },
   "error404": {
     "title": "Page not found",
@@ -46,8 +47,13 @@
     "unknownError": "An unknown error occurred"
   },
   "validation": {
-    "WRONG_CREDENTIALS": "Invalid credentials",
-    "UNKNOWN_ERROR": "An unexpected error occurred.",
-    "INVALID_TOKEN": "The token has expired or is not valid"
+    "wrongCredentials": "Invalid credentials",
+    "unknownError": "An unexpected error occurred.",
+    "requiredUsername": "Username is required",
+    "requiredPassword": "Password is required",
+    "minimumChars": "Minimum {count} characters",
+    "passwordLetterRequired": "At least one letter is required",
+    "passwordNumberRequired": "At least one number is required",
+    "passwordsDontMatch": "Passwords do not match"
   }
 }

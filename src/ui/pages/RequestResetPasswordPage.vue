@@ -5,17 +5,17 @@
     </div>
     <div class="request-password-container">
       <div class="request-password-title">
-        {{ t('request_password.title') }}
+        {{ t('requestResetPassword.title') }}
       </div>
       <div class="input">
         <label class="label">
-          {{ t('request_password.username') }}
+          {{ t('requestResetPassword.username') }}
         </label>
         <IconField>
           <InputIcon class="pi pi-user" />
           <InputText
             v-model="username"
-            :placeholder="t('request_password.email')"
+            :placeholder="t('requestResetPassword.email')"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
           />
@@ -23,14 +23,14 @@
       </div>
       <div class="button">
         <Button
-          :label="t('request_password.send_request')"
+          :label="t('requestResetPassword.sendRequest')"
           :disabled="!username"
           @click="sendRequestPassword"
         />
       </div>
       <div class="back-link">
         <a href="/login">
-          {{ t('resetPassword.back_to_login') }}
+          {{ t('resetPassword.backToLogin') }}
         </a>
       </div>
     </div>
@@ -58,7 +58,7 @@ export default defineComponent({
     const username = ref('');
     const sendRequestPassword = async () => {
       await userStore.requestPassword(username.value);
-        notificationStore.add(t('request_password.request_sent'), 'success');
+        notificationStore.add(t('requestResetPassword.requestSent'), 'success');
       };
     return {
       username,

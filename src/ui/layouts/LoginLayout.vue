@@ -24,8 +24,7 @@ import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useRouter } from 'vue-router';
 import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
-import { InternalServerError } from '@/application/shared/InternalServerError';
-import { UnknownError } from '@/application/shared/UnknownError';
+
 const router = useRouter();
 const instanceStore = useInstanceStore();
 const uiStore = useUIStore();

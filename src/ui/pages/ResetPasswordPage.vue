@@ -13,7 +13,7 @@
       </div>
       <div class="first-input">
         <label class="label">
-          {{ t('resetPassword.new_password') }}
+          {{ t('resetPassword.newPassword') }}
         </label>
         <IconField>
           <InputIcon class="pi pi-lock" />
@@ -22,21 +22,21 @@
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
             :placeholder="t('resetPassword.password')"
-            :promptLabel="t('resetPassword.enter_password')"
+            :promptLabel="t('resetPassword.enterPassword')"
             toggleMask
             @blur="firstPasswordBlur"
           >
             <template #header>
               <div class="font-semibold text-xm mb-4">
-                {{ t('resetPassword.choose_new_password') }}
+                {{ t('resetPassword.chooseNewPassword') }}
               </div>
             </template>
             <template #footer>
               <Divider />
               <ul class="pl-2 my-0 text-sm">
-                <li>{{ t('resetPassword.minimum_chars', {count: 8}) }}</li>
-                <li>{{ t('resetPassword.password_letter_required') }}</li>
-                <li>{{ t('resetPassword.password_number_required') }}</li>
+                <li>{{ t('resetPassword.minimumChars', {count: 8}) }}</li>
+                <li>{{ t('resetPassword.passwordLetterRequired') }}</li>
+                <li>{{ t('resetPassword.passwordNumberRequired') }}</li>
               </ul>
             </template>
           </Password>
@@ -44,7 +44,7 @@
       </div>
       <div class="second-input">
         <label class="label">
-          {{ t('resetPassword.repeat_new_password') }}
+          {{ t('resetPassword.repeatNewPassword') }}
         </label>
         <IconField>
           <InputIcon class="pi pi-lock" />
@@ -53,21 +53,21 @@
             :placeholder="t('resetPassword.password')"
             :style="{ width: '100%' }"
             :inputStyle="{ width: '100%' }"
-            :promptLabel="t('resetPassword.enter_password')"
+            :promptLabel="t('resetPassword.enterPassword')"
             toggleMask
             @blur="secondPasswordBlur"
           >
             <template #header>
               <div class="font-semibold text-xm mb-4">
-                {{ t('resetPassword.repeat_new_password') }}
+                {{ t('resetPassword.repeatNewPassword') }}
               </div>
             </template>
             <template #footer>
               <Divider />
               <ul class="pl-2 my-0 text-sm">
-                <li>{{ t('resetPassword.minimum_chars', {count: 8}) }}</li>
-                <li>{{ t('resetPassword.password_letter_required') }}</li>
-                <li>{{ t('resetPassword.password_number_required') }}</li>
+                <li>{{ t('resetPassword.minimumChars', {count: 8}) }}</li>
+                <li>{{ t('resetPassword.passwordLetterRequired') }}</li>
+                <li>{{ t('resetPassword.passwordNumberRequired') }}</li>
               </ul>
             </template>
           </Password>
@@ -77,21 +77,21 @@
         v-if="firstPasswordError || secondPasswordError"
         severity="error"
       >
-        {{ t(firstPasswordError || secondPasswordError) }}
+        {{ translate(firstPasswordError || secondPasswordError) }}
       </Message>
-      <Message v-if="errorMessage" severity="error">
+      <Message v-else-if="errorMessage" severity="error">
         {{ errorMessage }}
       </Message>
       <div class="button">
         <Button
-          :label="t('resetPassword.save_password')"
+          :label="t('resetPassword.savePassword')"
           :disabled="!isFormValid"
           @click="() => handleSubmit(resetPassword)()"
         />
       </div>
       <div class="back-link">
         <a href="/login">
-          {{ t('resetPassword.back_to_login') }}
+          {{ t('resetPassword.backToLogin') }}
         </a>
       </div>
     </div>
@@ -107,7 +107,8 @@ import { resetPasswordSchema } from '@/application/user/UserSchemas';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from '@/infrastructure/stores/notification';
-import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
+import { useTranslatedError } from '../composables/useTranslatedValidationError';
+import { BadRequestError } from '@/application/shared/BadRequestError';
 
 export default defineComponent({
   components: {
@@ -126,6 +127,7 @@ export default defineComponent({
     const router = useRouter();
     const userStore = useUserStore();
     const notificationStore = useNotificationStore();
+    const { translate } = useTranslatedError();
     const errorMessage = ref('');
 
     const { handleSubmit } = useForm({
@@ -151,10 +153,10 @@ export default defineComponent({
     const resetPassword = async () => {
       try {
         await userStore.resetPassword(firstPassword.value, route.query.token as string);
-        notificationStore.add(t('resetPassword.password_changed'), 'success');
+        notificationStore.add(t('resetPassword.passwordChanged'), 'success');
         router.push('/login');
       } catch (error) {
-        if (error instanceof UnauthorizedError) {
+        if (error instanceof BadRequestError) {
           errorMessage.value = t('resetPassword.invalidToken');
         } else {
           errorMessage.value = t('error.unknownError');
@@ -179,6 +181,7 @@ export default defineComponent({
       firstPasswordBlur,
       secondPasswordBlur,
       resetPassword,
+      translate,
     };
   },
 });
