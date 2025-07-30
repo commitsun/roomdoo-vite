@@ -43,13 +43,13 @@ describe('UserService', () => {
     expect(result).toEqual({ ...user, availabilityRuleFields: fields });
   });
 
-  it('throws WRONG_CREDENTIALS if login fails with 401', async () => {
+  it('throws wrongCredentials if login fails with 401', async () => {
     const repo = createMockRepo();
     repo.login.mockRejectedValue(new HttpError(401, '/login', 'post', {}));
 
     const service = new UserService(repo);
     await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
-      code: 'WRONG_CREDENTIALS',
+      code: 'wrongCredentials',
     });
   });
 
@@ -76,13 +76,13 @@ describe('UserService', () => {
     });
   });
 
-  it('throws UNKNOWN_ERROR on unexpected login error', async () => {
+  it('throws unknownError on unexpected login error', async () => {
     const repo = createMockRepo();
     repo.login.mockRejectedValue(new Error('boom'));
 
     const service = new UserService(repo);
     await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
-      code: 'UNKNOWN_ERROR',
+      code: 'unknownError',
     });
   });
 });
