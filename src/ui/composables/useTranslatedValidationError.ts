@@ -15,11 +15,8 @@ export function useTranslatedError() {
 
     const namedParams: Record<string, string> = {};
 
-    // Try to infer param name from key (e.g. MAX_GUESTS → { max_guests: value })
-    const paramKey = key.split('.').pop()?.toLowerCase() || 'value';
-
     if (params) {
-      namedParams[paramKey] = params;
+      namedParams["count"] = params;
     }
 
     const translated = t(key, namedParams);

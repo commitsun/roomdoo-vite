@@ -27,8 +27,4 @@ export class UsersRepositoryImpl implements UserRepository {
   async resetPassword(password: string, token: string): Promise<void> {
     await api.patch('/reset-password', { newPassword: password, resetToken: token });
   }
-
-  async refreshToken(): Promise<void> {
-    await api.post('/refresh-token');
-  }
 }
