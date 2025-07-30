@@ -29,11 +29,6 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  const logout = () => {
-    user.value = null;
-    CookieService.clearUserCookies();
-  };
-
   const requestPassword = async (email: string) => {
     await userService.requestPassword(email);
   };
@@ -42,21 +37,6 @@ export const useUserStore = defineStore('user', () => {
     await userService.resetPassword(password, token);
   }
 
-  const recoverFromCookies = () => {
-    const recoveredUser = CookieService.recoverUserFromCookies();
-    if (recoveredUser) {
-      user.value = recoveredUser;
-    }
-  };
 
-  const refreshToken = async () => {
-      await userService.refreshToken();
-  }
-
-  const setSessionExpired = (value: boolean) => {
-    isSessionExpired.value = value;
-  };
-
-
-  return { user,isSessionExpired, login, logout, requestPassword, resetPassword, recoverFromCookies, refreshToken, setSessionExpired,  };
+  return { user,isSessionExpired, login, requestPassword, resetPassword  };
 });
