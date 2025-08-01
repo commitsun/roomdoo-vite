@@ -22,9 +22,9 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
       .then((response: AxiosResponse<UserInfoInterface>) => {
         if (response.data && response.data.token) {
           if (!response.data.code) {
-            const jwt = `Bearer ${response.data.token}`;
+            // const jwt = `Bearer ${response.data.token}`;
             context.commit('SET_CURRENT_USER', response.data);
-            setCookie('jwt', jwt);
+            // setCookie('jwt', jwt);
             setCookie('expirationDate', response.data.expirationDate.toString());
             setCookie('defaultPropertyId', response.data.defaultPropertyId.toString());
             setCookie('userId', response.data.userId.toString());
@@ -59,7 +59,7 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
   },
   recoverCookies(context): void {
     console.log(context);
-    const jwt = getCookie('jwt');
+    // const jwt = getCookie('jwt');
     const expirationDate = getCookie('expirationDate');
     const defaultPropertyId = getCookie('defaultPropertyId');
     const userId = getCookie('userId');
@@ -75,7 +75,7 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
     console.log('allCookies from user/recoverCookies', allCookies);
 
     if (
-      jwt &&
+      // jwt &&
       expirationDate &&
       defaultPropertyId &&
       userId &&
@@ -90,7 +90,7 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
       ) {
         console.log('cookie is not expired');
         context.commit('SET_CURRENT_USER', {
-          jwt,
+          // jwt,
           expirationDate,
           defaultPropertyId,
           userId,
@@ -102,9 +102,9 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
           availabilityRuleFields,
           userImageUrl,
         });
-        Object.assign(api.defaults, {
-          headers: { Authorization: jwt, 'Content-Type': 'application/json' },
-        });
+        // Object.assign(api.defaults, {
+        //   headers: { Authorization: jwt, 'Content-Type': 'application/json' },
+        // });
       } else {
         console.log('cookie is expired');
         context.commit('CLEAR_CURRENT_USER');
@@ -114,7 +114,7 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
   },
 
   reset(context) {
-    deleteCookie('jwt');
+    // deleteCookie('jwt');
     deleteCookie('userId');
     deleteCookie('userName');
     deleteCookie('userFirstName');
