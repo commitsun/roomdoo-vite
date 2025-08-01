@@ -1,11 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-form-header">
-      <img
-        src="/logos/logo-black-new.svg"
-        class="logo"
-        alt="Roomdoo Logo"
-      />
+      <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
     </div>
     <div class="login-form-container">
       <div class="reset-password-title">
@@ -34,7 +30,7 @@
             <template #footer>
               <Divider />
               <ul class="pl-2 my-0 text-sm">
-                <li>{{ t('resetPassword.minimumChars', {count: 8}) }}</li>
+                <li>{{ t('resetPassword.minimumChars', { count: 8 }) }}</li>
                 <li>{{ t('resetPassword.passwordLetterRequired') }}</li>
                 <li>{{ t('resetPassword.passwordNumberRequired') }}</li>
               </ul>
@@ -65,7 +61,7 @@
             <template #footer>
               <Divider />
               <ul class="pl-2 my-0 text-sm">
-                <li>{{ t('resetPassword.minimumChars', {count: 8}) }}</li>
+                <li>{{ t('resetPassword.minimumChars', { count: 8 }) }}</li>
                 <li>{{ t('resetPassword.passwordLetterRequired') }}</li>
                 <li>{{ t('resetPassword.passwordNumberRequired') }}</li>
               </ul>
@@ -73,10 +69,7 @@
           </Password>
         </IconField>
       </div>
-      <Message
-        v-if="firstPasswordError || secondPasswordError"
-        severity="error"
-      >
+      <Message v-if="firstPasswordError || secondPasswordError" severity="error">
         {{ translate(firstPasswordError || secondPasswordError) }}
       </Message>
       <Message v-else-if="errorMessage" severity="error">
@@ -100,7 +93,16 @@
 <script lang="ts">
 import { defineComponent, computed, type Ref, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IconField, InputIcon, InputText, Password, Button, Select, Divider, Message } from 'primevue';
+import {
+  IconField,
+  InputIcon,
+  InputText,
+  Password,
+  Button,
+  Select,
+  Divider,
+  Message,
+} from 'primevue';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { resetPasswordSchema } from '@/application/user/UserSchemas';
@@ -134,7 +136,11 @@ export default defineComponent({
       validationSchema: toTypedSchema(resetPasswordSchema),
     });
 
-    const { value: firstPassword, errorMessage: firstPasswordError, handleBlur: firstPasswordBlur } = useField('firstPassword', undefined, {
+    const {
+      value: firstPassword,
+      errorMessage: firstPasswordError,
+      handleBlur: firstPasswordBlur,
+    } = useField('firstPassword', undefined, {
       validateOnValueUpdate: false,
     }) as {
       value: Ref<string>;
@@ -142,7 +148,11 @@ export default defineComponent({
       handleBlur: () => void;
     };
 
-    const { value: secondPassword, errorMessage: secondPasswordError, handleBlur: secondPasswordBlur } = useField('secondPassword', undefined, {
+    const {
+      value: secondPassword,
+      errorMessage: secondPasswordError,
+      handleBlur: secondPasswordBlur,
+    } = useField('secondPassword', undefined, {
       validateOnValueUpdate: false,
     }) as {
       value: Ref<string>;
@@ -154,7 +164,7 @@ export default defineComponent({
       try {
         await userStore.resetPassword(firstPassword.value, route.query.token as string);
         notificationStore.add(t('resetPassword.passwordChanged'), 'success');
-        router.push('/login');
+        // router.push('/login');
       } catch (error) {
         if (error instanceof BadRequestError) {
           errorMessage.value = t('resetPassword.invalidToken');
@@ -167,7 +177,6 @@ export default defineComponent({
     const isFormValid = computed(() => {
       return firstPassword.value && secondPassword.value;
     });
-
 
     return {
       firstPassword,
@@ -193,7 +202,7 @@ export default defineComponent({
   align-items: center;
   height: 100svh;
   width: 100%;
-  background-color: #F9FAFB;
+  background-color: #f9fafb;
   padding-top: 2rem;
   position: relative;
   .login-form-header {
@@ -203,7 +212,7 @@ export default defineComponent({
     }
   }
   .login-form-container {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     width: 100%;
     height: 100svh;
 
@@ -242,7 +251,7 @@ export default defineComponent({
       font-size: 16px;
       .p-button {
         width: 100%;
-        background-color: #1D4ED8;
+        background-color: #1d4ed8;
         border: none;
       }
     }
@@ -256,9 +265,7 @@ export default defineComponent({
         }
       }
     }
-
   }
-
 }
 @media (min-width: 640px) {
   .login-container {
@@ -273,7 +280,7 @@ export default defineComponent({
       width: 480px;
       height: auto;
       border-radius: 8px;
-      box-shadow: 0px 1px 3px 0px #0000001A;
+      box-shadow: 0px 1px 3px 0px #0000001a;
     }
     .button {
       margin-top: 2rem;
