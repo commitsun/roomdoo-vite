@@ -10,7 +10,6 @@ const userService = new UserService(userRepository);
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);
-  const isSessionExpired = ref(false);
 
   const login = async (email: string, password: string) => {
     user.value = await userService.loginAndGetUser(email, password);
@@ -33,10 +32,13 @@ export const useUserStore = defineStore('user', () => {
     await userService.requestPassword(email);
   };
 
-  const resetPassword = async ( password: string, token: string) => {
+  const resetPassword = async (password: string, token: string) => {
     await userService.resetPassword(password, token);
-  }
+  };
 
+  const refreshToken = async () => {
+    await userService.refreshToken();
+  };
 
-  return { user,isSessionExpired, login, requestPassword, resetPassword  };
+  return { user, refreshToken, login, requestPassword, resetPassword };
 });
