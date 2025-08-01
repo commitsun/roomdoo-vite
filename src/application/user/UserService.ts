@@ -14,7 +14,6 @@ export class UserService {
 
     availabilityRuleFields = await this.userRepository.fetchAvailabilityRuleFields();
 
-
     const userWithFields = {
       ...user,
       availabilityRuleFields,
@@ -28,8 +27,10 @@ export class UserService {
   }
 
   async resetPassword(password: string, token: string): Promise<void> {
-      await this.userRepository.resetPassword(password, token);
-
+    await this.userRepository.resetPassword(password, token);
   }
 
+  async refreshToken(): Promise<void> {
+    await this.userRepository.refreshToken();
+  }
 }
