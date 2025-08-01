@@ -2,7 +2,6 @@ import { dialogService } from '@/_legacy/services/DialogService';
 import axios, { type AxiosInstance } from 'axios';
 import type { App } from 'vue';
 
-// Crear la instancia de Axios
 const endPoint = import.meta.env.DEV
   ? '/api'
   : `${window.location.href.split('.')[0]}.host.roomdoo.com/api`;
@@ -12,16 +11,18 @@ const api: AxiosInstance = axios.create({
   baseURL: endPoint,
 });
 
-// Configurar interceptores
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.config.url !== '/login') {
       console.error('Axios interceptor error:', error.response);
       if (error.response.status === 401) {
-        // 'Redirecting to login...';
-        window.location.href = '/login';
-        // Reemplaza con un router push si usas Vue Router
+        dialogService.open({
+          header: 'Sesión expirada',
+          content: 'Debes iniciar sesión de nuevo',
+          btnAccept: 'Aceptar',
+          onAccept: () => (window.location.href = '/login'),
+        });
       } else {
         dialogService.open({
           header: 'Algo ha ido mal',
@@ -34,10 +35,8 @@ api.interceptors.response.use(
   }
 );
 
-// Exportar la instancia de Axios
 export { api };
 
-// Crear el plugin para integrarlo globalmente
 export default {
   install: (app: App) => {
     app.config.globalProperties.$axios = axios;
