@@ -34,7 +34,7 @@
             toggleMask
           />
         </IconField>
-        <Message v-if="errorMessage" severity="error" style="margin-top: 8px;">
+        <Message v-if="errorMessage" severity="error" style="margin-top: 8px">
           {{ errorMessage }}
         </Message>
       </div>
