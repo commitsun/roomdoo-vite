@@ -1,7 +1,6 @@
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import { InternalServerError } from '@/application/shared/InternalServerError';
 import { UnknownError } from '@/application/shared/UnknownError';
-import { BadRequestError } from '@/application/shared/BadRequestError';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useNotificationStore } from '../stores/notification';
@@ -87,8 +86,6 @@ api.interceptors.response.use(
     }
 
     switch (err.response?.status) {
-      case 400:
-        throw new BadRequestError();
       case 401:
         throw new UnauthorizedError();
       case 500:
