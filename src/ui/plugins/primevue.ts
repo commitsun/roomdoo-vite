@@ -2,8 +2,6 @@ import { type App } from 'vue';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primevue/themes';
-import { es } from 'primelocale/js/es.js';
-import { en } from 'primelocale/js/en.js';
 
 export const RoomdooPreset = definePreset(Aura, {
   semantic: {
@@ -30,8 +28,10 @@ export function getPrimeVueApp(): App | null {
 }
 
 function getPrimeVueLocale(newLocale: string) {
-  if (newLocale === 'es') return es;
-  return en;
+  if (newLocale === 'es') {
+    return require('primelocale/js/es.js').es;
+  }
+  return require('primelocale/js/en.js').en;
 }
 
 export function updatePrimevueLocale(newLocale: string) {
