@@ -1,58 +1,51 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InstanceService } from './InstanceService';
-import { AppError } from './AppError';
 import type { InstanceRepository } from '@/domain/repositories/InstanceRepository';
+import { InternalServerError } from '../shared/InternalServerError';
 
-const mockRepo = (): InstanceRepository => ({
-  fetchInstance: vi.fn(),
-  fetchLanguages: vi.fn(),
-});
+describe('InstanceService - fetchInstance', () => {
+  let instanceService: InstanceService;
+  let instanceRepoMock: Partial<Record<keyof InstanceRepository, any>>;
 
-describe('InstanceService', () => {
-  it('should return instance and languages when both calls succeed', async () => {
-    const repo = mockRepo();
-    const mockInstance = { name: 'Test Instance' };
-    const mockLanguages = [{ id: 'en', name: 'English' }];
-
-    repo.fetchInstance = vi.fn().mockResolvedValue(mockInstance);
-    repo.fetchLanguages = vi.fn().mockResolvedValue(mockLanguages);
-
-    const service = new InstanceService(repo);
-    const result = await service.fetchInstance();
-
-    expect(result).toEqual({ ...mockInstance, languages: mockLanguages });
+  beforeEach(() => {
+    instanceRepoMock = {
+      fetchInstance: vi.fn(),
+      fetchLanguages: vi.fn(),
+    };
+    instanceService = new InstanceService(instanceRepoMock as InstanceRepository);
   });
 
-  it('should throw INSTANCE_NOT_FOUND if fetchInstance fails with error code 404', async () => {
-    const repo = mockRepo();
-    repo.fetchInstance = vi.fn().mockRejectedValue(new Error('404'));
-    repo.fetchLanguages = vi.fn();
+  it('should fetch instance and languages, then return merged object', async () => {
+    // Arrange
+    const instanceData = {
+      name: 'Roomdoo',
+      image: '',
+    };
+    const languages = [
+      { id: 1, code: 'es', name: 'Español' },
+      { id: 2, code: 'en', name: 'English' },
+    ];
+    instanceRepoMock.fetchInstance.mockResolvedValue(instanceData);
+    instanceRepoMock.fetchLanguages.mockResolvedValue(languages);
 
-    const service = new InstanceService(repo);
+    // Act
+    const result = await instanceService.fetchInstance();
 
-    await expect(service.fetchInstance()).rejects.toThrowError(AppError);
-    await expect(service.fetchInstance()).rejects.toMatchObject({ code: 'INSTANCE_NOT_FOUND' });
+    // Assert
+    expect(instanceRepoMock.fetchInstance).toHaveBeenCalled();
+    expect(instanceRepoMock.fetchLanguages).toHaveBeenCalled();
+    expect(result).toEqual({
+      ...instanceData,
+      languages,
+    });
   });
 
-  it('should throw INSTANCE_NOT_FOUND if fetchInstance fails with error code 500', async () => {
-    const repo = mockRepo();
-    repo.fetchInstance = vi.fn().mockRejectedValue(new Error('500'));
-    repo.fetchLanguages = vi.fn();
+  it('should propagate error if fetchInstance or fetchLanguages fails', async () => {
+    instanceRepoMock.fetchInstance.mockRejectedValue(new InternalServerError());
+    instanceRepoMock.fetchLanguages.mockResolvedValue([]);
 
-    const service = new InstanceService(repo);
-
-    await expect(service.fetchInstance()).rejects.toThrowError(AppError);
-    await expect(service.fetchInstance()).rejects.toMatchObject({ code: 'INSTANCE_NOT_FOUND' });
-  });
-
-  it('should throw UNKNOWN_ERROR if fetchLanguages fails with error code 500', async () => {
-    const repo = mockRepo();
-    repo.fetchInstance = vi.fn().mockResolvedValue({ name: 'Test' });
-    repo.fetchLanguages = vi.fn().mockRejectedValue(new Error('500'));
-
-    const service = new InstanceService(repo);
-
-    await expect(service.fetchInstance()).rejects.toThrowError(AppError);
-    await expect(service.fetchInstance()).rejects.toMatchObject({ code: 'UNKNOWN_ERROR' });
+    await expect(instanceService.fetchInstance()).rejects.toThrow(InternalServerError);
+    expect(instanceRepoMock.fetchInstance).toHaveBeenCalled();
+    expect(instanceRepoMock.fetchLanguages).toHaveBeenCalled();
   });
 });

@@ -2,13 +2,15 @@ import type { InstanceRepository } from '@/domain/repositories/InstanceRepositor
 
 export class InstanceService {
   constructor(private instanceRepository: InstanceRepository) {}
-  async fetchInstance() {
-    const instance = await this.instanceRepository.fetchInstance();
-    const languages = await this.instanceRepository.fetchLanguages();
-
-    return {
-      ...instance,
-      languages,
-    };
+  fetchInstance() {
+    return Promise.all([
+      this.instanceRepository.fetchInstance(),
+      this.instanceRepository.fetchLanguages(),
+    ]).then(([instance, languages]) => {
+      return {
+        ...instance,
+        languages,
+      };
+    });
   }
 }
