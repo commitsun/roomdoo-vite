@@ -20,7 +20,7 @@ export class UsersRepositoryImpl implements UserRepository {
     return response.data.map((field: { name: string }) => field.name);
   }
 
-  async requestPassword(email: string): Promise<void> {
+  async requestChangePassword(email: string): Promise<void> {
     await api.post('/send-mail-reset-password', { email });
   }
 
