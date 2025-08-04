@@ -6,12 +6,9 @@ export class UserService {
   async loginAndGetUser(email: string, password: string): Promise<User | null> {
     let user;
     let availabilityRuleFields;
-    let loginData;
 
-    loginData = await this.userRepository.login(email, password);
-
+    await this.userRepository.login(email, password);
     user = await this.userRepository.fetchUser();
-
     availabilityRuleFields = await this.userRepository.fetchAvailabilityRuleFields();
 
     const userWithFields = {
@@ -22,8 +19,8 @@ export class UserService {
     return userWithFields;
   }
 
-  async requestPassword(email: string): Promise<void> {
-    await this.userRepository.requestPassword(email);
+  async requestChangePassword(email: string): Promise<void> {
+    await this.userRepository.requestChangePassword(email);
   }
 
   async resetPassword(password: string, token: string): Promise<void> {
