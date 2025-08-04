@@ -1,31 +1,46 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import LoginPage from './LoginPage.vue';
 import PrimeVue from 'primevue/config';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
-import { createI18n } from 'vue-i18n';
+import { createTestingPinia } from '@pinia/testing';
+import router from '@/ui/plugins/router';
 
-const i18n = createI18n({
-  legacy: false,
-  locale: 'en',
-  messages: {
-    en: {
-      username: 'Username',
-      password: 'Password',
-      sign_in: 'Sign in',
-      forgot_password: 'Forgot your password?',
-      email_label: 'Email',
-    },
-  },
+// 👇 Mock del plugin i18n
+vi.mock('@/ui/plugins/i18n', async () => {
+  const { createI18n } = await import('vue-i18n');
+  const en = (await import('@/infrastructure/locales/en.json')).default;
+  return {
+    i18n: createI18n({
+      legacy: false,
+      locale: 'en',
+      globalInjection: true,
+      messages: { en },
+    }),
+  };
 });
+
+import { i18n } from '@/ui/plugins/i18n';
+import LoginPage from './LoginPage.vue';
 
 describe('LoginPage.vue', () => {
   const globalConfig = {
     global: {
-      plugins: [PrimeVue, i18n],
-      components: { InputText, Password, Button },
+      plugins: [
+        PrimeVue,
+        router,
+        i18n,
+        createTestingPinia({
+          stubActions: false,
+          createSpy: vi.fn,
+        }),
+      ],
+      components: {
+        InputText,
+        Password,
+        Button,
+      },
     },
   };
 
