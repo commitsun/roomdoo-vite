@@ -28,8 +28,8 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  const requestPassword = async (email: string) => {
-    await userService.requestPassword(email);
+  const requestChangePassword = async (email: string) => {
+    await userService.requestChangePassword(email);
   };
 
   const resetPassword = async (password: string, token: string) => {
@@ -40,5 +40,5 @@ export const useUserStore = defineStore('user', () => {
     await userService.refreshToken();
   };
 
-  return { user, refreshToken, login, requestPassword, resetPassword };
+  return { user, refreshToken, login, requestChangePassword, resetPassword };
 });
