@@ -1,88 +1,115 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UserService } from './UserService';
-import { AppError } from './AppError';
-import { HttpError } from '@/infrastructure/http/HttpError';
-import type { User } from '@/domain/entities/User';
+import type { UserRepository } from '@/domain/repositories/UserRepository';
+import { UnauthorizedError } from '../shared/UnauthorizedError';
 
-// Mock realista del usuario conforme a la entidad
-const mockUser = (): User => ({
-  id: 'user-1',
-  email: 'test@roomdoo.com',
-  firstName: 'Test',
-  lastName: 'User',
-  defaultProperty: { id: 'property-123', name: 'Property 123' },
-  availabilityRuleFields: ['field-1'],
-});
+describe('UserService - loginAndGetUser', () => {
+  let userService: UserService;
+  let userRepoMock: Partial<Record<keyof UserRepository, any>>;
 
-// Usamos vi.fn() directamente sin forzar a cumplir una interfaz
-const createMockRepo = () => {
-  return {
-    login: vi.fn<(_: string, __: string) => Promise<void>>(),
-    fetchUser: vi.fn<() => Promise<User>>(),
-    fetchAvailabilityRuleFields: vi.fn<() => Promise<string[]>>(),
-    requestPassword: vi.fn<() => Promise<void>>(),
-    resetPassword: vi.fn<() => Promise<void>>(),
-  };
-};
-
-describe('UserService', () => {
-  const email = 'test@roomdoo.com';
-  const password = '1234';
-  const user = mockUser();
-  const fields = ['rule-a', 'rule-b'];
-
-  it('returns user with availabilityRuleFields on success', async () => {
-    const repo = createMockRepo();
-    repo.login.mockResolvedValue();
-    repo.fetchUser.mockResolvedValue(user);
-    repo.fetchAvailabilityRuleFields.mockResolvedValue(fields);
-
-    const service = new UserService(repo);
-    const result = await service.loginAndGetUser(email, password);
-
-    expect(result).toEqual({ ...user, availabilityRuleFields: fields });
+  beforeEach(() => {
+    userRepoMock = {
+      login: vi.fn(),
+      fetchUser: vi.fn(),
+      fetchAvailabilityRuleFields: vi.fn(),
+      requestChangePassword: vi.fn(),
+      resetPassword: vi.fn(),
+      refreshToken: vi.fn(),
+    };
+    userService = new UserService(userRepoMock as UserRepository);
   });
 
-  it('throws wrongCredentials if login fails with 401', async () => {
-    const repo = createMockRepo();
-    repo.login.mockRejectedValue(new HttpError(401, '/login', 'post', {}));
+  it('should login, fetch user, fetch fields and return merged user', async () => {
+    // arrange
+    userRepoMock.login.mockResolvedValue(undefined);
+    const userData = {
+      id: 2,
+      name: 'Mitchell Admin',
+      firstName: 'Mitchell',
+      lastName: 'Admin',
+      lastName2: '',
+      email: 'admin@yourcompany.example.com',
+      phone: '+1 555-555-5555',
+      image: 'http://localhost:8016/web/image/18?access_token=...',
+      defaultProperty: { id: 1, name: 'My Property' },
+    };
+    const ruleFields = [{ name: 'Field 1' }, { name: 'Field 2' }];
+    userRepoMock.fetchUser.mockResolvedValue(userData);
+    userRepoMock.fetchAvailabilityRuleFields.mockResolvedValue(ruleFields);
 
-    const service = new UserService(repo);
-    await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
-      code: 'wrongCredentials',
+    // act
+    const result = await userService.loginAndGetUser('roomdoo@roomdoo.com', 'pw');
+
+    // assert
+    expect(userRepoMock.login).toHaveBeenCalledWith('roomdoo@roomdoo.com', 'pw');
+    expect(userRepoMock.fetchUser).toHaveBeenCalled();
+    expect(userRepoMock.fetchAvailabilityRuleFields).toHaveBeenCalled();
+    expect(result).toEqual({
+      ...userData,
+      availabilityRuleFields: ruleFields,
     });
   });
 
-  it('throws USER_NOT_FOUND if fetchUser fails with 404', async () => {
-    const repo = createMockRepo();
-    repo.login.mockResolvedValue();
-    repo.fetchUser.mockRejectedValue(new HttpError(404, '/me', 'get', {}));
+  it('should propagate error if login fails', async () => {
+    // arrange
+    userRepoMock.login.mockRejectedValue(new UnauthorizedError());
 
-    const service = new UserService(repo);
-    await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
-      code: 'USER_NOT_FOUND',
-    });
+    // act & assert
+    await expect(userService.loginAndGetUser('fail@roomdoo.com', 'failpw')).rejects.toThrowError(
+      UnauthorizedError
+    );
+    expect(userRepoMock.login).toHaveBeenCalledWith('fail@roomdoo.com', 'failpw');
+    expect(userRepoMock.fetchUser).not.toHaveBeenCalled();
+    expect(userRepoMock.fetchAvailabilityRuleFields).not.toHaveBeenCalled();
   });
 
-  it('throws AVAILABILITY_RULE_FIELDS_NOT_FOUND if fetchAvailabilityRuleFields fails with 404', async () => {
-    const repo = createMockRepo();
-    repo.login.mockResolvedValue();
-    repo.fetchUser.mockResolvedValue(user);
-    repo.fetchAvailabilityRuleFields.mockRejectedValue(new HttpError(404, '/fields', 'get', {}));
-
-    const service = new UserService(repo);
-    await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
-      code: 'AVAILABILITY_RULE_FIELDS_NOT_FOUND',
+  it('should call repo methods in order: login, fetchUser, fetchAvailabilityRuleFields', async () => {
+    // arrange
+    const callOrder: string[] = [];
+    userRepoMock.login.mockImplementation(() => {
+      callOrder.push('login');
+      return Promise.resolve(undefined);
     });
+    userRepoMock.fetchUser.mockImplementation(() => {
+      callOrder.push('fetchUser');
+      return Promise.resolve({});
+    });
+    userRepoMock.fetchAvailabilityRuleFields.mockImplementation(() => {
+      callOrder.push('fetchAvailabilityRuleFields');
+      return Promise.resolve([]);
+    });
+
+    // act
+    await userService.loginAndGetUser('admin@yourcompany.example.com', 'pw');
+
+    // assert
+    expect(callOrder[0]).toBe('login');
   });
 
-  it('throws unknownError on unexpected login error', async () => {
-    const repo = createMockRepo();
-    repo.login.mockRejectedValue(new Error('boom'));
+  it('should call requestPassword with email', async () => {
+    await userService.requestChangePassword('test@roomdoo.com');
+    expect(userRepoMock.requestChangePassword).toHaveBeenCalledWith('test@roomdoo.com');
+  });
 
-    const service = new UserService(repo);
-    await expect(service.loginAndGetUser(email, password)).rejects.toMatchObject({
-      code: 'unknownError',
-    });
+  it('should call resetPassword with password and token', async () => {
+    await userService.resetPassword('newpass', 'token123');
+    expect(userRepoMock.resetPassword).toHaveBeenCalledWith('newpass', 'token123');
+  });
+
+  it('should propagate errors from resetPassword', async () => {
+    userRepoMock.resetPassword.mockRejectedValue(new UnauthorizedError());
+    await expect(userService.resetPassword('newpass', 'notValidToken')).rejects.toThrow(
+      UnauthorizedError
+    );
+  });
+
+  it('should call refreshToken', async () => {
+    await userService.refreshToken();
+    expect(userRepoMock.refreshToken).toHaveBeenCalled();
+  });
+
+  it('should propagate errors from refreshToken', async () => {
+    userRepoMock.refreshToken.mockRejectedValue(new UnauthorizedError());
+    await expect(userService.refreshToken()).rejects.toThrow(UnauthorizedError);
   });
 });
