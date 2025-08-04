@@ -110,7 +110,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from '@/infrastructure/stores/notification';
 import { useTranslatedError } from '../composables/useTranslatedValidationError';
-import { BadRequestError } from '@/application/shared/BadRequestError';
+import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 
 export default defineComponent({
   components: {
@@ -166,7 +166,7 @@ export default defineComponent({
         notificationStore.add(t('resetPassword.passwordChanged'), 'success');
         // router.push('/login');
       } catch (error) {
-        if (error instanceof BadRequestError) {
+        if (error instanceof UnauthorizedError) {
           errorMessage.value = t('resetPassword.invalidToken');
         } else {
           errorMessage.value = t('error.unknownError');

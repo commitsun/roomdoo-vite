@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-form-header">
-        <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+      <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
     </div>
     <div class="request-password-container">
       <div class="request-password-title">
@@ -25,7 +25,7 @@
         <Button
           :label="t('requestResetPassword.sendRequest')"
           :disabled="!username"
-          @click="sendRequestPassword"
+          @click="sendRequestChangePassword"
         />
       </div>
       <div class="back-link">
@@ -51,19 +51,18 @@ export default defineComponent({
     InputIcon,
   },
   setup() {
-
     const { t } = useI18n();
     const userStore = useUserStore();
     const notificationStore = useNotificationStore();
     const username = ref('');
-    const sendRequestPassword = async () => {
-      await userStore.requestPassword(username.value);
-        notificationStore.add(t('requestResetPassword.requestSent'), 'success');
-      };
+    const sendRequestChangePassword = async () => {
+      await userStore.requestChangePassword(username.value);
+      notificationStore.add(t('requestResetPassword.requestSent'), 'success');
+    };
     return {
       username,
       t,
-      sendRequestPassword,
+      sendRequestChangePassword,
     };
   },
 });
@@ -114,7 +113,7 @@ export default defineComponent({
       font-size: 16px;
       .p-button {
         width: 100%;
-        background-color: #1D4ED8;
+        background-color: #1d4ed8;
         border: none;
       }
     }
