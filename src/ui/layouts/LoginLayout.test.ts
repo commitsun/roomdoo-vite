@@ -1,8 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mount } from '@vue/test-utils';
+import PrimeVue from 'primevue/config';
+import Select from 'primevue/select';
+import { createTestingPinia } from '@pinia/testing';
+import router from '@/ui/plugins/router';
 
 const pushMock = vi.fn();
 
-// Mock del router
 vi.mock('vue-router', async () => {
   const actual = await vi.importActual<typeof import('vue-router')>('vue-router');
   return {
@@ -36,44 +40,46 @@ vi.mock('@/ui/plugins/i18n', async () => {
   };
 });
 
-import { mount } from '@vue/test-utils';
-import PrimeVue from 'primevue/config';
-import Select from 'primevue/select';
-import { createTestingPinia } from '@pinia/testing';
-import router from '@/ui/plugins/router';
-import { i18n } from '@/ui/plugins/i18n';
-import LoginLayout from './LoginLayout.vue';
+vi.mock('@/infrastructure/stores/ui', () => ({
+  useUIStore: () => ({ startLoading: vi.fn(), stopLoading: vi.fn() }),
+}));
+
+beforeEach(() => {
+  vi.resetModules();
+  vi.clearAllMocks();
+});
 
 describe('LoginLayout.vue', () => {
-  const globalConfig = {
-    global: {
-      plugins: [
-        PrimeVue,
-        router,
-        i18n,
-        createTestingPinia({
-          stubActions: false,
-          createSpy: vi.fn,
-        }),
-      ],
-      components: {
-        Select,
+  const getGlobalConfig = async () => {
+    const { i18n } = await import('@/ui/plugins/i18n');
+    return {
+      global: {
+        plugins: [
+          PrimeVue,
+          router,
+          i18n,
+          createTestingPinia({
+            stubActions: false,
+            createSpy: vi.fn,
+          }),
+        ],
+        components: {
+          Select,
+        },
       },
-    },
+    };
   };
 
   it('redirects to hotel-not-found if fetchInstance fails', async () => {
-    vi.mock('@/infrastructure/stores/instance', () => ({
+    vi.doMock('@/infrastructure/stores/instance', () => ({
       useInstanceStore: () => ({
         fetchInstance: vi.fn().mockRejectedValue(new Error('Server error')),
         instance: null,
       }),
     }));
 
-    vi.mock('@/infrastructure/stores/ui', () => ({
-      useUIStore: () => ({ stopLoading: vi.fn() }),
-    }));
-
+    const { default: LoginLayout } = await import('./LoginLayout.vue');
+    const globalConfig = await getGlobalConfig();
     mount(LoginLayout, globalConfig);
     await new Promise((resolve) => setImmediate(resolve));
 
@@ -81,7 +87,7 @@ describe('LoginLayout.vue', () => {
   });
 
   it('shows language selector if more than one locale is available', async () => {
-    vi.mock('@/infrastructure/stores/instance', () => ({
+    vi.doMock('@/infrastructure/stores/instance', () => ({
       useInstanceStore: () => ({
         fetchInstance: vi.fn().mockResolvedValue(undefined),
         instance: {
@@ -91,10 +97,8 @@ describe('LoginLayout.vue', () => {
       }),
     }));
 
-    vi.mock('@/infrastructure/stores/ui', () => ({
-      useUIStore: () => ({ stopLoading: vi.fn() }),
-    }));
-
+    const { default: LoginLayout } = await import('./LoginLayout.vue');
+    const globalConfig = await getGlobalConfig();
     const wrapper = mount(LoginLayout, globalConfig);
     await new Promise((resolve) => setImmediate(resolve));
 
@@ -102,24 +106,21 @@ describe('LoginLayout.vue', () => {
   });
 
   it('does not show language selector if only one locale is available', async () => {
-    vi.mock('@/infrastructure/stores/instance', () => ({
+    vi.doMock('@/infrastructure/stores/instance', () => ({
       useInstanceStore: () => ({
         fetchInstance: vi.fn().mockResolvedValue(undefined),
         instance: {
           image: '',
-          languages: ['en'],
+          languages: [{ code: 'en' }],
         },
       }),
     }));
 
-    vi.mock('@/infrastructure/stores/ui', () => ({
-      useUIStore: () => ({ stopLoading: vi.fn() }),
-    }));
-
+    const { default: LoginLayout } = await import('./LoginLayout.vue');
+    const globalConfig = await getGlobalConfig();
     const wrapper = mount(LoginLayout, globalConfig);
     await new Promise((resolve) => setImmediate(resolve));
-    // log languages
-    console.log('Available languages:', i18n.global.availableLocales);
+
     expect(wrapper.find('.select-language').exists()).toBe(false);
   });
 });
