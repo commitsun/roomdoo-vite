@@ -7,7 +7,7 @@ import Button from 'primevue/button';
 import { createTestingPinia } from '@pinia/testing';
 import router from '@/ui/plugins/router';
 
-// 👇 Mock del plugin i18n
+// Mock del plugin i18n
 vi.mock('@/ui/plugins/i18n', async () => {
   const { createI18n } = await import('vue-i18n');
   const en = (await import('@/infrastructure/locales/en.json')).default;
