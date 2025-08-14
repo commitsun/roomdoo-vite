@@ -161,7 +161,6 @@
             <span @click="openReportsDialog('transactions')"> Pagos </span>
             <span @click="openReportsDialog('INE')"> INE </span>
           </div>
-          <<<<<<< HEAD
           <template
             v-if="activeProperty?.linksRoomdoo && activeProperty?.linksRoomdoo.length === 1"
           >
@@ -196,7 +195,6 @@
               </div>
             </div>
           </template>
-          ======= >>>>>>> [FIX] pms-pwa: revert pinia userStore in legacy
           <div
             class="item-container hidden"
             :class="route.fullPath === '/settings' ? 'selected' : ''"
