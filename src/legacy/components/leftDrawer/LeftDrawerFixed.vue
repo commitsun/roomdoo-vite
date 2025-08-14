@@ -361,9 +361,11 @@ export default defineComponent({
     const openLinkInNewTab = (menuId: number) => {
       void store.dispatch('layout/showSpinner', true);
 
-      const url = `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi/properties/${
-        activeProperty.value?.id
-      }/menus/${menuId}`;
+      const endPoint = import.meta.env.DEV
+        ? '/pmsApi'
+        : `${window.location.href.split('.')[0]}.host.roomdoo.com/api`;
+
+      const url = `${endPoint}/properties/${activeProperty.value?.id}/links/${menuId}`;
 
       fetch(url, {
         method: 'GET',
@@ -374,6 +376,7 @@ export default defineComponent({
         },
       })
         .then(async (response) => {
+          console.log('Response from link:', response);
           if (!response.ok) {
             const error = await response.json();
             dialogService.open({
