@@ -275,7 +275,7 @@ export default defineComponent({
 
       const endPoint = import.meta.env.DEV
         ? '/pmsApi'
-        : `${window.location.href.split('.')[0]}.host.roomdoo.com/api`;
+        : `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi`;
 
       const url = `${endPoint}/properties/${activeProperty.value?.id}/links/${menuId}`;
 
