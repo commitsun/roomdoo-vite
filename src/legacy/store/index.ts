@@ -24,6 +24,7 @@ import type { FolioServicesStateInterface } from './folioServices';
 import type { InvoicesStateInterface } from './invoices';
 import type { LanguageStateInterface } from './languages';
 import type { LayoutStateInterface } from './layout';
+import type { LinksStateInterface } from './links';
 import type { NotificationsStateInterface } from './notifications';
 import type { OcrDocumentStateInterface } from './ocrDocument';
 import type { PartnerStateInterface } from './partners';
@@ -82,6 +83,7 @@ import services from './services';
 import ubications from './ubications';
 import user from './user';
 import users from './users';
+import links from './links';
 
 export interface RootState {
   accountJournals: AccountJournalsStateInterface;
@@ -107,6 +109,7 @@ export interface RootState {
   invoices: InvoicesStateInterface;
   languages: LanguageStateInterface;
   layout: LayoutStateInterface;
+  links: LinksStateInterface;
   notifications: NotificationsStateInterface;
   ocrDocument: OcrDocumentStateInterface;
   partners: PartnerStateInterface;
@@ -160,6 +163,7 @@ export const store = createStore<StateInterface>({
     invoices,
     languages,
     layout,
+    links,
     notifications,
     ocrDocument,
     partners,

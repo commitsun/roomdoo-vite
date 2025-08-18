@@ -270,54 +270,35 @@ export default defineComponent({
       showVersionCont.value += 1;
     };
 
-    const openLinkInNewTab = (menuId: number) => {
+    const openLinkInNewTab = async (menuId: number) => {
       void store.dispatch('layout/showSpinner', true);
 
-      const endPoint = import.meta.env.DEV
-        ? '/pmsApi'
-        : `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi`;
-
-      const url = `${endPoint}/properties/${activeProperty.value?.id}/links/${menuId}`;
-
-      fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: getCookie('jwt') || '',
-          'Cache-Control': 'no-cache',
-        },
-      })
-        .then(async (response) => {
-          if (!response.ok) {
-            const error = await response.json();
-            dialogService.open({
-              header: 'Error',
-              content: error.message || 'Error al abrir el enlace',
-              btnAccept: 'Ok',
-            });
-            return;
-          }
-          const data = await response.json();
-          if (data) {
-            window.open(data, '_blank', 'noopener,noreferrer');
-          } else {
-            dialogService.open({
-              header: 'Error',
-              content: 'No se pudo abrir el enlace',
-              btnAccept: 'Ok',
-            });
-          }
-        })
-        .catch((err) => {
+      try {
+        const link = await store.dispatch('links/fetchLink', {
+          pmsPropertyId: activeProperty.value?.id,
+          linkId: menuId,
+        });
+        if (link) {
+          window.open(link, '_blank', 'noopener,noreferrer');
+        } else {
           dialogService.open({
             header: 'Error',
-            content: err.message || 'Error al abrir el enlace',
+            content: 'No se pudo abrir el enlace',
             btnAccept: 'Ok',
           });
-        })
-        .finally(() => {
-          void store.dispatch('layout/showSpinner', false);
+        }
+      } catch (err) {
+        dialogService.open({
+          header: 'Error',
+          content:
+            err && typeof err === 'object' && 'message' in err
+              ? (err as { message: string }).message
+              : 'Error al abrir el enlace',
+          btnAccept: 'Ok',
         });
+      } finally {
+        void store.dispatch('layout/showSpinner', false);
+      }
     };
 
     return {
