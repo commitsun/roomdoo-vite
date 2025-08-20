@@ -27,16 +27,19 @@ export function getPrimeVueApp(): App | null {
   return primevueApp;
 }
 
-function getPrimeVueLocale(newLocale: string) {
+async function getPrimeVueLocale(newLocale: string) {
   if (newLocale === 'es') {
-    return require('primelocale/js/es.js').es;
+    const { es } = await import('primelocale/js/es.js');
+    return es;
+  } else {
+    const { en } = await import('primelocale/js/en.js');
+    return en;
   }
-  return require('primelocale/js/en.js').en;
 }
 
-export function updatePrimevueLocale(newLocale: string) {
+export async function updatePrimevueLocale(newLocale: string) {
   const app = getPrimeVueApp();
-  const primevueLocale = getPrimeVueLocale(newLocale);
+  const primevueLocale = await getPrimeVueLocale(newLocale);
   if (app?.config.globalProperties.$primevue?.config?.locale) {
     Object.assign(app.config.globalProperties.$primevue.config.locale, primevueLocale);
   }
