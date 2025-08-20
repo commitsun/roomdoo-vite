@@ -3,7 +3,7 @@ import { InternalServerError } from '@/application/shared/InternalServerError';
 import { UnknownError } from '@/application/shared/UnknownError';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { useNotificationStore } from '../stores/notification';
+import { useNotificationsStore } from '../stores/notifications';
 import type { InternalAxiosRequestConfig } from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -78,7 +78,7 @@ api.interceptors.response.use(
         return api(originalRequest); // Retry the original request
       } catch (refreshError: any) {
         processQueue(refreshError as AxiosError); // Failure: reject all queued requests
-        useNotificationStore().add('Session expired. Please log in again.');
+        useNotificationsStore().add('Session expired. Please log in again.');
         useRouter().push('/login');
       } finally {
         isRefreshing = false; // Reset flag regardless of outcome
