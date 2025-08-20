@@ -48,7 +48,9 @@ onMounted(async () => {
     instanceImage.value = instanceStore.instance?.image;
     locales.value = updateI18nAvailableLocales(instanceStore.instance?.languages);
     const savedLocale = localStorage.getItem('roomdoo-locale');
-    const foundLocale = locales.value.find((l) => l.value === (savedLocale || i18n.global.locale.value));
+    const foundLocale = locales.value.find(
+      (l) => l.value === (savedLocale || i18n.global.locale.value)
+    );
     selectedLocale.value = foundLocale || locales.value[0];
     updateAppLocale(selectedLocale.value.value);
   } catch (err) {

@@ -17,7 +17,7 @@ import DialogContainer from '@/_legacy/components/dialogs/DialogContainer.vue';
 import Toast from 'primevue/toast';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import ProgressSpinner from 'primevue/progressspinner';
-import { useNotificationStore } from '@/infrastructure/stores/notification';
+import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 import { useToast } from 'primevue/usetoast';
 
 export default defineComponent({
@@ -29,7 +29,7 @@ export default defineComponent({
   },
   setup() {
     const toast = useToast();
-    const notificationStore = useNotificationStore();
+    const notificationStore = useNotificationsStore();
     const uiStore = useUIStore();
     const notifications = computed(() => notificationStore.messages);
     const consumeNotification = () => {

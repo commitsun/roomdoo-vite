@@ -59,10 +59,10 @@ import { useI18n } from 'vue-i18n';
 import { IconField, InputIcon, InputText, Password, Button, Message } from 'primevue';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { useRouter } from 'vue-router';
-import { useNotificationStore } from '@/infrastructure/stores/notification';
+import { useRoute, useRouter } from 'vue-router';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 export default defineComponent({
   components: {
@@ -77,25 +77,23 @@ export default defineComponent({
     const { t } = useI18n();
     const instanceStore = useInstanceStore();
     const userStore = useUserStore();
-    const notificationStore = useNotificationStore();
+    const pmsPropertiesStore = usePmsPropertiesStore();
     const router = useRouter();
-
+    const route = useRoute();
     const username = ref('');
     const password = ref('');
     const errorMessage = ref('');
-
     const instanceName = computed(() => instanceStore.instance?.name ?? '');
-
     const doLogin = async () => {
       try {
         await userStore.login(username.value, password.value);
         await useLegacyStore().doVuexLogin(username.value, password.value);
         if (userStore.user) {
-          const propertyId = parseInt(userStore.user.defaultProperty.id, 10);
-          await router.push({
-            name: 'dashboard',
-            params: { pmsPropertyId: propertyId },
-          });
+          pmsPropertiesStore.fetchPmsProperties();
+          const propertyId = userStore.user.defaultProperty.id;
+          pmsPropertiesStore.setCurrentPmsPropertyId(propertyId);
+          const redirect = (route.query.redirect as string) || '/' + propertyId;
+          router.replace(redirect);
         }
       } catch (error) {
         if (error instanceof UnauthorizedError) {

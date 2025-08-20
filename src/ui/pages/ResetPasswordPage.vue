@@ -108,7 +108,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { resetPasswordSchema } from '@/application/user/UserSchemas';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useRoute, useRouter } from 'vue-router';
-import { useNotificationStore } from '@/infrastructure/stores/notification';
+import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 import { useTranslatedError } from '../composables/useTranslatedValidationError';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 
@@ -128,7 +128,7 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
     const userStore = useUserStore();
-    const notificationStore = useNotificationStore();
+    const notificationStore = useNotificationsStore();
     const { translate } = useTranslatedError();
     const errorMessage = ref('');
 
