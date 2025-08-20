@@ -7,7 +7,7 @@ export interface Notification {
   severity?: 'success' | 'error' | 'info' | 'warn';
 }
 
-export const useNotificationStore = defineStore('notification', () => {
+export const useNotificationsStore = defineStore('notifications', () => {
   const messages = ref<Notification[]>([]);
   function add(text: string, severity: 'success' | 'error' | 'info' | 'warn' = 'success') {
     messages.value.push({ id: Date.now(), text, severity });
