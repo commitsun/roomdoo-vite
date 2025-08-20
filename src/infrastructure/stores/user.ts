@@ -11,6 +11,12 @@ const userService = new UserService(userRepository);
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);
 
+  const hydrateFromCookies = () => {
+    if (user.value) return;
+    const data = CookieService.getUserCookies();
+    if (data) user.value = data as User;
+  };
+
   const login = async (email: string, password: string) => {
     user.value = await userService.loginAndGetUser(email, password);
     if (user.value) {
@@ -40,5 +46,5 @@ export const useUserStore = defineStore('user', () => {
     await userService.refreshToken();
   };
 
-  return { user, refreshToken, login, requestChangePassword, resetPassword };
+  return { user, refreshToken, login, requestChangePassword, resetPassword, hydrateFromCookies };
 });
