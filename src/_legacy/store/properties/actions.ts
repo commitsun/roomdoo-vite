@@ -7,6 +7,7 @@ import type { StateInterface } from '../index';
 import type { PropertyStateInterface } from '.';
 import { deleteCookie } from '@/_legacy/utils/cookies';
 import { toRaw } from 'vue';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 const actions: ActionTree<PropertyStateInterface, StateInterface> = {
   async fetchProperties(context) {
@@ -27,6 +28,8 @@ const actions: ActionTree<PropertyStateInterface, StateInterface> = {
       return;
     }
     context.commit('SET_ACTIVE_PROPERTY', activeProperty);
+    // set active property id in pinia
+    usePmsPropertiesStore().setCurrentPmsPropertyId(numericPropertyId);
   },
 
   reset(context) {
