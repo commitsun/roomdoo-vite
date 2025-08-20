@@ -41,7 +41,7 @@ import { defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, InputText, IconField, InputIcon } from 'primevue';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { useNotificationStore } from '@/infrastructure/stores/notification';
+import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 
 export default defineComponent({
   components: {
@@ -53,7 +53,7 @@ export default defineComponent({
   setup() {
     const { t } = useI18n();
     const userStore = useUserStore();
-    const notificationStore = useNotificationStore();
+    const notificationStore = useNotificationsStore();
     const username = ref('');
     const sendRequestChangePassword = async () => {
       await userStore.requestChangePassword(username.value);
