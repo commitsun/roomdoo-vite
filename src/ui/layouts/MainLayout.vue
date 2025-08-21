@@ -34,9 +34,12 @@ import { useRoute } from 'vue-router';
 import Drawer from 'primevue/drawer';
 import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
+import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { updateI18nAvailableLocales } from '@/ui/plugins/i18n';
 
 const route = useRoute();
 const pmsPropertiesStore = usePmsPropertiesStore();
+const instanceStore = useInstanceStore();
 
 const isMenuVisible = ref(false);
 const rightDrawerVisible = ref(false);
@@ -49,8 +52,10 @@ watch(
   { immediate: true }
 );
 
-onBeforeMount(() => {
-  pmsPropertiesStore.fetchPmsProperties();
+onBeforeMount(async () => {
+  await instanceStore.fetchInstance();
+  updateI18nAvailableLocales(instanceStore.instance?.languages);
+  await pmsPropertiesStore.fetchPmsProperties();
   const pmsPropertyId = route.params.pmsPropertyId as string;
   if (pmsPropertyId) pmsPropertiesStore.setCurrentPmsPropertyId(parseInt(pmsPropertyId));
 });

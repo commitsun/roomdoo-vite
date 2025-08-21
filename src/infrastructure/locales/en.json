@@ -31,7 +31,7 @@
     "invalidToken": "The link has expired or is invalid"
   },
   "requestResetPassword": {
-    "title": "Introduce your email or username to reset your password",
+    "title": "Enter your email or username to reset your password",
     "username": "Username",
     "email": "Email",
     "sendRequest": "Send request",
