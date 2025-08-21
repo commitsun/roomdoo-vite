@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import { type Ref, onMounted, ref, watch } from 'vue';
 import AppSelect from 'primevue/select';
-import { i18n, updateI18nAvailableLocales, SUPPORTED_LOCALES } from '@/ui/plugins/i18n';
+import { i18n, updateI18nAvailableLocales, availableLocales } from '@/ui/plugins/i18n';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useRouter } from 'vue-router';
@@ -29,7 +29,7 @@ const router = useRouter();
 const instanceStore = useInstanceStore();
 const uiStore = useUIStore();
 
-const locales = ref(SUPPORTED_LOCALES);
+const locales = ref(availableLocales);
 
 const selectedLocale = ref(locales.value.find((l) => l.value === i18n.global.locale.value));
 const instanceImage: Ref<string | undefined> = ref('');
@@ -46,7 +46,6 @@ onMounted(async () => {
     uiStore.startLoading();
     await instanceStore.fetchInstance();
     instanceImage.value = instanceStore.instance?.image;
-    locales.value = updateI18nAvailableLocales(instanceStore.instance?.languages);
     const savedLocale = localStorage.getItem('roomdoo-locale');
     const foundLocale = locales.value.find(
       (l) => l.value === (savedLocale || i18n.global.locale.value)

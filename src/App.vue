@@ -4,6 +4,7 @@
   <!-- start  remove this dialog component when removing legacy folder  -->
   <DialogContainer />
   <!-- end  remove this dialog component when removing legacy folder / -->
+  <DynamicDialog />
   <teleport to="body">
     <div v-if="uiStore.isLoading" class="overlay-spinner">
       <ProgressSpinner />
@@ -19,12 +20,14 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 import { useToast } from 'primevue/usetoast';
+import DynamicDialog from 'primevue/dynamicdialog';
 
 export default defineComponent({
   name: 'App',
   components: {
     DialogContainer,
     ProgressSpinner,
+    DynamicDialog,
     Toast,
   },
   setup() {
