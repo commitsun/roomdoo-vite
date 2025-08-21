@@ -22,17 +22,19 @@ export const SUPPORTED_LOCALES = [
   { label: 'English', value: 'en' },
 ];
 
+export let availableLocales = SUPPORTED_LOCALES;
+
 export const i18n = createI18n({
   legacy: false,
   globalInjection: true,
   locale: selectedLang,
   fallbackLocale: 'en',
-  availableLocales: SUPPORTED_LOCALES.map(locale => locale.value),
+  availableLocales: SUPPORTED_LOCALES.map((locale) => locale.value),
   messages,
 });
 
 export const getLocale = () => {
-  return i18n.global.locale.value
+  return i18n.global.locale.value;
 };
 
 export function updateI18nLocale(newLocale: string) {
@@ -40,14 +42,10 @@ export function updateI18nLocale(newLocale: string) {
 }
 
 export function updateI18nAvailableLocales(languages?: Array<{ code: string }>) {
-  let availableLocales = SUPPORTED_LOCALES;
+  availableLocales = SUPPORTED_LOCALES;
   if (languages && languages.length > 0) {
-    const codes = languages.map(l => l.code.split('_')[0]);
-    availableLocales = SUPPORTED_LOCALES.filter(locale => codes.includes(locale.value));
+    const codes = languages.map((l) => l.code.split('_')[0]);
+    availableLocales = SUPPORTED_LOCALES.filter((locale) => codes.includes(locale.value));
   }
   return availableLocales;
 }
-
-
-
-
