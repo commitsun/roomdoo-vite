@@ -8,7 +8,7 @@ export interface User {
   firstName: string;
   lastName: string;
   lastName2?: string;
-  defaultProperty: PmsProperty;
+  defaultPmsProperty: PmsProperty;
   phone?: string;
   avatar?: ImageUrl;
   availabilityRuleFields?: string[];
