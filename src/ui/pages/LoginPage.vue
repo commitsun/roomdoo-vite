@@ -90,7 +90,7 @@ export default defineComponent({
         await useLegacyStore().doVuexLogin(username.value, password.value);
         if (userStore.user) {
           pmsPropertiesStore.fetchPmsProperties();
-          const propertyId = userStore.user.defaultProperty.id;
+          const propertyId = userStore.user.defaultPmsProperty.id;
           pmsPropertiesStore.setCurrentPmsPropertyId(propertyId);
           const redirect = (route.query.redirect as string) || '/' + propertyId;
           router.replace(redirect);
