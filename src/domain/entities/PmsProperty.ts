@@ -1,7 +1,8 @@
 import type { Id } from '../types/Id';
-import type { MenuLink } from './MenuLink';
+import type { ImageUrl } from '../types/ImageUrl';
 
 export interface PmsProperty {
   id: Id;
   name: string;
+  image: ImageUrl;
 }
