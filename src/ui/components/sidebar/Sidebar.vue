@@ -194,6 +194,9 @@ import Avatar from 'primevue/avatar';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import Menu from 'primevue/menu';
+import UserSettings from '@/ui/components/user/UserSettings.vue';
+
+import { useAppDialog } from '@/ui/composables/useAppDialog';
 
 defineProps<{
   menuOpen: boolean;
@@ -202,10 +205,11 @@ defineProps<{
 const route = useRoute();
 const userStore = useUserStore();
 const pmsPropertiesStore = usePmsPropertiesStore();
-const isUserMenuOpen = ref(false);
+const { open } = useAppDialog();
 
 const hash = import.meta.env.VITE_COMMIT_HASH || 'dev';
 
+const isUserMenuOpen = ref(false);
 const isReportOptionsOpen = ref(false);
 const isLinkOptionsOpen = ref(false);
 const nav = ref<HTMLElement | null>(null);
@@ -216,6 +220,13 @@ const items = ref([
       {
         label: 'Configuración',
         icon: 'pi pi-cog',
+        command: () => {
+          open(UserSettings, {
+            props: {
+              header: 'Configuración de usuario',
+            },
+          });
+        },
       },
       {
         label: 'Cerrar sesión',
