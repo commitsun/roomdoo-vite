@@ -15,9 +15,9 @@ export class CookieService {
   }
 
   static setUserCookies(user: User): void {
-    this.setCookie('id', user.id);
+    this.setCookie('id', user.id.toString());
     this.setCookie('firstName', user.firstName);
-    this.setCookie('defaultProperty', JSON.stringify(user.defaultProperty));
+    this.setCookie('defaultPmsProperty', JSON.stringify(user.defaultPmsProperty));
     this.setCookie('lastName', user.lastName);
     this.setCookie('lastName2', user.lastName2 || '');
     this.setCookie('email', user.email);
@@ -30,7 +30,7 @@ export class CookieService {
     const id = this.getCookie('id');
     const email = this.getCookie('email');
     const firstName = this.getCookie('firstName');
-    const defaultProperty = this.getCookie('defaultProperty');
+    const defaultPmsProperty = this.getCookie('defaultPmsProperty');
     const lastName = this.getCookie('lastName');
     const lastName2 = this.getCookie('lastName2') || undefined;
     const phone = this.getCookie('phone') || undefined;
@@ -39,15 +39,15 @@ export class CookieService {
       decodeURIComponent(this.getCookie('availabilityRuleFields') || '[]')
     );
 
-    if (!id || !email || !firstName || !defaultProperty || !lastName) {
+    if (!id || !email || !firstName || !defaultPmsProperty || !lastName) {
       return null;
     }
 
     return {
-      id,
+      id: parseInt(id, 10),
       email,
       firstName,
-      defaultProperty: JSON.parse(defaultProperty),
+      defaultPmsProperty: JSON.parse(defaultPmsProperty),
       lastName,
       lastName2,
       phone,
@@ -60,7 +60,7 @@ export class CookieService {
     const cookies = [
       'id',
       'firstName',
-      'defaultProperty',
+      'defaultPmsProperty',
       'lastName',
       'lastName2',
       'email',
