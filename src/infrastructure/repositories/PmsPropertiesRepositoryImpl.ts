@@ -5,21 +5,16 @@ import type { MenuLink } from '@/domain/entities/MenuLink';
 
 export class PmsPropertiesRepositoryImpl implements PmsPropertiesRepository {
   async fetchPmsProperties(): Promise<PmsProperty[]> {
-    const response = await api.get<PmsProperty[]>('/properties');
+    const response = await api.get<PmsProperty[]>('/pmsProperties');
     return response.data;
   }
   async fetchMenuLinks(pmsPropertyId: number): Promise<MenuLink[]> {
-    const response = await api.get<
-      Array<Omit<MenuLink, 'isSupportLink'> & { support_link: boolean }>
-    >(`/properties/${pmsPropertyId}/links`);
-
-    return response.data.map((link) => ({
-      ...link,
-      isSupportLink: link.support_link,
-    }));
+    const response = await api.get<MenuLink[]>(`/pmsProperties/${pmsPropertyId}/links`);
+    return response.data;
   }
+
   async fetchPmsPropertyLink(pmsPropertyId: number, linkId: number): Promise<string> {
-    const response = await api.get<string>(`/properties/${pmsPropertyId}/links/${linkId}`);
+    const response = await api.get<string>(`/pmsProperties/${pmsPropertyId}/links/${linkId}`);
     return response.data;
   }
 }
