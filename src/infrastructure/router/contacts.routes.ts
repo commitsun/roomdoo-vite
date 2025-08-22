@@ -11,15 +11,15 @@ export const contactsRoutes: RouteRecordRaw[] = [
         component: () => import('@/ui/pages/ContactsPage.vue'),
         meta: { requiresAuth: true },
       },
-      {
-        name: 'contacts-detail',
-        path: 'detail/:contactId',
-        components: {
-          default: () => import('@/ui/pages/ContactsPage.vue'),
-          drawer: () => import('@/ui/components/contacts/ContactDetail.vue'),
-        },
-        meta: { requiresAuth: true },
-      },
+      // {
+      //   name: 'contacts-detail',
+      //   path: 'detail/:contactId',
+      //   components: {
+      //     default: () => import('@/ui/pages/ContactsPage.vue'),
+      //     drawer: () => import('@/ui/components/contacts/ContactDetail.vue'),
+      //   },
+      //   meta: { requiresAuth: true },
+      // },
       // {
       //   name: 'customers',
       //   path: 'clients',

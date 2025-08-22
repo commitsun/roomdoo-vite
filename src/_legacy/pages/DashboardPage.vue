@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <img src="/app-images/icon-burger.svg" @click="openLeftDrawer" class="icon-menu" />
+    <img src="/app-images/icon-burger.svg" @click="openLeftDrawer()" class="icon-menu" />
     <div class="logo-container">
       <img src="/logos/logo-black-new.svg" />
     </div>
@@ -562,7 +562,8 @@ export default defineComponent({
     DashboardFeedPosts,
     DashboardLineChart,
   },
-  setup() {
+  emits: ['openLeftDrawer'],
+  setup(props, context) {
     const store = useStore();
     // dates
     const thirtyDaysAgo = new Date();
@@ -690,6 +691,7 @@ export default defineComponent({
 
     const openLeftDrawer = () => {
       void store.dispatch('layout/leftDrawerDisplayed', true);
+      context.emit('openLeftDrawer');
     };
 
     const refreshPropertyDependantData = async () => {
