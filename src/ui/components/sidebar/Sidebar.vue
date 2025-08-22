@@ -14,48 +14,48 @@
     <!-- NAVIGATION -->
     <nav class="layout__nav" ref="nav">
       <router-link
-        to="/"
+        :to="`/${route.params.pmsPropertyId}`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/') }"
       >
         <i class="pi pi-objects-column layout__nav-link-icon" />
-        <span>Dashboard</span>
+        <span>{{ t('sidebar.dashboard') }}</span>
       </router-link>
 
       <router-link
-        to="/planning"
+        :to="`/${route.params.pmsPropertyId}/planning`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/planning') }"
       >
         <i class="pi pi-calendar layout__nav-link-icon" />
-        <span>Planning de reservas</span>
+        <span>{{ t('sidebar.planning') }}</span>
       </router-link>
 
       <router-link
-        to="/contacts"
+        :to="`/${route.params.pmsPropertyId}/contacts`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/contacts') }"
       >
         <i class="pi pi-user layout__nav-link-icon" />
-        <span>Contactos</span>
+        <span>{{ t('sidebar.contacts') }}</span>
       </router-link>
 
       <router-link
-        to="/transactions"
+        :to="`/${route.params.pmsPropertyId}/transactions`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/transactions') }"
       >
         <i class="pi pi-euro layout__nav-link-icon" />
-        <span>Registro de caja</span>
+        <span>{{ t('sidebar.cashRegister') }}</span>
       </router-link>
 
       <router-link
-        to="/invoices"
+        :to="`/${route.params.pmsPropertyId}/invoices`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/invoices') }"
       >
         <i class="pi pi-credit-card layout__nav-link-icon" />
-        <span>Facturación</span>
+        <span>{{ t('sidebar.billing') }}</span>
       </router-link>
 
       <!-- REPORTS -->
@@ -64,7 +64,7 @@
         @click="isReportOptionsOpen = !isReportOptionsOpen"
       >
         <i class="pi pi-chart-bar layout__nav-link-icon" />
-        <span>Informes</span>
+        <span>{{ t('sidebar.reports') }}</span>
         <i
           class="pi pi-sort-down-fill layout__nav-link-caret"
           :class="{ 'layout__nav-link-caret--rotated': isReportOptionsOpen }"
@@ -75,31 +75,31 @@
         <li class="layout__submenu-item">
           <div class="layout__submenu-link">
             <i class="pi pi-list-check layout__submenu-link-icon" />
-            <span>Limpieza</span>
+            <span>{{ t('sidebar.housekeeping') }}</span>
           </div>
         </li>
         <li class="layout__submenu-item">
           <div class="layout__submenu-link">
             <i class="pi pi-sign-in layout__submenu-link-icon" />
-            <span>Entradas</span>
+            <span>{{ t('sidebar.arrivals') }}</span>
           </div>
         </li>
         <li class="layout__submenu-item">
           <div class="layout__submenu-link">
             <i class="pi pi-sign-out layout__submenu-link-icon" />
-            <span>Salidas</span>
+            <span>{{ t('sidebar.departures') }}</span>
           </div>
         </li>
         <li class="layout__submenu-item">
           <div class="layout__submenu-link">
             <i class="pi pi-tags layout__submenu-link-icon" />
-            <span>Servicios</span>
+            <span>{{ t('sidebar.services') }}</span>
           </div>
         </li>
         <li class="layout__submenu-item">
           <div class="layout__submenu-link">
             <i class="pi pi-money-bill layout__submenu-link-icon" />
-            <span>Pagos</span>
+            <span>{{ t('sidebar.payments') }}</span>
           </div>
         </li>
         <li class="layout__submenu-item">
@@ -188,15 +188,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import Avatar from 'primevue/avatar';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import Menu from 'primevue/menu';
 import UserSettings from '@/ui/components/user/UserSettings.vue';
-
+import { useI18n } from 'vue-i18n';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
+import UserChangePassword from '../user/UserChangePassword.vue';
 
 defineProps<{
   menuOpen: boolean;
@@ -205,6 +206,7 @@ defineProps<{
 const route = useRoute();
 const userStore = useUserStore();
 const pmsPropertiesStore = usePmsPropertiesStore();
+const { t } = useI18n();
 const { open } = useAppDialog();
 
 const hash = import.meta.env.VITE_COMMIT_HASH || 'dev';
@@ -213,24 +215,37 @@ const isUserMenuOpen = ref(false);
 const isReportOptionsOpen = ref(false);
 const isLinkOptionsOpen = ref(false);
 const nav = ref<HTMLElement | null>(null);
-const items = ref([
+const userSettingsHeader = computed(() => t('sidebar.userSettings'));
+const userChangePasswordHeader = computed(() => t('sidebar.changePassword'));
+
+const items = computed(() => [
   {
-    label: 'Opciones',
+    label: t('sidebar.options'),
     items: [
       {
-        label: 'Configuración',
+        label: t('sidebar.settings'),
         icon: 'pi pi-cog',
         command: () => {
           open(UserSettings, {
-            props: {
-              header: 'Configuración de usuario',
-            },
+            props: { header: userSettingsHeader },
           });
         },
       },
       {
-        label: 'Cerrar sesión',
+        label: t('sidebar.changePassword'),
+        icon: 'pi pi-lock',
+        command: () => {
+          open(UserChangePassword, {
+            props: { header: userChangePasswordHeader },
+          });
+        },
+      },
+      {
+        label: t('sidebar.logout'),
         icon: 'pi pi-sign-out',
+        command: () => {
+          userStore.logout();
+        },
       },
     ],
   },

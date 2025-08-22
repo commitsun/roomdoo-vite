@@ -30,4 +30,11 @@ export class UserService {
   async refreshToken(): Promise<void> {
     await this.userRepository.refreshToken();
   }
+
+  async updateUser(user: Partial<User>): Promise<void> {
+    await this.userRepository.updateUser(user);
+  }
+  logout(): void {
+    this.userRepository.logout();
+  }
 }

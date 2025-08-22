@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import { UsersRepositoryImpl } from '../repositories/UserRepositoryImpl';
 import { UserService } from '@/application/user/UserService';
 import { CookieService } from '@/infrastructure/cookies/CookieService';
+import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 
 const userRepository = new UsersRepositoryImpl();
 const userService = new UserService(userRepository);
@@ -26,6 +27,7 @@ export const useUserStore = defineStore('user', () => {
         firstName: user.value.firstName,
         defaultPmsProperty: user.value.defaultPmsProperty,
         lastName: user.value.lastName,
+        languageId: user.value.languageId,
         lastName2: user.value.lastName2,
         phone: user.value.phone,
         avatar: user.value.avatar,
@@ -46,5 +48,29 @@ export const useUserStore = defineStore('user', () => {
     await userService.refreshToken();
   };
 
-  return { user, refreshToken, login, requestChangePassword, resetPassword, hydrateFromCookies };
+  const updateUser = async (updatedUser: Partial<User>) => {
+    await userService.updateUser(updatedUser);
+    if (user.value) {
+      user.value = { ...user.value, ...updatedUser };
+      CookieService.setUserCookies(user.value);
+    }
+  };
+
+  const logout = () => {
+    user.value = null;
+    userService.logout();
+    //TODO: remove with legacy
+    useLegacyStore().removeVuexAndOldCookiesUser();
+  };
+
+  return {
+    user,
+    refreshToken,
+    login,
+    requestChangePassword,
+    resetPassword,
+    hydrateFromCookies,
+    updateUser,
+    logout,
+  };
 });

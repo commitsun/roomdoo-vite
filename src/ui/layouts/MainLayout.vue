@@ -29,17 +29,21 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, onBeforeMount, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import Drawer from 'primevue/drawer';
 import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useUserStore } from '@/infrastructure/stores/user';
 import { updateI18nAvailableLocales } from '@/ui/plugins/i18n';
 
 const route = useRoute();
+const router = useRouter();
 const pmsPropertiesStore = usePmsPropertiesStore();
 const instanceStore = useInstanceStore();
+const userStore = useUserStore();
+const activeUser = computed(() => userStore.user);
 
 const isMenuVisible = ref(false);
 const rightDrawerVisible = ref(false);
@@ -51,6 +55,12 @@ watch(
   },
   { immediate: true }
 );
+
+watch(activeUser, () => {
+  if (!activeUser.value) {
+    router.push({ name: 'login' });
+  }
+});
 
 onBeforeMount(async () => {
   await instanceStore.fetchInstance();
