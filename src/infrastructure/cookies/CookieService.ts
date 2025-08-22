@@ -20,6 +20,7 @@ export class CookieService {
     this.setCookie('defaultPmsProperty', JSON.stringify(user.defaultPmsProperty));
     this.setCookie('lastName', user.lastName);
     this.setCookie('lastName2', user.lastName2 || '');
+    this.setCookie('languageId', user.languageId.toString());
     this.setCookie('email', user.email);
     this.setCookie('phone', user.phone || '');
     this.setCookie('avatar', user.avatar || '');
@@ -32,6 +33,7 @@ export class CookieService {
     const firstName = this.getCookie('firstName');
     const defaultPmsProperty = this.getCookie('defaultPmsProperty');
     const lastName = this.getCookie('lastName');
+    const languageId = this.getCookie('languageId');
     const lastName2 = this.getCookie('lastName2') || undefined;
     const phone = this.getCookie('phone') || undefined;
     const avatar = this.getCookie('avatar') || undefined;
@@ -49,6 +51,7 @@ export class CookieService {
       firstName,
       defaultPmsProperty: JSON.parse(defaultPmsProperty),
       lastName,
+      languageId: parseInt(languageId || '0', 10),
       lastName2,
       phone,
       avatar,
@@ -63,6 +66,7 @@ export class CookieService {
       'defaultPmsProperty',
       'lastName',
       'lastName2',
+      'languageId',
       'email',
       'phone',
       'avatar',

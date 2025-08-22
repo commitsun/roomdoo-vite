@@ -5,12 +5,13 @@ const DEFAULT_PROPS = {
   draggable: false,
   resizable: false,
   style: { width: 'auto', maxWidth: '100vw' },
-  breakpoints: { '960px': '95vw', '640px': '100vw' },
+  breakpoints: { '1024px': '100vw' },
   pt: {
     root: {
       style: {
         maxHeight: '100%',
         borderRadius: '0',
+        overflow: 'hidden',
       },
     },
   },

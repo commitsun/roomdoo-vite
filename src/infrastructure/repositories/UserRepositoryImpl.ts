@@ -1,6 +1,7 @@
 import type { User } from '@/domain/entities/User';
 import type { UserRepository } from '@/domain/repositories/UserRepository';
 import { api } from '@/infrastructure/http/axios';
+import { CookieService } from '../cookies/CookieService';
 
 export class UsersRepositoryImpl implements UserRepository {
   async login(email: string, password: string): Promise<void> {
@@ -12,6 +13,7 @@ export class UsersRepositoryImpl implements UserRepository {
     const user = response.data;
     user.avatar = user.image;
     delete user.image;
+    user.languageId = 1;
     return user;
   }
 
@@ -30,5 +32,12 @@ export class UsersRepositoryImpl implements UserRepository {
 
   async refreshToken(): Promise<void> {
     await api.post('/refresh-token');
+  }
+  async updateUser(user: Partial<User>): Promise<void> {
+    // TODO: await api.patch('/user', user);
+    CookieService.setUserCookies(user as User);
+  }
+  logout(): void {
+    CookieService.clearUserCookies();
   }
 }
