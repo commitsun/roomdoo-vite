@@ -7,4 +7,6 @@ export interface UserRepository {
   requestChangePassword(email: string): Promise<void>;
   resetPassword(password: string, token: string): Promise<void>;
   refreshToken(): Promise<void>;
+  updateUser(user: Partial<User>): Promise<void>;
+  logout(): void;
 }

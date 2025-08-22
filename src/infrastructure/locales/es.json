@@ -38,6 +38,50 @@
     "backToLogin": "Volver al inicio de sesión",
     "requestSent": "Se ha enviado un correo para restablecer tu contraseña"
   },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "planning": "Planning de reservas",
+    "contacts": "Contactos",
+    "cashRegister": "Registro de caja",
+    "billing": "Facturación",
+    "reports": "Informes",
+    "housekeeping": "Limpieza",
+    "arrivals": "Entradas",
+    "departures": "Salidas",
+    "services": "Servicios",
+    "payments": "Pagos",
+    "options": "Opciones",
+    "settings": "Configuración",
+    "userSettings": "Configuración de usuario",
+    "changePassword": "Cambiar contraseña",
+    "logout": "Cerrar sesión"
+  },
+  "contacts": {
+    "fullName": "Nombre",
+    "type": "Tipo",
+    "email": "Email",
+    "phone": "Teléfono",
+    "country": "País"
+  },
+  "userSettings": {
+    "replaceImage": "Reemplazar foto",
+    "removeImage": "Borrar foto",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "secondLastName": "Segundo apellido",
+    "phone": "Teléfono",
+    "email": "Email",
+    "language": "Idioma",
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
+  "changePassword": {
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "repeatPassword": "Repetir contraseña",
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
   "error404": {
     "title": "Página no encontrada",
     "message": "Lo sentimos, la página que estás buscando no existe o ha sido movida.",

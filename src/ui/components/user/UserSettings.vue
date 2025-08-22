@@ -6,92 +6,80 @@
       </div>
       <div class="user__settings--buttons">
         <div class="user__settings--button">
-          <Button label="Reemplazar foto" :style="{ width: '100%', minWidth: '130px' }" />
+          <Button
+            :label="t('userSettings.replaceImage')"
+            :style="{ width: '100%', minWidth: '130px' }"
+          />
         </div>
         <div class="user__settings--button">
-          <Button label="Eliminar foto" :style="{ width: '100%', minWidth: '130px' }" />
+          <Button
+            :label="t('userSettings.removeImage')"
+            :style="{ width: '100%', minWidth: '130px' }"
+          />
         </div>
       </div>
     </div>
     <div class="user__settings--row">
       <div class="user__settings--field">
-        <label class="user__settings--label">Nombre</label>
+        <label class="user__settings--label">
+          {{ t('userSettings.firstName') }}
+        </label>
         <InputText v-model="firstName" />
       </div>
 
       <div class="user__settings--field">
-        <label class="user__settings--label">Apellido</label>
+        <label class="user__settings--label">
+          {{ t('userSettings.lastName') }}
+        </label>
         <InputText v-model="lastName" />
       </div>
 
       <div class="user__settings--field">
-        <label class="user__settings--label">Segundo apellido</label>
+        <label class="user__settings--label">
+          {{ t('userSettings.secondLastName') }}
+        </label>
         <InputText v-model="secondLastName" />
       </div>
     </div>
     <div class="user__settings--row">
       <div class="user__settings--field">
-        <label class="user__settings--label">Teléfono</label>
+        <label class="user__settings--label">
+          {{ t('userSettings.phone') }}
+        </label>
         <InputText v-model="phone" />
       </div>
 
       <div class="user__settings--field">
-        <label class="user__settings--label">Email</label>
+        <label class="user__settings--label">
+          {{ t('userSettings.email') }}
+        </label>
         <InputText v-model="email" />
       </div>
 
       <div class="user__settings--field" v-if="locales.length > 1">
-        <label class="user__settings--label">Idioma</label>
+        <label class="user__settings--label">
+          {{ t('userSettings.language') }}
+        </label>
         <Select v-model="language" :options="locales" optionLabel="label" />
       </div>
     </div>
-    <div class="user__settings--row">
-      <Panel header="Cambiar contraseña" toggleable collapsed :style="{ width: '100%' }">
-        <div class="user__settings--field">
-          <label class="user__settings--label">Contraseña actual</label>
-          <IconField>
-            <InputIcon class="pi pi-lock" />
-            <Password
-              v-model="currentPassword"
-              :feedback="false"
-              toggleMask
-              :style="{ width: '100%' }"
-              :inputStyle="{ width: '100%' }"
-            />
-          </IconField>
-        </div>
-        <div class="user__settings--field">
-          <label class="user__settings--label">Nueva contraseña</label>
-          <IconField>
-            <InputIcon class="pi pi-lock" />
-            <Password
-              v-model="newPassword"
-              :feedback="false"
-              toggleMask
-              :style="{ width: '100%' }"
-              :inputStyle="{ width: '100%' }"
-            />
-          </IconField>
-        </div>
-        <div class="user__settings--field">
-          <label class="user__settings--label">repetir contraseña</label>
-          <IconField>
-            <InputIcon class="pi pi-lock" />
-            <Password
-              v-model="repeatPassword"
-              :feedback="false"
-              toggleMask
-              :style="{ width: '100%' }"
-              :inputStyle="{ width: '100%' }"
-            />
-          </IconField>
-        </div>
-      </Panel>
+    <div class="user__settings--footer-buttons">
+      <Button
+        :label="t('userSettings.cancel')"
+        class="p-button-text"
+        :style="{ width: 'auto', minWidth: '130px' }"
+      />
+      <Button
+        :label="t('userSettings.save')"
+        :style="{ width: 'auto', minWidth: '130px' }"
+        @click="save()"
+      />
     </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { i18n, availableLocales } from '@/ui/plugins/i18n';
 import Avatar from 'primevue/avatar';
@@ -102,6 +90,7 @@ import Select from 'primevue/select';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import Password from 'primevue/password';
+import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
 
 export default defineComponent({
   components: {
@@ -116,6 +105,7 @@ export default defineComponent({
   },
   setup() {
     const userStore = useUserStore();
+    const { t } = useI18n({ useScope: 'global' });
     const user = userStore.user;
     const firstName = ref('');
     const lastName = ref('');
@@ -124,9 +114,13 @@ export default defineComponent({
     const email = ref('');
     const locales = ref(availableLocales);
     const language = ref(locales.value.find((l) => l.value === i18n.global.locale.value));
-    const currentPassword = ref('');
-    const newPassword = ref('');
-    const repeatPassword = ref('');
+
+    const save = () => {
+      if (language.value) {
+        updateAppLocale(language.value.value);
+        localStorage.setItem('roomdoo-locale', language.value.value);
+      }
+    };
 
     onMounted(() => {
       firstName.value = user?.firstName || '';
@@ -144,9 +138,8 @@ export default defineComponent({
       email,
       locales,
       language,
-      currentPassword,
-      newPassword,
-      repeatPassword,
+      t,
+      save,
     };
   },
 });
@@ -155,7 +148,7 @@ export default defineComponent({
 .user__settings {
   display: flex;
   flex-direction: column;
-  height: 90svh;
+  height: calc(90svh - 1.25rem);
   &--row {
     display: flex;
     flex-direction: column;
@@ -188,6 +181,12 @@ export default defineComponent({
     margin-bottom: 0.25rem;
     font-weight: bold;
   }
+  &--footer-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -212,6 +211,11 @@ export default defineComponent({
     &--button {
       width: fit-content;
       justify-content: start;
+    }
+    &--footer-buttons {
+      flex-direction: row;
+      justify-content: flex-end;
+      width: auto;
     }
   }
 }
