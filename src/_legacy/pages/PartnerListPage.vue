@@ -179,7 +179,8 @@ export default defineComponent({
     CheckboxComponent,
     ListComponent,
   },
-  setup() {
+  emits: ['openLeftDrawer'],
+  setup(props, context) {
     const store = useStore();
     const { fetchPartners } = usePartner();
     const housedOptions = [
@@ -280,6 +281,7 @@ export default defineComponent({
 
     const openLeftDrawer = () => {
       void store.dispatch('layout/leftDrawerDisplayed', true);
+      context.emit('openLeftDrawer');
     };
 
     const openCreatePartner = async () => {
