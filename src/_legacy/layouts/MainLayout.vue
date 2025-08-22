@@ -1,18 +1,9 @@
 <template>
-  <Transition name="left-drawer-transition">
-    <LeftDrawerSlide
-      class="left-drawer"
-      v-if="leftDrawerExpanded"
-      @showUserSettingsModal="peformShowUserSettingsModal"
-    />
-  </Transition>
   <div class="layout-container" v-if="activeUser && activeProperty">
-    <div class="left-drawer-fixed">
-      <LeftDrawerFixed />
-    </div>
+    <Sidebar :menuOpen="isMenuOpen" />
     <div class="overlay" @click="closeLeftDrawer" v-if="leftDrawerExpanded" />
     <div class="main-container" :class="rightDrawerExpanded ? 'main-container-shrinked' : ''">
-      <router-view />
+      <router-view @openLeftDrawer="openLeftDrawer()" />
     </div>
     <div class="button-open-drawer" @click="openFolioList" v-if="route.name === 'planning'">
       <img src="/app-images/icon-menu.svg" class="arrow-left-img" />
@@ -69,6 +60,8 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/_legacy/store';
+import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 const BookingEngine = defineAsyncComponent(
   () => import('@/_legacy/components/bookingEngine/BookingEngine.vue')
@@ -106,12 +99,14 @@ export default defineComponent({
     AutocompleteMobile,
     TransactionDetailMobile,
     Spinner,
+    Sidebar,
   },
   emits: ['moveToReservation'],
   setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const pmsPropertiesStore = usePmsPropertiesStore();
     const showUserSettingsModal = ref(false);
     const peformShowUserSettingsModal = () => {
       showUserSettingsModal.value = true;
@@ -124,6 +119,7 @@ export default defineComponent({
     const isPricelistExpanded = ref(false);
     const isMoveToReservation = ref(false);
     const isMoveToFirstReservation = ref(false);
+    const isMenuOpen = ref(false);
     provide('moveToReservation', isMoveToReservation);
     provide('moveToFirstReservation', isMoveToFirstReservation);
     provide('selectedPropertyIdFromRightSelector', selectedPropertyId);
@@ -177,6 +173,7 @@ export default defineComponent({
     };
     const closeLeftDrawer = () => {
       void store.dispatch('layout/leftDrawerDisplayed', false);
+      isMenuOpen.value = false;
     };
 
     const openFolioList = () => {
@@ -203,6 +200,12 @@ export default defineComponent({
 
     const moveToFirstReservation = () => {
       isMoveToFirstReservation.value = true;
+    };
+
+    const openLeftDrawer = () => {
+      console.log('openLeftdrawer MainLayout');
+      isMenuOpen.value = !isMenuOpen.value;
+      // void store.dispatch('layout/leftDrawerDisplayed', isMenuOpen.value);
     };
 
     watch(pricelistPlanningExpanded, (value) => {
@@ -233,6 +236,12 @@ export default defineComponent({
         void router.push(path);
         void store.dispatch('layout/rightDrawerDisplayed', false);
         void store.dispatch('layout/changeRightDrawerContent', 'FoliosList');
+      }
+    });
+
+    watch(activeUser, () => {
+      if (!activeUser.value) {
+        router.push({ name: 'login' });
       }
     });
 
@@ -275,6 +284,9 @@ export default defineComponent({
       } else {
         await store.dispatch('properties/setActiveProperty', activeUser.value?.defaultPropertyId);
       }
+      await pmsPropertiesStore.fetchPmsProperties();
+      const pmsPropertyId = route.params.pmsPropertyId as string;
+      if (pmsPropertyId) pmsPropertiesStore.setCurrentPmsPropertyId(parseInt(pmsPropertyId));
     });
 
     onMounted(() => {
@@ -320,6 +332,8 @@ export default defineComponent({
       activePricelist,
       activeAvailabilityPlan,
       showSpinner,
+      isMenuOpen,
+      openLeftDrawer,
     };
   },
 });
@@ -332,7 +346,6 @@ export default defineComponent({
   overflow-y: hidden;
   display: flex;
   .left-drawer-fixed {
-    display: none;
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.25);
     z-index: 100;
     background-color: white;
@@ -348,6 +361,7 @@ export default defineComponent({
     transition: width 0.8s ease;
     flex: 1 1 auto;
     overflow: hidden;
+    position: relative;
   }
 
   .button-open-drawer {
@@ -448,6 +462,9 @@ export default defineComponent({
 }
 // MEDIA QUERIES
 @media (min-width: 1024px) {
+  .main-container {
+    margin-left: 65px;
+  }
   .left-drawer,
   .overlay {
     display: none;

@@ -50,6 +50,7 @@ onMounted(async () => {
     const foundLocale = locales.value.find(
       (l) => l.value === (savedLocale || i18n.global.locale.value)
     );
+    locales.value = updateI18nAvailableLocales(instanceStore.instance?.languages);
     selectedLocale.value = foundLocale || locales.value[0];
     updateAppLocale(selectedLocale.value.value);
   } catch (err) {
