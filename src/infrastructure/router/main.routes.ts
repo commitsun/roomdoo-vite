@@ -2,21 +2,21 @@ import type { RouteRecordRaw } from 'vue-router';
 
 export const mainRoutes: RouteRecordRaw[] = [
   {
-    path: '/:pmsPropertyId(\\d+)?',
+    path: '/:pmsPropertyId(\\d+)',
     component: () => import('@/_legacy/layouts/MainLayout.vue'),
     children: [
       { name: 'dashboard', path: '', component: () => import('@/_legacy/pages/DashboardPage.vue') },
     ],
   },
   {
-    path: '/planning/:pmsPropertyId(\\d+)?',
+    path: '/:pmsPropertyId(\\d+)/planning',
     component: () => import('@/_legacy/layouts/MainLayout.vue'),
     children: [
       { name: 'planning', path: '', component: () => import('@/_legacy/pages/PlanningPage.vue') },
     ],
   },
   {
-    path: '/transactions/:pmsPropertyId(\\d+)?',
+    path: '/:pmsPropertyId(\\d+)/transactions',
     component: () => import('@/_legacy/layouts/MainLayout.vue'),
     children: [
       {
@@ -27,21 +27,10 @@ export const mainRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/invoices/:pmsPropertyId(\\d+)?',
+    path: '/:pmsPropertyId(\\d+)/invoices',
     component: () => import('@/_legacy/layouts/MainLayout.vue'),
     children: [
       { name: 'invoices', path: '', component: () => import('@/_legacy/pages/InvoicesPage.vue') },
     ],
   },
-  {
-    path: '/partners/:pmsPropertyId(\\d+)?',
-    component: () => import('@/_legacy/layouts/MainLayout.vue'),
-    children: [
-      {
-        name: 'partners',
-        path: '',
-        component: () => import('@/_legacy/pages/PartnerListPage.vue'),
-      },
-    ],
-  },
-]
+];
