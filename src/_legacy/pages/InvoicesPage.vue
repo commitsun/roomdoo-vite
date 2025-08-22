@@ -263,7 +263,8 @@ export default defineComponent({
     CheckboxComponent,
     PartnerForm,
   },
-  setup() {
+  emits: ['openLeftDrawer'],
+  setup(props, context) {
     const store = useStore();
     const router = useRouter();
     const { fetchPartners } = usePartner();
@@ -632,6 +633,7 @@ export default defineComponent({
 
     const openLeftDrawer = () => {
       void store.dispatch('layout/leftDrawerDisplayed', true);
+      context.emit('openLeftDrawer');
     };
 
     const openMailModal = () => {

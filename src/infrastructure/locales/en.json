@@ -38,6 +38,50 @@
     "backToLogin": "Back to login",
     "requestSent": "An email has been sent to reset your password"
   },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "planning": "Reservations calendar",
+    "contacts": "Contacts",
+    "cashRegister": "Cash register",
+    "billing": "Billing",
+    "reports": "Reports",
+    "housekeeping": "Housekeeping",
+    "arrivals": "Arrivals",
+    "departures": "Departures",
+    "services": "Services",
+    "payments": "Payments",
+    "options": "Options",
+    "settings": "Settings",
+    "userSettings": "User settings",
+    "changePassword": "Change password",
+    "logout": "Logout"
+  },
+  "contacts": {
+    "fullName": "Name",
+    "type": "Type",
+    "email": "Email",
+    "phone": "Phone",
+    "country": "Country"
+  },
+  "userSettings": {
+    "replaceImage": "Replace image",
+    "removeImage": "Remove image",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "secondLastName": "Second Last Name",
+    "phone": "Phone",
+    "email": "Email",
+    "language": "Language",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "changePassword": {
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "repeatPassword": "Repeat password",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
   "error404": {
     "title": "Page not found",
     "message": "Sorry, the page you are looking for does not exist or has been moved.",
