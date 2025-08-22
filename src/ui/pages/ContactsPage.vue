@@ -15,12 +15,13 @@
     >
       <Column
         field="name"
-        header="Nombre"
+        :header="t('contacts.fullName')"
         style="min-width: 200px"
         frozen
         class="font-bold"
-      ></Column>
-      <Column field="types" header="Tipo" style="min-width: 100px">
+      >
+      </Column>
+      <Column field="types" :header="t('contacts.type')" style="min-width: 100px">
         <template #body="{ data }">
           <Tag
             :severity="severityType(type)"
@@ -30,8 +31,8 @@
           ></Tag>
         </template>
       </Column>
-      <Column field="email" header="Email" style="min-width: 100px"></Column>
-      <Column field="phone" header="Teléfono" style="min-width: 200px">
+      <Column field="email" :header="t('contacts.email')" style="min-width: 100px"></Column>
+      <Column field="phone":header="t('contacts.phone')"" style="min-width: 200px">
         <template #body="{ data }">
           <span v-for="(phone, index) in data.phones" :key="phone.type">
             <Chip
@@ -49,7 +50,7 @@
           </span>
         </template>
       </Column>
-      <Column header="Country" filterField="country" style="min-width: 200px">
+      <Column :header="t('contacts.country')" filterField="country" style="min-width: 200px">
         <template #body="{ data }">
           <div class="flex items-center gap-2">
             <div v-if="data.country">
@@ -69,6 +70,7 @@ import DataTable from 'primevue/datatable';
 import Tag from 'primevue/tag';
 import Chip from 'primevue/chip';
 
+import { useI18n } from 'vue-i18n';
 import Column from 'primevue/column';
 import CountryFlag from 'vue-country-flag-next';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
@@ -86,6 +88,7 @@ export default defineComponent({
   setup() {
     const contactsStore = useContactsStore();
     const uiStore = useUIStore();
+    const { t } = useI18n();
     const numTotalRecords = ref(0);
     const page = ref(1);
     const rows = ref(20);
@@ -120,6 +123,7 @@ export default defineComponent({
       rows,
       customers,
       numTotalRecords,
+      t,
       loadContacts,
       severityType,
     };
