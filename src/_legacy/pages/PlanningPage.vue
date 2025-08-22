@@ -362,7 +362,8 @@ export default defineComponent({
     CustomSelect,
     CustomIcon,
   },
-  setup() {
+  emits: ['openLeftDrawer'],
+  setup(props, context) {
     const store = useStore();
     const router = useRouter();
     const { refreshPlanning } = usePlanning();
@@ -554,6 +555,7 @@ export default defineComponent({
 
     const openLeftDrawer = () => {
       void store.dispatch('layout/leftDrawerDisplayed', true);
+      context.emit('openLeftDrawer');
     };
 
     const closeLeftDrawer = () => {

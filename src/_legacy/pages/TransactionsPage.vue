@@ -422,7 +422,8 @@ export default defineComponent({
     AppButton: Button,
     InputNumber,
   },
-  setup() {
+  emits: ['openLeftDrawer'],
+  setup(props, context) {
     const store = useStore();
     const router = useRouter();
 
@@ -806,6 +807,7 @@ export default defineComponent({
 
     const openLeftDrawer = () => {
       void store.dispatch('layout/leftDrawerDisplayed', true);
+      context.emit('openLeftDrawer');
     };
 
     const clearFilters = () => {
