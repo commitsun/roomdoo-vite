@@ -239,12 +239,6 @@ export default defineComponent({
       }
     });
 
-    watch(activeUser, () => {
-      if (!activeUser.value) {
-        router.push({ name: 'login' });
-      }
-    });
-
     onBeforeMount(async () => {
       console.log(
         'onBeforeMount MainLayout before recovering cookies',
