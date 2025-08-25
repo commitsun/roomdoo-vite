@@ -4,7 +4,6 @@ import { ref } from 'vue';
 import { UsersRepositoryImpl } from '../repositories/UserRepositoryImpl';
 import { UserService } from '@/application/user/UserService';
 import { CookieService } from '@/infrastructure/cookies/CookieService';
-import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 
 const userRepository = new UsersRepositoryImpl();
 const userService = new UserService(userRepository);
@@ -59,8 +58,6 @@ export const useUserStore = defineStore('user', () => {
   const logout = () => {
     user.value = null;
     userService.logout();
-    //TODO: remove with legacy
-    useLegacyStore().removeVuexAndOldCookiesUser();
   };
 
   return {
