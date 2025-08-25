@@ -25,6 +25,7 @@
         <template #body="{ data }">
           <Tag
             :severity="severityType(type)"
+            :key="type"
             v-for="type in data.types"
             :value="type"
             class="mr-2 mt-1"
@@ -32,7 +33,7 @@
         </template>
       </Column>
       <Column field="email" :header="t('contacts.email')" style="min-width: 100px"></Column>
-      <Column field="phone":header="t('contacts.phone')"" style="min-width: 200px">
+      <Column field="phone" :header="t('contacts.phone')" style="min-width: 200px">
         <template #body="{ data }">
           <span v-for="(phone, index) in data.phones" :key="phone.type">
             <Chip

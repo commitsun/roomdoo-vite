@@ -62,7 +62,6 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import { useRoute, useRouter } from 'vue-router';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 export default defineComponent({
   components: {
@@ -77,7 +76,6 @@ export default defineComponent({
     const { t } = useI18n();
     const instanceStore = useInstanceStore();
     const userStore = useUserStore();
-    const pmsPropertiesStore = usePmsPropertiesStore();
     const router = useRouter();
     const route = useRoute();
     const username = ref('');
@@ -89,10 +87,7 @@ export default defineComponent({
         await userStore.login(username.value, password.value);
         await useLegacyStore().doVuexLogin(username.value, password.value);
         if (userStore.user) {
-          pmsPropertiesStore.fetchPmsProperties();
-          const propertyId = userStore.user.defaultPmsProperty.id;
-          pmsPropertiesStore.setCurrentPmsPropertyId(propertyId);
-          const redirect = (route.query.redirect as string) || '/' + propertyId;
+          const redirect = (route.query.redirect as string) || '/';
           router.replace(redirect);
         }
       } catch (error) {
