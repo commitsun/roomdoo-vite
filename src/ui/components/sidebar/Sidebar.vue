@@ -14,7 +14,7 @@
     <!-- NAVIGATION -->
     <nav class="layout__nav" ref="nav">
       <router-link
-        :to="`/${route.params.pmsPropertyId}`"
+        :to="`/${route.params.pmsPropertyId || ''}`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/') }"
       >
@@ -23,7 +23,7 @@
       </router-link>
 
       <router-link
-        :to="`/${route.params.pmsPropertyId}/planning`"
+        :to="`/planning${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/planning') }"
       >
@@ -32,7 +32,7 @@
       </router-link>
 
       <router-link
-        :to="`/${route.params.pmsPropertyId}/contacts`"
+        :to="`/contacts${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/contacts') }"
       >
@@ -41,7 +41,7 @@
       </router-link>
 
       <router-link
-        :to="`/${route.params.pmsPropertyId}/transactions`"
+        :to="`/transactions${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/transactions') }"
       >
@@ -50,7 +50,7 @@
       </router-link>
 
       <router-link
-        :to="`/${route.params.pmsPropertyId}/invoices`"
+        :to="`/invoices${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
         class="layout__nav-link"
         :class="{ 'layout__nav-link--active': isActive('/invoices') }"
       >
@@ -176,7 +176,7 @@
               <div class="property__user-name">{{ user?.firstName }} {{ user?.lastName }}</div>
               <div class="property__user-email">{{ user?.email }}</div>
             </div>
-            <div class="property__user-menu" v-if="isUserMenuOpen">
+            <div class="property__user-menu" :class="{ 'is-open': isUserMenuOpen }">
               <Menu :model="items" />
             </div>
           </div>
@@ -198,6 +198,8 @@ import UserSettings from '@/ui/components/user/UserSettings.vue';
 import { useI18n } from 'vue-i18n';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import UserChangePassword from '../user/UserChangePassword.vue';
+import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
+import { useRouter } from 'vue-router';
 
 defineProps<{
   menuOpen: boolean;
@@ -206,6 +208,7 @@ defineProps<{
 const route = useRoute();
 const userStore = useUserStore();
 const pmsPropertiesStore = usePmsPropertiesStore();
+const router = useRouter();
 const { t } = useI18n();
 const { open } = useAppDialog();
 
@@ -245,6 +248,9 @@ const items = computed(() => [
         icon: 'pi pi-sign-out',
         command: () => {
           userStore.logout();
+          //TODO: remove with legacy
+          useLegacyStore().removeVuexAndOldCookiesUser();
+          router.push({ name: 'login' });
         },
       },
     ],
@@ -520,6 +526,26 @@ const hideUserMenu = () => {
       left: 0;
       width: 95%;
       margin-bottom: 0.5rem;
+
+      /* estado cerrado */
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(10px);
+      visibility: hidden;
+      pointer-events: none;
+
+      transition: max-height 0.25s ease, opacity 0.18s ease, transform 0.18s ease,
+        visibility 0s linear 0.25s;
+      &.is-open {
+        max-height: 500px; // suficiente para tu menú
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+        pointer-events: auto;
+
+        transition: max-height 0.25s ease, opacity 0.18s ease, transform 0.18s ease, visibility 0s;
+      }
     }
   }
 
