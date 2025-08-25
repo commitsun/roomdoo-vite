@@ -5,7 +5,7 @@ import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useNotificationsStore } from '../stores/notifications';
 import type { InternalAxiosRequestConfig } from 'axios';
-import { useRouter } from 'vue-router';
+import router from '@/ui/plugins/router';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -77,9 +77,15 @@ api.interceptors.response.use(
         processQueue(null); // Success: retry all queued requests
         return api(originalRequest); // Retry the original request
       } catch (refreshError: any) {
+        useUserStore().logout();
         processQueue(refreshError as AxiosError); // Failure: reject all queued requests
         useNotificationsStore().add('Session expired. Please log in again.');
-        useRouter().push('/login');
+        const currentRoute = router.currentRoute.value;
+        console.log(`Redirecting `);
+        router.replace({
+          name: 'login',
+          query: { redirect: currentRoute.fullPath },
+        });
       } finally {
         isRefreshing = false; // Reset flag regardless of outcome
       }
