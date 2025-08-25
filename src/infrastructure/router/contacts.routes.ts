@@ -2,7 +2,7 @@ import type { RouteRecordRaw } from 'vue-router';
 
 export const contactsRoutes: RouteRecordRaw[] = [
   {
-    path: '/:pmsPropertyId(\\d+)/contacts',
+    path: '/contacts/:pmsPropertyId(\\d+)?',
     component: () => import('@/ui/layouts/MainLayout.vue'),
     children: [
       {
