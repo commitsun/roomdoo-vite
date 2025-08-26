@@ -12,6 +12,10 @@ const router = createRouter({
 //   redirect to /login and preserve the intended path as ?redirect=...
 router.beforeEach((to) => {
   const auth = useUserStore();
+  if (to.name === 'login') {
+    return true;
+  }
+
   if (!auth.user) {
     auth.hydrateFromCookies?.();
   }

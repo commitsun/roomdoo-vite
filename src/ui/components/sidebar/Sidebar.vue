@@ -200,6 +200,7 @@ import { useAppDialog } from '@/ui/composables/useAppDialog';
 import UserChangePassword from '../user/UserChangePassword.vue';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import { useRouter } from 'vue-router';
+import { useDynamicDialogsStore } from '@/infrastructure/stores/dynamicDialogs';
 
 defineProps<{
   menuOpen: boolean;
@@ -207,6 +208,7 @@ defineProps<{
 
 const route = useRoute();
 const userStore = useUserStore();
+const dynamicDialogsStore = useDynamicDialogsStore();
 const pmsPropertiesStore = usePmsPropertiesStore();
 const router = useRouter();
 const { t } = useI18n();

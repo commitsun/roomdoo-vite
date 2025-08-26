@@ -203,7 +203,6 @@ export default defineComponent({
     };
 
     const openLeftDrawer = () => {
-      console.log('openLeftdrawer MainLayout');
       isMenuOpen.value = !isMenuOpen.value;
       // void store.dispatch('layout/leftDrawerDisplayed', isMenuOpen.value);
     };
@@ -240,17 +239,10 @@ export default defineComponent({
     });
 
     onBeforeMount(async () => {
-      console.log(
-        'onBeforeMount MainLayout before recovering cookies',
-        store.state.user.activeUser
-      );
       if (!store.state.user.activeUser) {
         await store.dispatch('user/recoverCookies');
       }
-      console.log('onBeforeMount MainLayout after recovering cookies', store.state.user.activeUser);
-      console.log('*****');
       if (!activeUser.value) {
-        console.log('onBeforeMount MainLayout before redirect to login');
         router.push({
           name: 'login',
           params: { pmsPropertyId: route.params.pmsPropertyId },
