@@ -1,32 +1,107 @@
 import { dialogService } from '@/_legacy/services/DialogService';
-import axios, { type AxiosInstance } from 'axios';
+import { useUserStore } from '@/infrastructure/stores/user';
+import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import type { App } from 'vue';
+import { useDynamicDialogsStore } from '@/infrastructure/stores/dynamicDialogs';
+
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 const endPoint = import.meta.env.DEV
   ? '/api'
   : `${window.location.href.split('.')[0]}.host.roomdoo.com/api`;
 
-// const endPoint = 'https://staging16.odoo.aldahotels.moduon.net/api';
 const api: AxiosInstance = axios.create({
   baseURL: endPoint,
 });
+// Internal flag to track if the refresh token request is in progress
+let isRefreshing = false;
+
+// Queue to hold failed requests while token is being refreshed
+let failedQueue: any[] = [];
+
+// Process all requests in the queue after token refresh finishes
+const processQueue = (error: AxiosError | null) => {
+  failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve()));
+  failedQueue = [];
+};
+
+const enqueueUntilRefresh = (originalRequest: CustomAxiosRequestConfig) =>
+  new Promise((resolve, reject) => {
+    failedQueue.push({
+      resolve: () => resolve(api(originalRequest)),
+      reject,
+    });
+  });
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response && error.response.config.url !== '/login') {
-      console.error('Axios interceptor error:', error.response);
-      if (error.response.status === 401) {
+  async (error: AxiosError) => {
+    const originalRequest = error.config as CustomAxiosRequestConfig | undefined;
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      originalRequest.url !== '/login' &&
+      originalRequest.url !== '/refresh-token'
+    ) {
+      originalRequest._retry = true;
+
+      // If refresh is in progress, queue this request
+      if (isRefreshing) {
+        return enqueueUntilRefresh(originalRequest);
+      }
+
+      isRefreshing = true;
+      try {
+        // Lazy import to avoid circular dependencies
+        const { useUserStore } = await import('@/infrastructure/stores/user');
+        await useUserStore().refreshToken();
+
+        // Success: retry queued + current request
+        processQueue(null);
+        return api(originalRequest);
+      } catch (refreshError) {
+        // --- session expired ---
+        useUserStore().logout();
+        processQueue(refreshError as AxiosError);
         dialogService.open({
           header: 'Sesión expirada',
-          content: 'Debes iniciar sesión de nuevo',
+          content: 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.',
           btnAccept: 'Aceptar',
-          onAccept: () => (window.location.href = '/login'),
         });
-      } else {
+        useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
+        const { default: router } = await import('@/ui/plugins/router');
+        const current = router.currentRoute.value;
+        const redirect = current?.fullPath || '/';
+        if (current?.name !== 'login') {
+          // Use replace to avoid stacking broken history entries
+          router.replace({ name: 'login', query: { redirect } });
+        }
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // --- Legacy error UI (kept) for non-refresh paths ---
+    if (error.response) {
+      const status = error.response.status;
+      const data: any = (error.response as any).data;
+
+      // Other 4xx (excluding 401 handled above)
+      if (status >= 400 && status < 500 && status !== 401) {
         dialogService.open({
           header: 'Algo ha ido mal',
-          content: error.response.data.description,
+          content: data?.description || data?.message || 'Request error',
+          btnAccept: 'Aceptar',
+        });
+      }
+      // 5xx
+      else if (status >= 500) {
+        dialogService.open({
+          header: 'Algo ha ido mal',
+          content: data?.description || 'Ha ocurrido un error interno.',
           btnAccept: 'Aceptar',
         });
       }
