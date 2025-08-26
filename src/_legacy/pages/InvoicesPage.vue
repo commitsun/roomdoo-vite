@@ -286,6 +286,8 @@ export default defineComponent({
       { paymentState: 'not_paid', name: 'No pagada' },
       { paymentState: 'partial', name: 'Parcialmente pagada' },
     ];
+
+    const isMounting = ref(true);
     const selectedPropertyId = ref(0);
 
     const invoiceDialog = ref(false);
@@ -431,7 +433,7 @@ export default defineComponent({
       } catch (error) {
         dialogService.open({
           header: 'Error',
-          content: 'Algo ha ido mal',
+          content: 'Algo ha ido mal 8888',
           btnAccept: 'Ok',
         });
       } finally {
@@ -450,7 +452,7 @@ export default defineComponent({
         } catch (error) {
           dialogService.open({
             header: 'Error',
-            content: 'Algo ha ido mal',
+            content: 'Algo ha ido mal 7777',
             btnAccept: 'Ok',
           });
         } finally {
@@ -494,7 +496,7 @@ export default defineComponent({
         showMailSendFeedback.value = false;
         dialogService.open({
           header: 'Error',
-          content: 'Algo ha ido mal',
+          content: 'Algo ha ido mal 6666',
           btnAccept: 'Ok',
         });
       } finally {
@@ -787,16 +789,16 @@ export default defineComponent({
     watch(activeProperty, async () => {
       currentPage.value = 1;
       await store.dispatch('invoices/clearInvoices');
-      fetchInvoices({
-        limit,
-        offset: (currentPage.value - 1) * limit,
-        filter: invoicesTextSearch.value,
-        orderBy: selectedOrder.value.field ?? undefined,
-        orderDesc: selectedOrder.value.isDesc,
-        pmsPropertyId: activeProperty.value?.id ?? 0,
-        dateStart: dateRange.value[0],
-        dateEnd: dateRange.value[1],
-      });
+      // fetchInvoices({
+      //   limit,
+      //   offset: (currentPage.value - 1) * limit,
+      //   filter: invoicesTextSearch.value,
+      //   orderBy: selectedOrder.value.field ?? undefined,
+      //   orderDesc: selectedOrder.value.isDesc,
+      //   pmsPropertyId: activeProperty.value?.id ?? 0,
+      //   dateStart: dateRange.value[0],
+      //   dateEnd: dateRange.value[1],
+      // });
       invoicesSelected.value = [];
     });
 
@@ -807,8 +809,12 @@ export default defineComponent({
     watch(
       [invoicesTextSearch, selectedOrder, selectedPaymentState, selectedAgencyId, dateRange],
       async () => {
+        if (isMounting.value) {
+          return;
+        }
         let payload;
         currentPage.value = 1;
+
         if (invoicesTextSearch.value.length >= 5) {
           payload = {
             limit,
@@ -842,10 +848,10 @@ export default defineComponent({
         }
         if (dateRange.value[1] !== null && dateRange.value[0] !== null) {
           await store.dispatch('invoices/clearInvoices');
-          fetchInvoices({
-            ...payload,
-            pmsPropertyId: payload.pmsPropertyId ?? 0, // Ensure pmsPropertyId is a number
-          });
+          // fetchInvoices({
+          //   ...payload,
+          //   pmsPropertyId: payload.pmsPropertyId ?? 0, // Ensure pmsPropertyId is a number
+          // });
         }
       }
     );
@@ -949,16 +955,26 @@ export default defineComponent({
       void store.dispatch('layout/showSpinner', true);
       try {
         await store.dispatch('agencies/fetchAgencies');
+        if (activeProperty.value) {
+          await fetchInvoices({
+            pmsPropertyId: activeProperty.value?.id ?? 0,
+            limit,
+            offset: (currentPage.value - 1) * limit,
+            dateStart: dateRange.value[0],
+            dateEnd: dateRange.value[1],
+          });
+        }
       } catch (error) {
         dialogService.open({
           header: 'Error',
-          content: 'Algo ha ido mal',
+          content: 'Algo ha ido mal 9999',
           btnAccept: 'Ok',
         });
       } finally {
         void store.dispatch('layout/showSpinner', false);
       }
       isInvoiceSelectedArray.value = invoices.value.map(() => false);
+      isMounting.value = false;
     });
 
     onUnmounted(() => {
