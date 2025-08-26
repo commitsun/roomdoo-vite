@@ -1,18 +1,19 @@
 import { useDialog } from 'primevue/usedialog';
-
+import { useDynamicDialogsStore } from '@/infrastructure/stores/dynamicDialogs';
 const DEFAULT_PROPS = {
   modal: true,
   draggable: false,
   resizable: false,
-  style: { width: 'auto', maxWidth: '100vw' },
-  breakpoints: { '1024px': '100vw' },
+
   pt: {
+    header: {
+      class: 'app-dialog__header',
+    },
+    content: {
+      class: 'app-dialog__content',
+    },
     root: {
-      style: {
-        maxHeight: '100%',
-        borderRadius: '0',
-        overflow: 'hidden',
-      },
+      class: 'app-dialog__root',
     },
   },
 };
@@ -20,13 +21,20 @@ const DEFAULT_PROPS = {
 export function useAppDialog() {
   const dialog = useDialog();
 
-  function open(component: any, options: any = {}) {
+  const dynamicDialogStore = useDynamicDialogsStore();
+  const open = (component: any, options: any = {}) => {
+    const newId = Date.now();
     const merged = {
       ...options,
+      onClose: () => {
+        dynamicDialogStore.unRegisterDynamicDialog(newId);
+      },
       props: { ...DEFAULT_PROPS, ...(options.props || {}) },
     };
-    return dialog.open(component, merged);
-  }
+    const dynamicDialog = dialog.open(component, merged);
+    dynamicDialogStore.registerDynamicDialog(newId, dynamicDialog);
+    return dynamicDialog;
+  };
 
   return { open };
 }

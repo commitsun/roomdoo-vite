@@ -83,7 +83,7 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
+<style scoped lang="scss">
 .change__password--row {
   display: flex;
   flex-direction: column;
