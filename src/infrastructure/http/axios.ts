@@ -5,7 +5,8 @@ import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useNotificationsStore } from '../stores/notifications';
 import type { InternalAxiosRequestConfig } from 'axios';
-import router from '@/ui/plugins/router';
+import { useTextMessagesStore } from '../stores/textMessages';
+import { useDynamicDialogsStore } from '../stores/dynamicDialogs';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -69,9 +70,7 @@ api.interceptors.response.use(
           });
         });
       }
-
       isRefreshing = true; // Set flag to indicate token refresh in progress
-
       try {
         await useUserStore().refreshToken(); // Attempt to refresh the session
         processQueue(null); // Success: retry all queued requests
@@ -80,12 +79,21 @@ api.interceptors.response.use(
         useUserStore().logout();
         processQueue(refreshError as AxiosError); // Failure: reject all queued requests
         useNotificationsStore().add('Session expired. Please log in again.');
-        const currentRoute = router.currentRoute.value;
-        console.log(`Redirecting `);
-        router.replace({
-          name: 'login',
-          query: { redirect: currentRoute.fullPath },
-        });
+        useTextMessagesStore().addTextMessage(
+          'Session Expired',
+          'Your session has expired. Please log in again.'
+        );
+        useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
+
+        // Redirige a login preservando la ruta actual
+        const { default: router } = await import('@/ui/plugins/router'); // avoid loops
+        const current = router.currentRoute.value;
+        const redirect = current?.fullPath || '/';
+        if (current?.name !== 'login') {
+          router.replace({ name: 'login', query: { redirect } });
+        }
+
+        throw new UnauthorizedError();
       } finally {
         isRefreshing = false; // Reset flag regardless of outcome
       }
