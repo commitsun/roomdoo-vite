@@ -148,7 +148,6 @@ export default defineComponent({
 .user__settings {
   display: flex;
   flex-direction: column;
-  height: calc(90svh - 1.25rem);
   &--row {
     display: flex;
     flex-direction: column;
@@ -191,7 +190,7 @@ export default defineComponent({
 
 @media (min-width: 1024px) {
   .user__settings {
-    width: auto;
+    min-width: 75vw;
     height: auto;
     &--row {
       flex-direction: row;

@@ -681,7 +681,7 @@ export default defineComponent({
       } catch {
         dialogService.open({
           header: 'Error',
-          content: 'Algo ha ido mal',
+          content: 'algo ha ido mal transactions',
           btnAccept: 'Ok',
         });
       } finally {
@@ -712,7 +712,7 @@ export default defineComponent({
       } catch {
         dialogService.open({
           header: 'Error',
-          content: 'Algo ha ido mal',
+          content: 'algo ha ido mal transactions',
           btnAccept: 'Ok',
         });
       } finally {
@@ -834,7 +834,7 @@ export default defineComponent({
         } catch {
           dialogService.open({
             header: 'Error',
-            content: 'Algo ha ido mal',
+            content: 'algo ha ido mal transactions',
             btnAccept: 'Ok',
           });
         } finally {
@@ -964,7 +964,7 @@ export default defineComponent({
       } catch {
         dialogService.open({
           header: 'Error',
-          content: 'Algo ha ido mal',
+          content: 'algo ha ido mal transactions',
           btnAccept: 'Ok',
         });
       } finally {
@@ -1054,7 +1054,7 @@ export default defineComponent({
           } catch {
             dialogService.open({
               header: 'Error',
-              content: 'Algo ha ido mal',
+              content: 'algo ha ido mal transactions',
               btnAccept: 'Ok',
             });
           } finally {
@@ -1082,7 +1082,7 @@ export default defineComponent({
         } catch {
           dialogService.open({
             header: 'Error',
-            content: 'Algo ha ido mal',
+            content: 'algo ha ido mal transactions',
             btnAccept: 'Ok',
           });
         } finally {
@@ -1108,7 +1108,7 @@ export default defineComponent({
       } catch {
         dialogService.open({
           header: 'Error',
-          content: 'Algo ha ido mal',
+          content: 'algo ha ido mal transactions',
           btnAccept: 'Ok',
         });
       } finally {
