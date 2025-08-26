@@ -58,8 +58,6 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
       });
   },
   recoverCookies(context): void {
-    console.log(context);
-    // const jwt = getCookie('jwt');
     const expirationDate = getCookie('expirationDate');
     const defaultPropertyId = getCookie('defaultPropertyId');
     const userId = getCookie('userId');
@@ -70,27 +68,16 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
     const userImageBase64 = localStorage.getItem('userImageBase64');
     const availabilityRuleFields = JSON.parse(getCookie('availabilityRuleFields') || '[]');
     const userImageUrl = getCookie('userImageUrl');
-
     const allCookies = getAllCookies();
-    console.log('allCookies from user/recoverCookies', allCookies);
 
-    if (
-      // jwt &&
-      expirationDate &&
-      defaultPropertyId &&
-      userId &&
-      userName &&
-      availabilityRuleFields
-    ) {
+    if (expirationDate && defaultPropertyId && userId && userName && availabilityRuleFields) {
       const today = new Date();
       const expirationDateCookieValue = getCookie('expirationDate');
       if (
         expirationDateCookieValue &&
         parseInt(expirationDateCookieValue, 10) * 1000 >= today.getTime()
       ) {
-        console.log('cookie is not expired');
         context.commit('SET_CURRENT_USER', {
-          // jwt,
           expirationDate,
           defaultPropertyId,
           userId,
@@ -102,11 +89,7 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
           availabilityRuleFields,
           userImageUrl,
         });
-        // Object.assign(api.defaults, {
-        //   headers: { Authorization: jwt, 'Content-Type': 'application/json' },
-        // });
       } else {
-        console.log('cookie is expired');
         context.commit('CLEAR_CURRENT_USER');
         void context.dispatch('properties/reset', {}, { root: true });
       }
@@ -114,7 +97,6 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
   },
 
   reset(context) {
-    // deleteCookie('jwt');
     deleteCookie('userId');
     deleteCookie('userName');
     deleteCookie('userFirstName');

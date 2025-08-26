@@ -1000,24 +1000,33 @@ export default defineComponent({
     watch(selectedAvailabilityPlanId, async () => {
       if (selectedAvailabilityPlanId.value !== activeAvailabilityPlan.value?.id) {
         void store.dispatch('layout/showSpinner', true);
-        await store.dispatch(
-          'availabilityPlans/setActiveAvailabilityPlan',
-          availabilityPlans.value.find((el) => el.id === selectedAvailabilityPlanId.value)
-        );
-        await store.dispatch('planning/fetchPlanning', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-        });
-        await store.dispatch('planning/fetchPlanningPricesRules', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          pricelistId: store.state.pricelists.activePricelist?.id,
-        });
-        void store.dispatch('layout/showSpinner', false);
+        try {
+          await store.dispatch(
+            'availabilityPlans/setActiveAvailabilityPlan',
+            availabilityPlans.value.find((el) => el.id === selectedAvailabilityPlanId.value)
+          );
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+          await store.dispatch('planning/fetchPlanningPricesRules', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+            pricelistId: store.state.pricelists.activePricelist?.id,
+          });
+        } catch {
+          dialogService.open({
+            header: 'Error',
+            content: 'Algo ha ido mal',
+            btnAccept: 'Ok',
+          });
+        } finally {
+          void store.dispatch('layout/showSpinner', false);
+        }
       }
     });
 
@@ -1087,7 +1096,7 @@ export default defineComponent({
       } catch {
         dialogService.open({
           header: 'Error',
-          content: 'Algo ha ido mal',
+          content: 'Algo ha ido mal planning mounted',
           btnAccept: 'Ok',
         });
       } finally {
