@@ -1,4 +1,4 @@
-import { createI18n } from 'vue-i18n';
+import { createI18n, type NamedValue, type TranslateOptions } from 'vue-i18n';
 import messages from '@intlify/unplugin-vue-i18n/messages';
 import { en_GB } from 'primelocale/js/en_GB.js';
 import { en } from 'primelocale/js/en.js';
@@ -48,4 +48,26 @@ export function updateI18nAvailableLocales(languages?: Array<{ code: string }>) 
     availableLocales = SUPPORTED_LOCALES.filter((locale) => codes.includes(locale.value));
   }
   return availableLocales;
+}
+export function t(key: string): string;
+export function t(key: string, params: NamedValue | unknown[]): string;
+export function t(
+  key: string,
+  params: NamedValue | unknown[],
+  options: TranslateOptions<string>
+): string;
+
+export function t(
+  key: string,
+  params?: NamedValue | unknown[],
+  options?: TranslateOptions<string>
+): string {
+  const g = i18n.global;
+  if (options !== undefined && params !== undefined) {
+    return g.t(key, params as any, options) as string;
+  }
+  if (params !== undefined) {
+    return g.t(key, params as any) as string;
+  }
+  return g.t(key) as string;
 }

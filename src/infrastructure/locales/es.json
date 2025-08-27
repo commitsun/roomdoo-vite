@@ -88,7 +88,13 @@
     "button": "Volver al inicio"
   },
   "error": {
-    "unknownError": "Se ha producido un error desconocido"
+    "unknownError": "Se ha producido un error desconocido",
+    "sessionExpiredTitle": "Sesión expirada",
+    "sessionExpiredContent": "Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.",
+    "accept": "Aceptar",
+    "somethingWentWrong": "Algo ha ido mal",
+    "internalError": "Ha ocurrido un error interno.",
+    "requestError": "Se ha producido un error en la solicitud."
   },
   "validation": {
     "wrongCredentials": "Credenciales no válidas",
