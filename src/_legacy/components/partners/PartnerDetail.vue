@@ -471,33 +471,24 @@ export default defineComponent({
 
     const openInvoiceDialog = async (index: number, folioId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (folioId) {
-          await store.dispatch('folios/fetchFolioInvoices', folioId);
-          await store.dispatch('folios/fetchFolioSaleLines', folioId);
-        }
-        showInvoiceDialog.value[index] = true;
-
-        dialogService.open({
-          header: 'Modificar factura',
-          content: markRaw(InvoiceChanges),
-          closable: true,
-          props: {
-            isRenderSaleLines: false,
-            isRenderInvoiceLines: true,
-            invoiceId: partnerInvoices.value[index].id || 0,
-            idPartner: currentPartner.value?.id,
-          },
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      if (folioId) {
+        await store.dispatch('folios/fetchFolioInvoices', folioId);
+        await store.dispatch('folios/fetchFolioSaleLines', folioId);
       }
+      showInvoiceDialog.value[index] = true;
+
+      dialogService.open({
+        header: 'Modificar factura',
+        content: markRaw(InvoiceChanges),
+        closable: true,
+        props: {
+          isRenderSaleLines: false,
+          isRenderInvoiceLines: true,
+          invoiceId: partnerInvoices.value[index].id || 0,
+          idPartner: currentPartner.value?.id,
+        },
+      });
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openTransactionDialog = (transaction: TransactionInterface) => {
@@ -514,37 +505,8 @@ export default defineComponent({
 
     watch(currentPartner, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (currentPartner.value) {
-          await Promise.all([
-            store.dispatch(
-              'reservations/fetchReservationsForPartnerAsHost',
-              currentPartner.value?.id
-            ),
-            store.dispatch(
-              'reservations/fetchReservationsForPartnerAsCustomer',
-              currentPartner.value?.id
-            ),
-            store.dispatch('partners/fetchCurrentPartnerTransactions', currentPartner.value?.id),
-            store.dispatch('partners/fetchCurrentPartnerInvoices', currentPartner.value?.id),
-          ]);
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
-    });
-
-    onMounted(async () => {
-      void store.dispatch('layout/showSpinner', true);
-      try {
+      if (currentPartner.value) {
         await Promise.all([
-          store.dispatch('countryStates/fetchCountryStates', currentPartner.value?.countryId),
           store.dispatch(
             'reservations/fetchReservationsForPartnerAsHost',
             currentPartner.value?.id
@@ -555,28 +517,36 @@ export default defineComponent({
           ),
           store.dispatch('partners/fetchCurrentPartnerTransactions', currentPartner.value?.id),
           store.dispatch('partners/fetchCurrentPartnerInvoices', currentPartner.value?.id),
-          store.dispatch('accountJournals/fetchAccountJournals', {
-            pmsPropertyId: activeProperty.value?.id,
-          }),
         ]);
-        if (
-          currentPartner.value?.street !== currentPartner.value?.residenceStreet ||
-          currentPartner.value?.zip !== currentPartner.value?.residenceZip ||
-          currentPartner.value?.city !== currentPartner.value?.residenceCity ||
-          currentPartner.value?.stateId !== currentPartner.value?.residenceStateId ||
-          currentPartner.value?.countryId !== currentPartner.value?.residenceCountryId
-        ) {
-          sameAddressData.value = false;
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      void store.dispatch('layout/showSpinner', false);
+    });
+
+    onMounted(async () => {
+      void store.dispatch('layout/showSpinner', true);
+      await Promise.all([
+        store.dispatch('countryStates/fetchCountryStates', currentPartner.value?.countryId),
+        store.dispatch('reservations/fetchReservationsForPartnerAsHost', currentPartner.value?.id),
+        store.dispatch(
+          'reservations/fetchReservationsForPartnerAsCustomer',
+          currentPartner.value?.id
+        ),
+        store.dispatch('partners/fetchCurrentPartnerTransactions', currentPartner.value?.id),
+        store.dispatch('partners/fetchCurrentPartnerInvoices', currentPartner.value?.id),
+        store.dispatch('accountJournals/fetchAccountJournals', {
+          pmsPropertyId: activeProperty.value?.id,
+        }),
+      ]);
+      if (
+        currentPartner.value?.street !== currentPartner.value?.residenceStreet ||
+        currentPartner.value?.zip !== currentPartner.value?.residenceZip ||
+        currentPartner.value?.city !== currentPartner.value?.residenceCity ||
+        currentPartner.value?.stateId !== currentPartner.value?.residenceStateId ||
+        currentPartner.value?.countryId !== currentPartner.value?.residenceCountryId
+      ) {
+        sameAddressData.value = false;
+      }
+      void store.dispatch('layout/showSpinner', false);
       showInvoiceDialog.value = partnerInvoices.value.map(() => false);
       showTransactionDialog.value = partnerTransactions.value.map(() => false);
     });

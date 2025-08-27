@@ -361,23 +361,14 @@ export default defineComponent({
     const discardChanges = async () => {
       // reset all changes
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('planning/fetchPlanningPricesRules', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          pricelistId: store.state.pricelists.activePricelist?.id,
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('planning/fetchPlanningPricesRules', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+        pricelistId: store.state.pricelists.activePricelist?.id,
+      });
+      void store.dispatch('layout/showSpinner', false);
       pricelistItemsToSave.value = [];
       availabilityPlanRulesToSave.value = [];
       errorsPricelistItems.value = [];
@@ -424,58 +415,49 @@ export default defineComponent({
 
     const persistChanges = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (pricelistItemsToSave.value.length > 0) {
-          await store.dispatch('pricelists/createOrUpdatePricelistItems', {
+      if (pricelistItemsToSave.value.length > 0) {
+        await store.dispatch('pricelists/createOrUpdatePricelistItems', {
+          pricelistId: store.state.pricelists.activePricelist?.id,
+          pricelistItems: pricelistItemsToSave.value.map((el) => ({
+            ...el,
+            date: `${el.date.getFullYear()}-${(el.date.getMonth() + 1)
+              .toString()
+              .padStart(2, '0')}-${el.date.getDate().toString().padStart(2, '0')}`,
             pricelistId: store.state.pricelists.activePricelist?.id,
-            pricelistItems: pricelistItemsToSave.value.map((el) => ({
-              ...el,
-              date: `${el.date.getFullYear()}-${(el.date.getMonth() + 1)
-                .toString()
-                .padStart(2, '0')}-${el.date.getDate().toString().padStart(2, '0')}`,
-              pricelistId: store.state.pricelists.activePricelist?.id,
-              pmsPropertyId: store.state.properties.activeProperty?.id,
-            })),
-          });
-        }
-        if (availabilityPlanRulesToSave.value.length > 0) {
-          await store.dispatch('availabilityPlans/createOrUpdateAvailabilityPlanRules', {
+            pmsPropertyId: store.state.properties.activeProperty?.id,
+          })),
+        });
+      }
+      if (availabilityPlanRulesToSave.value.length > 0) {
+        await store.dispatch('availabilityPlans/createOrUpdateAvailabilityPlanRules', {
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          availabilityPlanRules: availabilityPlanRulesToSave.value.map((el) => ({
+            ...el,
+            date: `${el.date.getFullYear()}-${(el.date.getMonth() + 1)
+              .toString()
+              .padStart(2, '0')}-${el.date.getDate().toString().padStart(2, '0')}`,
             availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            availabilityPlanRules: availabilityPlanRulesToSave.value.map((el) => ({
-              ...el,
-              date: `${el.date.getFullYear()}-${(el.date.getMonth() + 1)
-                .toString()
-                .padStart(2, '0')}-${el.date.getDate().toString().padStart(2, '0')}`,
-              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              pmsPropertyId: store.state.properties.activeProperty?.id,
-            })),
-          });
-          await store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
-        }
-        await store.dispatch('planning/fetchPlanningPricesRules', {
+            pmsPropertyId: store.state.properties.activeProperty?.id,
+          })),
+        });
+        await store.dispatch('planning/fetchPlanning', {
           dateStart: store.state.planning.dateStart,
           dateEnd: store.state.planning.dateEnd,
           propertyId: store.state.properties.activeProperty?.id,
           availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          pricelistId: store.state.pricelists.activePricelist?.id,
         });
-
-        pricelistItemsToSave.value = [];
-        availabilityPlanRulesToSave.value = [];
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      await store.dispatch('planning/fetchPlanningPricesRules', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+        pricelistId: store.state.pricelists.activePricelist?.id,
+      });
+
+      pricelistItemsToSave.value = [];
+      availabilityPlanRulesToSave.value = [];
+      void store.dispatch('layout/showSpinner', false);
     };
 
     watch(dateStart, async () => {

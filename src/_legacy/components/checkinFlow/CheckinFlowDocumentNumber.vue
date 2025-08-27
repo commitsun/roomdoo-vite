@@ -377,11 +377,6 @@ export default defineComponent({
           }
         } catch (error) {
           context.emit('update:modelValue', '');
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
         } finally {
           void store.dispatch('layout/showSpinner', false);
         }

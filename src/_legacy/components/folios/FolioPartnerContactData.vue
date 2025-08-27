@@ -181,45 +181,36 @@ export default defineComponent({
         language: languageSelected.value,
       };
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('folios/updatePartnerFolio', payload);
-        await store.dispatch('folios/updateLanguageFolio', payloadLang);
-        if (currentReservations.value) {
-          await Promise.all(
-            currentReservations.value.map(async (reservation) => {
-              let payloadReservation: {
-                reservationId: number;
-                partnerName: string;
-                partnerEmail: string;
-                partnerPhone: string;
-                partnerId?: number;
-              } = {
-                reservationId: reservation.id,
-                partnerName: partnerName.value,
-                partnerEmail: partnerEmail.value,
-                partnerPhone: partnerPhone.value,
-              };
-              if (selectedPartnerId.value) {
-                payloadReservation.partnerId = selectedPartnerId.value;
-              }
-              await store.dispatch('reservations/updateReservation', payloadReservation);
-            })
-          );
-        }
-        if (currentFolio.value) {
-          await store.dispatch('folios/fetchFolio', currentFolio.value.id);
-        }
-        await refreshPlanning();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
+      await store.dispatch('folios/updatePartnerFolio', payload);
+      await store.dispatch('folios/updateLanguageFolio', payloadLang);
+      if (currentReservations.value) {
+        await Promise.all(
+          currentReservations.value.map(async (reservation) => {
+            let payloadReservation: {
+              reservationId: number;
+              partnerName: string;
+              partnerEmail: string;
+              partnerPhone: string;
+              partnerId?: number;
+            } = {
+              reservationId: reservation.id,
+              partnerName: partnerName.value,
+              partnerEmail: partnerEmail.value,
+              partnerPhone: partnerPhone.value,
+            };
+            if (selectedPartnerId.value) {
+              payloadReservation.partnerId = selectedPartnerId.value;
+            }
+            await store.dispatch('reservations/updateReservation', payloadReservation);
+          })
+        );
       }
+      if (currentFolio.value) {
+        await store.dispatch('folios/fetchFolio', currentFolio.value.id);
+      }
+      await refreshPlanning();
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
     };
 
     watch(partners, () => {
@@ -242,17 +233,8 @@ export default defineComponent({
         }
       } else if (selectedPartnerId.value) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('partners/fetchCurrentPartner', selectedPartnerId.value);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('partners/fetchCurrentPartner', selectedPartnerId.value);
+        void store.dispatch('layout/showSpinner', false);
       }
     });
 
@@ -270,17 +252,8 @@ export default defineComponent({
     onMounted(async () => {
       if (currentFolio.value) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await getGuestFromVatDocNumber(currentFolio.value.partnerName ?? '');
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await getGuestFromVatDocNumber(currentFolio.value.partnerName ?? '');
+        void store.dispatch('layout/showSpinner', false);
         selectedPartnerId.value = currentFolio.value.partnerId ?? 0;
         partnerName.value = currentFolio.value.partnerName ?? '';
         partnerEmail.value = currentFolio.value.partnerEmail ?? '';

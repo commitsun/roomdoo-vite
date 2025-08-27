@@ -138,7 +138,7 @@
         v-if="currentReservation"
         :style="`background-color: ${getReservationColor(
           currentReservation,
-          currentFolio?.pendingAmount || 0
+          currentFolio?.pendingAmount || 0,
         )}`"
       >
         {{ reservationStateText(currentReservation) }}
@@ -249,7 +249,8 @@ export default defineComponent({
     const wizardState = computed(() => store.state.reservations.reservationsWizardState);
 
     const agencyName = computed(
-      () => store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.name
+      () =>
+        store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.name,
     );
 
     const getDateFormat = (date: string | Date | undefined) => {
@@ -314,7 +315,7 @@ export default defineComponent({
       let saleChannel: string | undefined = '';
       if (store.state.saleChannels.saleChannels && currentReservation.value?.saleChannelId) {
         saleChannel = store.state.saleChannels.saleChannels.find(
-          (el) => el.id === currentReservation.value?.saleChannelId
+          (el) => el.id === currentReservation.value?.saleChannelId,
         )?.name;
       }
       return saleChannel;
@@ -322,7 +323,7 @@ export default defineComponent({
 
     const getReservationColor = (
       onGoingReservation: ReservationInterface | null,
-      folioPendingAmount: number
+      folioPendingAmount: number,
     ) => {
       let result;
       if (onGoingReservation) {
@@ -449,7 +450,7 @@ export default defineComponent({
             onClose: async () => {
               await store.dispatch(
                 'reservations/fetchReservationWizardState',
-                store.state.reservations.currentReservation?.id
+                store.state.reservations.currentReservation?.id,
               );
             },
           });
@@ -516,7 +517,7 @@ export default defineComponent({
           try {
             const response = (await store.dispatch(
               'folios/fetchFolioMailData',
-              payload
+              payload,
             )) as AxiosResponse<{ bodyMail: string; subject: string }>;
             if (response.data) {
               if (response.data.bodyMail) {
@@ -607,7 +608,7 @@ export default defineComponent({
       }
       await store.dispatch(
         'reservations/fetchReservationWizardState',
-        store.state.reservations.currentReservation?.id
+        store.state.reservations.currentReservation?.id,
       );
     };
 
@@ -620,7 +621,7 @@ export default defineComponent({
         }
         if (code === 'splitted_with_availability') {
           const roomTypeClassName = store.state.roomTypeClasses.roomTypeClasses.find(
-            (rtc) => rtc.id === currentReservation.value?.roomTypeClassId
+            (rtc) => rtc.id === currentReservation.value?.roomTypeClassId,
           )?.name;
           if (roomTypeClassName) {
             text = `Unificar ${roomTypeClassName}`;
@@ -674,16 +675,16 @@ export default defineComponent({
         await store.dispatch('services/deleteService', serviceIsCancelPenalty.id);
         await store.dispatch(
           'reservations/fetchReservationWizardState',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         await store.dispatch(
           'reservations/fetchReservation',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
         await store.dispatch(
           'services/fetchServices',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         showDeleteCancelPenalty.value = false;
       }
@@ -700,7 +701,7 @@ export default defineComponent({
         onClose: async () => {
           await store.dispatch(
             'reservations/fetchReservationWizardState',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           );
         },
         onAccept: (result?: unknown) => context.emit('setTabValue', 'room'),
@@ -718,25 +719,25 @@ export default defineComponent({
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
       const pricelist = store.state.pricelists.pricelists.find(
-        (el) => el.id === currentReservation.value?.pricelistId
+        (el) => el.id === currentReservation.value?.pricelistId,
       );
       if (pricelist) {
         pricelistName.value = pricelist.name;
       } else if (currentReservation.value?.pricelistId) {
         await store.dispatch(
           'pricelists/fetchRestrictedPricelist',
-          currentReservation.value?.pricelistId
+          currentReservation.value?.pricelistId,
         );
         pricelistName.value = store.state.pricelists.restrictedPricelist?.name ?? '';
       }
       try {
         await store.dispatch(
           'reservations/fetchReservationWizardState',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         await store.dispatch(
           'services/fetchServices',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
       } catch {
         dialogService.open({

@@ -146,27 +146,19 @@ export default defineComponent({
 
     const openFolioDetail = async (folioId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', folioId),
-          store.dispatch('reservations/fetchReservations', folioId),
-        ]);
-        await store.dispatch('layout/rightDrawerDisplayed', true);
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', folioId),
+        store.dispatch('reservations/fetchReservations', folioId),
+      ]);
+      await store.dispatch('layout/rightDrawerDisplayed', true);
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
 
-        if (store.state.reservations.reservations) {
-          const firstFolioReservation = store.state.reservations.reservations[0];
-          await store.dispatch('reservations/fetchReservation', firstFolioReservation.id);
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      if (store.state.reservations.reservations) {
+        const firstFolioReservation = store.state.reservations.reservations[0];
+        await store.dispatch('reservations/fetchReservation', firstFolioReservation.id);
       }
+
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const circleBorderStyle = (folio: FolioInterface) => {
@@ -209,8 +201,7 @@ export default defineComponent({
       }
 
       const diffMonths =
-        (date.getFullYear() - today.getFullYear()) * 12 +
-        (date.getMonth() - today.getMonth());
+        (date.getFullYear() - today.getFullYear()) * 12 + (date.getMonth() - today.getMonth());
 
       if (diffMonths === 1) return 'Próximo mes';
       if (diffMonths > 1 && diffMonths < 12) return `Faltan ${diffMonths} meses`;
@@ -324,21 +315,12 @@ export default defineComponent({
 
     watch(currentPage, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('dashboard/fetchLastReceivedFolios', {
-          pmsPropertyId: store.state.properties.activeProperty?.id,
-          offset: currentPage.value * NUM_LAST_FOLIOS_VIEWED,
-          limit: NUM_LAST_FOLIOS_VIEWED,
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('dashboard/fetchLastReceivedFolios', {
+        pmsPropertyId: store.state.properties.activeProperty?.id,
+        offset: currentPage.value * NUM_LAST_FOLIOS_VIEWED,
+        limit: NUM_LAST_FOLIOS_VIEWED,
+      });
+      void store.dispatch('layout/showSpinner', false);
     });
 
     watch(activeProperty, () => {

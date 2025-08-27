@@ -460,27 +460,18 @@ export default defineComponent({
 
     const openNewInvoiceDialogWithPartner = async (partnerId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('partners/fetchCurrentPartner', partnerId);
-        saleLineIds.value = [];
-        idPartner.value = partnerId;
-        isRenderSaleLines.value = true;
-        isRenderInvoiceLines.value = false;
-        invoiceDialog.value = true;
-        saleLines.value.forEach((el) => {
-          if (el.defaultInvoiceTo === partnerId) {
-            saleLineIds.value.push(el.id);
-          }
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('partners/fetchCurrentPartner', partnerId);
+      saleLineIds.value = [];
+      idPartner.value = partnerId;
+      isRenderSaleLines.value = true;
+      isRenderInvoiceLines.value = false;
+      invoiceDialog.value = true;
+      saleLines.value.forEach((el) => {
+        if (el.defaultInvoiceTo === partnerId) {
+          saleLineIds.value.push(el.id);
+        }
+      });
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openInvoiceChanges = async (partnerId?: number) => {
@@ -540,21 +531,12 @@ export default defineComponent({
 
     const deleteInvoice = async (moveId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('invoices/deleteInvoice', moveId);
-        await Promise.all([
-          store.dispatch('folios/fetchFolioSaleLines', folio.value?.id),
-          store.dispatch('folios/fetchFolioInvoices', folio.value?.id),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('invoices/deleteInvoice', moveId);
+      await Promise.all([
+        store.dispatch('folios/fetchFolioSaleLines', folio.value?.id),
+        store.dispatch('folios/fetchFolioInvoices', folio.value?.id),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openMailInvoiceDialog = async (moveId: number) => {
@@ -563,38 +545,29 @@ export default defineComponent({
         invoiceId: moveId,
       };
       void store.dispatch('layout/showSpinner', true);
-      try {
-        const response = (await store.dispatch(
-          'folios/fetchInvoiceMailData',
-          payload
-        )) as AxiosResponse<{ bodyMail: string; subject: string }>;
-        if (response.data) {
-          if (response.data.bodyMail) {
-            template.value = response.data.bodyMail;
-          }
-          if (response.data.subject) {
-            subject.value = response.data.subject;
-          }
-          dialogService.open({
-            header: 'Enviar factura por email',
-            content: markRaw(MailComponent),
-            closable: true,
-            props: {
-              invoiceId: invoiceId.value,
-              template: template.value,
-              defaultSubject: subject.value,
-            },
-          });
+      const response = (await store.dispatch(
+        'folios/fetchInvoiceMailData',
+        payload
+      )) as AxiosResponse<{ bodyMail: string; subject: string }>;
+      if (response.data) {
+        if (response.data.bodyMail) {
+          template.value = response.data.bodyMail;
         }
-      } catch {
+        if (response.data.subject) {
+          subject.value = response.data.subject;
+        }
         dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+          header: 'Enviar factura por email',
+          content: markRaw(MailComponent),
+          closable: true,
+          props: {
+            invoiceId: invoiceId.value,
+            template: template.value,
+            defaultSubject: subject.value,
+          },
         });
-      } finally {
-        mailInvoiceDialog.value = true;
       }
+      mailInvoiceDialog.value = true;
     };
 
     const moveLineUnit = (invId: number, invoiceLineId: number) => {
@@ -645,21 +618,12 @@ export default defineComponent({
           isSimplifiedInvoice: invoice.isSimplifiedInvoice,
         };
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('folios/updateFolioInvoice', payload);
-          await Promise.all([
-            store.dispatch('folios/fetchFolioSaleLines', folio.value?.id),
-            store.dispatch('folios/fetchFolioInvoices', folio.value?.id),
-          ]);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('folios/updateFolioInvoice', payload);
+        await Promise.all([
+          store.dispatch('folios/fetchFolioSaleLines', folio.value?.id),
+          store.dispatch('folios/fetchFolioInvoices', folio.value?.id),
+        ]);
+        void store.dispatch('layout/showSpinner', false);
       }
     };
 
@@ -686,70 +650,52 @@ export default defineComponent({
 
     watch(saleLines, () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        partnersToInvoice.value = [];
-        saleLinesWithoutPartner.value = [];
-        partnerSaleLines.value = [];
-        saleLines.value.forEach((el) => {
-          if (el.defaultInvoiceTo && !partnersToInvoice.value.includes(el.defaultInvoiceTo)) {
-            partnersToInvoice.value.push(el.defaultInvoiceTo);
-          } else if (!el.defaultInvoiceTo) {
-            saleLinesWithoutPartner.value.push(el);
+      partnersToInvoice.value = [];
+      saleLinesWithoutPartner.value = [];
+      partnerSaleLines.value = [];
+      saleLines.value.forEach((el) => {
+        if (el.defaultInvoiceTo && !partnersToInvoice.value.includes(el.defaultInvoiceTo)) {
+          partnersToInvoice.value.push(el.defaultInvoiceTo);
+        } else if (!el.defaultInvoiceTo) {
+          saleLinesWithoutPartner.value.push(el);
+        }
+      });
+      saleLines.value.forEach((saleLine) => {
+        partnersToInvoice.value.forEach((partnerId) => {
+          if (
+            saleLine.defaultInvoiceTo === partnerId &&
+            !partnerSaleLines.value.includes(saleLine)
+          ) {
+            partnerSaleLines.value.push(saleLine);
           }
         });
-        saleLines.value.forEach((saleLine) => {
-          partnersToInvoice.value.forEach((partnerId) => {
-            if (
-              saleLine.defaultInvoiceTo === partnerId &&
-              !partnerSaleLines.value.includes(saleLine)
-            ) {
-              partnerSaleLines.value.push(saleLine);
-            }
-          });
+      });
+      partnersToInvoice.value.forEach((el) => {
+        void store.dispatch('partners/fetchCurrentPartner', el).then(() => {
+          if (
+            store.state.partners.currentPartner &&
+            !partners.value.includes(store.state.partners.currentPartner)
+          ) {
+            partners.value.push(store.state.partners.currentPartner);
+          }
         });
-        partnersToInvoice.value.forEach((el) => {
-          void store.dispatch('partners/fetchCurrentPartner', el).then(() => {
-            if (
-              store.state.partners.currentPartner &&
-              !partners.value.includes(store.state.partners.currentPartner)
-            ) {
-              partners.value.push(store.state.partners.currentPartner);
-            }
-          });
-        });
-        void store.dispatch('partners/removePartner');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      });
+      void store.dispatch('partners/removePartner');
+      void store.dispatch('layout/showSpinner', false);
     });
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolioSaleLines', folio.value?.id),
-          store.dispatch('folios/fetchFolioInvoices', folio.value?.id),
-        ]);
-        invoices.value.forEach((el) => {
-          if (el.state === 'draft') {
-            openDraftInvoiceMenu.value.push(false);
-          }
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('folios/fetchFolioSaleLines', folio.value?.id),
+        store.dispatch('folios/fetchFolioInvoices', folio.value?.id),
+      ]);
+      invoices.value.forEach((el) => {
+        if (el.state === 'draft') {
+          openDraftInvoiceMenu.value.push(false);
+        }
+      });
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

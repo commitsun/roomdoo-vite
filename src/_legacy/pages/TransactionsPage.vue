@@ -669,24 +669,15 @@ export default defineComponent({
         payload.action = 'open';
       }
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('cashRegister/actionCash', payload);
-        if (cashRegisterResult.value && cashRegisterResult.value?.result) {
-          actionCash.value = false;
-          amount.value = 0;
-          await store.dispatch('cashRegister/fetchCashRegister', cashJournalId.value);
-        } else {
-          openForceDialog.value = true;
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'algo ha ido mal transactions',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch('cashRegister/actionCash', payload);
+      if (cashRegisterResult.value && cashRegisterResult.value?.result) {
+        actionCash.value = false;
+        amount.value = 0;
+        await store.dispatch('cashRegister/fetchCashRegister', cashJournalId.value);
+      } else {
+        openForceDialog.value = true;
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const force = async (stateCash: string) => {
@@ -703,21 +694,12 @@ export default defineComponent({
         payload.action = 'open';
       }
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('cashRegister/actionCash', payload);
-        actionCash.value = false;
-        openForceDialog.value = false;
-        amount.value = 0;
-        await store.dispatch('cashRegister/fetchCashRegister', cashJournalId.value);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'algo ha ido mal transactions',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('cashRegister/actionCash', payload);
+      actionCash.value = false;
+      openForceDialog.value = false;
+      amount.value = 0;
+      await store.dispatch('cashRegister/fetchCashRegister', cashJournalId.value);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const sortTransactionsByField = (field: string) => {
@@ -819,27 +801,18 @@ export default defineComponent({
       if (currentPage.value < maxPage.value) {
         currentPage.value += 1;
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('transactions/fetchTransactions', {
-            limit,
-            offset: (currentPage.value - 1) * limit,
-            pmsPropertyId: activeProperty.value?.id,
-            filter: transactionTextSearch.value,
-            dateStart: transactionDateRange.value[0],
-            dateEnd: transactionDateRange.value[1],
-            journalIds: selectedJournalIds.value,
-            transactionTypes: selectedTransactionTypesIds.value,
-            transactionMethodId: selectedJournalId.value,
-          });
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'algo ha ido mal transactions',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('transactions/fetchTransactions', {
+          limit,
+          offset: (currentPage.value - 1) * limit,
+          pmsPropertyId: activeProperty.value?.id,
+          filter: transactionTextSearch.value,
+          dateStart: transactionDateRange.value[0],
+          dateEnd: transactionDateRange.value[1],
+          journalIds: selectedJournalIds.value,
+          transactionTypes: selectedTransactionTypesIds.value,
+          transactionMethodId: selectedJournalId.value,
+        });
+        void store.dispatch('layout/showSpinner', false);
       }
     };
 
@@ -949,27 +922,18 @@ export default defineComponent({
 
     watch(activeProperty, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('accountJournals/fetchAccountJournals', {
-          pmsPropertyId: activeProperty.value?.id,
-        });
-        await store.dispatch('transactions/removeTransactions');
-        await store.dispatch('transactions/fetchTransactions', {
-          limit,
-          offset: 0,
-          pmsPropertyId: activeProperty.value?.id,
-          dateStart: transactionDateRange.value[0],
-          dateEnd: transactionDateRange.value[1],
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'algo ha ido mal transactions',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('accountJournals/fetchAccountJournals', {
+        pmsPropertyId: activeProperty.value?.id,
+      });
+      await store.dispatch('transactions/removeTransactions');
+      await store.dispatch('transactions/fetchTransactions', {
+        limit,
+        offset: 0,
+        pmsPropertyId: activeProperty.value?.id,
+        dateStart: transactionDateRange.value[0],
+        dateEnd: transactionDateRange.value[1],
+      });
+      void store.dispatch('layout/showSpinner', false);
     });
 
     watch(cashRegister, () => {
@@ -1048,18 +1012,9 @@ export default defineComponent({
             Object.assign(payload, { transactionType: selectedTransactionTypesIds.value });
           }
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('transactions/removeTransactions');
-            await store.dispatch('transactions/fetchTransactions', payload);
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'algo ha ido mal transactions',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('transactions/removeTransactions');
+          await store.dispatch('transactions/fetchTransactions', payload);
+          void store.dispatch('layout/showSpinner', false);
         }
       },
       {
@@ -1077,17 +1032,8 @@ export default defineComponent({
         });
         [cashJournalId.value] = journalsIds;
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('cashRegister/fetchCashRegister', journalsIds[0]);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'algo ha ido mal transactions',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('cashRegister/fetchCashRegister', journalsIds[0]);
+        void store.dispatch('layout/showSpinner', false);
 
         [cashJournalSelectedId.value] = journalsIds;
         if (journalsIds.length > 1) {
@@ -1103,17 +1049,8 @@ export default defineComponent({
     watch(cashJournalSelectedId, async () => {
       cashJournalId.value = cashJournalSelectedId.value;
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('cashRegister/fetchCashRegister', cashJournalSelectedId.value);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'algo ha ido mal transactions',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('cashRegister/fetchCashRegister', cashJournalSelectedId.value);
+      void store.dispatch('layout/showSpinner', false);
     });
 
     watch(selectedPropertyId, async () => {

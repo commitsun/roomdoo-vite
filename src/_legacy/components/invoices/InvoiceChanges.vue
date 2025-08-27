@@ -596,21 +596,12 @@ export default defineComponent({
         checkMinimumPartnerData(partnerToAdd.value);
         if (partnerToAdd.value.stateId) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.countryId);
-            partnerStateName.value =
-              store.state.countryStates.countryStates.find(
-                (el) => el.id === partnerToAdd.value?.stateId
-              )?.name ?? '';
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.countryId);
+          partnerStateName.value =
+            store.state.countryStates.countryStates.find(
+              (el) => el.id === partnerToAdd.value?.stateId
+            )?.name ?? '';
+          void store.dispatch('layout/showSpinner', false);
         }
       }
       void store.dispatch('partners/setCurrentPartner', partnerToAdd.value);
@@ -640,59 +631,48 @@ export default defineComponent({
 
     const setPartnerArray = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (store.state.folios.currentFolio?.partnerId) {
-          await store.dispatch(
-            'partners/fetchCurrentPartner',
-            store.state.folios.currentFolio.partnerId
-          );
-          partners.value.push(store.state.partners.currentPartner ?? ({} as PartnerInterface));
-        }
-        const { reservations } = store.state.reservations;
-        if (reservations) {
-          await Promise.all(
-            reservations.map(async (reservation) => {
-              if (reservation.partnerId) {
-                await store.dispatch('partners/fetchCurrentPartner', reservation.partnerId);
-                partners.value.push(
-                  store.state.partners.currentPartner ?? ({} as PartnerInterface)
-                );
-              }
-              await store.dispatch('checkinPartners/fetchCheckinPartners', reservation.id);
-              const fetchPartnerPromises = store.state.checkinPartners.checkinpartners.map(
-                async (checkinPartner) => {
-                  if (checkinPartner.partnerId) {
-                    await store.dispatch('partners/fetchCurrentPartner', checkinPartner.partnerId);
-                    partners.value.push(
-                      store.state.partners.currentPartner ?? ({} as PartnerInterface)
-                    );
-                  }
-                }
-              );
-
-              await Promise.all(fetchPartnerPromises);
-            })
-          );
-        }
-        partners.value = partners.value.filter(
-          (partner, index, self) => index === self.findIndex((t) => t.id === partner.id)
+      if (store.state.folios.currentFolio?.partnerId) {
+        await store.dispatch(
+          'partners/fetchCurrentPartner',
+          store.state.folios.currentFolio.partnerId
         );
-        itemsAutocompleteCustomer.value = partners.value.map((el) => ({
-          value: el.id,
-          name: `${el.name} ${el.vatNumber ? '(' : ''}${el.vatNumber ? el.vatNumber : ''}${
-            el.vatNumber ? ')' : ''
-          }`,
-        }));
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('partners/removePartner');
-        void store.dispatch('layout/showSpinner', false);
+        partners.value.push(store.state.partners.currentPartner ?? ({} as PartnerInterface));
       }
+      const { reservations } = store.state.reservations;
+      if (reservations) {
+        await Promise.all(
+          reservations.map(async (reservation) => {
+            if (reservation.partnerId) {
+              await store.dispatch('partners/fetchCurrentPartner', reservation.partnerId);
+              partners.value.push(store.state.partners.currentPartner ?? ({} as PartnerInterface));
+            }
+            await store.dispatch('checkinPartners/fetchCheckinPartners', reservation.id);
+            const fetchPartnerPromises = store.state.checkinPartners.checkinpartners.map(
+              async (checkinPartner) => {
+                if (checkinPartner.partnerId) {
+                  await store.dispatch('partners/fetchCurrentPartner', checkinPartner.partnerId);
+                  partners.value.push(
+                    store.state.partners.currentPartner ?? ({} as PartnerInterface)
+                  );
+                }
+              }
+            );
+
+            await Promise.all(fetchPartnerPromises);
+          })
+        );
+      }
+      partners.value = partners.value.filter(
+        (partner, index, self) => index === self.findIndex((t) => t.id === partner.id)
+      );
+      itemsAutocompleteCustomer.value = partners.value.map((el) => ({
+        value: el.id,
+        name: `${el.name} ${el.vatNumber ? '(' : ''}${el.vatNumber ? el.vatNumber : ''}${
+          el.vatNumber ? ')' : ''
+        }`,
+      }));
+      void store.dispatch('partners/removePartner');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openPartnerSearchDialog = (isRenderCheckins: boolean) => {
@@ -834,63 +814,54 @@ export default defineComponent({
         return;
       }
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (props.isRenderSaleLines) {
-          const linesSend: FolioSaleLineInterface[] = [];
-          isLineRemoved.value.forEach((el, index) => {
-            if (el) {
-              if (
-                saleLinesToSend.value[index].displayType !== 'line_section' &&
-                saleLinesToSend.value[index].qtyToInvoice !== 0
-              ) {
-                linesSend.push(saleLinesToSend.value[index]);
-              }
+      if (props.isRenderSaleLines) {
+        const linesSend: FolioSaleLineInterface[] = [];
+        isLineRemoved.value.forEach((el, index) => {
+          if (el) {
+            if (
+              saleLinesToSend.value[index].displayType !== 'line_section' &&
+              saleLinesToSend.value[index].qtyToInvoice !== 0
+            ) {
+              linesSend.push(saleLinesToSend.value[index]);
             }
-          });
-          if (linesSend.length === 0) {
-            partnerError.value = false;
-            noLinesToSendError.value = true;
-            return;
           }
-          const payload = {
-            folioId: folio.value?.id,
-            partnerId: partnerToAdd.value?.id,
-            saleLines: linesSend,
-            narration: comment.value,
-            isSimplifiedInvoice: isSimplifiedInvoice.value,
-          };
-          await store.dispatch('folios/createFolioInvoice', payload);
-        } else {
-          const invoicesLinesToSend: InvoiceLineInterface[] = [];
-          isLineRemoved.value.forEach((el, index) => {
-            if (el) {
-              if (invoiceLinesToSend.value[index].displayType !== 'line_section') {
-                invoicesLinesToSend.push(invoiceLinesToSend.value[index]);
-              }
-            }
-          });
-          const payload = {
-            invoiceId: props.invoiceId,
-            partnerId: partnerToAdd.value?.id,
-            moveLines: invoicesLinesToSend,
-            narration: comment.value,
-            isSimplifiedInvoice: isSimplifiedInvoice.value,
-          };
-          await store.dispatch('folios/updateFolioInvoice', payload);
-        }
-        void store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
-        void store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
-        context.emit('update:invoiceDialog', false);
-        context.emit('close');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+        if (linesSend.length === 0) {
+          partnerError.value = false;
+          noLinesToSendError.value = true;
+          return;
+        }
+        const payload = {
+          folioId: folio.value?.id,
+          partnerId: partnerToAdd.value?.id,
+          saleLines: linesSend,
+          narration: comment.value,
+          isSimplifiedInvoice: isSimplifiedInvoice.value,
+        };
+        await store.dispatch('folios/createFolioInvoice', payload);
+      } else {
+        const invoicesLinesToSend: InvoiceLineInterface[] = [];
+        isLineRemoved.value.forEach((el, index) => {
+          if (el) {
+            if (invoiceLinesToSend.value[index].displayType !== 'line_section') {
+              invoicesLinesToSend.push(invoiceLinesToSend.value[index]);
+            }
+          }
+        });
+        const payload = {
+          invoiceId: props.invoiceId,
+          partnerId: partnerToAdd.value?.id,
+          moveLines: invoicesLinesToSend,
+          narration: comment.value,
+          isSimplifiedInvoice: isSimplifiedInvoice.value,
+        };
+        await store.dispatch('folios/updateFolioInvoice', payload);
       }
+      void store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
+      void store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
+      context.emit('update:invoiceDialog', false);
+      context.emit('close');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const addSaleLinesToInvoice = (saleLineId: number) => {
@@ -1153,21 +1124,12 @@ export default defineComponent({
         checkMinimumPartnerData(partnerToAdd.value);
         if (partnerToAdd.value.stateId) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.countryId);
-            partnerStateName.value =
-              store.state.countryStates.countryStates.find(
-                (el) => el.id === partnerToAdd.value?.stateId
-              )?.name ?? '';
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.countryId);
+          partnerStateName.value =
+            store.state.countryStates.countryStates.find(
+              (el) => el.id === partnerToAdd.value?.stateId
+            )?.name ?? '';
+          void store.dispatch('layout/showSpinner', false);
         }
       }
       if (isSimplifiedInvoice.value) {
@@ -1311,34 +1273,25 @@ export default defineComponent({
         }
         if (invoice?.partnerId) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store
-              .dispatch('partners/fetchCurrentPartner', invoice?.partnerId)
-              .then(async () => {
-                if (store.state.partners.currentPartner) {
-                  isSearchPartnerOpened.value = false;
-                  partnerToAdd.value = store.state.partners.currentPartner;
-                  if (partnerToAdd.value.stateId) {
-                    await store.dispatch(
-                      'countryStates/fetchCountryStates',
-                      partnerToAdd.value.countryId
-                    );
-                    partnerStateName.value =
-                      store.state.countryStates.countryStates.find(
-                        (el) => el.id === partnerToAdd.value?.stateId
-                      )?.name ?? '';
-                  }
+          await store
+            .dispatch('partners/fetchCurrentPartner', invoice?.partnerId)
+            .then(async () => {
+              if (store.state.partners.currentPartner) {
+                isSearchPartnerOpened.value = false;
+                partnerToAdd.value = store.state.partners.currentPartner;
+                if (partnerToAdd.value.stateId) {
+                  await store.dispatch(
+                    'countryStates/fetchCountryStates',
+                    partnerToAdd.value.countryId
+                  );
+                  partnerStateName.value =
+                    store.state.countryStates.countryStates.find(
+                      (el) => el.id === partnerToAdd.value?.stateId
+                    )?.name ?? '';
                 }
-              });
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
+              }
             });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          void store.dispatch('layout/showSpinner', false);
         }
         if (invoice?.date) {
           invoiceDate.value = invoice?.date;
