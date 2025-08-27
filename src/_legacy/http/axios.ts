@@ -3,6 +3,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import type { App } from 'vue';
 import { useDynamicDialogsStore } from '@/infrastructure/stores/dynamicDialogs';
+import { t } from '@/ui/plugins/i18n';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -67,9 +68,9 @@ api.interceptors.response.use(
         useUserStore().logout();
         processQueue(refreshError as AxiosError);
         dialogService.open({
-          header: 'Sesión expirada',
-          content: 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.',
-          btnAccept: 'Aceptar',
+          header: t('error.sessionExpiredTitle'),
+          content: t('error.sessionExpiredContent'),
+          btnAccept: t('error.accept'),
         });
         useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
         const { default: router } = await import('@/ui/plugins/router');
@@ -92,17 +93,17 @@ api.interceptors.response.use(
       // Other 4xx (excluding 401 handled above)
       if (status >= 400 && status < 500 && status !== 401) {
         dialogService.open({
-          header: 'Algo ha ido mal',
-          content: data?.description || data?.message || 'Request error',
-          btnAccept: 'Aceptar',
+          header: t('error.somethingWentWrong'),
+          content: data?.description || data?.message || t('error.requestError'),
+          btnAccept: t('error.accept'),
         });
       }
       // 5xx
       else if (status >= 500) {
         dialogService.open({
-          header: 'Algo ha ido mal',
-          content: data?.description || 'Ha ocurrido un error interno.',
-          btnAccept: 'Aceptar',
+          header: t('error.somethingWentWrong'),
+          content: data?.description || t('error.internalError'),
+          btnAccept: t('error.accept'),
         });
       }
     }
