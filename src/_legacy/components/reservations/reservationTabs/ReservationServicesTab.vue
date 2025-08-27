@@ -377,89 +377,80 @@ export default defineComponent({
 
     const addService = async (productId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        const product = store.state.products.products.find((el) => el.id === productId);
-        let quantity = 1;
-        let priceUnit = 0;
+      const product = store.state.products.products.find((el) => el.id === productId);
+      let quantity = 1;
+      let priceUnit = 0;
 
-        if (product?.perPerson) {
-          quantity = currentReservation.value?.adults ?? 0;
-        }
-
-        const items: ServiceLineInterface[] = [];
-
-        if (product?.perDay) {
-          await store.dispatch('prices/fetchPrices', {
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            pricelistId: currentReservation.value?.pricelistId,
-            productId,
-            dateFrom: new Date(currentReservation.value?.checkin || 0),
-            dateTo: new Date(currentReservation.value?.checkout || 0),
-          });
-
-          const startDate = new Date(currentReservation.value?.checkin || 0);
-          const endDate = new Date(currentReservation.value?.checkout || 0);
-          endDate.setDate(endDate.getDate() - 1);
-
-          utilsDates.getDatesRange(startDate, endDate).forEach((date) => {
-            priceUnit = priceByDate(new Date(date))?.price ?? 0;
-            let serviceLine;
-            if (product.consumedOn === 'before') {
-              serviceLine = {
-                priceUnit,
-                date,
-                quantity,
-              };
-            } else {
-              date.setDate(date.getDate() + 1);
-              priceUnit = priceByDate(new Date(date))?.price ?? 0;
-              serviceLine = {
-                priceUnit,
-                date,
-                quantity,
-              };
-            }
-            items.push(serviceLine as ServiceLineInterface);
-          });
-        } else {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          await store.dispatch('prices/fetchPrices', {
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            pricelistId: currentReservation.value?.pricelistId,
-            productId,
-            dateFrom: today,
-            dateTo: today,
-          });
-          items.push({
-            priceUnit: priceByDate(today)?.price ?? 0,
-            date: today,
-            quantity,
-            discount: 0,
-          });
-        }
-        await store.dispatch('services/createService', {
-          productId,
-          reservationId: currentReservation.value?.id,
-          serviceLines: items,
-        });
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
-          store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
-          store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id),
-          store.dispatch('services/fetchServices', currentReservation.value?.id),
-        ]);
-        selectedProductId.value = 0;
-        selectedMobileProductId.value = 0;
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      if (product?.perPerson) {
+        quantity = currentReservation.value?.adults ?? 0;
       }
+
+      const items: ServiceLineInterface[] = [];
+
+      if (product?.perDay) {
+        await store.dispatch('prices/fetchPrices', {
+          pmsPropertyId: store.state.properties.activeProperty?.id,
+          pricelistId: currentReservation.value?.pricelistId,
+          productId,
+          dateFrom: new Date(currentReservation.value?.checkin || 0),
+          dateTo: new Date(currentReservation.value?.checkout || 0),
+        });
+
+        const startDate = new Date(currentReservation.value?.checkin || 0);
+        const endDate = new Date(currentReservation.value?.checkout || 0);
+        endDate.setDate(endDate.getDate() - 1);
+
+        utilsDates.getDatesRange(startDate, endDate).forEach((date) => {
+          priceUnit = priceByDate(new Date(date))?.price ?? 0;
+          let serviceLine;
+          if (product.consumedOn === 'before') {
+            serviceLine = {
+              priceUnit,
+              date,
+              quantity,
+            };
+          } else {
+            date.setDate(date.getDate() + 1);
+            priceUnit = priceByDate(new Date(date))?.price ?? 0;
+            serviceLine = {
+              priceUnit,
+              date,
+              quantity,
+            };
+          }
+          items.push(serviceLine as ServiceLineInterface);
+        });
+      } else {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        await store.dispatch('prices/fetchPrices', {
+          pmsPropertyId: store.state.properties.activeProperty?.id,
+          pricelistId: currentReservation.value?.pricelistId,
+          productId,
+          dateFrom: today,
+          dateTo: today,
+        });
+        items.push({
+          priceUnit: priceByDate(today)?.price ?? 0,
+          date: today,
+          quantity,
+          discount: 0,
+        });
+      }
+      await store.dispatch('services/createService', {
+        productId,
+        reservationId: currentReservation.value?.id,
+        serviceLines: items,
+      });
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
+        store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
+        store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id),
+        store.dispatch('services/fetchServices', currentReservation.value?.id),
+      ]);
+      selectedProductId.value = 0;
+      selectedMobileProductId.value = 0;
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const deleteBoardService = async () => {
@@ -470,30 +461,18 @@ export default defineComponent({
         btnCancel: 'Cancelar',
         onAccept: async () => {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('reservations/updateReservation', {
-              reservationId: currentReservation.value?.id,
-              boardServiceId: 0,
-            });
-            await Promise.all([
-              store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
-              store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
-              store.dispatch(
-                'reservationLines/fetchReservationLines',
-                currentReservation.value?.id
-              ),
-              store.dispatch('services/fetchServices', currentReservation.value?.id),
-            ]);
-            openDeleteBoardServiceModal.value = false;
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('reservations/updateReservation', {
+            reservationId: currentReservation.value?.id,
+            boardServiceId: 0,
+          });
+          await Promise.all([
+            store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
+            store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
+            store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id),
+            store.dispatch('services/fetchServices', currentReservation.value?.id),
+          ]);
+          openDeleteBoardServiceModal.value = false;
+          void store.dispatch('layout/showSpinner', false);
         },
       });
     };
@@ -506,27 +485,15 @@ export default defineComponent({
         btnCancel: 'Cancelar',
         onAccept: async () => {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('services/deleteService', serviceId);
-            await Promise.all([
-              store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
-              store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
-              store.dispatch(
-                'reservationLines/fetchReservationLines',
-                currentReservation.value?.id
-              ),
-              store.dispatch('services/fetchServices', currentReservation.value?.id),
-            ]);
-            openDeleteServiceModal.value[indexService] = false;
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('services/deleteService', serviceId);
+          await Promise.all([
+            store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
+            store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
+            store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id),
+            store.dispatch('services/fetchServices', currentReservation.value?.id),
+          ]);
+          openDeleteServiceModal.value[indexService] = false;
+          void store.dispatch('layout/showSpinner', false);
         },
       });
     };
@@ -596,20 +563,11 @@ export default defineComponent({
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch(
-          'services/fetchServices',
-          store.state.reservations.currentReservation?.id
-        );
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch(
+        'services/fetchServices',
+        store.state.reservations.currentReservation?.id
+      );
+      void store.dispatch('layout/showSpinner', false);
       services.value = reservationServices.value;
       openServicesOptionsMenu.value = services.value.map(() => false);
       openDeleteServiceModal.value = services.value.map(() => false);

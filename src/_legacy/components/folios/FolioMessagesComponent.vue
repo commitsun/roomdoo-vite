@@ -146,46 +146,37 @@ export default defineComponent({
         mailType: state.value,
       };
       void store.dispatch('layout/showSpinner', true);
-      try {
-        const response = (await store.dispatch(
-          'folios/fetchFolioMailData',
-          payload
-        )) as AxiosResponse<{ bodyMail: string; subject: string }>;
-        if (response.data) {
-          if (response.data.bodyMail) {
-            template.value = response.data.bodyMail;
-          }
-          if (response.data.subject) {
-            subject.value = response.data.subject;
-          }
+      const response = (await store.dispatch(
+        'folios/fetchFolioMailData',
+        payload
+      )) as AxiosResponse<{ bodyMail: string; subject: string }>;
+      if (response.data) {
+        if (response.data.bodyMail) {
+          template.value = response.data.bodyMail;
         }
-        let title = '';
-        if (state.value === 'confirm') {
-          title = 'Enviar correo de confirmación';
-        } else if (state.value === 'done') {
-          title = 'Enviar correo de salida';
-        } else if (state.value === 'cancel') {
-          title = 'Enviar correo de cancelación';
+        if (response.data.subject) {
+          subject.value = response.data.subject;
         }
-        dialogService.open({
-          header: title,
-          content: markRaw(MailComponent),
-          closable: true,
-          props: {
-            template: template.value,
-            stateReservation: state.value,
-            defaultSubject: subject.value,
-          },
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      let title = '';
+      if (state.value === 'confirm') {
+        title = 'Enviar correo de confirmación';
+      } else if (state.value === 'done') {
+        title = 'Enviar correo de salida';
+      } else if (state.value === 'cancel') {
+        title = 'Enviar correo de cancelación';
+      }
+      dialogService.open({
+        header: title,
+        content: markRaw(MailComponent),
+        closable: true,
+        props: {
+          template: template.value,
+          stateReservation: state.value,
+          defaultSubject: subject.value,
+        },
+      });
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const stripMessageBody = (body: string) => {
@@ -215,18 +206,9 @@ export default defineComponent({
 
     const openCurrentReservation = async (reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/fetchReservation', reservationId);
-        context.emit('goToReservationCard');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('reservations/fetchReservation', reservationId);
+      context.emit('goToReservationCard');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const decodeAvatarImage = (encodedImage: string) => window.atob(encodedImage);
@@ -251,33 +233,15 @@ export default defineComponent({
     watch(currentFolio, async () => {
       if (currentFolio.value) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('folios/fetchFolioMessages', currentFolio.value?.id);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('folios/fetchFolioMessages', currentFolio.value?.id);
+        void store.dispatch('layout/showSpinner', false);
       }
     });
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('folios/fetchFolioMessages', currentFolio.value?.id);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('folios/fetchFolioMessages', currentFolio.value?.id);
+      void store.dispatch('layout/showSpinner', false);
       if (currentReservations.value) {
         currentReservations.value.forEach((el) => {
           if (el.stateCode === 'confirm' || el.stateCode === 'arrival_delayed') {

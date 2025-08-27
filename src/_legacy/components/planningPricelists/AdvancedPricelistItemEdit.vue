@@ -382,91 +382,82 @@ export default defineComponent({
     const saveValues = async () => {
       if (!anyChanges.value || validator.value.$errors.length > 0) return;
       void store.dispatch('layout/showSpinner', true);
-      try {
-        const pricelistItems: PayloadCreatePricelistItemInterface[] = [];
-        const oldPricelistItemValue = props.oldPricelistItem as PricelistItemInterface;
-        const oldAvailabilityPlanRuleValue =
-          props.oldAvailabilityPlanRule as AvailabilityPlanRuleInterface;
+      const pricelistItems: PayloadCreatePricelistItemInterface[] = [];
+      const oldPricelistItemValue = props.oldPricelistItem as PricelistItemInterface;
+      const oldAvailabilityPlanRuleValue =
+        props.oldAvailabilityPlanRule as AvailabilityPlanRuleInterface;
 
-        if (activePricelist.value?.id && activeProperty.value && oldPricelistItemValue) {
-          const dateStr = `${oldPricelistItemValue.date.getFullYear()}-${(
-            oldPricelistItemValue.date.getMonth() + 1
-          )
-            .toString()
-            .padStart(2, '0')}-${oldPricelistItemValue.date.getDate().toString().padStart(2, '0')}`;
-          pricelistItems.push({
-            pricelistItemId: -1,
-            roomTypeId: oldPricelistItemValue.roomTypeId,
-            date: dateStr,
-            price: currentPrice.value,
-            pmsPropertyId: activeProperty.value.id,
-            pricelistId: activePricelist.value.id,
-          });
-        }
-        await store.dispatch('pricelists/createOrUpdatePricelistItems', {
-          pricelistId: activePricelist.value?.id,
-          pricelistItems,
+      if (activePricelist.value?.id && activeProperty.value && oldPricelistItemValue) {
+        const dateStr = `${oldPricelistItemValue.date.getFullYear()}-${(
+          oldPricelistItemValue.date.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, '0')}-${oldPricelistItemValue.date.getDate().toString().padStart(2, '0')}`;
+        pricelistItems.push({
+          pricelistItemId: -1,
+          roomTypeId: oldPricelistItemValue.roomTypeId,
+          date: dateStr,
+          price: currentPrice.value,
+          pmsPropertyId: activeProperty.value.id,
+          pricelistId: activePricelist.value.id,
         });
-
-        const availabilityPlanRules: PayloadCreateAvailPlanRuleInterface[] = [];
-        if (
-          activeAvailabilityPlan.value?.id &&
-          activeProperty.value &&
-          oldAvailabilityPlanRuleValue
-        ) {
-          const dateStr = `${oldAvailabilityPlanRuleValue.date.getFullYear()}-${(
-            oldAvailabilityPlanRuleValue.date.getMonth() + 1
-          )
-            .toString()
-            .padStart(2, '0')}-${oldAvailabilityPlanRuleValue.date
-            .getDate()
-            .toString()
-            .padStart(2, '0')}`;
-          availabilityPlanRules.push({
-            availabilityRuleId: -1,
-            pmsPropertyId: activeProperty.value.id,
-            roomTypeId: oldAvailabilityPlanRuleValue.roomTypeId,
-            date: dateStr,
-            minStay: currentMinStay.value,
-            maxStay: currentMaxStay.value,
-            minStayArrival: currentMinStayArrival.value,
-            maxStayArrival: currentMaxStayArrival.value,
-            maxAvailability: currentMaxAvailability.value,
-            closed: currentClosed.value,
-            closedDeparture: currentClosedDeparture.value,
-            closedArrival: currentClosedArrival.value,
-            quota: currentQuota.value,
-            availabilityPlanId: activeAvailabilityPlan.value.id,
-          });
-        }
-        await store.dispatch('availabilityPlans/createOrUpdateAvailabilityPlanRules', {
-          availabilityPlanId: activeAvailabilityPlan.value?.id,
-          availabilityPlanRules,
-        });
-
-        await store.dispatch('planning/fetchPlanning', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-        });
-        await store.dispatch('planning/fetchPlanningPricesRules', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          pricelistId: store.state.pricelists.activePricelist?.id,
-        });
-        closePopup();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      await store.dispatch('pricelists/createOrUpdatePricelistItems', {
+        pricelistId: activePricelist.value?.id,
+        pricelistItems,
+      });
+
+      const availabilityPlanRules: PayloadCreateAvailPlanRuleInterface[] = [];
+      if (
+        activeAvailabilityPlan.value?.id &&
+        activeProperty.value &&
+        oldAvailabilityPlanRuleValue
+      ) {
+        const dateStr = `${oldAvailabilityPlanRuleValue.date.getFullYear()}-${(
+          oldAvailabilityPlanRuleValue.date.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, '0')}-${oldAvailabilityPlanRuleValue.date
+          .getDate()
+          .toString()
+          .padStart(2, '0')}`;
+        availabilityPlanRules.push({
+          availabilityRuleId: -1,
+          pmsPropertyId: activeProperty.value.id,
+          roomTypeId: oldAvailabilityPlanRuleValue.roomTypeId,
+          date: dateStr,
+          minStay: currentMinStay.value,
+          maxStay: currentMaxStay.value,
+          minStayArrival: currentMinStayArrival.value,
+          maxStayArrival: currentMaxStayArrival.value,
+          maxAvailability: currentMaxAvailability.value,
+          closed: currentClosed.value,
+          closedDeparture: currentClosedDeparture.value,
+          closedArrival: currentClosedArrival.value,
+          quota: currentQuota.value,
+          availabilityPlanId: activeAvailabilityPlan.value.id,
+        });
+      }
+      await store.dispatch('availabilityPlans/createOrUpdateAvailabilityPlanRules', {
+        availabilityPlanId: activeAvailabilityPlan.value?.id,
+        availabilityPlanRules,
+      });
+
+      await store.dispatch('planning/fetchPlanning', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+      });
+      await store.dispatch('planning/fetchPlanningPricesRules', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+        pricelistId: store.state.pricelists.activePricelist?.id,
+      });
+      closePopup();
+      void store.dispatch('layout/showSpinner', false);
     };
 
     // validations

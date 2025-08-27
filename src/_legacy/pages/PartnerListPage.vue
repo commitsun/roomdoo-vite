@@ -343,60 +343,51 @@ export default defineComponent({
     const fetchMorePartners = () => {
       let payload;
       void store.dispatch('layout/showSpinner', true);
-      try {
-        currentPage.value += 1;
-        payload = {
-          limit,
-          multiFieldSearch: partnerTextSearch.value,
-          isIndividual: isIndividual.value,
-          isAgency: isAgency.value,
-          isCompany: isCompany.value,
-          offset: (currentPage.value - 1) * limit,
-        };
-        if (selectedHoused.value.length > 0) {
-          const today = new Date();
-          const filteredHousedOptions = housedOptions.filter((el) =>
-            selectedHoused.value.includes(el.id)
-          );
-          if (filteredHousedOptions.find((el) => el.id === 0)) {
-            payload = {
-              ...payload,
-              inHouse: 'true',
-              // TODO: review this field
-              housedNow: true,
-            };
-          }
-          if (filteredHousedOptions.find((el) => el.id === 1)) {
-            const lastweek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            payload = {
-              ...payload,
-              housedFrom: lastweek,
-              housedTo: today,
-              // TODO: review this field
-              housedLastWeek: true,
-            };
-          }
-          if (filteredHousedOptions.find((el) => el.id === 2)) {
-            const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-            payload = {
-              ...payload,
-              housedFrom: lastMonth,
-              housedTo: today,
-              // TODO: review this field
-              housedLastMonth: true,
-            };
-          }
+      currentPage.value += 1;
+      payload = {
+        limit,
+        multiFieldSearch: partnerTextSearch.value,
+        isIndividual: isIndividual.value,
+        isAgency: isAgency.value,
+        isCompany: isCompany.value,
+        offset: (currentPage.value - 1) * limit,
+      };
+      if (selectedHoused.value.length > 0) {
+        const today = new Date();
+        const filteredHousedOptions = housedOptions.filter((el) =>
+          selectedHoused.value.includes(el.id)
+        );
+        if (filteredHousedOptions.find((el) => el.id === 0)) {
+          payload = {
+            ...payload,
+            inHouse: 'true',
+            // TODO: review this field
+            housedNow: true,
+          };
         }
-        fetchPartners(payload);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+        if (filteredHousedOptions.find((el) => el.id === 1)) {
+          const lastweek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+          payload = {
+            ...payload,
+            housedFrom: lastweek,
+            housedTo: today,
+            // TODO: review this field
+            housedLastWeek: true,
+          };
+        }
+        if (filteredHousedOptions.find((el) => el.id === 2)) {
+          const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+          payload = {
+            ...payload,
+            housedFrom: lastMonth,
+            housedTo: today,
+            // TODO: review this field
+            housedLastMonth: true,
+          };
+        }
       }
+      fetchPartners(payload);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const schema: SchemaInterface[] = [
@@ -480,67 +471,58 @@ export default defineComponent({
       let payload: PayloadPartnerRequestInterface;
       currentPage.value = 1;
 
-      try {
-        await store.dispatch('partners/removePartners');
-        payload = {
-          limit,
-          multiFieldSearch: partnerTextSearch.value,
-          isIndividual: isIndividual.value,
-          isAgency: isAgency.value,
-          isCompany: isCompany.value,
-          offset: 0,
-        };
-        if (selectedHoused.value.length > 0) {
-          const today = new Date();
-          const filteredHousedOptions = housedOptions.filter((el) =>
-            selectedHoused.value.includes(el.id)
-          );
-          if (filteredHousedOptions.find((el) => el.id === 0)) {
-            payload = {
-              ...payload,
-              inHouse: 'true',
-              // TODO: review this field
-              housedNow: true,
-            };
-          }
-          if (filteredHousedOptions.find((el) => el.id === 1)) {
-            const lastweek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            payload = {
-              ...payload,
-              housedFrom: lastweek,
-              housedTo: today,
-              // TODO: review this field
-              housedLastWeek: true,
-            };
-          }
-          if (filteredHousedOptions.find((el) => el.id === 2)) {
-            const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-            payload = {
-              ...payload,
-              housedFrom: lastMonth,
-              housedTo: today,
-              // TODO: review this field
-              housedLastMonth: true,
-            };
-          }
-        }
-        if (selectedOrder.value) {
+      await store.dispatch('partners/removePartners');
+      payload = {
+        limit,
+        multiFieldSearch: partnerTextSearch.value,
+        isIndividual: isIndividual.value,
+        isAgency: isAgency.value,
+        isCompany: isCompany.value,
+        offset: 0,
+      };
+      if (selectedHoused.value.length > 0) {
+        const today = new Date();
+        const filteredHousedOptions = housedOptions.filter((el) =>
+          selectedHoused.value.includes(el.id)
+        );
+        if (filteredHousedOptions.find((el) => el.id === 0)) {
           payload = {
             ...payload,
-            orderBy: selectedOrder.value.field,
-            orderDesc: selectedOrder.value.isDesc,
+            inHouse: 'true',
+            // TODO: review this field
+            housedNow: true,
           };
         }
-        fetchPartners(payload);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+        if (filteredHousedOptions.find((el) => el.id === 1)) {
+          const lastweek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+          payload = {
+            ...payload,
+            housedFrom: lastweek,
+            housedTo: today,
+            // TODO: review this field
+            housedLastWeek: true,
+          };
+        }
+        if (filteredHousedOptions.find((el) => el.id === 2)) {
+          const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+          payload = {
+            ...payload,
+            housedFrom: lastMonth,
+            housedTo: today,
+            // TODO: review this field
+            housedLastMonth: true,
+          };
+        }
       }
+      if (selectedOrder.value) {
+        payload = {
+          ...payload,
+          orderBy: selectedOrder.value.field,
+          orderDesc: selectedOrder.value.isDesc,
+        };
+      }
+      fetchPartners(payload);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     watch(
@@ -554,20 +536,11 @@ export default defineComponent({
     onMounted(async () => {
       void store.dispatch('categories/fetchCategories');
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          await store.dispatch('countries/fetchCountries'),
-          fetchPartners({ limit, offset: 0 }),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        await store.dispatch('countries/fetchCountries'),
+        fetchPartners({ limit, offset: 0 }),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
     });
 
     onUnmounted(() => {

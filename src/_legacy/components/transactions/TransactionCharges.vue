@@ -400,62 +400,53 @@ export default defineComponent({
       let transactionId = 0;
       let folioTransactionIds: AxiosResponse<number[]>;
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (!props.isRefund) {
-          if (!props.isEdit) {
-            payload = { ...payload, requestedInvoice: requestedInvoice.value };
-          }
-          folioTransactionIds = (await store.dispatch(
-            'folios/createFolioCharge',
-            payload
-          )) as AxiosResponse<number[]>;
-          if (requestedInvoice.value) {
-            const result = folioTransactionIds.data.filter(
-              (id) => !store.state.folios.transactions.some((tr) => tr.id === id)
-            );
-            if (result.length > 0) {
-              transactionId = result[0];
-            }
-            await store.dispatch('transactions/createDownPaymentInvoice', {
-              originDownPaymentId: transactionId,
-              partnerId: selectedPartner.value?.id,
-            });
-            await store.dispatch('folios/fetchFolioTransactions', folio.value?.id);
-            await store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
-            await store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
-            await store.dispatch('planning/fetchPlanning', {
-              dateStart: store.state.planning.dateStart,
-              dateEnd: store.state.planning.dateEnd,
-              propertyId: store.state.properties.activeProperty?.id,
-              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            });
-          }
-        } else {
-          if (reference.value !== '') {
-            payload.reference = reference.value;
-          }
-          await store.dispatch('folios/createFolioRefund', payload);
+      if (!props.isRefund) {
+        if (!props.isEdit) {
+          payload = { ...payload, requestedInvoice: requestedInvoice.value };
         }
-        await store.dispatch('folios/fetchFolio', folio.value?.id);
-        await store.dispatch('folios/fetchFolioTransactions', folio.value?.id);
-        await store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
-        await store.dispatch('planning/fetchPlanning', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        void store.dispatch('layout/setForceMoveFolioTab', 'charges');
-        context.emit('close');
+        folioTransactionIds = (await store.dispatch(
+          'folios/createFolioCharge',
+          payload
+        )) as AxiosResponse<number[]>;
+        if (requestedInvoice.value) {
+          const result = folioTransactionIds.data.filter(
+            (id) => !store.state.folios.transactions.some((tr) => tr.id === id)
+          );
+          if (result.length > 0) {
+            transactionId = result[0];
+          }
+          await store.dispatch('transactions/createDownPaymentInvoice', {
+            originDownPaymentId: transactionId,
+            partnerId: selectedPartner.value?.id,
+          });
+          await store.dispatch('folios/fetchFolioTransactions', folio.value?.id);
+          await store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
+          await store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+        }
+      } else {
+        if (reference.value !== '') {
+          payload.reference = reference.value;
+        }
+        await store.dispatch('folios/createFolioRefund', payload);
       }
+      await store.dispatch('folios/fetchFolio', folio.value?.id);
+      await store.dispatch('folios/fetchFolioTransactions', folio.value?.id);
+      await store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
+      await store.dispatch('planning/fetchPlanning', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+      });
+      void store.dispatch('layout/showSpinner', false);
+      void store.dispatch('layout/setForceMoveFolioTab', 'charges');
+      context.emit('close');
     };
 
     const openPartnerForm = () => {
@@ -554,80 +545,69 @@ export default defineComponent({
         chargeDate.value = new Date(transactionDate.value);
       }
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (reservations.value) {
-          await Promise.all(
-            reservations.value.map(async (reservation: ReservationInterface) => {
-              await store.dispatch('reservationLines/fetchReservationLines', reservation.id);
-              if (store.state.reservationLines.reservationLines) {
-                const newRoomIds = store.state.reservationLines.reservationLines
-                  .map((el) => el.roomId)
-                  .filter((roomId): roomId is number => roomId !== undefined);
+      if (reservations.value) {
+        await Promise.all(
+          reservations.value.map(async (reservation: ReservationInterface) => {
+            await store.dispatch('reservationLines/fetchReservationLines', reservation.id);
+            if (store.state.reservationLines.reservationLines) {
+              const newRoomIds = store.state.reservationLines.reservationLines
+                .map((el) => el.roomId)
+                .filter((roomId): roomId is number => roomId !== undefined);
 
-                // avoid duplicates when adding to the array
-                newRoomIds.forEach((roomId) => {
-                  if (!roomIds.value.includes(roomId)) {
-                    roomIds.value.push(roomId);
-                  }
-                });
-              }
-            })
-          );
-          await store.dispatch('accountJournals/fetchAccountJournals', {
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            roomIds: roomIds.value,
-          });
-        }
-
-        await store.dispatch(
-          'folioServices/fetchFolioServices',
-          store.state.folios.currentFolio?.id
-        );
-        reservations.value?.forEach((reservation) => {
-          const services: ServiceToPayInterface[] = [];
-          let reservationAmount = reservation.priceTotal ? reservation.priceTotal : 0;
-          store.state.folioServices.folioServices.forEach((service) => {
-            if (reservation.id === service.reservationId && !service.isBoardService) {
-              if (service.priceTotal) {
-                reservationAmount -= service.priceTotal;
-              }
-              const serviceToPay = {
-                isSelectedToPay: false,
-                service,
-              };
-              services.push(serviceToPay);
+              // avoid duplicates when adding to the array
+              newRoomIds.forEach((roomId) => {
+                if (!roomIds.value.includes(roomId)) {
+                  roomIds.value.push(roomId);
+                }
+              });
             }
-          });
-          if (reservation.priceTotal) {
-            reservationsToPay.value.push({
-              reservation,
-              amount: reservationAmount,
+          })
+        );
+        await store.dispatch('accountJournals/fetchAccountJournals', {
+          pmsPropertyId: store.state.properties.activeProperty?.id,
+          roomIds: roomIds.value,
+        });
+      }
+
+      await store.dispatch('folioServices/fetchFolioServices', store.state.folios.currentFolio?.id);
+      reservations.value?.forEach((reservation) => {
+        const services: ServiceToPayInterface[] = [];
+        let reservationAmount = reservation.priceTotal ? reservation.priceTotal : 0;
+        store.state.folioServices.folioServices.forEach((service) => {
+          if (reservation.id === service.reservationId && !service.isBoardService) {
+            if (service.priceTotal) {
+              reservationAmount -= service.priceTotal;
+            }
+            const serviceToPay = {
               isSelectedToPay: false,
-              services,
-            });
+              service,
+            };
+            services.push(serviceToPay);
           }
         });
-        if (props.partnerId) {
-          void store.dispatch('partners/fetchCurrentPartner', props.partnerId);
+        if (reservation.priceTotal) {
+          reservationsToPay.value.push({
+            reservation,
+            amount: reservationAmount,
+            isSelectedToPay: false,
+            services,
+          });
         }
-        if (props.isEdit) {
-          selectedTransactionMethod.value =
-            store.state.accountJournals.accountJournals.find(
-              (el) =>
-                el.id ===
-                store.state.folios.transactions.find((trans) => trans.id === props.transactionId)
-                  ?.journalId
-            )?.id ?? 0;
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      });
+      if (props.partnerId) {
+        void store.dispatch('partners/fetchCurrentPartner', props.partnerId);
       }
+      if (props.isEdit) {
+        selectedTransactionMethod.value =
+          store.state.accountJournals.accountJournals.find(
+            (el) =>
+              el.id ===
+              store.state.folios.transactions.find((trans) => trans.id === props.transactionId)
+                ?.journalId
+          )?.id ?? 0;
+      }
+
+      void store.dispatch('layout/showSpinner', false);
     });
 
     onUnmounted(() => {
