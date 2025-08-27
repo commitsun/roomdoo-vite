@@ -3,10 +3,10 @@ import { InternalServerError } from '@/application/shared/InternalServerError';
 import { UnknownError } from '@/application/shared/UnknownError';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { useNotificationsStore } from '../stores/notifications';
 import type { InternalAxiosRequestConfig } from 'axios';
 import { useTextMessagesStore } from '../stores/textMessages';
 import { useDynamicDialogsStore } from '../stores/dynamicDialogs';
+import { t } from '@/ui/plugins/i18n';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -78,10 +78,9 @@ api.interceptors.response.use(
       } catch (refreshError: any) {
         useUserStore().logout();
         processQueue(refreshError as AxiosError); // Failure: reject all queued requests
-        useNotificationsStore().add('Session expired. Please log in again.');
         useTextMessagesStore().addTextMessage(
-          'Session Expired',
-          'Your session has expired. Please log in again.'
+          t('error.sessionExpiredTitle'),
+          t('error.sessionExpiredContent')
         );
         useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
 
