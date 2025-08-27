@@ -42,22 +42,13 @@ export default defineComponent({
     const saveInternalNotes = async () => {
       void store.dispatch('layout/showSpinner', true);
 
-      try {
-        await store.dispatch('folios/updateFolio', {
-          folioId: store.state.folios.currentFolio?.id,
-          internalComment: internalComments.value,
-        });
-        await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
-      }
+      await store.dispatch('folios/updateFolio', {
+        folioId: store.state.folios.currentFolio?.id,
+        internalComment: internalComments.value,
+      });
+      await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
     };
 
     onMounted(() => {

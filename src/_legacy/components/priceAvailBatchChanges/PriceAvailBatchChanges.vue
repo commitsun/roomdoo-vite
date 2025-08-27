@@ -804,6 +804,7 @@ export default defineComponent({
           });
         });
         void store.dispatch('layout/showSpinner', true);
+<<<<<<< HEAD
         try {
           await store.dispatch('availabilityPlans/batchChangesAvailabilityPlanRules', {
             availabilityPlanRules,
@@ -835,6 +836,28 @@ export default defineComponent({
         } finally {
           void store.dispatch('layout/showSpinner', false);
         }
+=======
+        await store.dispatch('availabilityPlans/batchChangesAvailabilityPlanRules', {
+          availabilityPlanRules,
+        });
+        resetValues();
+        await Promise.all([
+          store.dispatch('planning/fetchPlanningPricesRules', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+            pricelistId: store.state.pricelists.activePricelist?.id,
+          }),
+          store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          }),
+        ]);
+        void store.dispatch('layout/showSpinner', false);
+>>>>>>> e90bdfc ([REF] pms-pwa: Refactor error handling in various pages and utilities)
       } else {
         const pricelistItems: PayloadCreatePricelistItemInterface[] = [];
         selectedPricelists.value.forEach((pricelist) => {
@@ -858,6 +881,7 @@ export default defineComponent({
           });
         });
         void store.dispatch('layout/showSpinner', true);
+<<<<<<< HEAD
         try {
           await store.dispatch('pricelists/batchChangesPricelistItems', { pricelistItems });
           resetValues();
@@ -879,6 +903,18 @@ export default defineComponent({
         } finally {
           void store.dispatch('layout/showSpinner', false);
         }
+=======
+        await store.dispatch('pricelists/batchChangesPricelistItems', { pricelistItems });
+        resetValues();
+        await store.dispatch('planning/fetchPlanningPricesRules', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          pricelistId: store.state.pricelists.activePricelist?.id,
+        });
+        void store.dispatch('layout/showSpinner', false);
+>>>>>>> e90bdfc ([REF] pms-pwa: Refactor error handling in various pages and utilities)
       }
     };
 

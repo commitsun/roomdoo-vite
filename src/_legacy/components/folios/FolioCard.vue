@@ -445,21 +445,12 @@ export default defineComponent({
     };
     const updateFolio = async (folioId: number | undefined) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', folioId),
-          store.dispatch('reservations/fetchReservations', folioId),
-        ]);
-        void store.dispatch('layout/changeRightDrawerContent', 'NewFolioStep1');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', folioId),
+        store.dispatch('reservations/fetchReservations', folioId),
+      ]);
+      void store.dispatch('layout/changeRightDrawerContent', 'NewFolioStep1');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const buildReservationMappedForBatchChanges = () => {
@@ -519,63 +510,45 @@ export default defineComponent({
 
     const openBatchChangesDialog = async (folio: FolioInterface) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/fetchReservations', folio.id);
-        await store.dispatch('reservationLines/fetchCurrentFolioReservationLines');
+      await store.dispatch('reservations/fetchReservations', folio.id);
+      await store.dispatch('reservationLines/fetchCurrentFolioReservationLines');
 
-        await store.dispatch(
-          'services/fetchFolioServices',
-          store.state.reservations.reservations?.map((el) => el.id)
-        );
-        buildReservationMappedForBatchChanges();
+      await store.dispatch(
+        'services/fetchFolioServices',
+        store.state.reservations.reservations?.map((el) => el.id)
+      );
+      buildReservationMappedForBatchChanges();
 
-        dialogService.open({
-          header: 'CAMBIOS EN LOTE',
-          content: markRaw(FolioBatchChanges),
-          props: {
-            folio: folio,
-            folioName: props.folio.name,
-            fromBookingEngine: false,
-            reservations: reservationsMappedForBatchChanges,
-          },
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      dialogService.open({
+        header: 'CAMBIOS EN LOTE',
+        content: markRaw(FolioBatchChanges),
+        props: {
+          folio: folio,
+          folioName: props.folio.name,
+          fromBookingEngine: false,
+          reservations: reservationsMappedForBatchChanges,
+        },
+      });
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const confirmReservations = async (folioId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('folios/confirmFolioReservations', {
-          folioId,
-          confirmReservations: true,
-        });
-        const payload = {
-          propertyId: store.state.properties.activeProperty?.id,
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          limit: store.state.folios.folios.length,
-        };
-        await store.dispatch('folios/fetchFolios', payload);
-        isOpenMenu.value = false;
-        isOpen.value = true;
-        await refreshPlanning();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('folios/confirmFolioReservations', {
+        folioId,
+        confirmReservations: true,
+      });
+      const payload = {
+        propertyId: store.state.properties.activeProperty?.id,
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        limit: store.state.folios.folios.length,
+      };
+      await store.dispatch('folios/fetchFolios', payload);
+      isOpenMenu.value = false;
+      isOpen.value = true;
+      await refreshPlanning();
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const getAgencyName = (agencyId: number) =>
@@ -583,34 +556,25 @@ export default defineComponent({
 
     const doCancelReservations = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('folios/cancelFolioReservations', {
-          folioId: props.folio.id,
-          cancelReservations: true,
-        });
-        const payload = {
-          propertyId: store.state.properties.activeProperty?.id,
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          limit: store.state.folios.folios.length,
-        };
-        await store.dispatch('folios/fetchFolios', payload);
-        isOpenMenu.value = false;
-        isOpen.value = true;
-        if (router.currentRoute.value.name === 'planning') {
-          await refreshPlanning();
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('reservations/setCurrentReservations', null);
-        void store.dispatch('folios/setCurrentFolio', null);
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch('folios/cancelFolioReservations', {
+        folioId: props.folio.id,
+        cancelReservations: true,
+      });
+      const payload = {
+        propertyId: store.state.properties.activeProperty?.id,
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        limit: store.state.folios.folios.length,
+      };
+      await store.dispatch('folios/fetchFolios', payload);
+      isOpenMenu.value = false;
+      isOpen.value = true;
+      if (router.currentRoute.value.name === 'planning') {
+        await refreshPlanning();
       }
+      void store.dispatch('reservations/setCurrentReservations', null);
+      void store.dispatch('folios/setCurrentFolio', null);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const cancelReservations = async () => {
@@ -684,42 +648,24 @@ export default defineComponent({
 
     const setCurrentReservation = async (folioId: number, reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', folioId),
-          store.dispatch('reservations/fetchReservations', folioId),
-          store.dispatch('reservations/fetchReservation', reservationId),
-          store.dispatch('reservationLines/fetchReservationLines', reservationId),
-        ]);
-        void store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', folioId),
+        store.dispatch('reservations/fetchReservations', folioId),
+        store.dispatch('reservations/fetchReservation', reservationId),
+        store.dispatch('reservationLines/fetchReservationLines', reservationId),
+      ]);
+      void store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openFolioDetail = async (folioId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', folioId),
-          store.dispatch('reservations/fetchReservations', folioId),
-        ]);
-        void store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', folioId),
+        store.dispatch('reservations/fetchReservations', folioId),
+      ]);
+      void store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const anyCheckinToday = (reservations: ReservationInterface[]) => {
@@ -741,26 +687,17 @@ export default defineComponent({
     const doCheckinAction = async (folio: FolioInterface) => {
       void store.dispatch('layout/showSpinner', true);
       await store.dispatch('reservations/fetchReservations', folio.id);
-      try {
-        if (folio.reservations.length === 1) {
-          await store.dispatch('folios/setCurrentFolio', folio);
-          await store.dispatch('reservations/setCurrentReservation', folio.reservations[0]);
-          await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
-          void store.dispatch('layout/setMoveToGuestsTab', true);
-        } else if (folio.reservations.length > 1) {
-          await store.dispatch('folios/setCurrentFolio', folio);
-          await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
-          void store.dispatch('layout/setMoveToGuestsTab', true);
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      if (folio.reservations.length === 1) {
+        await store.dispatch('folios/setCurrentFolio', folio);
+        await store.dispatch('reservations/setCurrentReservation', folio.reservations[0]);
+        await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
+        void store.dispatch('layout/setMoveToGuestsTab', true);
+      } else if (folio.reservations.length > 1) {
+        await store.dispatch('folios/setCurrentFolio', folio);
+        await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
+        void store.dispatch('layout/setMoveToGuestsTab', true);
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const moveToFirstReservation = (reservation: ReservationInterface | null) => {

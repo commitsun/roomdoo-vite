@@ -257,6 +257,7 @@ export default defineComponent({
         partnerId,
       };
       void store.dispatch('layout/showSpinner', true);
+<<<<<<< HEAD
       try {
         if (props.transaction) {
           await store.dispatch('transactions/editTransaction', payload);
@@ -290,7 +291,40 @@ export default defineComponent({
       } finally {
         void store.dispatch('layout/showSpinner', false);
         context.emit('accept', true);
+=======
+      if (props.transaction) {
+        await store.dispatch('transactions/editTransaction', payload);
+      } else {
+        await store.dispatch('transactions/createTransaction', payload);
+>>>>>>> e90bdfc ([REF] pms-pwa: Refactor error handling in various pages and utilities)
       }
+      if (router.currentRoute.value.name === 'planning') {
+        await store.dispatch('planning/fetchPlanning', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+        });
+        await store.dispatch('folios/fetchFolio', props.folioId);
+        await store.dispatch('folios/fetchFolioTransactions', props.folioId);
+        await store.dispatch('folios/fetchFolioSaleLines', props.folioId);
+        await store.dispatch('planning/fetchPlanning', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+        });
+      }
+
+      dialogService.open({
+        header: props.transaction ? 'Pago modificado' : 'Pago realizado',
+        content: props.transaction ? 'Pago modificado con éxito' : 'Pago realizado con éxito',
+        btnAccept: 'Ok',
+      });
+
+      context.emit('transactionCreated');
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('accept', true);
     };
 
     const openPartnerDialog = () => {
@@ -385,24 +419,15 @@ export default defineComponent({
         isReconcilied.value = props.transaction.isReconcilied;
         if (props.transaction.partnerId) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store
-              .dispatch('partners/fetchCurrentPartner', props.transaction.partnerId)
-              .then(() => {
-                if (store.state.partners.currentPartner) {
-                  partnerName.value = store.state.partners.currentPartner.name ?? '';
-                  selectedPartner.value = store.state.partners.currentPartner;
-                }
-              });
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
+          await store
+            .dispatch('partners/fetchCurrentPartner', props.transaction.partnerId)
+            .then(() => {
+              if (store.state.partners.currentPartner) {
+                partnerName.value = store.state.partners.currentPartner.name ?? '';
+                selectedPartner.value = store.state.partners.currentPartner;
+              }
             });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          void store.dispatch('layout/showSpinner', false);
         }
       }
     });

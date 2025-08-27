@@ -153,115 +153,70 @@ export default defineComponent({
 
     const openYesterdayPendingReservations = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        await store.dispatch('layout/setRightDrawerFilter', 'yesterdayCheckins');
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
-        void store.dispatch('layout/rightDrawerDisplayed', true);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('layout/rightDrawerDisplayed', false);
+      await store.dispatch('layout/setRightDrawerFilter', '');
+      await store.dispatch('layout/setRightDrawerFilter', 'yesterdayCheckins');
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+      void store.dispatch('layout/rightDrawerDisplayed', true);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openPendingCheckinReservations = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        if (dateOptionsSelected.value === 1) {
-          await store.dispatch('layout/setRightDrawerFilter', 'todayPendingCheckins');
-        } else {
-          await store.dispatch('layout/setRightDrawerFilter', 'tomorrowPendingCheckins');
-        }
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
-        void store.dispatch('layout/rightDrawerDisplayed', true);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch('layout/rightDrawerDisplayed', false);
+      await store.dispatch('layout/setRightDrawerFilter', '');
+      if (dateOptionsSelected.value === 1) {
+        await store.dispatch('layout/setRightDrawerFilter', 'todayPendingCheckins');
+      } else {
+        await store.dispatch('layout/setRightDrawerFilter', 'tomorrowPendingCheckins');
       }
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+      void store.dispatch('layout/rightDrawerDisplayed', true);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openCompletedCheckinReservations = async (completedCheckins: number) => {
       if (completedCheckins === 0) return;
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        if (dateOptionsSelected.value === 1) {
-          await store.dispatch('layout/setRightDrawerFilter', 'todayCompletedCheckins');
-        } else {
-          return;
-        }
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
-        void store.dispatch('layout/rightDrawerDisplayed', true);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch('layout/rightDrawerDisplayed', false);
+      await store.dispatch('layout/setRightDrawerFilter', '');
+      if (dateOptionsSelected.value === 1) {
+        await store.dispatch('layout/setRightDrawerFilter', 'todayCompletedCheckins');
+      } else {
+        return;
       }
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+      void store.dispatch('layout/rightDrawerDisplayed', true);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openPendingCheckoutReservations = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        if (dateOptionsSelected.value === 1) {
-          await store.dispatch('layout/setRightDrawerFilter', 'todayPendingCheckouts');
-        } else {
-          await store.dispatch('layout/setRightDrawerFilter', 'tomorrowPendingCheckouts');
-        }
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
-        void store.dispatch('layout/rightDrawerDisplayed', true);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch('layout/rightDrawerDisplayed', false);
+      await store.dispatch('layout/setRightDrawerFilter', '');
+      if (dateOptionsSelected.value === 1) {
+        await store.dispatch('layout/setRightDrawerFilter', 'todayPendingCheckouts');
+      } else {
+        await store.dispatch('layout/setRightDrawerFilter', 'tomorrowPendingCheckouts');
       }
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+      void store.dispatch('layout/rightDrawerDisplayed', true);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openCompletedCheckoutReservations = async (completedCheckouts: number) => {
       if (completedCheckouts === 0) return;
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        if (dateOptionsSelected.value === 1) {
-          await store.dispatch('layout/setRightDrawerFilter', 'todayCompletedCheckouts');
-        } else {
-          await store.dispatch('layout/setRightDrawerFilter', 'tomorrowCompletedCheckouts');
-        }
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
-        void store.dispatch('layout/rightDrawerDisplayed', true);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch('layout/rightDrawerDisplayed', false);
+      await store.dispatch('layout/setRightDrawerFilter', '');
+      if (dateOptionsSelected.value === 1) {
+        await store.dispatch('layout/setRightDrawerFilter', 'todayCompletedCheckouts');
+      } else {
+        await store.dispatch('layout/setRightDrawerFilter', 'tomorrowCompletedCheckouts');
       }
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+      void store.dispatch('layout/rightDrawerDisplayed', true);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     onUnmounted(() => {

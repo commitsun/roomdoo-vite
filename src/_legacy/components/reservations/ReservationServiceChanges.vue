@@ -410,141 +410,132 @@ export default defineComponent({
 
     const addService = async (productId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (currentReservation.value) {
-          const product = products.value.find((el) => el.id === productId);
+      if (currentReservation.value) {
+        const product = products.value.find((el) => el.id === productId);
 
-          let quantity = 1;
-          let priceTotal = 0;
+        let quantity = 1;
+        let priceTotal = 0;
 
-          if (product?.perPerson) {
-            quantity = currentReservation.value?.adults ?? 0;
-          }
+        if (product?.perPerson) {
+          quantity = currentReservation.value?.adults ?? 0;
+        }
 
-          let quantityHeader = 0;
-          const items: CalendarItemInterface[] = [];
+        let quantityHeader = 0;
+        const items: CalendarItemInterface[] = [];
 
-          if (product?.perDay) {
-            await store.dispatch('prices/fetchPrices', {
-              pmsPropertyId: activeProperty.value?.id,
-              pricelistId: activePricelistId.value?.id,
-              productId,
-              dateFrom: new Date(currentReservation.value?.checkin),
-              dateTo: new Date(currentReservation.value?.checkout),
-            });
+        if (product?.perDay) {
+          await store.dispatch('prices/fetchPrices', {
+            pmsPropertyId: activeProperty.value?.id,
+            pricelistId: activePricelistId.value?.id,
+            productId,
+            dateFrom: new Date(currentReservation.value?.checkin),
+            dateTo: new Date(currentReservation.value?.checkout),
+          });
 
-            const startDate = new Date(currentReservation.value?.checkin);
-            const endDate = new Date(currentReservation.value?.checkout);
+          const startDate = new Date(currentReservation.value?.checkin);
+          const endDate = new Date(currentReservation.value?.checkout);
 
-            const checkinDate = new Date(currentReservation.value?.checkin);
-            const checkoutDate = new Date(currentReservation.value?.checkout);
+          const checkinDate = new Date(currentReservation.value?.checkin);
+          const checkoutDate = new Date(currentReservation.value?.checkout);
 
-            let daysBeforeCheckin;
-            let daysAfterCheckout;
+          let daysBeforeCheckin;
+          let daysAfterCheckout;
 
-            if (startDate.getDay() === 0) {
-              daysBeforeCheckin = 6;
-            } else {
-              daysBeforeCheckin = startDate.getDay() - 1;
-            }
-            if (endDate.getDay() === 0) {
-              daysAfterCheckout = 0;
-            } else {
-              daysAfterCheckout = 6 - (endDate.getDay() - 1);
-            }
-            startDate.setDate(startDate.getDate() - daysBeforeCheckin);
-            endDate.setDate(endDate.getDate() + daysAfterCheckout);
-
-            utilsDates.getDatesRange(startDate, endDate).forEach((date) => {
-              const priceUnit = priceByDate(new Date(date))?.price ?? 0;
-              let serviceLine;
-              if (
-                date.getTime() >= checkinDate.getTime() &&
-                date.getTime() < checkoutDate.getTime() &&
-                product.consumedOn === 'before'
-              ) {
-                priceTotal += priceUnit * quantity;
-                quantityHeader += quantity;
-                serviceLine = {
-                  priceUnit,
-                  date,
-                  quantity,
-                  discount: 0,
-                  discountPrice: 0,
-                };
-              } else if (
-                date.getTime() > checkinDate.getTime() &&
-                date.getTime() <= checkoutDate.getTime() &&
-                product.consumedOn === 'after'
-              ) {
-                quantityHeader += quantity;
-                priceTotal += priceUnit * quantity;
-                serviceLine = {
-                  priceUnit,
-                  date,
-                  quantity,
-                  discount: 0,
-                };
-              }
-
-              items.push({
-                date,
-                serviceLine,
-              });
-            });
+          if (startDate.getDay() === 0) {
+            daysBeforeCheckin = 6;
           } else {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            await store.dispatch('prices/fetchPrices', {
-              pmsPropertyId: activeProperty.value?.id,
-              pricelistId: activePricelistId.value?.id,
-              productId,
-              dateFrom: today,
-              dateTo: today,
-            });
-            quantityHeader += quantity;
-            items.push({
-              date: today,
-              serviceLine: {
-                priceUnit: priceByDate(today)?.price ?? 0,
-                date: today,
+            daysBeforeCheckin = startDate.getDay() - 1;
+          }
+          if (endDate.getDay() === 0) {
+            daysAfterCheckout = 0;
+          } else {
+            daysAfterCheckout = 6 - (endDate.getDay() - 1);
+          }
+          startDate.setDate(startDate.getDate() - daysBeforeCheckin);
+          endDate.setDate(endDate.getDate() + daysAfterCheckout);
+
+          utilsDates.getDatesRange(startDate, endDate).forEach((date) => {
+            const priceUnit = priceByDate(new Date(date))?.price ?? 0;
+            let serviceLine;
+            if (
+              date.getTime() >= checkinDate.getTime() &&
+              date.getTime() < checkoutDate.getTime() &&
+              product.consumedOn === 'before'
+            ) {
+              priceTotal += priceUnit * quantity;
+              quantityHeader += quantity;
+              serviceLine = {
+                priceUnit,
+                date,
                 quantity,
                 discount: 0,
-              },
-            });
-          }
-
-          if (product) {
-            let priceForAllLines;
-            const lines = items.map((el) => el.serviceLine).filter((el) => el !== undefined);
-            if (lines.every((val) => val?.priceUnit === lines[0]?.priceUnit)) {
-              priceForAllLines = lines[0]?.priceUnit;
+                discountPrice: 0,
+              };
+            } else if (
+              date.getTime() > checkinDate.getTime() &&
+              date.getTime() <= checkoutDate.getTime() &&
+              product.consumedOn === 'after'
+            ) {
+              quantityHeader += quantity;
+              priceTotal += priceUnit * quantity;
+              serviceLine = {
+                priceUnit,
+                date,
+                quantity,
+                discount: 0,
+              };
             }
-            calendarDatesByService.value.push({
-              isDiscountShowedAsPercentage: true,
-              productId: product.id,
-              serviceName: product?.name,
-              perDay: product?.perDay,
-              viewMode: 'modify',
-              priceForAllLines,
-              discountForAllLines: 0,
-              priceTotal,
-              priceSubtotal: 0,
-              quantity: quantityHeader,
-              items,
+
+            items.push({
+              date,
+              serviceLine,
             });
-          }
+          });
+        } else {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          await store.dispatch('prices/fetchPrices', {
+            pmsPropertyId: activeProperty.value?.id,
+            pricelistId: activePricelistId.value?.id,
+            productId,
+            dateFrom: today,
+            dateTo: today,
+          });
+          quantityHeader += quantity;
+          items.push({
+            date: today,
+            serviceLine: {
+              priceUnit: priceByDate(today)?.price ?? 0,
+              date: today,
+              quantity,
+              discount: 0,
+            },
+          });
         }
-        extraServiceSelected.value = -1;
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+
+        if (product) {
+          let priceForAllLines;
+          const lines = items.map((el) => el.serviceLine).filter((el) => el !== undefined);
+          if (lines.every((val) => val?.priceUnit === lines[0]?.priceUnit)) {
+            priceForAllLines = lines[0]?.priceUnit;
+          }
+          calendarDatesByService.value.push({
+            isDiscountShowedAsPercentage: true,
+            productId: product.id,
+            serviceName: product?.name,
+            perDay: product?.perDay,
+            viewMode: 'modify',
+            priceForAllLines,
+            discountForAllLines: 0,
+            priceTotal,
+            priceSubtotal: 0,
+            quantity: quantityHeader,
+            items,
+          });
+        }
       }
+      extraServiceSelected.value = -1;
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const previewServiceView = (serviceIndex: number, serviceId: number | undefined) => {
@@ -672,90 +663,81 @@ export default defineComponent({
 
     const saveChanges = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (
-          currentReservation.value &&
-          boardServiceSelected.value !== currentReservation.value?.boardServiceId
-        ) {
-          await store.dispatch('reservations/updateReservation', {
-            reservationId: currentReservation.value.id,
-            boardServiceId: boardServiceSelected.value,
-          });
-        }
-        await Promise.all(
-          calendarServicesToRemove.value.map(async (el) => {
-            await store.dispatch('services/deleteService', el);
-          })
-        );
+      if (
+        currentReservation.value &&
+        boardServiceSelected.value !== currentReservation.value?.boardServiceId
+      ) {
+        await store.dispatch('reservations/updateReservation', {
+          reservationId: currentReservation.value.id,
+          boardServiceId: boardServiceSelected.value,
+        });
+      }
+      await Promise.all(
+        calendarServicesToRemove.value.map(async (el) => {
+          await store.dispatch('services/deleteService', el);
+        })
+      );
 
-        await Promise.all(
-          calendarDatesByService.value
-            .filter((el) => el.items)
-            .map(async (el) => {
-              const serviceLines: ServiceLineInterface[] = [];
-              if (el.viewMode === 'calendar') {
-                el.items.forEach((i) => {
-                  if (i.serviceLine) {
+      await Promise.all(
+        calendarDatesByService.value
+          .filter((el) => el.items)
+          .map(async (el) => {
+            const serviceLines: ServiceLineInterface[] = [];
+            if (el.viewMode === 'calendar') {
+              el.items.forEach((i) => {
+                if (i.serviceLine) {
+                  serviceLines.push({
+                    priceUnit: i.serviceLine.priceUnit,
+                    discount: i.serviceLine.discount,
+                    date: new Date(i.serviceLine.date),
+                    quantity: i.serviceLine.quantity,
+                  });
+                }
+              });
+            } else if (el.viewMode === 'modify') {
+              el.items.forEach((i) => {
+                if (i.serviceLine) {
+                  if (el.perDay) {
                     serviceLines.push({
-                      priceUnit: i.serviceLine.priceUnit,
-                      discount: i.serviceLine.discount,
-                      date: new Date(i.serviceLine.date),
+                      priceUnit: el.priceForAllLines ?? 0,
+                      discount: el.discountForAllLines ?? 0,
                       quantity: i.serviceLine.quantity,
+                      date: new Date(i.date),
+                    });
+                  } else {
+                    serviceLines.push({
+                      priceUnit: el.priceForAllLines ?? 0,
+                      discount: el.discountForAllLines ?? 0,
+                      quantity: el.quantity,
+                      date: new Date(i.date),
                     });
                   }
-                });
-              } else if (el.viewMode === 'modify') {
-                el.items.forEach((i) => {
-                  if (i.serviceLine) {
-                    if (el.perDay) {
-                      serviceLines.push({
-                        priceUnit: el.priceForAllLines ?? 0,
-                        discount: el.discountForAllLines ?? 0,
-                        quantity: i.serviceLine.quantity,
-                        date: new Date(i.date),
-                      });
-                    } else {
-                      serviceLines.push({
-                        priceUnit: el.priceForAllLines ?? 0,
-                        discount: el.discountForAllLines ?? 0,
-                        quantity: el.quantity,
-                        date: new Date(i.date),
-                      });
-                    }
-                  }
-                });
-              }
-              if (!el.serviceId) {
-                await store.dispatch('services/createService', {
-                  reservationId: currentReservation.value?.id,
-                  productId: el.productId,
-                  serviceLines,
-                });
-              } else {
-                await store.dispatch('services/updateService', {
-                  reservationId: currentReservation.value?.id,
-                  serviceId: el.serviceId,
-                  serviceLines,
-                });
-              }
-            })
-        );
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', currentFolio.value?.id),
-          store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
-          store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id),
-          store.dispatch('services/fetchServices', currentReservation.value?.id),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
-      }
+                }
+              });
+            }
+            if (!el.serviceId) {
+              await store.dispatch('services/createService', {
+                reservationId: currentReservation.value?.id,
+                productId: el.productId,
+                serviceLines,
+              });
+            } else {
+              await store.dispatch('services/updateService', {
+                reservationId: currentReservation.value?.id,
+                serviceId: el.serviceId,
+                serviceLines,
+              });
+            }
+          })
+      );
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', currentFolio.value?.id),
+        store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
+        store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id),
+        store.dispatch('services/fetchServices', currentReservation.value?.id),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
     };
 
     onMounted(() => {

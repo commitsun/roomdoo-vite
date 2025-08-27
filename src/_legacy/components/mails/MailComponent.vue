@@ -244,25 +244,16 @@ export default defineComponent({
       } else {
         void store.dispatch('layout/showSpinner', true);
       }
-      try {
-        await store.dispatch('partners/fetchCurrentPartner', partnerId);
-        dialogService.open({
-          header: partnerId === 0 ? 'Nuevo cliente' : 'Editar cliente',
-          content: markRaw(PartnerForm),
-          closable: true,
-          onAccept: () => {
-            addMailToPartner();
-          },
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('partners/fetchCurrentPartner', partnerId);
+      dialogService.open({
+        header: partnerId === 0 ? 'Nuevo cliente' : 'Editar cliente',
+        content: markRaw(PartnerForm),
+        closable: true,
+        onAccept: () => {
+          addMailToPartner();
+        },
+      });
+      void store.dispatch('layout/showSpinner', false);
       partnerDialog.value = true;
     };
 
@@ -283,39 +274,30 @@ export default defineComponent({
       partners.value.forEach((el) => partnerIds.push(el.id));
       emails.value.forEach((el) => emailAddresses.push(el));
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (props.invoiceId) {
-          const payload = {
-            invoiceId: props.invoiceId,
-            subject: subject.value,
-            bodyMail: mailContent.value,
-            partnerIds,
-            emailAddresses,
-          };
-          await store.dispatch('folios/sendMailInvoice', payload);
-        } else if (props.stateReservation) {
-          const payload = {
-            folioId: store.state.folios.currentFolio?.id,
-            mailType: props.stateReservation,
-            subject: subject.value,
-            bodyMail: mailContent.value,
-            partnerIds,
-            emailAddresses,
-          };
-          await store.dispatch('folios/sendFolioMail', payload);
-        }
-        void store.dispatch('folios/fetchFolioMessages', store.state.folios.currentFolio?.id);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        context.emit('accept');
-        void store.dispatch('layout/showSpinner', false);
-        void store.dispatch('layout/setForceMoveFolioTab', 'messages');
+      if (props.invoiceId) {
+        const payload = {
+          invoiceId: props.invoiceId,
+          subject: subject.value,
+          bodyMail: mailContent.value,
+          partnerIds,
+          emailAddresses,
+        };
+        await store.dispatch('folios/sendMailInvoice', payload);
+      } else if (props.stateReservation) {
+        const payload = {
+          folioId: store.state.folios.currentFolio?.id,
+          mailType: props.stateReservation,
+          subject: subject.value,
+          bodyMail: mailContent.value,
+          partnerIds,
+          emailAddresses,
+        };
+        await store.dispatch('folios/sendFolioMail', payload);
       }
+      void store.dispatch('folios/fetchFolioMessages', store.state.folios.currentFolio?.id);
+      context.emit('accept');
+      void store.dispatch('layout/showSpinner', false);
+      void store.dispatch('layout/setForceMoveFolioTab', 'messages');
     };
 
     const addMailToPartner = async () => {
@@ -370,17 +352,8 @@ export default defineComponent({
       }
       if (partnerId !== 0) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('partners/fetchCurrentPartner', partnerId);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('partners/fetchCurrentPartner', partnerId);
+        void store.dispatch('layout/showSpinner', false);
         if (store.state.partners.currentPartner && store.state.partners.currentPartner.email) {
           partners.value.push(store.state.partners.currentPartner);
         }

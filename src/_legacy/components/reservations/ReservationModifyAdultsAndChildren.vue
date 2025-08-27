@@ -77,28 +77,19 @@ export default defineComponent({
     const currentFolioId = computed(() => store.state.folios.currentFolio?.id);
     const saveAdultsAndChildren = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/updateReservation', {
-          reservationId: reservation.value?.id,
-          adults: numberAdults.value,
-          children: numberChildren.value,
-        });
-        await Promise.all([
-          store.dispatch('reservations/fetchReservation', reservation.value?.id),
-          store.dispatch('reservations/fetchReservations', currentFolioId.value),
-          store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolioId.value),
-          store.dispatch('checkinPartners/fetchCheckinPartners', reservation.value?.id),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
-      }
+      await store.dispatch('reservations/updateReservation', {
+        reservationId: reservation.value?.id,
+        adults: numberAdults.value,
+        children: numberChildren.value,
+      });
+      await Promise.all([
+        store.dispatch('reservations/fetchReservation', reservation.value?.id),
+        store.dispatch('reservations/fetchReservations', currentFolioId.value),
+        store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolioId.value),
+        store.dispatch('checkinPartners/fetchCheckinPartners', reservation.value?.id),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
     };
 
     onMounted(() => {

@@ -1240,78 +1240,72 @@ export default defineComponent({
 
     const saveChanges = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        let pricePerNight = fixedPriceByNight.value;
+      let pricePerNight = fixedPriceByNight.value;
 
-        if (isFixedPriceTotalReservation.value) {
-          pricePerNight =
-            (fixedPriceTotalReservation.value ?? 0) / currentReservationLines.value.length;
-        }
-        const reservationLines = calendarDates.value
-          .filter((el) => el.reservationLine)
-          .map((el) => el.reservationLine)
-          .map((el) => ({
-            date: el?.date,
-            price:
-              isFixedPriceByNight.value || isFixedPriceTotalReservation.value
-                ? pricePerNight
-                : el?.price,
-            discount:
-              isFixedPriceByNight.value || isFixedPriceTotalReservation.value ? 0 : el?.discount,
-            roomId: el?.roomId,
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            reservationId: currentReservation.value?.id,
-          }));
-
-        await store.dispatch('reservations/updateReservation', {
+      if (isFixedPriceTotalReservation.value) {
+        pricePerNight =
+          (fixedPriceTotalReservation.value ?? 0) / currentReservationLines.value.length;
+      }
+      const reservationLines = calendarDates.value
+        .filter((el) => el.reservationLine)
+        .map((el) => el.reservationLine)
+        .map((el) => ({
+          date: el?.date,
+          price:
+            isFixedPriceByNight.value || isFixedPriceTotalReservation.value
+              ? pricePerNight
+              : el?.price,
+          discount:
+            isFixedPriceByNight.value || isFixedPriceTotalReservation.value ? 0 : el?.discount,
+          roomId: el?.roomId,
+          pmsPropertyId: store.state.properties.activeProperty?.id,
           reservationId: currentReservation.value?.id,
-          reservationLines,
-          pricelistId: selectedPricelistId.value,
-          roomTypeId: selectedRoomTypeId.value,
-        });
+        }));
 
-        await Promise.all(
-          calendarDatesByService.value
-            .filter((el) => el.items)
-            .map(async (el) => {
-              const serviceLines: ServiceLineInterface[] = [];
-              if (el.viewMode === 'calendar') {
-                el.items.forEach((i) => {
-                  if (i.serviceLine) {
+      await store.dispatch('reservations/updateReservation', {
+        reservationId: currentReservation.value?.id,
+        reservationLines,
+        pricelistId: selectedPricelistId.value,
+        roomTypeId: selectedRoomTypeId.value,
+      });
+
+      await Promise.all(
+        calendarDatesByService.value
+          .filter((el) => el.items)
+          .map(async (el) => {
+            const serviceLines: ServiceLineInterface[] = [];
+            if (el.viewMode === 'calendar') {
+              el.items.forEach((i) => {
+                if (i.serviceLine) {
+                  serviceLines.push({
+                    priceUnit: i.serviceLine.priceUnit,
+                    discount: i.serviceLine.discount,
+                    date: new Date(i.serviceLine.date),
+                    quantity: i.serviceLine.quantity,
+                  });
+                }
+              });
+            } else if (el.viewMode === 'modify') {
+              el.items.forEach((i) => {
+                if (i.serviceLine) {
+                  if (el.perDay) {
                     serviceLines.push({
-                      priceUnit: i.serviceLine.priceUnit,
-                      discount: i.serviceLine.discount,
-                      date: new Date(i.serviceLine.date),
+                      priceUnit: el.priceForAllLines ?? 0,
+                      discount: el.discountForAllLines ?? 0,
                       quantity: i.serviceLine.quantity,
+                      date: new Date(i.date),
+                    });
+                  } else {
+                    serviceLines.push({
+                      priceUnit: el.priceForAllLines ?? 0,
+                      discount: el.discountForAllLines ?? 0,
+                      quantity: el.quantity,
+                      date: new Date(i.date),
                     });
                   }
-                });
-              } else if (el.viewMode === 'modify') {
-                el.items.forEach((i) => {
-                  if (i.serviceLine) {
-                    if (el.perDay) {
-                      serviceLines.push({
-                        priceUnit: el.priceForAllLines ?? 0,
-                        discount: el.discountForAllLines ?? 0,
-                        quantity: i.serviceLine.quantity,
-                        date: new Date(i.date),
-                      });
-                    } else {
-                      serviceLines.push({
-                        priceUnit: el.priceForAllLines ?? 0,
-                        discount: el.discountForAllLines ?? 0,
-                        quantity: el.quantity,
-                        date: new Date(i.date),
-                      });
-                    }
-                  }
-                });
-              }
-              await store.dispatch('services/updateService', {
-                reservationId: currentReservation.value?.id,
-                serviceId: el.serviceId,
-                serviceLines,
+                }
               });
+<<<<<<< HEAD
             }),
         );
         if (router.currentRoute.value.name === 'planning') {
@@ -1350,6 +1344,40 @@ export default defineComponent({
         void store.dispatch('layout/showSpinner', false);
         context.emit('close');
       }
+=======
+            }
+            await store.dispatch('services/updateService', {
+              reservationId: currentReservation.value?.id,
+              serviceId: el.serviceId,
+              serviceLines,
+            });
+          })
+      );
+
+      void store.dispatch('planning/fetchAlertsPerDay', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+      });
+      void store.dispatch('planning/fetchDailyBillings', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+      });
+      void store.dispatch('planning/fetchPlanning', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+      });
+      await store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id);
+      void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
+      void store.dispatch('folios/fetchFolio', currentReservation.value?.folioId);
+      void store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id);
+      void store.dispatch('services/fetchServices', currentReservation.value?.id);
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
+>>>>>>> e90bdfc ([REF] pms-pwa: Refactor error handling in various pages and utilities)
     };
 
     watch(isFixedPriceByNight, (value) => {
