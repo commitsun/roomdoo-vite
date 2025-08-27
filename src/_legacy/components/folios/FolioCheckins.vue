@@ -342,17 +342,8 @@ export default defineComponent({
 
     const closeCheckinFlow = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id);
+      void store.dispatch('layout/showSpinner', false);
       isCheckinFlowStepperOpen.value = false;
     };
 
@@ -401,88 +392,70 @@ export default defineComponent({
     };
     const doCheckout = async (reservationId: number, index: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/checkoutReservation', {
-          reservationId,
-          toCheckout: true,
+      await store.dispatch('reservations/checkoutReservation', {
+        reservationId,
+        toCheckout: true,
+      });
+      await Promise.all([
+        store.dispatch('reservations/fetchReservations', currentFolio.value?.id),
+        store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
+        store.dispatch('rooms/fetchRooms', store.state.properties.activeProperty?.id),
+      ]);
+      if (router.currentRoute.value.name === 'planning') {
+        await store.dispatch('planning/fetchPlanning', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
         });
-        await Promise.all([
-          store.dispatch('reservations/fetchReservations', currentFolio.value?.id),
-          store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
-          store.dispatch('rooms/fetchRooms', store.state.properties.activeProperty?.id),
-        ]);
-        if (router.currentRoute.value.name === 'planning') {
-          await store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
-        } else {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          yesterday.setHours(0, 0, 0, 0);
+      } else {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
 
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          tomorrow.setHours(0, 0, 0, 0);
-          await store.dispatch('dashboard/fetchPendingReservations', {
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            dateFrom: yesterday,
-            dateTo: tomorrow,
-          });
-        }
-        isBtnToCheckout.value[index] = false;
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        await store.dispatch('dashboard/fetchPendingReservations', {
+          pmsPropertyId: store.state.properties.activeProperty?.id,
+          dateFrom: yesterday,
+          dateTo: tomorrow,
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      isBtnToCheckout.value[index] = false;
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const undoOnboard = async (reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/undoOnboard', { reservationId });
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', currentFolio.value?.id),
-          store.dispatch('reservations/fetchReservations', currentFolio.value?.id),
-          store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
-        ]);
-        if (router.currentRoute.value.name === 'planning') {
-          await store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
-        } else {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          yesterday.setHours(0, 0, 0, 0);
-
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          tomorrow.setHours(0, 0, 0, 0);
-          await store.dispatch('dashboard/fetchPendingReservations', {
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            dateFrom: yesterday,
-            dateTo: tomorrow,
-          });
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+      await store.dispatch('reservations/undoOnboard', { reservationId });
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', currentFolio.value?.id),
+        store.dispatch('reservations/fetchReservations', currentFolio.value?.id),
+        store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
+      ]);
+      if (router.currentRoute.value.name === 'planning') {
+        await store.dispatch('planning/fetchPlanning', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      } else {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        await store.dispatch('dashboard/fetchPendingReservations', {
+          pmsPropertyId: store.state.properties.activeProperty?.id,
+          dateFrom: yesterday,
+          dateTo: tomorrow,
+        });
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const setActiveCheckinPartnerAndRemove = (
@@ -502,23 +475,14 @@ export default defineComponent({
 
     const removeCheckinPartner = async (reservationId: number, index: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('checkinPartners/deleteCheckinPartner', {
-          reservationId,
-          checkinPartnerId: activeCheckinPartner.value?.id,
-        });
-        await Promise.all([
-          store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('checkinPartners/deleteCheckinPartner', {
+        reservationId,
+        checkinPartnerId: activeCheckinPartner.value?.id,
+      });
+      await Promise.all([
+        store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
       openRemoveCheckinConfirmation.value[index] = false;
     };
 
@@ -628,56 +592,38 @@ export default defineComponent({
 
     const saveAdultsAndChildren = async (reservationId: number, index: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/updateReservation', {
-          reservationId,
-          adults: numberAdults.value,
-          children: numberChildren.value,
-        });
-        await Promise.all([
-          store.dispatch('reservations/fetchReservations', currentFolio.value?.id),
-          store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('reservations/updateReservation', {
+        reservationId,
+        adults: numberAdults.value,
+        children: numberChildren.value,
+      });
+      await Promise.all([
+        store.dispatch('reservations/fetchReservations', currentFolio.value?.id),
+        store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
       showAdultsModal.value[index] = false;
     };
 
     const printAllCheckins = async (reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        const response = (await store.dispatch(
-          'checkinPartners/fetchPdfAllCheckins',
-          reservationId,
-        )) as AxiosResponse<{ binary: string }>;
-        if (response.data) {
-          const content = base64ToArrayBuffer(`${response.data.binary}`);
-          const blob = new Blob([content], { type: 'application/pdf' });
-          const url = window.URL.createObjectURL(blob);
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = url;
-          document.body.appendChild(iframe);
-          if (iframe) {
-            iframe.contentWindow?.print();
-          }
+      const response = (await store.dispatch(
+        'checkinPartners/fetchPdfAllCheckins',
+        reservationId,
+      )) as AxiosResponse<{ binary: string }>;
+      if (response.data) {
+        const content = base64ToArrayBuffer(`${response.data.binary}`);
+        const blob = new Blob([content], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        if (iframe) {
+          iframe.contentWindow?.print();
         }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const state = (checkinState: string) => {
@@ -780,19 +726,10 @@ export default defineComponent({
 
     const openCheckinFlow = async (reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/fetchReservation', reservationId);
-        await store.dispatch('checkinPartners/fetchCheckinPartners', reservationId);
-        isCheckinFlowStepperOpen.value = true;
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('reservations/fetchReservation', reservationId);
+      await store.dispatch('checkinPartners/fetchCheckinPartners', reservationId);
+      isCheckinFlowStepperOpen.value = true;
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const performDoCheckin = async (
@@ -833,66 +770,48 @@ export default defineComponent({
 
     const showSegmentation = async (reservationId: number, index: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/fetchReservation', reservationId);
-        checkinPartnerSegmentation.value = null;
-        showSegmentationModal.value[index] = true;
-        dialogService.open({
-          header: `Segmentación ${reservation.value?.name}`,
-          content: markRaw(ReservationSegmentation),
-          props: {
-            parentName: 'ReservationGeneralTab',
-            isOpenFromGeneralTab: true,
-          },
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('reservations/fetchReservation', reservationId);
+      checkinPartnerSegmentation.value = null;
+      showSegmentationModal.value[index] = true;
+      dialogService.open({
+        header: `Segmentación ${reservation.value?.name}`,
+        content: markRaw(ReservationSegmentation),
+        props: {
+          parentName: 'ReservationGeneralTab',
+          isOpenFromGeneralTab: true,
+        },
+      });
+      void store.dispatch('layout/showSpinner', false);
     };
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (store.state.reservations.reservations) {
-          await store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id);
+      if (store.state.reservations.reservations) {
+        await store.dispatch('checkinPartners/fetchFolioCheckinPartners', currentFolio.value?.id);
 
-          isCheckinPartnerCardOpen.value = allCheckinPartners.value.map(() => false);
-          openRemoveCheckinConfirmation.value = allCheckinPartners.value.map(() => false);
-          openCheckinsMenu.value = allCheckinPartners.value.map(() => false);
-          openEditModalCheckin.value = allCheckinPartners.value.map(() => false);
-          isFormDisplayed.value = allCheckinPartners.value.map(() => false);
-          isCheckinMenuOpen.value = props.currentReservations.map(() => false);
-          showSegmentationModal.value = props.currentReservations.map(() => false);
-          showAdultsModal.value = props.currentReservations.map(() => false);
-          isCheckinTodayButton.value = props.currentReservations.map(() => false);
-          isBtnToCheckout.value = props.currentReservations.map((el) => {
-            if (isReadyToCheckout(el)) {
-              return true;
-            }
-            return false;
-          });
-          numberAdults.value = reservation.value?.adults ?? 0;
-          numberChildren.value = reservation.value?.children ?? 0;
-          if (store.state.layout.isMoveToGuestsTab) {
-            isCheckinFlowStepperOpen.value = true;
-            void store.dispatch('layout/setMoveToGuestsTab', false);
+        isCheckinPartnerCardOpen.value = allCheckinPartners.value.map(() => false);
+        openRemoveCheckinConfirmation.value = allCheckinPartners.value.map(() => false);
+        openCheckinsMenu.value = allCheckinPartners.value.map(() => false);
+        openEditModalCheckin.value = allCheckinPartners.value.map(() => false);
+        isFormDisplayed.value = allCheckinPartners.value.map(() => false);
+        isCheckinMenuOpen.value = props.currentReservations.map(() => false);
+        showSegmentationModal.value = props.currentReservations.map(() => false);
+        showAdultsModal.value = props.currentReservations.map(() => false);
+        isCheckinTodayButton.value = props.currentReservations.map(() => false);
+        isBtnToCheckout.value = props.currentReservations.map((el) => {
+          if (isReadyToCheckout(el)) {
+            return true;
           }
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+          return false;
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+        numberAdults.value = reservation.value?.adults ?? 0;
+        numberChildren.value = reservation.value?.children ?? 0;
+        if (store.state.layout.isMoveToGuestsTab) {
+          isCheckinFlowStepperOpen.value = true;
+          void store.dispatch('layout/setMoveToGuestsTab', false);
+        }
       }
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

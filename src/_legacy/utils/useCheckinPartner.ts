@@ -128,59 +128,41 @@ export function useCheckinPartner() {
   };
 
   const printCheckin = async (checkinPartner: CheckinPartnerInterface) => {
-    try {
-      void store.dispatch('layout/showSpinner', true);
-      await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
-      const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
-        reservationId: store.state.reservations.currentReservation?.id,
-        checkinPartnerId: checkinPartner.id,
-      })) as AxiosResponse<{ binary: string }>;
-      if (response.data) {
-        const content = base64ToArrayBuffer(`${response.data.binary}`);
-        const blob = new Blob([content], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url;
-        document.body.appendChild(iframe);
-        if (iframe) {
-          iframe.contentWindow?.print();
-        }
+    void store.dispatch('layout/showSpinner', true);
+    await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
+    const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
+      reservationId: store.state.reservations.currentReservation?.id,
+      checkinPartnerId: checkinPartner.id,
+    })) as AxiosResponse<{ binary: string }>;
+    if (response.data) {
+      const content = base64ToArrayBuffer(`${response.data.binary}`);
+      const blob = new Blob([content], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = url;
+      document.body.appendChild(iframe);
+      if (iframe) {
+        iframe.contentWindow?.print();
       }
-    } catch {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
-      });
-    } finally {
-      void store.dispatch('layout/showSpinner', false);
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const viewCheckinPDF = async (checkinPartner: CheckinPartnerInterface) => {
-    try {
-      void store.dispatch('layout/showSpinner', true);
-      await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
-      const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
-        reservationId: store.state.reservations.currentReservation?.id,
-        checkinPartnerId: checkinPartner.id,
-      })) as AxiosResponse<{ binary: string }>;
-      if (response.data) {
-        const content = base64ToArrayBuffer(`${response.data.binary}`);
-        const blob = new Blob([content], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
-      }
-    } catch (error) {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
-      });
-    } finally {
-      void store.dispatch('layout/showSpinner', false);
+    void store.dispatch('layout/showSpinner', true);
+    await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
+    const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
+      reservationId: store.state.reservations.currentReservation?.id,
+      checkinPartnerId: checkinPartner.id,
+    })) as AxiosResponse<{ binary: string }>;
+    if (response.data) {
+      const content = base64ToArrayBuffer(`${response.data.binary}`);
+      const blob = new Blob([content], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const viewAllCheckinsPDF = async () => {

@@ -179,33 +179,24 @@ export default defineComponent({
         reference: reference.value,
       };
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (props.transaction) {
-          await store.dispatch('transactions/editTransaction', payload);
-        } else {
-          await store.dispatch('transactions/createTransaction', payload);
-        }
-
-        const message = props.transaction
-          ? 'Transferencia modificada con éxito'
-          : 'Transferencia interna creada con éxito';
-        dialogService.open({
-          header: 'Éxito',
-          content: message,
-          btnAccept: 'Ok',
-        });
-
-        context.emit('transferCreated');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
+      if (props.transaction) {
+        await store.dispatch('transactions/editTransaction', payload);
+      } else {
+        await store.dispatch('transactions/createTransaction', payload);
       }
+
+      const message = props.transaction
+        ? 'Transferencia modificada con éxito'
+        : 'Transferencia interna creada con éxito';
+      dialogService.open({
+        header: 'Éxito',
+        content: message,
+        btnAccept: 'Ok',
+      });
+
+      context.emit('transferCreated');
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
     };
 
     const selectOriginJournalIsOverflow = () => {

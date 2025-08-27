@@ -412,33 +412,24 @@ export default defineComponent({
 
     const downloadInvoicesByMail = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store
-          .dispatch('invoices/sendMailOrPrintInvoices', {
-            invoiceIds: invoicesSelected.value.map((el) => el.id),
-            isEmail: false,
-            isPrint: true,
-          })
-          .then((response: AxiosResponse<{ binary: string }>) => {
-            const a: HTMLAnchorElement = document.createElement('a');
-            if (response.data && response.data.binary) {
-              a.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${response.data.binary}`;
-            }
-            a.download = 'invoices.pdf';
-            document.body.appendChild(a);
-            a.click();
-            isInvoiceSelectedArray.value = invoices.value.map(() => false);
-            isAllInvoicesSelected.value = false;
-          });
-      } catch (error) {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal 8888',
-          btnAccept: 'Ok',
+      await store
+        .dispatch('invoices/sendMailOrPrintInvoices', {
+          invoiceIds: invoicesSelected.value.map((el) => el.id),
+          isEmail: false,
+          isPrint: true,
+        })
+        .then((response: AxiosResponse<{ binary: string }>) => {
+          const a: HTMLAnchorElement = document.createElement('a');
+          if (response.data && response.data.binary) {
+            a.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${response.data.binary}`;
+          }
+          a.download = 'invoices.pdf';
+          document.body.appendChild(a);
+          a.click();
+          isInvoiceSelectedArray.value = invoices.value.map(() => false);
+          isAllInvoicesSelected.value = false;
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openPartnerDialog = async (partnerId: number) => {
@@ -447,17 +438,8 @@ export default defineComponent({
         await store.dispatch('countryStates/removeCountryStates');
       } else {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('partners/fetchCurrentPartner', partnerId);
-        } catch (error) {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal 7777',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('partners/fetchCurrentPartner', partnerId);
+        void store.dispatch('layout/showSpinner', false);
       }
       showPartnerDialog.value = true;
     };
@@ -494,11 +476,6 @@ export default defineComponent({
         isOpenPartnersMail.value = false;
       } catch (error) {
         showMailSendFeedback.value = false;
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal 6666',
-          btnAccept: 'Ok',
-        });
       } finally {
         void store.dispatch('layout/showSpinner', false);
       }
@@ -953,26 +930,17 @@ export default defineComponent({
       );
       dateRange.value = [dateRangeStart, dateRangeEnd];
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('agencies/fetchAgencies');
-        if (activeProperty.value) {
-          await fetchInvoices({
-            pmsPropertyId: activeProperty.value?.id ?? 0,
-            limit,
-            offset: (currentPage.value - 1) * limit,
-            dateStart: dateRange.value[0],
-            dateEnd: dateRange.value[1],
-          });
-        }
-      } catch (error) {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal 9999',
-          btnAccept: 'Ok',
+      await store.dispatch('agencies/fetchAgencies');
+      if (activeProperty.value) {
+        await fetchInvoices({
+          pmsPropertyId: activeProperty.value?.id ?? 0,
+          limit,
+          offset: (currentPage.value - 1) * limit,
+          dateStart: dateRange.value[0],
+          dateEnd: dateRange.value[1],
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      void store.dispatch('layout/showSpinner', false);
       isInvoiceSelectedArray.value = invoices.value.map(() => false);
       isMounting.value = false;
     });

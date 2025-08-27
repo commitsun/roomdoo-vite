@@ -357,7 +357,6 @@ export default defineComponent({
             'checkinPartners/fetchCheckinPartners',
             store.state.reservations.currentReservation?.id,
           ),
-          store.dispatch('rooms/fetchRooms', store.state.properties.activeProperty?.id),
         ]);
         if (router.currentRoute.value.name === 'planning') {
           await store.dispatch('planning/fetchPlanning', {
@@ -412,6 +411,7 @@ export default defineComponent({
       } finally {
         void store.dispatch('layout/showSpinner', false);
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const setActiveCheckinPartnerAndRemove = (checkinPartner: CheckinPartnerInterface) => {

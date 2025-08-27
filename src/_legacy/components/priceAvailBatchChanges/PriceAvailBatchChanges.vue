@@ -552,16 +552,15 @@ import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
 import Button from 'primevue/button';
 
-import utilsDates from '@/legacy/utils/dates';
+import utilsDates from '@/_legacy/utils/dates';
 
-import { store } from '@/legacy/store';
-import type { PayloadCreateAvailPlanRuleInterface } from '@/legacy/interfaces/PayloadCreateAvailPlanRuleInterface';
-import type { PayloadCreatePricelistItemInterface } from '@/legacy/interfaces/PayloadCreatePricelistItemInterface';
-import { dialogService } from '@/legacy/services/DialogService';
-import type { AvailabilityPlanInterface } from '@/legacy/interfaces/AvailabilityPlanInterface';
-import type { PricelistInterface } from '@/legacy/interfaces/PricelistInterface';
-import type { RoomTypeInterface } from '@/legacy/interfaces/RoomTypeInterfaces';
-import { useRouter } from 'vue-router';
+import { store } from '@/_legacy/store';
+import type { PayloadCreateAvailPlanRuleInterface } from '@/_legacy/interfaces/PayloadCreateAvailPlanRuleInterface';
+import type { PayloadCreatePricelistItemInterface } from '@/_legacy/interfaces/PayloadCreatePricelistItemInterface';
+import { dialogService } from '@/_legacy/services/DialogService';
+import type { AvailabilityPlanInterface } from '@/_legacy/interfaces/AvailabilityPlanInterface';
+import type { PricelistInterface } from '@/_legacy/interfaces/PricelistInterface';
+import type { RoomTypeInterface } from '@/_legacy/interfaces/RoomTypeInterfaces';
 
 export default defineComponent({
   components: {
@@ -574,7 +573,6 @@ export default defineComponent({
     AppButton: Button,
   },
   setup() {
-    const router = useRouter();
     // date from and to inputs
     const dateFrom: Ref<Date | null> = ref(null);
     const dateTo: Ref<Date | null> = ref(null);
@@ -811,37 +809,26 @@ export default defineComponent({
           });
         });
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('availabilityPlans/batchChangesAvailabilityPlanRules', {
-            availabilityPlanRules,
-          });
-          resetValues();
-          if (router.currentRoute.value.name === 'planning') {
-            await Promise.all([
-              store.dispatch('planning/fetchPlanningPricesRules', {
-                dateStart: store.state.planning.dateStart,
-                dateEnd: store.state.planning.dateEnd,
-                propertyId: store.state.properties.activeProperty?.id,
-                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-                pricelistId: store.state.pricelists.activePricelist?.id,
-              }),
-              store.dispatch('planning/fetchPlanning', {
-                dateStart: store.state.planning.dateStart,
-                dateEnd: store.state.planning.dateEnd,
-                propertyId: store.state.properties.activeProperty?.id,
-                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              }),
-            ]);
-          }
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('availabilityPlans/batchChangesAvailabilityPlanRules', {
+          availabilityPlanRules,
+        });
+        resetValues();
+        await Promise.all([
+          store.dispatch('planning/fetchPlanningPricesRules', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+            pricelistId: store.state.pricelists.activePricelist?.id,
+          }),
+          store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          }),
+        ]);
+        void store.dispatch('layout/showSpinner', false);
       } else {
         const pricelistItems: PayloadCreatePricelistItemInterface[] = [];
         selectedPricelists.value.forEach((pricelist) => {
@@ -865,27 +852,16 @@ export default defineComponent({
           });
         });
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('pricelists/batchChangesPricelistItems', { pricelistItems });
-          resetValues();
-          if (router.currentRoute.value.name === 'planning') {
-            await store.dispatch('planning/fetchPlanningPricesRules', {
-              dateStart: store.state.planning.dateStart,
-              dateEnd: store.state.planning.dateEnd,
-              propertyId: store.state.properties.activeProperty?.id,
-              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              pricelistId: store.state.pricelists.activePricelist?.id,
-            });
-          }
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('pricelists/batchChangesPricelistItems', { pricelistItems });
+        resetValues();
+        await store.dispatch('planning/fetchPlanningPricesRules', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          pricelistId: store.state.pricelists.activePricelist?.id,
+        });
+        void store.dispatch('layout/showSpinner', false);
       }
     };
 

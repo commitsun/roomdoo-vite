@@ -812,36 +812,18 @@ export default defineComponent({
 
     watch(activeProperty, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await refreshPropertyDependantData();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await refreshPropertyDependantData();
+      void store.dispatch('layout/showSpinner', false);
     });
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await refreshPropertyDependantData();
-        void store.dispatch('documentType/fetchDocumentTypes');
-        void store.dispatch('languages/fetchLanguages');
-        void store.dispatch('countries/fetchCountries');
-        void store.dispatch('categories/fetchCategories');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await refreshPropertyDependantData();
+      void store.dispatch('documentType/fetchDocumentTypes');
+      void store.dispatch('languages/fetchLanguages');
+      void store.dispatch('countries/fetchCountries');
+      void store.dispatch('categories/fetchCategories');
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

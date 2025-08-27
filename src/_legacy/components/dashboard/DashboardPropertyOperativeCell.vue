@@ -158,21 +158,12 @@ export default defineComponent({
     );
     const openYesterdayPendingReservations = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        await store.dispatch('layout/setRightDrawerFilter', 'yesterdayCheckins');
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
-        void store.dispatch('layout/rightDrawerDisplayed', true);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('layout/rightDrawerDisplayed', false);
+      await store.dispatch('layout/setRightDrawerFilter', '');
+      await store.dispatch('layout/setRightDrawerFilter', 'yesterdayCheckins');
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+      void store.dispatch('layout/rightDrawerDisplayed', true);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openPendingCheckinReservations = async () => {

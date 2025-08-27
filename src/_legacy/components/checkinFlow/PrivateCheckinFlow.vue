@@ -1333,42 +1333,33 @@ export default defineComponent({
     };
 
     const processOCR = async () => {
-      try {
-        void store.dispatch('layout/showSpinner', true);
-        await store.dispatch('ocrDocument/processDocument', {
-          imageBase64Front: documentImageBase64Front.value.split(';base64,')[1],
-          imageBase64Back: documentImageBase64Back?.value.split(';base64,')[1],
-          pmsPropertyId: store.state.properties.activeProperty?.id,
-        });
-        // if the ocr process returns an object with all fields as
-        //          null, it means that the ocr process failed
-        if (
-          Object.values(checkinPartnerOcr.value).every(
-            (field) => field === null || field === '' || field === 0,
-          )
-        ) {
-          dialogService.open({
-            header: t('not_scanned'),
-            content: t('enter_data_manually'),
-            btnAccept: t('continue'),
-          });
-        }
-        const checkinPartner = {
-          ...checkinPartnerOcr.value,
-          reservationId: currentReservation.value?.id,
-          id: activeCheckinPartner.value.id,
-          originInputData: activeCheckinPartner.value.originInputData,
-        };
-        setActiveCheckinPartnerAndDisplayForm(checkinPartner as CheckinPartnerInterface);
-      } catch (error) {
+      void store.dispatch('layout/showSpinner', true);
+      await store.dispatch('ocrDocument/processDocument', {
+        imageBase64Front: documentImageBase64Front.value.split(';base64,')[1],
+        imageBase64Back: documentImageBase64Back?.value.split(';base64,')[1],
+        pmsPropertyId: store.state.properties.activeProperty?.id,
+      });
+      // if the ocr process returns an object with all fields as
+      //          null, it means that the ocr process failed
+      if (
+        Object.values(checkinPartnerOcr.value).every(
+          (field) => field === null || field === '' || field === 0,
+        )
+      ) {
         dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+          header: t('not_scanned'),
+          content: t('enter_data_manually'),
+          btnAccept: t('continue'),
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      const checkinPartner = {
+        ...checkinPartnerOcr.value,
+        reservationId: currentReservation.value?.id,
+        id: activeCheckinPartner.value.id,
+        originInputData: activeCheckinPartner.value.originInputData,
+      };
+      setActiveCheckinPartnerAndDisplayForm(checkinPartner as CheckinPartnerInterface);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const registerOnEnter = (fn: () => void) => {

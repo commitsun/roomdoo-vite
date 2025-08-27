@@ -1150,27 +1150,18 @@ export default defineComponent({
       }
 
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolioTransactions', selectedFolioId),
-          store.dispatch('folios/fetchFolioSaleLines', selectedFolioId),
-          store.dispatch('folios/fetchFolioInvoices', selectedFolioId),
-          store.dispatch('services/fetchServices', selectedReservationId),
-          store.dispatch('reservationLines/fetchReservationLines', selectedReservationId),
-          store.dispatch('checkinPartners/fetchCheckinPartners', selectedReservationId),
-          store.dispatch('folios/fetchFolio', selectedFolioId),
-          store.dispatch('reservations/fetchReservations', selectedFolioId),
-          store.dispatch('reservations/fetchReservation', selectedReservationId),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('folios/fetchFolioTransactions', selectedFolioId),
+        store.dispatch('folios/fetchFolioSaleLines', selectedFolioId),
+        store.dispatch('folios/fetchFolioInvoices', selectedFolioId),
+        store.dispatch('services/fetchServices', selectedReservationId),
+        store.dispatch('reservationLines/fetchReservationLines', selectedReservationId),
+        store.dispatch('checkinPartners/fetchCheckinPartners', selectedReservationId),
+        store.dispatch('folios/fetchFolio', selectedFolioId),
+        store.dispatch('reservations/fetchReservations', selectedFolioId),
+        store.dispatch('reservations/fetchReservation', selectedReservationId),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
       void store.dispatch('folios/setLastFolioFilters', null);
       void store.dispatch('layout/pricelistPlanningDisplayed', false);
       void store.dispatch('layout/rightDrawerDisplayed', true);
@@ -1179,27 +1170,18 @@ export default defineComponent({
 
     const openOverbookingFolioList = async (folioDate: Date) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('folios/fetchFolios', {
-          propertyId: store.state.properties.activeProperty?.id,
-          filterByState: 14,
-          dateStart: folioDate,
-          dateEnd: folioDate,
-        });
-        await store.dispatch('layout/setRightDrawerFilter', 'overbookingReservations');
-        void store.dispatch('folios/setLastFolioFilters', null);
-        void store.dispatch('layout/pricelistPlanningDisplayed', false);
-        void store.dispatch('layout/changeRightDrawerContent', 'FolioList');
-        void store.dispatch('layout/rightDrawerDisplayed', true);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('folios/fetchFolios', {
+        propertyId: store.state.properties.activeProperty?.id,
+        filterByState: 14,
+        dateStart: folioDate,
+        dateEnd: folioDate,
+      });
+      await store.dispatch('layout/setRightDrawerFilter', 'overbookingReservations');
+      void store.dispatch('folios/setLastFolioFilters', null);
+      void store.dispatch('layout/pricelistPlanningDisplayed', false);
+      void store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+      void store.dispatch('layout/rightDrawerDisplayed', true);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const closeRightDrawer = () => {
@@ -1607,22 +1589,13 @@ export default defineComponent({
               onAccept: async () => {
                 // do the movement
                 void store.dispatch('layout/showSpinner', true);
-                try {
-                  await store.dispatch('planning/updateReservationLines', {
-                    reservationLines: reservationLinesSelected.value,
-                    roomIdTarget,
-                    dateTarget: targetDate,
-                    moreDays: reservationLineIndexSelected.value,
-                  });
-                } catch {
-                  dialogService.open({
-                    header: 'Error',
-                    content: 'Algo ha ido mal',
-                    btnAccept: 'Ok',
-                  });
-                } finally {
-                  void store.dispatch('layout/showSpinner', false);
-                }
+                await store.dispatch('planning/updateReservationLines', {
+                  reservationLines: reservationLinesSelected.value,
+                  roomIdTarget,
+                  dateTarget: targetDate,
+                  moreDays: reservationLineIndexSelected.value,
+                });
+                void store.dispatch('layout/showSpinner', false);
               },
             });
           }

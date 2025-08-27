@@ -355,24 +355,15 @@ export default defineComponent({
         dateTo = new Date(currentReservation.value.checkout);
       }
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('extraBeds/fetchExtraBeds', {
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            dateFrom,
-            dateTo,
-          }),
-          store.dispatch('services/fetchServices', store.state.reservations.currentReservation?.id),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('extraBeds/fetchExtraBeds', {
+          pmsPropertyId: store.state.properties.activeProperty?.id,
+          dateFrom,
+          dateTo,
+        }),
+        store.dispatch('services/fetchServices', store.state.reservations.currentReservation?.id),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {
