@@ -88,7 +88,13 @@
     "button": "Go to home"
   },
   "error": {
-    "unknownError": "An unknown error occurred"
+    "unknownError": "An unknown error occurred",
+    "sessionExpiredTitle": "Session expired",
+    "sessionExpiredContent": "Your session has expired. Please log in again.",
+    "accept": "Accept",
+    "somethingWentWrong": "Something went wrong",
+    "internalError": "An internal error occurred.",
+    "requestError": "A request error occurred."
   },
   "validation": {
     "wrongCredentials": "Invalid credentials",
