@@ -61,21 +61,12 @@ export function useCheckinPartner() {
 
   const saveCheckinPartner = async (checkinPartner: CheckinPartnerInterface) => {
     void store.dispatch('layout/showSpinner', true);
-    try {
-      if (checkinPartner) {
-        await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
-        await store.dispatch('checkinPartners/fetchCheckinPartners', checkinPartner.reservationId);
-        await store.dispatch('reservations/fetchReservation', checkinPartner.reservationId);
-      }
-    } catch {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
-      });
-    } finally {
-      void store.dispatch('layout/showSpinner', false);
+    if (checkinPartner) {
+      await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
+      await store.dispatch('checkinPartners/fetchCheckinPartners', checkinPartner.reservationId);
+      await store.dispatch('reservations/fetchReservation', checkinPartner.reservationId);
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const base64ToArrayBuffer = (data: string) => {
@@ -91,199 +82,145 @@ export function useCheckinPartner() {
 
   const printAllCheckins = async () => {
     void store.dispatch('layout/showSpinner', true);
-    try {
-      const response = (await store.dispatch(
-        'checkinPartners/fetchPdfAllCheckins',
-        store.state.reservations.currentReservation?.id
-      )) as AxiosResponse<{ binary: string }>;
-      if (response.data && response.data) {
-        const content = base64ToArrayBuffer(`${response.data.binary}`);
-        const blob = new Blob([content], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url;
-        document.body.appendChild(iframe);
-        if (iframe) {
-          iframe.contentWindow?.print();
-        }
+    const response = (await store.dispatch(
+      'checkinPartners/fetchPdfAllCheckins',
+      store.state.reservations.currentReservation?.id
+    )) as AxiosResponse<{ binary: string }>;
+    if (response.data && response.data) {
+      const content = base64ToArrayBuffer(`${response.data.binary}`);
+      const blob = new Blob([content], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = url;
+      document.body.appendChild(iframe);
+      if (iframe) {
+        iframe.contentWindow?.print();
       }
-    } catch {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
-      });
-    } finally {
-      void store.dispatch('layout/showSpinner', false);
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const printCheckin = async (checkinPartner: CheckinPartnerInterface) => {
-    try {
-      void store.dispatch('layout/showSpinner', true);
-      await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
-      const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
-        reservationId: store.state.reservations.currentReservation?.id,
-        checkinPartnerId: checkinPartner.id,
-      })) as AxiosResponse<{ binary: string }>;
-      if (response.data) {
-        const content = base64ToArrayBuffer(`${response.data.binary}`);
-        const blob = new Blob([content], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url;
-        document.body.appendChild(iframe);
-        if (iframe) {
-          iframe.contentWindow?.print();
-        }
+    void store.dispatch('layout/showSpinner', true);
+    await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
+    const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
+      reservationId: store.state.reservations.currentReservation?.id,
+      checkinPartnerId: checkinPartner.id,
+    })) as AxiosResponse<{ binary: string }>;
+    if (response.data) {
+      const content = base64ToArrayBuffer(`${response.data.binary}`);
+      const blob = new Blob([content], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = url;
+      document.body.appendChild(iframe);
+      if (iframe) {
+        iframe.contentWindow?.print();
       }
-    } catch {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
-      });
-    } finally {
-      void store.dispatch('layout/showSpinner', false);
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const viewCheckinPDF = async (checkinPartner: CheckinPartnerInterface) => {
-    try {
-      void store.dispatch('layout/showSpinner', true);
-      await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
-      const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
-        reservationId: store.state.reservations.currentReservation?.id,
-        checkinPartnerId: checkinPartner.id,
-      })) as AxiosResponse<{ binary: string }>;
-      if (response.data) {
-        const content = base64ToArrayBuffer(`${response.data.binary}`);
-        const blob = new Blob([content], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
-      }
-    } catch (error) {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
-      });
-    } finally {
-      void store.dispatch('layout/showSpinner', false);
+    void store.dispatch('layout/showSpinner', true);
+    await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
+    const response = (await store.dispatch('checkinPartners/fetchPdfCheckin', {
+      reservationId: store.state.reservations.currentReservation?.id,
+      checkinPartnerId: checkinPartner.id,
+    })) as AxiosResponse<{ binary: string }>;
+    if (response.data) {
+      const content = base64ToArrayBuffer(`${response.data.binary}`);
+      const blob = new Blob([content], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const viewAllCheckinsPDF = async () => {
-    try {
-      void store.dispatch('layout/showSpinner', true);
-      const response = (await store.dispatch(
-        'checkinPartners/fetchPdfAllCheckins',
-        store.state.reservations.currentReservation?.id
-      )) as AxiosResponse<{ binary: string }>;
-      if (response.data) {
-        const content = base64ToArrayBuffer(`${response.data.binary}`);
-        const blob = new Blob([content], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
-      }
-    } catch (error) {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
-      });
-    } finally {
-      void store.dispatch('layout/showSpinner', false);
+    void store.dispatch('layout/showSpinner', true);
+    const response = (await store.dispatch(
+      'checkinPartners/fetchPdfAllCheckins',
+      store.state.reservations.currentReservation?.id
+    )) as AxiosResponse<{ binary: string }>;
+    if (response.data) {
+      const content = base64ToArrayBuffer(`${response.data.binary}`);
+      const blob = new Blob([content], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const doCheckin = async (checkinPartner: CheckinPartnerInterface) => {
-    try {
-      void store.dispatch('layout/showSpinner', true);
-      await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
-      await store.dispatch('checkinPartners/onBoardCheckinPartner', {
-        reservationId: checkinPartner.reservationId,
-        checkinPartnerId: checkinPartner.id,
+    void store.dispatch('layout/showSpinner', true);
+    await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
+    await store.dispatch('checkinPartners/onBoardCheckinPartner', {
+      reservationId: checkinPartner.reservationId,
+      checkinPartnerId: checkinPartner.id,
+    });
+    await Promise.all([
+      store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
+      store.dispatch('reservations/fetchReservations', store.state.folios.currentFolio?.id),
+      store.dispatch('reservations/fetchReservation', checkinPartner.reservationId),
+      store.dispatch(
+        'checkinPartners/fetchCheckinPartners',
+        store.state.reservations.currentReservation?.id
+      ),
+      store.dispatch(
+        'checkinPartners/fetchFolioCheckinPartners',
+        store.state.folios.currentFolio?.id
+      ),
+    ]);
+    if (router.currentRoute.value.name === 'planning') {
+      await store.dispatch('planning/fetchPlanning', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
       });
-      await Promise.all([
-        store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
-        store.dispatch('reservations/fetchReservations', store.state.folios.currentFolio?.id),
-        store.dispatch('reservations/fetchReservation', checkinPartner.reservationId),
-        store.dispatch(
-          'checkinPartners/fetchCheckinPartners',
-          store.state.reservations.currentReservation?.id
-        ),
-        store.dispatch(
-          'checkinPartners/fetchFolioCheckinPartners',
-          store.state.folios.currentFolio?.id
-        ),
-      ]);
-      if (router.currentRoute.value.name === 'planning') {
-        await store.dispatch('planning/fetchPlanning', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-        });
-      } else {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0);
+    } else {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
 
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(0, 0, 0, 0);
-        await store.dispatch('dashboard/fetchPendingReservations', {
-          pmsPropertyId: store.state.properties.activeProperty?.id,
-          dateFrom: yesterday,
-          dateTo: tomorrow,
-        });
-      }
-    } catch {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      await store.dispatch('dashboard/fetchPendingReservations', {
+        pmsPropertyId: store.state.properties.activeProperty?.id,
+        dateFrom: yesterday,
+        dateTo: tomorrow,
       });
-    } finally {
-      void store.dispatch('layout/showSpinner', false);
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const doAllCheckins = async (reservationId: number) => {
     void store.dispatch('layout/showSpinner', true);
-    try {
-      await Promise.all(
-        store.state.checkinPartners.checkinpartners.map(
-          async (checkinPartner: CheckinPartnerInterface) => {
-            await store.dispatch('checkinPartners/onBoardCheckinPartner', {
-              reservationId,
-              checkinPartnerId: checkinPartner.id,
-            });
-          }
-        )
-      );
-      await store.dispatch('reservations/fetchReservation', reservationId);
-      await store.dispatch('checkinPartners/fetchCheckinPartners', reservationId);
-    } catch {
-      dialogService.open({
-        header: 'Error',
-        content: 'Algo ha ido mal',
-        btnAccept: 'Ok',
+    await Promise.all(
+      store.state.checkinPartners.checkinpartners.map(
+        async (checkinPartner: CheckinPartnerInterface) => {
+          await store.dispatch('checkinPartners/onBoardCheckinPartner', {
+            reservationId,
+            checkinPartnerId: checkinPartner.id,
+          });
+        }
+      )
+    );
+    await store.dispatch('reservations/fetchReservation', reservationId);
+    await store.dispatch('checkinPartners/fetchCheckinPartners', reservationId);
+    if (router.currentRoute.value.name === 'planning') {
+      await store.dispatch('planning/fetchPlanning', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
       });
-    } finally {
-      if (router.currentRoute.value.name === 'planning') {
-        await store.dispatch('planning/fetchPlanning', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-        });
-      }
-      void store.dispatch('layout/showSpinner', false);
     }
+    void store.dispatch('layout/showSpinner', false);
   };
 
   const validateDocumentNumber = (

@@ -642,52 +642,43 @@ export default defineComponent({
 
     const saveChanges = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (isShowingRoomPerNight.value && currentReservation.value) {
-          const reservationId = currentReservation.value.id;
-          await Promise.all(
-            reservationLinesToChangeRoom.value.map(async (el) => {
-              await store.dispatch('reservations/updateReservationLineRoom', {
-                reservationId,
-                reservationLineId: el.reservationLineId,
-                roomId: el.roomId,
-              });
-            })
-          );
-        } else if (selectedRoom.value) {
-          await store.dispatch('reservations/updateReservationRoom', {
-            reservationId: currentReservation.value?.id,
-            roomId: selectedRoom.value as number,
-          });
-        }
-        if (isReservationReselling.value) {
-          await Promise.all(
-            reservationLinesToReselling.value.map(async (el) => {
-              await store.dispatch('reservationLines/updateReservationLine', {
-                reservationLineId: el.reservationLineId,
-                isReselling: el.isReselling,
-              });
-            })
-          );
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+      if (isShowingRoomPerNight.value && currentReservation.value) {
+        const reservationId = currentReservation.value.id;
+        await Promise.all(
+          reservationLinesToChangeRoom.value.map(async (el) => {
+            await store.dispatch('reservations/updateReservationLineRoom', {
+              reservationId,
+              reservationLineId: el.reservationLineId,
+              roomId: el.roomId,
+            });
+          })
+        );
+      } else if (selectedRoom.value) {
+        await store.dispatch('reservations/updateReservationRoom', {
+          reservationId: currentReservation.value?.id,
+          roomId: selectedRoom.value as number,
         });
-      } finally {
-        void store.dispatch('folios/fetchFolio', currentReservation.value?.folioId);
-        void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
-        void store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id);
-        void store.dispatch('services/fetchServices', currentReservation.value?.id);
-        if (route.fullPath.includes('planning')) {
-          await refreshPlanning();
-        }
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('moveToRoomTab');
-        context.emit('close');
       }
+      if (isReservationReselling.value) {
+        await Promise.all(
+          reservationLinesToReselling.value.map(async (el) => {
+            await store.dispatch('reservationLines/updateReservationLine', {
+              reservationLineId: el.reservationLineId,
+              isReselling: el.isReselling,
+            });
+          })
+        );
+      }
+      void store.dispatch('folios/fetchFolio', currentReservation.value?.folioId);
+      void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
+      void store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id);
+      void store.dispatch('services/fetchServices', currentReservation.value?.id);
+      if (route.fullPath.includes('planning')) {
+        await refreshPlanning();
+      }
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('moveToRoomTab');
+      context.emit('close');
     };
 
     const saveChangesWithExtraBed = async () => {
@@ -718,36 +709,27 @@ export default defineComponent({
         btnCancel: 'Cancelar',
         onAccept: async () => {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('reservations/assignReservationRoom', {
-              reservationId: currentReservation.value?.id,
-              toAssign: false,
-            });
-            await store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
-            await store.dispatch('reservations/fetchReservations', currentFolio.value?.id);
-            await store.dispatch(
-              'reservations/fetchReservationsToAssign',
-              store.state.properties.activeProperty?.id
-            );
-            await store.dispatch(
-              'notifications/fetchNotificationsReservationsToAssign',
-              activeProperty.value?.id
-            );
-            if (route.fullPath.includes('planning')) {
-              await refreshPlanning();
-            }
-            assignReservation.value = false;
-            context.emit('moveToRoomTab');
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-            context.emit('close');
+          await store.dispatch('reservations/assignReservationRoom', {
+            reservationId: currentReservation.value?.id,
+            toAssign: false,
+          });
+          await store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
+          await store.dispatch('reservations/fetchReservations', currentFolio.value?.id);
+          await store.dispatch(
+            'reservations/fetchReservationsToAssign',
+            store.state.properties.activeProperty?.id
+          );
+          await store.dispatch(
+            'notifications/fetchNotificationsReservationsToAssign',
+            activeProperty.value?.id
+          );
+          if (route.fullPath.includes('planning')) {
+            await refreshPlanning();
           }
+          assignReservation.value = false;
+          context.emit('moveToRoomTab');
+          void store.dispatch('layout/showSpinner', false);
+          context.emit('close');
         },
       });
     };
@@ -812,69 +794,60 @@ export default defineComponent({
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (props.splitMode && currentReservation.value?.isSplitted) {
-          isShowingRoomPerNight.value = true;
-        }
-        let dateFrom;
-        let dateTo;
-        if (currentReservation.value?.checkin && currentReservation.value.checkout) {
-          dateFrom = new Date(currentReservation.value.checkin);
-          dateTo = new Date(currentReservation.value.checkout);
-        }
-        await Promise.all([
-          store.dispatch('extraBeds/fetchExtraBeds', {
-            pmsPropertyId: activeProperty.value?.id,
-            dateFrom,
-            dateTo,
-          }),
-          store.dispatch('amenityTypes/fetchAmenityTypes', activeProperty.value?.id),
-        ]);
-
-        if (currentReservation.value) {
-          await store
-            .dispatch('rooms/fetchRoomsByAvailability', {
-              pmsPropertyId: activeProperty.value?.id,
-              availabilityFrom: new Date(currentReservation.value?.checkin),
-              availabilityTo: new Date(currentReservation.value?.checkout),
-              pricelistId: activePricelist.value?.id,
-              currentLines: currentReservationLines.value.map((el) => el.id),
-            })
-            .then((response: AxiosResponse<RoomInterface[]>) => {
-              optionsRoom.value = response.data;
-            });
-          const lastNight = new Date(currentReservation.value?.checkout);
-          lastNight.setDate(lastNight.getDate() - 1);
-          utilsDates
-            .getDatesRange(new Date(currentReservation.value?.checkin), lastNight)
-            .forEach((date) => {
-              const oneDayAfter = new Date(date);
-              oneDayAfter.setDate(date.getDate() + 1);
-              void store
-                .dispatch('rooms/fetchRoomsByAvailability', {
-                  pmsPropertyId: activeProperty.value?.id,
-                  availabilityFrom: date,
-                  availabilityTo: oneDayAfter,
-                  pricelistId: activePricelist.value?.id,
-                  currentLines: currentReservationLines.value.map((el) => el.id),
-                })
-                .then((response: AxiosResponse<RoomInterface[]>) => {
-                  availabilityPerDay.value.push({
-                    date,
-                    rooms: response.data,
-                  });
-                });
-            });
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      if (props.splitMode && currentReservation.value?.isSplitted) {
+        isShowingRoomPerNight.value = true;
       }
+      let dateFrom;
+      let dateTo;
+      if (currentReservation.value?.checkin && currentReservation.value.checkout) {
+        dateFrom = new Date(currentReservation.value.checkin);
+        dateTo = new Date(currentReservation.value.checkout);
+      }
+      await Promise.all([
+        store.dispatch('extraBeds/fetchExtraBeds', {
+          pmsPropertyId: activeProperty.value?.id,
+          dateFrom,
+          dateTo,
+        }),
+        store.dispatch('amenityTypes/fetchAmenityTypes', activeProperty.value?.id),
+      ]);
+
+      if (currentReservation.value) {
+        await store
+          .dispatch('rooms/fetchRoomsByAvailability', {
+            pmsPropertyId: activeProperty.value?.id,
+            availabilityFrom: new Date(currentReservation.value?.checkin),
+            availabilityTo: new Date(currentReservation.value?.checkout),
+            pricelistId: activePricelist.value?.id,
+            currentLines: currentReservationLines.value.map((el) => el.id),
+          })
+          .then((response: AxiosResponse<RoomInterface[]>) => {
+            optionsRoom.value = response.data;
+          });
+        const lastNight = new Date(currentReservation.value?.checkout);
+        lastNight.setDate(lastNight.getDate() - 1);
+        utilsDates
+          .getDatesRange(new Date(currentReservation.value?.checkin), lastNight)
+          .forEach((date) => {
+            const oneDayAfter = new Date(date);
+            oneDayAfter.setDate(date.getDate() + 1);
+            void store
+              .dispatch('rooms/fetchRoomsByAvailability', {
+                pmsPropertyId: activeProperty.value?.id,
+                availabilityFrom: date,
+                availabilityTo: oneDayAfter,
+                pricelistId: activePricelist.value?.id,
+                currentLines: currentReservationLines.value.map((el) => el.id),
+              })
+              .then((response: AxiosResponse<RoomInterface[]>) => {
+                availabilityPerDay.value.push({
+                  date,
+                  rooms: response.data,
+                });
+              });
+          });
+      }
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

@@ -721,17 +721,8 @@ export default defineComponent({
         await store.dispatch('planning/updateDateStart', newDateStart);
         await store.dispatch('planning/updateDateEnd', newDateEnd);
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await refreshPlanning();
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await refreshPlanning();
+        void store.dispatch('layout/showSpinner', false);
         refPlanningBody.value.scrollLeft = 0;
       } else {
         isScrollingOneDay.value = true;
@@ -781,17 +772,8 @@ export default defineComponent({
         await store.dispatch('planning/updateDateStart', newDateStart);
         await store.dispatch('planning/updateDateEnd', newDateEnd);
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await refreshPlanning();
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await refreshPlanning();
+        void store.dispatch('layout/showSpinner', false);
       } else {
         isScrollingOneDay.value = true;
         await Promise.all([
@@ -834,30 +816,21 @@ export default defineComponent({
       const dateEndRange = new Date(dateStartRange);
       dateEndRange.setDate(dateEndRange.getDate() + 32);
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('planning/updateDateStart', dateStartRange);
-        await store.dispatch('planning/updateDateEnd', dateEndRange);
-        await refreshPlanning();
-        if (
-          store.state.reservations.currentReservation &&
-          store.state.reservationLines.reservationLines[0]?.id &&
-          refPlanningBody.value
-        ) {
-          const selector = `${store.state.reservations.currentReservation.id}-${store.state.reservationLines.reservationLines[0].id}`;
-          const refReservation = document.getElementById(selector);
-          refReservation?.scrollIntoView({
-            block: 'center',
-          });
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+      await store.dispatch('planning/updateDateStart', dateStartRange);
+      await store.dispatch('planning/updateDateEnd', dateEndRange);
+      await refreshPlanning();
+      if (
+        store.state.reservations.currentReservation &&
+        store.state.reservationLines.reservationLines[0]?.id &&
+        refPlanningBody.value
+      ) {
+        const selector = `${store.state.reservations.currentReservation.id}-${store.state.reservationLines.reservationLines[0].id}`;
+        const refReservation = document.getElementById(selector);
+        refReservation?.scrollIntoView({
+          block: 'center',
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const handleScrollPlanning = () => {
@@ -915,17 +888,8 @@ export default defineComponent({
         void store.dispatch('layout/rightDrawerDisplayed', false);
         void store.dispatch('layout/changeRightDrawerContent', 'FoliosList');
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await refreshPropertyDependantData();
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await refreshPropertyDependantData();
+        void store.dispatch('layout/showSpinner', false);
         selectedRoomTypeClasses.value = [];
         selectedRoomTypes.value = [];
         selectedCapacities.value = [];
@@ -940,17 +904,8 @@ export default defineComponent({
         void store.dispatch('planning/updateDateStart', dateStartSelected);
         void store.dispatch('planning/updateDateEnd', dateEndSelected);
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await refreshPlanning();
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await refreshPlanning();
+        void store.dispatch('layout/showSpinner', false);
         refPlanningBody.value?.scrollTo({
           top: 0,
           left: 0,
@@ -973,60 +928,42 @@ export default defineComponent({
     watch(selectedPricelistId, async () => {
       if (selectedPricelistId.value !== activePricelist.value?.id) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch(
-            'pricelists/setActivePricelist',
-            pricelists.value.find((el) => el.id === selectedPricelistId.value)
-          );
-          await store.dispatch('planning/fetchPlanningPricesRules', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            pricelistId: store.state.pricelists.activePricelist?.id,
-          });
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch(
+          'pricelists/setActivePricelist',
+          pricelists.value.find((el) => el.id === selectedPricelistId.value)
+        );
+        await store.dispatch('planning/fetchPlanningPricesRules', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          pricelistId: store.state.pricelists.activePricelist?.id,
+        });
+        void store.dispatch('layout/showSpinner', false);
       }
     });
 
     watch(selectedAvailabilityPlanId, async () => {
       if (selectedAvailabilityPlanId.value !== activeAvailabilityPlan.value?.id) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch(
-            'availabilityPlans/setActiveAvailabilityPlan',
-            availabilityPlans.value.find((el) => el.id === selectedAvailabilityPlanId.value)
-          );
-          await store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
-          await store.dispatch('planning/fetchPlanningPricesRules', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            pricelistId: store.state.pricelists.activePricelist?.id,
-          });
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch(
+          'availabilityPlans/setActiveAvailabilityPlan',
+          availabilityPlans.value.find((el) => el.id === selectedAvailabilityPlanId.value)
+        );
+        await store.dispatch('planning/fetchPlanning', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+        });
+        await store.dispatch('planning/fetchPlanningPricesRules', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          pricelistId: store.state.pricelists.activePricelist?.id,
+        });
+        void store.dispatch('layout/showSpinner', false);
       }
     });
 
@@ -1082,26 +1019,17 @@ export default defineComponent({
       selectedPropertyId.value = activeProperty.value?.id ?? 0;
 
       void store.dispatch('layout/showSpinner', true);
-      try {
-        finishLoadingData.value = false;
-        await refreshPropertyDependantData();
-        selectedPricelistId.value = activePricelist.value?.id ?? 0;
-        selectedAvailabilityPlanId.value = activeAvailabilityPlan.value?.id ?? 0;
+      finishLoadingData.value = false;
+      await refreshPropertyDependantData();
+      selectedPricelistId.value = activePricelist.value?.id ?? 0;
+      selectedAvailabilityPlanId.value = activeAvailabilityPlan.value?.id ?? 0;
 
-        finishLoadingData.value = true;
-        void store.dispatch('documentType/fetchDocumentTypes');
-        void store.dispatch('languages/fetchLanguages');
-        void store.dispatch('countries/fetchCountries');
-        void store.dispatch('categories/fetchCategories');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal planning mounted',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      finishLoadingData.value = true;
+      void store.dispatch('documentType/fetchDocumentTypes');
+      void store.dispatch('languages/fetchLanguages');
+      void store.dispatch('countries/fetchCountries');
+      void store.dispatch('categories/fetchCategories');
+      void store.dispatch('layout/showSpinner', false);
 
       refPlanningHeader.value = document.getElementById('top-middle');
       refPlanningBody.value = document.getElementById('bottom-middle');

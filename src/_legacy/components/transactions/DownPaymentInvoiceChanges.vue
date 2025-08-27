@@ -130,27 +130,18 @@ export default defineComponent({
 
     const createDownPaymentInvoice = () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        void store
-          .dispatch('transactions/createDownPaymentInvoice', {
-            originDownPaymentId: props.transaction.id,
-            partnerId: selectedPartner.value?.id,
-          })
-          .then(() => {
-            void store.dispatch('folios/fetchFolioTransactions', folio.value?.id);
-            void store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
-            void store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
-          });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+      void store
+        .dispatch('transactions/createDownPaymentInvoice', {
+          originDownPaymentId: props.transaction.id,
+          partnerId: selectedPartner.value?.id,
+        })
+        .then(() => {
+          void store.dispatch('folios/fetchFolioTransactions', folio.value?.id);
+          void store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
+          void store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
-      }
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
     };
 
     const openPartnerDialog = () => {
@@ -217,23 +208,14 @@ export default defineComponent({
     onMounted(() => {
       if (props.transaction && props.transaction.partnerId) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          void store
-            .dispatch('partners/fetchCurrentPartner', props.transaction.partnerId)
-            .then(() => {
-              if (store.state.partners.currentPartner) {
-                selectedPartner.value = store.state.partners.currentPartner;
-              }
-            });
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
+        void store
+          .dispatch('partners/fetchCurrentPartner', props.transaction.partnerId)
+          .then(() => {
+            if (store.state.partners.currentPartner) {
+              selectedPartner.value = store.state.partners.currentPartner;
+            }
           });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        void store.dispatch('layout/showSpinner', false);
       }
     });
 
