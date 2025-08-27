@@ -1643,17 +1643,8 @@ export default defineComponent({
             dateTo: reservation.checkout,
           };
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('prices/fetchPrices', payloadPrices);
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('prices/fetchPrices', payloadPrices);
+          void store.dispatch('layout/showSpinner', false);
           if (product) {
             const items: ServiceLineInterface[] = [];
             if (product.perDay) {
@@ -1927,53 +1918,44 @@ export default defineComponent({
 
       if (reservation) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          reservation.roomId = value.roomId;
-          const resp = (await store.dispatch('rooms/fetchRoomsByAvailability', {
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            availabilityFrom: reservation.checkin,
-            availabilityTo: reservation.checkout,
-          })) as AxiosResponse<RoomInterface[]>;
+        reservation.roomId = value.roomId;
+        const resp = (await store.dispatch('rooms/fetchRoomsByAvailability', {
+          pmsPropertyId: store.state.properties.activeProperty?.id,
+          availabilityFrom: reservation.checkin,
+          availabilityTo: reservation.checkout,
+        })) as AxiosResponse<RoomInterface[]>;
 
-          const availFromApi = resp.data
-            .filter((el) => el.roomTypeClassId === reservation.roomTypeClassId)
-            .map((el) => el.id);
+        const availFromApi = resp.data
+          .filter((el) => el.roomTypeClassId === reservation.roomTypeClassId)
+          .map((el) => el.id);
 
-          const overlappingReservationsSameRoomTypeClass = reservationsByRoomTypeToCreate.value
-            .map((el) => el.reservations)
-            .reduce((acc, val) => acc.concat(val), [])
-            .filter(
-              (el) =>
-                utilsDates.datesOverlaps(
-                  el.checkin,
-                  el.checkout,
-                  reservation.checkin,
-                  reservation.checkout
-                ) &&
-                el.id !== reservation.id &&
-                el.roomTypeClassId === reservation.roomTypeClassId
-            );
-          reservation.availRoomIds = availFromApi.filter(
-            (el) => !overlappingReservationsSameRoomTypeClass.map((ov) => ov.roomId).includes(el)
+        const overlappingReservationsSameRoomTypeClass = reservationsByRoomTypeToCreate.value
+          .map((el) => el.reservations)
+          .reduce((acc, val) => acc.concat(val), [])
+          .filter(
+            (el) =>
+              utilsDates.datesOverlaps(
+                el.checkin,
+                el.checkout,
+                reservation.checkin,
+                reservation.checkout
+              ) &&
+              el.id !== reservation.id &&
+              el.roomTypeClassId === reservation.roomTypeClassId
           );
-          overlappingReservationsSameRoomTypeClass.forEach((el) => {
-            el.availRoomIds = availFromApi.filter(
-              (roomFromApi) =>
-                !overlappingReservationsSameRoomTypeClass
-                  .filter((ov) => ov.id !== el.id)
-                  .map((ov) => ov.roomId)
-                  .includes(roomFromApi) && roomFromApi !== reservation.roomId
-            );
-          });
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        reservation.availRoomIds = availFromApi.filter(
+          (el) => !overlappingReservationsSameRoomTypeClass.map((ov) => ov.roomId).includes(el)
+        );
+        overlappingReservationsSameRoomTypeClass.forEach((el) => {
+          el.availRoomIds = availFromApi.filter(
+            (roomFromApi) =>
+              !overlappingReservationsSameRoomTypeClass
+                .filter((ov) => ov.id !== el.id)
+                .map((ov) => ov.roomId)
+                .includes(roomFromApi) && roomFromApi !== reservation.roomId
+          );
+        });
+        void store.dispatch('layout/showSpinner', false);
       }
     };
 
@@ -2278,17 +2260,8 @@ export default defineComponent({
         reservation.checkin = new Date(value.checkin);
         reservation.checkout = new Date(value.checkout);
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await adjustAvailableRoomIdsAndPrices(reservation.roomTypeId, reservation.id);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await adjustAvailableRoomIdsAndPrices(reservation.roomTypeId, reservation.id);
+        void store.dispatch('layout/showSpinner', false);
       }
     };
 
@@ -2574,23 +2547,12 @@ export default defineComponent({
         });
       });
       void store.dispatch('layout/showSpinner', true);
-      try {
-        const { data } = (await store.dispatch(
-          'folios/createFolio',
-          send
-        )) as AxiosResponse<number>;
-        await store.dispatch('folios/fetchFolio', data);
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
-        await refreshPlanning();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      const { data } = (await store.dispatch('folios/createFolio', send)) as AxiosResponse<number>;
+      await store.dispatch('folios/fetchFolio', data);
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
+      await refreshPlanning();
+
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const updateFolio = async () => {
@@ -2652,21 +2614,12 @@ export default defineComponent({
         });
       });
       void store.dispatch('layout/showSpinner', true);
-      try {
-        (await store.dispatch('folios/addReservationsToFolio', send)) as AxiosResponse<number>;
-        await store.dispatch('folios/fetchFolio', currentFolio.value?.id);
-        await store.dispatch('reservations/setCurrentReservation', null);
-        await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
-        await refreshPlanning();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      (await store.dispatch('folios/addReservationsToFolio', send)) as AxiosResponse<number>;
+      await store.dispatch('folios/fetchFolio', currentFolio.value?.id);
+      await store.dispatch('reservations/setCurrentReservation', null);
+      await store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
+      await refreshPlanning();
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const closeBookingEngine = () => {
@@ -2713,123 +2666,96 @@ export default defineComponent({
       ) {
         void store.dispatch('layout/showSpinner', true);
         loadingPrices.value = true;
-        try {
-          await buildAvailabilityRoomTypes();
-          if (selectedPricelistId.value !== 0) {
-            await roomTypes.value.reduce(async (acc, rt) => {
-              await acc;
-              await store.dispatch('prices/fetchPrices', {
-                pmsPropertyId: store.state.properties.activeProperty?.id,
-                pricelistId: selectedPricelistId.value,
-                roomTypeId: rt.id,
-                dateFrom: checkin.value,
-                dateTo: checkout.value,
-              });
-              prices.value.push({
-                roomTypeId: rt.id,
-                prices: store.state.prices.prices,
-              });
-            }, undefined as unknown);
-            const selectedPricelist = store.state.pricelists.pricelists.find(
-              (el) => el.id === selectedPricelistId.value
-            );
-            const availabilityPlan = store.state.availabilityPlans.availabilityPlans.find(
-              (el) => el.id === selectedPricelist?.defaultAvailabilityPlanId
-            );
-            if (availabilityPlan && availabilityPlan.name) {
-              availabilityPlanName.value = availabilityPlan.name;
-            }
+        await buildAvailabilityRoomTypes();
+        if (selectedPricelistId.value !== 0) {
+          await roomTypes.value.reduce(async (acc, rt) => {
+            await acc;
+            await store.dispatch('prices/fetchPrices', {
+              pmsPropertyId: store.state.properties.activeProperty?.id,
+              pricelistId: selectedPricelistId.value,
+              roomTypeId: rt.id,
+              dateFrom: checkin.value,
+              dateTo: checkout.value,
+            });
+            prices.value.push({
+              roomTypeId: rt.id,
+              prices: store.state.prices.prices,
+            });
+          }, undefined as unknown);
+          const selectedPricelist = store.state.pricelists.pricelists.find(
+            (el) => el.id === selectedPricelistId.value
+          );
+          const availabilityPlan = store.state.availabilityPlans.availabilityPlans.find(
+            (el) => el.id === selectedPricelist?.defaultAvailabilityPlanId
+          );
+          if (availabilityPlan && availabilityPlan.name) {
+            availabilityPlanName.value = availabilityPlan.name;
           }
-        } catch (error) {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal' + error,
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-          loadingPrices.value = false;
         }
+        void store.dispatch('layout/showSpinner', false);
+        loadingPrices.value = false;
       }
     });
 
     watch(selectedSaleChannelId, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('pricelists/fetchPricelists', {
-          pmsPropertyId: store.state.properties.activeProperty?.id,
-          saleChannelId: selectedSaleChannelId.value,
-        });
-        if (!currentFolio.value) {
-          if (selectedPricelistId.value !== 0) {
-            selectedPricelistId.value = 0;
-          }
-          if (selectedAgencyId.value !== 0) {
-            selectedAgencyId.value = 0;
-          }
+      await store.dispatch('pricelists/fetchPricelists', {
+        pmsPropertyId: store.state.properties.activeProperty?.id,
+        saleChannelId: selectedSaleChannelId.value,
+      });
+      if (!currentFolio.value) {
+        if (selectedPricelistId.value !== 0) {
+          selectedPricelistId.value = 0;
         }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+        if (selectedAgencyId.value !== 0) {
+          selectedAgencyId.value = 0;
+        }
       }
+
+      void store.dispatch('layout/showSpinner', false);
     });
 
     onMounted(async () => {
       void store.dispatch('partners/removePartner');
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('pricelists/fetchPricelists', { pmsPropertyId: activeProperty.value?.id }),
-          store.dispatch('roomClosureReasons/fetchRoomClosureReasons'),
-          store.dispatch('languages/fetchLanguages'),
-        ]);
+      await Promise.all([
+        store.dispatch('pricelists/fetchPricelists', { pmsPropertyId: activeProperty.value?.id }),
+        store.dispatch('roomClosureReasons/fetchRoomClosureReasons'),
+        store.dispatch('languages/fetchLanguages'),
+      ]);
 
-        if (activeProperty.value?.language) {
-          languageSelected.value = activeProperty.value.language;
-        }
-        if (currentFolio.value) {
-          await store.dispatch('folios/fetchFolio', currentFolio.value.id);
-          if (currentFolio.value.reservationType === 'normal') {
-            selectedSaleChannelId.value = currentFolio.value?.saleChannelId ?? 0;
-            selectedPricelistId.value = currentFolio.value.pricelistId ?? 0;
-            selectedAgencyId.value = currentFolio.value.agencyId ?? 0;
-            externalReference.value = currentFolio.value.externalReference ?? '';
-          } else if (currentFolio.value.reservationType === 'out') {
-            selectedReservationType.value = 'out';
-            selectedRoomClosureReasonId.value = currentFolio.value.closureReasonId ?? 0;
-            if (currentFolio.value?.outOfServiceDescription) {
-              roomClosureReasonDescription.value = currentFolio.value.outOfServiceDescription;
-            }
-          } else if (currentFolio.value.reservationType === 'staff') {
-            selectedReservationType.value = 'staff';
-          }
-
-          const checkins =
-            store.state.reservations.reservations?.map((el) => (el.checkin as Date).getTime()) ??
-            [];
-          const minCheckins = Math.min.apply(null, checkins);
-
-          const checkouts =
-            store.state.reservations.reservations?.map((el) => (el.checkout as Date).getTime()) ??
-            [];
-          const maxCheckouts = Math.max.apply(null, checkouts);
-
-          dates.value = [new Date(minCheckins), new Date(maxCheckouts)];
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      if (activeProperty.value?.language) {
+        languageSelected.value = activeProperty.value.language;
       }
+      if (currentFolio.value) {
+        await store.dispatch('folios/fetchFolio', currentFolio.value.id);
+        if (currentFolio.value.reservationType === 'normal') {
+          selectedSaleChannelId.value = currentFolio.value?.saleChannelId ?? 0;
+          selectedPricelistId.value = currentFolio.value.pricelistId ?? 0;
+          selectedAgencyId.value = currentFolio.value.agencyId ?? 0;
+          externalReference.value = currentFolio.value.externalReference ?? '';
+        } else if (currentFolio.value.reservationType === 'out') {
+          selectedReservationType.value = 'out';
+          selectedRoomClosureReasonId.value = currentFolio.value.closureReasonId ?? 0;
+          if (currentFolio.value?.outOfServiceDescription) {
+            roomClosureReasonDescription.value = currentFolio.value.outOfServiceDescription;
+          }
+        } else if (currentFolio.value.reservationType === 'staff') {
+          selectedReservationType.value = 'staff';
+        }
+
+        const checkins =
+          store.state.reservations.reservations?.map((el) => (el.checkin as Date).getTime()) ?? [];
+        const minCheckins = Math.min.apply(null, checkins);
+
+        const checkouts =
+          store.state.reservations.reservations?.map((el) => (el.checkout as Date).getTime()) ?? [];
+        const maxCheckouts = Math.max.apply(null, checkouts);
+
+        dates.value = [new Date(minCheckins), new Date(maxCheckouts)];
+      }
+
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

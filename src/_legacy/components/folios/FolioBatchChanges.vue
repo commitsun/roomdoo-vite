@@ -1316,147 +1316,28 @@ export default defineComponent({
 
     const rebuildBoardServiceLines = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await modifiedReservations.value.reduce(async (memo, res, index) => {
-          await memo;
-          if (res.selected) {
-            // remove extra service and items that come from board services
+      await modifiedReservations.value.reduce(async (memo, res, index) => {
+        await memo;
+        if (res.selected) {
+          // remove extra service and items that come from board services
+          res.extraServices = res.extraServices.filter((ex) => !ex.isBoardService);
+          // keep the original services and items but should rebuild
+          // bc of the dates & adults & children
+          if (selectedBoardService.value === -1) {
+            res.boardServiceId = props.reservations[index].boardServiceId;
+
+            // add non-board services from props
             res.extraServices = res.extraServices.filter((ex) => !ex.isBoardService);
-            // keep the original services and items but should rebuild
-            // bc of the dates & adults & children
-            if (selectedBoardService.value === -1) {
-              res.boardServiceId = props.reservations[index].boardServiceId;
-
-              // add non-board services from props
-              res.extraServices = res.extraServices.filter((ex) => !ex.isBoardService);
-              // iterate board services from props
-              props.reservations[index].extraServices
-                .filter((ex) => ex.isBoardService)
-                .forEach((p) => {
-                  let items: ServiceLineInterface[] = [];
-                  const product = store.state.products.products.find((pr) => pr.id === p.productId);
-                  if (product) {
-                    if (product.perDay) {
-                      let dateStart: Date;
-                      let dateEnd: Date;
-                      if (product.consumedOn === 'before') {
-                        dateStart = new Date(res.checkin.getTime());
-                        dateEnd = new Date(res.checkout.getTime() - ONE_DAY_IN_MS);
-                      } else {
-                        dateStart = new Date(res.checkin.getTime() + ONE_DAY_IN_MS);
-                        dateEnd = new Date(res.checkout.getTime());
-                      }
-                      items = p.items.filter(
-                        (i) =>
-                          (i.date as Date).getTime() <= dateEnd.getTime() &&
-                          (i.date as Date).getTime() >= dateStart.getTime()
-                      );
-                      utilsDates.getDatesRange(dateStart, dateEnd).forEach((date) => {
-                        const item = p.items.find(
-                          (i) => (i.date as Date).getTime() === date.getTime()
-                        );
-                        const boardServicePriceForChildren = boardServicePrices.value
-                          .find(
-                            (f) => f.boardServiceLineId === p.boardServiceLineId && f.isChildren
-                          )
-                          ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
-                        const boardServicePriceForAdults = boardServicePrices.value
-                          .find((f) => f.boardServiceLineId === p.boardServiceLineId && f.isAdults)
-                          ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
-                        const boardServicePriceForAdultsAndChildren = boardServicePrices.value
-                          .find(
-                            (f) =>
-                              f.boardServiceLineId === p.boardServiceLineId &&
-                              f.isAdults &&
-                              f.isChildren
-                          )
-                          ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
-
-                        let qty = 1;
-                        let priceUnit = 0;
-                        if (boardServicePriceForAdultsAndChildren) {
-                          qty = res.adults + (res.children ?? 0);
-                          priceUnit = boardServicePriceForAdultsAndChildren;
-                        } else if (boardServicePriceForChildren) {
-                          qty = res.children;
-                          priceUnit = boardServicePriceForChildren;
-                        } else if (boardServicePriceForAdults) {
-                          qty = res.adults;
-                          priceUnit = boardServicePriceForAdults;
-                        }
-                        if (
-                          !item &&
-                          (boardServicePriceForAdultsAndChildren ||
-                            boardServicePriceForAdults ||
-                            boardServicePriceForChildren)
-                        ) {
-                          let discount = 0;
-                          if (isServicesDiscount.value) {
-                            if (!Number.isNaN(parseFloat(percentDiscount.value))) {
-                              discount = parseFloat(percentDiscount.value);
-                            }
-                          }
-                          items.push({
-                            date,
-                            discount,
-                            quantity: qty,
-                            priceUnit: priceUnit ?? 0,
-                          });
-                        }
-                      });
-                    } else {
-                      items.push({
-                        priceUnit:
-                          store.state.prices.prices.find(
-                            (el) =>
-                              el.date.getTime() ===
-                              new Date(
-                                today.getFullYear(),
-                                today.getMonth(),
-                                today.getDate()
-                              ).getTime()
-                          )?.price ?? 0,
-                        date: today,
-                        quantity: product.perPerson ? res.adults : 1,
-                        discount: 0,
-                      });
-                    }
-                    if (items.every((i) => i.quantity > 0)) {
-                      res.extraServices.push({
-                        isBoardService: true,
-                        items,
-                        name: p.name,
-                        productId: p.productId,
-                        serviceId: p.serviceId,
-                        fromBatchChanges: false,
-                        boardServiceLineId: p.boardServiceLineId,
-                      });
-                    }
-                  }
-                });
-            } else if (selectedBoardService.value === 0) {
-              // no board service
-              res.boardServiceId = 0;
-            } else {
-              // selected board service
-              res.boardServiceId = selectedBoardService.value;
-              const boardServiceRoomType = store.state.boardServices.boardServices.find(
-                (el) =>
-                  el.boardServiceId === selectedBoardService.value &&
-                  el.roomTypeId === res.roomTypeId
-              );
-              res.boardServiceId = boardServiceRoomType?.id ?? 0;
-              await store.dispatch('boardServiceLines/fetchBoardServiceLines', {
-                pmsPropertyId: store.state.properties.activeProperty?.id,
-                boardServiceId: boardServiceRoomType?.id,
-              });
-              store.state.boardServiceLines.boardServiceLines.forEach((bsl) => {
-                const items: ServiceLineInterface[] = [];
-                const product = store.state.products.products.find((pr) => pr.id === bsl.productId);
+            // iterate board services from props
+            props.reservations[index].extraServices
+              .filter((ex) => ex.isBoardService)
+              .forEach((p) => {
+                let items: ServiceLineInterface[] = [];
+                const product = store.state.products.products.find((pr) => pr.id === p.productId);
                 if (product) {
                   if (product.perDay) {
-                    let dateStart;
-                    let dateEnd;
+                    let dateStart: Date;
+                    let dateEnd: Date;
                     if (product.consumedOn === 'before') {
                       dateStart = new Date(res.checkin.getTime());
                       dateEnd = new Date(res.checkout.getTime() - ONE_DAY_IN_MS);
@@ -1464,15 +1345,28 @@ export default defineComponent({
                       dateStart = new Date(res.checkin.getTime() + ONE_DAY_IN_MS);
                       dateEnd = new Date(res.checkout.getTime());
                     }
+                    items = p.items.filter(
+                      (i) =>
+                        (i.date as Date).getTime() <= dateEnd.getTime() &&
+                        (i.date as Date).getTime() >= dateStart.getTime()
+                    );
                     utilsDates.getDatesRange(dateStart, dateEnd).forEach((date) => {
+                      const item = p.items.find(
+                        (i) => (i.date as Date).getTime() === date.getTime()
+                      );
                       const boardServicePriceForChildren = boardServicePrices.value
-                        .find((f) => f.boardServiceLineId === bsl.id && f.isChildren)
+                        .find((f) => f.boardServiceLineId === p.boardServiceLineId && f.isChildren)
                         ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
                       const boardServicePriceForAdults = boardServicePrices.value
-                        .find((f) => f.boardServiceLineId === bsl.id && f.isAdults)
+                        .find((f) => f.boardServiceLineId === p.boardServiceLineId && f.isAdults)
                         ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
                       const boardServicePriceForAdultsAndChildren = boardServicePrices.value
-                        .find((f) => f.boardServiceLineId === bsl.id && f.isAdults && f.isChildren)
+                        .find(
+                          (f) =>
+                            f.boardServiceLineId === p.boardServiceLineId &&
+                            f.isAdults &&
+                            f.isChildren
+                        )
                         ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
 
                       let qty = 1;
@@ -1487,26 +1381,27 @@ export default defineComponent({
                         qty = res.adults;
                         priceUnit = boardServicePriceForAdults;
                       }
-                      let discount = 0;
-                      if (isServicesDiscount.value) {
-                        if (!Number.isNaN(parseFloat(percentDiscount.value))) {
-                          discount = parseFloat(percentDiscount.value);
+                      if (
+                        !item &&
+                        (boardServicePriceForAdultsAndChildren ||
+                          boardServicePriceForAdults ||
+                          boardServicePriceForChildren)
+                      ) {
+                        let discount = 0;
+                        if (isServicesDiscount.value) {
+                          if (!Number.isNaN(parseFloat(percentDiscount.value))) {
+                            discount = parseFloat(percentDiscount.value);
+                          }
                         }
+                        items.push({
+                          date,
+                          discount,
+                          quantity: qty,
+                          priceUnit: priceUnit ?? 0,
+                        });
                       }
-                      items.push({
-                        priceUnit,
-                        date,
-                        quantity: qty,
-                        discount,
-                      });
                     });
                   } else {
-                    let discount = 0;
-                    if (isServicesDiscount.value) {
-                      if (!Number.isNaN(parseFloat(percentDiscount.value))) {
-                        discount = parseFloat(percentDiscount.value);
-                      }
-                    }
                     items.push({
                       priceUnit:
                         store.state.prices.prices.find(
@@ -1520,33 +1415,122 @@ export default defineComponent({
                         )?.price ?? 0,
                       date: today,
                       quantity: product.perPerson ? res.adults : 1,
-                      discount,
+                      discount: 0,
                     });
                   }
                   if (items.every((i) => i.quantity > 0)) {
                     res.extraServices.push({
                       isBoardService: true,
-                      boardServiceLineId: bsl.id,
                       items,
-                      name: bsl.name,
-                      productId: bsl.productId,
-                      fromBatchChanges: true,
+                      name: p.name,
+                      productId: p.productId,
+                      serviceId: p.serviceId,
+                      fromBatchChanges: false,
+                      boardServiceLineId: p.boardServiceLineId,
                     });
                   }
                 }
               });
-            }
+          } else if (selectedBoardService.value === 0) {
+            // no board service
+            res.boardServiceId = 0;
+          } else {
+            // selected board service
+            res.boardServiceId = selectedBoardService.value;
+            const boardServiceRoomType = store.state.boardServices.boardServices.find(
+              (el) =>
+                el.boardServiceId === selectedBoardService.value && el.roomTypeId === res.roomTypeId
+            );
+            res.boardServiceId = boardServiceRoomType?.id ?? 0;
+            await store.dispatch('boardServiceLines/fetchBoardServiceLines', {
+              pmsPropertyId: store.state.properties.activeProperty?.id,
+              boardServiceId: boardServiceRoomType?.id,
+            });
+            store.state.boardServiceLines.boardServiceLines.forEach((bsl) => {
+              const items: ServiceLineInterface[] = [];
+              const product = store.state.products.products.find((pr) => pr.id === bsl.productId);
+              if (product) {
+                if (product.perDay) {
+                  let dateStart;
+                  let dateEnd;
+                  if (product.consumedOn === 'before') {
+                    dateStart = new Date(res.checkin.getTime());
+                    dateEnd = new Date(res.checkout.getTime() - ONE_DAY_IN_MS);
+                  } else {
+                    dateStart = new Date(res.checkin.getTime() + ONE_DAY_IN_MS);
+                    dateEnd = new Date(res.checkout.getTime());
+                  }
+                  utilsDates.getDatesRange(dateStart, dateEnd).forEach((date) => {
+                    const boardServicePriceForChildren = boardServicePrices.value
+                      .find((f) => f.boardServiceLineId === bsl.id && f.isChildren)
+                      ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
+                    const boardServicePriceForAdults = boardServicePrices.value
+                      .find((f) => f.boardServiceLineId === bsl.id && f.isAdults)
+                      ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
+                    const boardServicePriceForAdultsAndChildren = boardServicePrices.value
+                      .find((f) => f.boardServiceLineId === bsl.id && f.isAdults && f.isChildren)
+                      ?.prices.find((pr) => pr.date.getTime() === date.getTime())?.price;
+
+                    let qty = 1;
+                    let priceUnit = 0;
+                    if (boardServicePriceForAdultsAndChildren) {
+                      qty = res.adults + (res.children ?? 0);
+                      priceUnit = boardServicePriceForAdultsAndChildren;
+                    } else if (boardServicePriceForChildren) {
+                      qty = res.children;
+                      priceUnit = boardServicePriceForChildren;
+                    } else if (boardServicePriceForAdults) {
+                      qty = res.adults;
+                      priceUnit = boardServicePriceForAdults;
+                    }
+                    let discount = 0;
+                    if (isServicesDiscount.value) {
+                      if (!Number.isNaN(parseFloat(percentDiscount.value))) {
+                        discount = parseFloat(percentDiscount.value);
+                      }
+                    }
+                    items.push({
+                      priceUnit,
+                      date,
+                      quantity: qty,
+                      discount,
+                    });
+                  });
+                } else {
+                  let discount = 0;
+                  if (isServicesDiscount.value) {
+                    if (!Number.isNaN(parseFloat(percentDiscount.value))) {
+                      discount = parseFloat(percentDiscount.value);
+                    }
+                  }
+                  items.push({
+                    priceUnit:
+                      store.state.prices.prices.find(
+                        (el) =>
+                          el.date.getTime() ===
+                          new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+                      )?.price ?? 0,
+                    date: today,
+                    quantity: product.perPerson ? res.adults : 1,
+                    discount,
+                  });
+                }
+                if (items.every((i) => i.quantity > 0)) {
+                  res.extraServices.push({
+                    isBoardService: true,
+                    boardServiceLineId: bsl.id,
+                    items,
+                    name: bsl.name,
+                    productId: bsl.productId,
+                    fromBatchChanges: true,
+                  });
+                }
+              }
+            });
           }
-        }, undefined as unknown);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+        }
+      }, undefined as unknown);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const adjustDiscounts = () => {
@@ -1649,125 +1633,116 @@ export default defineComponent({
         btnCancel: 'Cancelar',
         onAccept: async () => {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            if (props.fromBookingEngine) {
-              context.emit('accept', {
-                modifiedReservations: modifiedReservations.value
-                  .filter((el) => el.selected)
-                  .map((el) => ({
-                    id: el.id,
-                    adults: el.adults,
-                    children: el.children,
-                    checkin: el.checkin,
-                    checkout: el.checkout,
-                    boardServiceId: el.boardServiceId,
-                    roomTypeId: el.roomTypeId,
-                    reservationLines: el.reservationLines.map((rl) => ({
-                      date: rl.date,
-                      price: rl.price,
-                      discount: rl.discount,
-                      roomId: rl.roomId,
-                      pmsPropertyId: rl.pmsPropertyId,
-                      id: rl.id,
-                      discountPrice: rl.discountPrice,
-                      cancelDiscount: rl.cancelDiscount,
-                      reservationId: rl.reservationId,
-                    })),
-                    extraServices: el.extraServices.map((e) => ({
-                      boardServiceLineId: e.boardServiceLineId,
-                      isBoardService: e.isBoardService,
-                      name: e.name,
-                      productId: e.productId,
-                      items: e.items.map((i) => ({
-                        date: i.date,
-                        discount: i.discount,
-                        priceUnit: i.priceUnit,
-                        quantity: i.quantity,
-                      })),
-                    })),
-                  })),
-              });
-            } else {
-              const folio = {
-                reservations: modifiedReservations.value.map((el) => ({
+          if (props.fromBookingEngine) {
+            context.emit('accept', {
+              modifiedReservations: modifiedReservations.value
+                .filter((el) => el.selected)
+                .map((el) => ({
                   id: el.id,
-                  checkin: el.checkin as Date,
-                  checkout: el.checkout,
                   adults: el.adults,
                   children: el.children,
+                  checkin: el.checkin,
+                  checkout: el.checkout,
                   boardServiceId: el.boardServiceId,
+                  roomTypeId: el.roomTypeId,
                   reservationLines: el.reservationLines.map((rl) => ({
                     date: rl.date,
                     price: rl.price,
                     discount: rl.discount,
                     roomId: rl.roomId,
+                    pmsPropertyId: rl.pmsPropertyId,
+                    id: rl.id,
+                    discountPrice: rl.discountPrice,
+                    cancelDiscount: rl.cancelDiscount,
+                    reservationId: rl.reservationId,
                   })),
-                  services: el.extraServices.map((s) => {
-                    const serviceData = {
-                      id: s.serviceId,
-                      isBoardService: s.isBoardService,
-                      productId: s.productId,
-                      serviceLines: s.items.map((l) => ({
-                        date: l.date,
-                        discount: l.discount,
-                        priceUnit: l.priceUnit,
-                        quantity: l.quantity,
-                      })),
-                    };
-
-                    if (!s.serviceId) {
-                      delete serviceData.id;
-                    }
-
-                    return serviceData;
-                  }),
+                  extraServices: el.extraServices.map((e) => ({
+                    boardServiceLineId: e.boardServiceLineId,
+                    isBoardService: e.isBoardService,
+                    name: e.name,
+                    productId: e.productId,
+                    items: e.items.map((i) => ({
+                      date: i.date,
+                      discount: i.discount,
+                      priceUnit: i.priceUnit,
+                      quantity: i.quantity,
+                    })),
+                  })),
                 })),
-              };
-
-              await store.dispatch('folios/updateFolioBatchChanges', {
-                folioId: props.folio.id,
-                reservations: folio.reservations,
-              });
-              await refreshPlanning();
-
-              void store.dispatch('planning/fetchPlanning', {
-                dateStart: store.state.planning.dateStart,
-                dateEnd: store.state.planning.dateEnd,
-                propertyId: store.state.properties.activeProperty?.id,
-                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              });
-              if (props.folio.id) {
-                void store.dispatch('folios/fetchFolio', props.folio.id);
-                void store.dispatch('reservations/fetchReservations', props.folio.id);
-              }
-              if (store.state.reservations.currentReservation) {
-                void store.dispatch(
-                  'reservations/fetchReservation',
-                  store.state.reservations.currentReservation.id
-                );
-                void store.dispatch(
-                  'reservationLines/fetchReservationLines',
-                  store.state.reservations.currentReservation.id
-                );
-                void store.dispatch(
-                  'services/fetchServices',
-                  store.state.reservations.currentReservation?.id
-                );
-                void store.dispatch(
-                  'reservationServices/fetchReservationServices',
-                  store.state.reservations.currentReservation?.id
-                );
-              }
-            }
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
             });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
+          } else {
+            const folio = {
+              reservations: modifiedReservations.value.map((el) => ({
+                id: el.id,
+                checkin: el.checkin as Date,
+                checkout: el.checkout,
+                adults: el.adults,
+                children: el.children,
+                boardServiceId: el.boardServiceId,
+                reservationLines: el.reservationLines.map((rl) => ({
+                  date: rl.date,
+                  price: rl.price,
+                  discount: rl.discount,
+                  roomId: rl.roomId,
+                })),
+                services: el.extraServices.map((s) => {
+                  const serviceData = {
+                    id: s.serviceId,
+                    isBoardService: s.isBoardService,
+                    productId: s.productId,
+                    serviceLines: s.items.map((l) => ({
+                      date: l.date,
+                      discount: l.discount,
+                      priceUnit: l.priceUnit,
+                      quantity: l.quantity,
+                    })),
+                  };
+
+                  if (!s.serviceId) {
+                    delete serviceData.id;
+                  }
+
+                  return serviceData;
+                }),
+              })),
+            };
+
+            await store.dispatch('folios/updateFolioBatchChanges', {
+              folioId: props.folio.id,
+              reservations: folio.reservations,
+            });
+            await refreshPlanning();
+
+            void store.dispatch('planning/fetchPlanning', {
+              dateStart: store.state.planning.dateStart,
+              dateEnd: store.state.planning.dateEnd,
+              propertyId: store.state.properties.activeProperty?.id,
+              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+            });
+            if (props.folio.id) {
+              void store.dispatch('folios/fetchFolio', props.folio.id);
+              void store.dispatch('reservations/fetchReservations', props.folio.id);
+            }
+            if (store.state.reservations.currentReservation) {
+              void store.dispatch(
+                'reservations/fetchReservation',
+                store.state.reservations.currentReservation.id
+              );
+              void store.dispatch(
+                'reservationLines/fetchReservationLines',
+                store.state.reservations.currentReservation.id
+              );
+              void store.dispatch(
+                'services/fetchServices',
+                store.state.reservations.currentReservation?.id
+              );
+              void store.dispatch(
+                'reservationServices/fetchReservationServices',
+                store.state.reservations.currentReservation?.id
+              );
+            }
           }
+          void store.dispatch('layout/showSpinner', false);
 
           if (isClosingAfterChanges) {
             context.emit('close');
@@ -1778,125 +1753,104 @@ export default defineComponent({
 
     watch(dateFrom, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (modifiedReservations.value.filter((el) => el.selected).length > 0) {
-          if (dateFrom.value) {
-            await buildNotAllowedCheckoutDates(
-              dateFrom.value.getMonth(),
-              dateFrom.value.getFullYear()
-            );
-          }
-          // reset checkout
-          dateTo.value = null;
-          modifiedReservations.value.forEach((r, index) => {
-            if (r.selected) {
-              r.checkout = props.reservations[index].checkout;
-            }
-          });
-
-          // load rooms, services and board services prices
-          const checkinParam = dateFrom.value ?? minCheckin.value;
-          const checkoutParam = dateTo.value ?? maxCheckout.value;
-          await loadPrices(checkinParam, checkoutParam);
-
-          // set checkin value to selected reservations
-          let checkoutDateChangeIsPerformed = false;
-          modifiedReservations.value.forEach((el, index) => {
-            if (el.selected) {
-              // if checkin is not empty
-              if (dateFrom.value) {
-                el.checkin = dateFrom.value;
-                if (el.checkin >= el.checkout && !checkoutDateChangeIsPerformed) {
-                  checkoutDateChangeIsPerformed = true;
-                }
-              } else {
-                // if checkin is empty restore original checkin
-                el.checkin = new Date(props.reservations[index].checkin);
-              }
-              // if services are present rebuild extra services
-              if (el.extraServices.length > 0) {
-                rebuildExtraServices();
-              }
-            }
-          });
-          // adjust checkout to avoid checkin > checkout
-          if (checkoutDateChangeIsPerformed && dateFrom.value) {
-            const newCheckout = new Date(dateFrom.value.getTime());
-            // new checkout is the next day to checkin
-            newCheckout.setDate(dateFrom.value.getDate() + 1);
-            // set checkout to selected reservations
-            modifiedReservations.value
-              .filter((el) => el.selected)
-              .forEach((el) => {
-                el.checkout = newCheckout;
-              });
-            // set checkout string value to input
-            dateTo.value = newCheckout;
-          }
-          // rebuild reservation lines
-          rebuildReservationLines();
-          // rebuild board service lines
-          await rebuildBoardServiceLines();
-          // rebuild extra services
-          rebuildExtraServices();
-        }
+      if (modifiedReservations.value.filter((el) => el.selected).length > 0) {
         if (dateFrom.value) {
           await buildNotAllowedCheckoutDates(
             dateFrom.value.getMonth(),
             dateFrom.value.getFullYear()
           );
         }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+        // reset checkout
+        dateTo.value = null;
+        modifiedReservations.value.forEach((r, index) => {
+          if (r.selected) {
+            r.checkout = props.reservations[index].checkout;
+          }
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+
+        // load rooms, services and board services prices
+        const checkinParam = dateFrom.value ?? minCheckin.value;
+        const checkoutParam = dateTo.value ?? maxCheckout.value;
+        await loadPrices(checkinParam, checkoutParam);
+
+        // set checkin value to selected reservations
+        let checkoutDateChangeIsPerformed = false;
+        modifiedReservations.value.forEach((el, index) => {
+          if (el.selected) {
+            // if checkin is not empty
+            if (dateFrom.value) {
+              el.checkin = dateFrom.value;
+              if (el.checkin >= el.checkout && !checkoutDateChangeIsPerformed) {
+                checkoutDateChangeIsPerformed = true;
+              }
+            } else {
+              // if checkin is empty restore original checkin
+              el.checkin = new Date(props.reservations[index].checkin);
+            }
+            // if services are present rebuild extra services
+            if (el.extraServices.length > 0) {
+              rebuildExtraServices();
+            }
+          }
+        });
+        // adjust checkout to avoid checkin > checkout
+        if (checkoutDateChangeIsPerformed && dateFrom.value) {
+          const newCheckout = new Date(dateFrom.value.getTime());
+          // new checkout is the next day to checkin
+          newCheckout.setDate(dateFrom.value.getDate() + 1);
+          // set checkout to selected reservations
+          modifiedReservations.value
+            .filter((el) => el.selected)
+            .forEach((el) => {
+              el.checkout = newCheckout;
+            });
+          // set checkout string value to input
+          dateTo.value = newCheckout;
+        }
+        // rebuild reservation lines
+        rebuildReservationLines();
+        // rebuild board service lines
+        await rebuildBoardServiceLines();
+        // rebuild extra services
+        rebuildExtraServices();
       }
+      if (dateFrom.value) {
+        await buildNotAllowedCheckoutDates(dateFrom.value.getMonth(), dateFrom.value.getFullYear());
+      }
+      void store.dispatch('layout/showSpinner', false);
     });
 
     watch(dateTo, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (modifiedReservations.value.filter((el) => el.selected).length > 0) {
-          // load rooms, services and board services prices
-          const checkinParam = dateFrom.value ?? minCheckin.value;
-          const checkoutParam = dateTo.value ?? maxCheckout.value;
-          await loadPrices(checkinParam, checkoutParam);
-          // set checkout value to selected reservations
-          modifiedReservations.value.forEach((el, index) => {
-            if (el.selected) {
-              // if checkout is not empty
-              if (dateTo.value) {
-                el.checkout = dateTo.value;
-              } else {
-                //  if checkout is empty restore original checkout
-                el.checkout = new Date(props.reservations[index].checkout);
-              }
-              // if services are present rebuild extra services
-              if (el.extraServices.length > 0) {
-                rebuildExtraServices();
-              }
+      if (modifiedReservations.value.filter((el) => el.selected).length > 0) {
+        // load rooms, services and board services prices
+        const checkinParam = dateFrom.value ?? minCheckin.value;
+        const checkoutParam = dateTo.value ?? maxCheckout.value;
+        await loadPrices(checkinParam, checkoutParam);
+        // set checkout value to selected reservations
+        modifiedReservations.value.forEach((el, index) => {
+          if (el.selected) {
+            // if checkout is not empty
+            if (dateTo.value) {
+              el.checkout = dateTo.value;
+            } else {
+              //  if checkout is empty restore original checkout
+              el.checkout = new Date(props.reservations[index].checkout);
             }
-          });
-          // rebuild reservation lines
-          rebuildReservationLines();
-          await rebuildBoardServiceLines();
-        }
-        if (dateTo.value) {
-          await buildNotAllowedCheckoutDates(dateTo.value.getMonth(), dateTo.value.getFullYear());
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+            // if services are present rebuild extra services
+            if (el.extraServices.length > 0) {
+              rebuildExtraServices();
+            }
+          }
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+        // rebuild reservation lines
+        rebuildReservationLines();
+        await rebuildBoardServiceLines();
       }
+      if (dateTo.value) {
+        await buildNotAllowedCheckoutDates(dateTo.value.getMonth(), dateTo.value.getFullYear());
+      }
+      void store.dispatch('layout/showSpinner', false);
     });
 
     watch(fixedPricePerNight, () => {
@@ -2073,15 +2027,8 @@ export default defineComponent({
 
     watch(selectedBoardService, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await rebuildBoardServiceLines();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      }
+      await rebuildBoardServiceLines();
+      void store.dispatch('layout/showSpinner', false);
     });
 
     watch(selectedExtraServices, () => {
@@ -2144,20 +2091,10 @@ export default defineComponent({
         });
       if (modifiedReservations.value.filter((el) => el.selected).length > 0) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await loadPrices(minCheckin.value, maxCheckout.value);
-          await buildNotAllowedCheckinDates(today.getMonth(), today.getFullYear());
-          await buildNotAllowedCheckoutDates(today.getMonth(), today.getFullYear());
-        } catch (error) {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-          console.error(error);
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await loadPrices(minCheckin.value, maxCheckout.value);
+        await buildNotAllowedCheckinDates(today.getMonth(), today.getFullYear());
+        await buildNotAllowedCheckoutDates(today.getMonth(), today.getFullYear());
+        void store.dispatch('layout/showSpinner', false);
       }
     });
 

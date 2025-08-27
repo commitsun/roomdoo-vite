@@ -513,29 +513,20 @@ export default defineComponent({
         }));
 
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/updateReservation', {
-          reservationId: currentReservation.value?.id,
-          reservationLines,
-        });
-        if (route.fullPath.includes('planning')) {
-          await refreshPlanning();
-        }
-        await Promise.all([
-          store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id),
-          store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
-          store.dispatch('folios/fetchFolio', currentReservation.value?.folioId),
-        ]);
-      } catch (error) {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
+      await store.dispatch('reservations/updateReservation', {
+        reservationId: currentReservation.value?.id,
+        reservationLines,
+      });
+      if (route.fullPath.includes('planning')) {
+        await refreshPlanning();
       }
+      await Promise.all([
+        store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id),
+        store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
+        store.dispatch('folios/fetchFolio', currentReservation.value?.folioId),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
     };
 
     const buildAvailabilityPerDay = async () => {
@@ -704,23 +695,14 @@ export default defineComponent({
         newRange.value = utilsDates.getDatesRange(checkinDate.value, lastNight);
         if (currentReservation.value?.pricelistId) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('prices/fetchPrices', {
-              pmsPropertyId: store.state.properties.activeProperty?.id,
-              pricelistId: currentReservation.value?.pricelistId,
-              roomTypeId: currentReservation.value?.roomTypeId,
-              dateFrom: checkinDate.value,
-              dateTo: checkoutDate.value,
-            });
-          } catch (error) {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('prices/fetchPrices', {
+            pmsPropertyId: store.state.properties.activeProperty?.id,
+            pricelistId: currentReservation.value?.pricelistId,
+            roomTypeId: currentReservation.value?.roomTypeId,
+            dateFrom: checkinDate.value,
+            dateTo: checkoutDate.value,
+          });
+          void store.dispatch('layout/showSpinner', false);
         }
         await buildAvailabilityPerDay();
         buildCalendarDates();
@@ -734,23 +716,14 @@ export default defineComponent({
         newRange.value = utilsDates.getDatesRange(checkinDate.value, lastNight);
         if (currentReservation.value?.pricelistId) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('prices/fetchPrices', {
-              pmsPropertyId: store.state.properties.activeProperty?.id,
-              pricelistId: currentReservation.value?.pricelistId,
-              roomTypeId: currentReservation.value?.roomTypeId,
-              dateFrom: checkinDate.value,
-              dateTo: checkoutDate.value,
-            });
-          } catch (error) {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('prices/fetchPrices', {
+            pmsPropertyId: store.state.properties.activeProperty?.id,
+            pricelistId: currentReservation.value?.pricelistId,
+            roomTypeId: currentReservation.value?.roomTypeId,
+            dateFrom: checkinDate.value,
+            dateTo: checkoutDate.value,
+          });
+          void store.dispatch('layout/showSpinner', false);
         }
         await buildAvailabilityPerDay();
         buildCalendarDates();

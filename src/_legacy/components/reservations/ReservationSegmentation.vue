@@ -229,49 +229,34 @@ export default defineComponent({
 
     const saveAndClose = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (childSegmentationSelectedId.value !== 0) {
-          await store.dispatch('reservations/updateReservation', {
-            reservationId: store.state.reservations.currentReservation?.id,
-            segmentationId: childSegmentationSelectedId.value,
-          });
-          await store.dispatch(
-            'reservations/fetchReservations',
-            store.state.folios.currentFolio?.id
-          );
-          await store.dispatch(
-            'reservations/fetchReservation',
-            store.state.reservations.currentReservation?.id
-          );
-        } else {
-          await store.dispatch('reservations/updateReservation', {
-            reservationId: store.state.reservations.currentReservation?.id,
-            segmentationId: parentSegmentationSelectedId.value,
-          });
-          await store.dispatch(
-            'reservations/fetchReservations',
-            store.state.folios.currentFolio?.id
-          );
-          await store.dispatch(
-            'reservations/fetchReservation',
-            store.state.reservations.currentReservation?.id
-          );
-        }
-        if (props.checkinPartner && store.state.reservations.currentReservation?.segmentationId) {
-          await doCheckin(props.checkinPartner);
-        }
-        context.emit('accept');
-        context.emit('close');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+      if (childSegmentationSelectedId.value !== 0) {
+        await store.dispatch('reservations/updateReservation', {
+          reservationId: store.state.reservations.currentReservation?.id,
+          segmentationId: childSegmentationSelectedId.value,
         });
-      } finally {
-        context.emit('accept');
-        void store.dispatch('layout/showSpinner', false);
+        await store.dispatch('reservations/fetchReservations', store.state.folios.currentFolio?.id);
+        await store.dispatch(
+          'reservations/fetchReservation',
+          store.state.reservations.currentReservation?.id
+        );
+      } else {
+        await store.dispatch('reservations/updateReservation', {
+          reservationId: store.state.reservations.currentReservation?.id,
+          segmentationId: parentSegmentationSelectedId.value,
+        });
+        await store.dispatch('reservations/fetchReservations', store.state.folios.currentFolio?.id);
+        await store.dispatch(
+          'reservations/fetchReservation',
+          store.state.reservations.currentReservation?.id
+        );
       }
+      if (props.checkinPartner && store.state.reservations.currentReservation?.segmentationId) {
+        await doCheckin(props.checkinPartner);
+      }
+      context.emit('accept');
+      context.emit('close');
+      context.emit('accept');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const selectSegmentationByKey = async (event: KeyboardEvent) => {

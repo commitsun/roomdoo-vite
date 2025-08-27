@@ -803,35 +803,26 @@ export default defineComponent({
           });
         });
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('availabilityPlans/batchChangesAvailabilityPlanRules', {
-            availabilityPlanRules,
-          });
-          resetValues();
-          await Promise.all([
-            store.dispatch('planning/fetchPlanningPricesRules', {
-              dateStart: store.state.planning.dateStart,
-              dateEnd: store.state.planning.dateEnd,
-              propertyId: store.state.properties.activeProperty?.id,
-              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              pricelistId: store.state.pricelists.activePricelist?.id,
-            }),
-            store.dispatch('planning/fetchPlanning', {
-              dateStart: store.state.planning.dateStart,
-              dateEnd: store.state.planning.dateEnd,
-              propertyId: store.state.properties.activeProperty?.id,
-              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            }),
-          ]);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('availabilityPlans/batchChangesAvailabilityPlanRules', {
+          availabilityPlanRules,
+        });
+        resetValues();
+        await Promise.all([
+          store.dispatch('planning/fetchPlanningPricesRules', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+            pricelistId: store.state.pricelists.activePricelist?.id,
+          }),
+          store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          }),
+        ]);
+        void store.dispatch('layout/showSpinner', false);
       } else {
         const pricelistItems: PayloadCreatePricelistItemInterface[] = [];
         selectedPricelists.value.forEach((pricelist) => {
@@ -855,25 +846,16 @@ export default defineComponent({
           });
         });
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('pricelists/batchChangesPricelistItems', { pricelistItems });
-          resetValues();
-          await store.dispatch('planning/fetchPlanningPricesRules', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            pricelistId: store.state.pricelists.activePricelist?.id,
-          });
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('pricelists/batchChangesPricelistItems', { pricelistItems });
+        resetValues();
+        await store.dispatch('planning/fetchPlanningPricesRules', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          pricelistId: store.state.pricelists.activePricelist?.id,
+        });
+        void store.dispatch('layout/showSpinner', false);
       }
     };
 
