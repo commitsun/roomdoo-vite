@@ -218,25 +218,17 @@ export default defineComponent({
       } else {
         void store.dispatch('layout/showSpinner', true);
       }
-      try {
-        await store.dispatch('partners/fetchCurrentPartner', partnerId);
-        dialogService.open({
-          header: partnerId === 0 ? 'Nuevo cliente' : 'Editar cliente',
-          content: markRaw(PartnerForm),
-          closable: true,
-          onAccept: () => {
-            addMailToPartner();
-          },
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('partners/fetchCurrentPartner', partnerId);
+      dialogService.open({
+        header: partnerId === 0 ? 'Nuevo cliente' : 'Editar cliente',
+        content: markRaw(PartnerForm),
+        closable: true,
+        onAccept: () => {
+          addMailToPartner();
+        },
+      });
+
+      void store.dispatch('layout/showSpinner', false);
       partnerDialog.value = true;
     };
 

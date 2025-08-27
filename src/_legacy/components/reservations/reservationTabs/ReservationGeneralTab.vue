@@ -201,21 +201,20 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted, watch, markRaw } from 'vue';
-import type { ReservationInterface } from '@/legacy/interfaces/ReservationInterface';
+import type { ReservationInterface } from '@/_legacy/interfaces/ReservationInterface';
 import type { AxiosResponse } from 'axios';
-import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
-import ReservationDateChanges from '@/legacy/components/reservations/ReservationDateChanges.vue';
-import { reservationStateText } from '@/legacy/utils/reservation';
-import MailComponent from '@/legacy/components/mails/MailComponent.vue';
-import { useCheckinPartner } from '@/legacy/utils/useCheckinPartner';
-import PrivateCheckinFlow from '@/legacy/components/checkinFlow/PrivateCheckinFlow.vue';
-import TransactionCharges from '@/legacy/components/transactions/TransactionCharges.vue';
+import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
+import ReservationDateChanges from '@/_legacy/components/reservations/ReservationDateChanges.vue';
+import { reservationStateText } from '@/_legacy/utils/reservation';
+import MailComponent from '@/_legacy/components/mails/MailComponent.vue';
+import { useCheckinPartner } from '@/_legacy/utils/useCheckinPartner';
+import PrivateCheckinFlow from '@/_legacy/components/checkinFlow/PrivateCheckinFlow.vue';
+import TransactionCharges from '@/_legacy/components/transactions/TransactionCharges.vue';
 
-import { useStore } from '@/legacy/store';
-import { dialogService } from '@/legacy/services/DialogService';
-import ReservationRoomChanges from '@/legacy/components/reservations/ReservationRoomChanges.vue';
-import ReservationSegmentation from '@/legacy/components/reservations/ReservationSegmentation.vue';
-import { useRouter } from 'vue-router';
+import { useStore } from '@/_legacy/store';
+import { dialogService } from '@/_legacy/services/DialogService';
+import ReservationRoomChanges from '@/_legacy/components/reservations/ReservationRoomChanges.vue';
+import ReservationSegmentation from '@/_legacy/components/reservations/ReservationSegmentation.vue';
 
 export default defineComponent({
   components: {
@@ -226,7 +225,6 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
     const { doAllCheckins } = useCheckinPartner();
-    const router = useRouter();
 
     const changeDatesModal = ref(false);
     const changeRoomsModal = ref(false);
@@ -457,18 +455,9 @@ export default defineComponent({
         // CONFIRM RESERVATION AND UPDATE DATA TAB
         if (code === 'to_confirm') {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('reservations/confirmReservation', currentReservation.value?.id);
-            void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('reservations/confirmReservation', currentReservation.value?.id);
+          void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
+          void store.dispatch('layout/showSpinner', false);
         }
         // SEGMENTATION / CHECKIN TAB
         if (code === 'checkin_done_precheckin') {
@@ -486,14 +475,12 @@ export default defineComponent({
               },
               onAccept: async () => {
                 await doAllCheckins(currentReservation.value?.id ?? 0);
-                if (router.currentRoute.value.name === 'planning') {
-                  await store.dispatch('planning/fetchPlanning', {
-                    dateStart: store.state.planning.dateStart,
-                    dateEnd: store.state.planning.dateEnd,
-                    propertyId: store.state.properties.activeProperty?.id,
-                    availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-                  });
-                }
+                await store.dispatch('planning/fetchPlanning', {
+                  dateStart: store.state.planning.dateStart,
+                  dateEnd: store.state.planning.dateEnd,
+                  propertyId: store.state.properties.activeProperty?.id,
+                  availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+                });
                 context.emit('setTabValue', 'guests');
               },
             });
@@ -513,38 +500,29 @@ export default defineComponent({
             mailType: 'confirm',
           };
           void store.dispatch('layout/showSpinner', true);
-          try {
-            const response = (await store.dispatch(
-              'folios/fetchFolioMailData',
-              payload
-            )) as AxiosResponse<{ bodyMail: string; subject: string }>;
-            if (response.data) {
-              if (response.data.bodyMail) {
-                bodyMail.value = response.data.bodyMail;
-              }
-              if (response.data.subject) {
-                subject.value = response.data.subject;
-              }
+          const response = (await store.dispatch(
+            'folios/fetchFolioMailData',
+            payload
+          )) as AxiosResponse<{ bodyMail: string; subject: string }>;
+          if (response.data) {
+            if (response.data.bodyMail) {
+              bodyMail.value = response.data.bodyMail;
             }
-            mailDialog.value = true;
-            dialogService.open({
-              header: 'Enviar correo de confirmación',
-              content: markRaw(MailComponent),
-              closable: true,
-              props: {
-                template: bodyMail.value,
-                defaultSubject: subject.value,
-              },
-            });
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
+            if (response.data.subject) {
+              subject.value = response.data.subject;
+            }
           }
+          mailDialog.value = true;
+          dialogService.open({
+            header: 'Enviar correo de confirmación',
+            content: markRaw(MailComponent),
+            closable: true,
+            props: {
+              template: bodyMail.value,
+              defaultSubject: subject.value,
+            },
+          });
+          void store.dispatch('layout/showSpinner', false);
         }
 
         // open checkin modal
@@ -578,30 +556,21 @@ export default defineComponent({
         }
         if (code === 'checkout') {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('reservations/checkoutReservation', {
-              reservationId: currentReservation.value?.id,
-              toCheckout: true,
-            });
-            await store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
-            if (router.currentRoute.value.name === 'planning') {
-              await store.dispatch('planning/fetchPlanning', {
-                dateStart: store.state.planning.dateStart,
-                dateEnd: store.state.planning.dateEnd,
-                propertyId: store.state.properties.activeProperty?.id,
-                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              });
-            }
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-            context.emit('setTabValue', 'guests');
-          }
+          await store.dispatch('reservations/checkoutReservation', {
+            reservationId: currentReservation.value?.id,
+            toCheckout: true,
+          });
+          await Promise.all([
+            store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
+            store.dispatch('planning/fetchPlanning', {
+              dateStart: store.state.planning.dateStart,
+              dateEnd: store.state.planning.dateEnd,
+              propertyId: store.state.properties.activeProperty?.id,
+              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+            }),
+          ]);
+          void store.dispatch('layout/showSpinner', false);
+          context.emit('setTabValue', 'guests');
         }
       }
       await store.dispatch(
@@ -728,24 +697,15 @@ export default defineComponent({
         );
         pricelistName.value = store.state.pricelists.restrictedPricelist?.name ?? '';
       }
-      try {
-        await store.dispatch(
-          'reservations/fetchReservationWizardState',
-          store.state.reservations.currentReservation?.id
-        );
-        await store.dispatch(
-          'services/fetchServices',
-          store.state.reservations.currentReservation?.id
-        );
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch(
+        'reservations/fetchReservationWizardState',
+        store.state.reservations.currentReservation?.id
+      );
+      await store.dispatch(
+        'services/fetchServices',
+        store.state.reservations.currentReservation?.id
+      );
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

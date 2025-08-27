@@ -369,21 +369,12 @@ export default defineComponent({
     const closeTransactionDialog = async () => {
       customerTransaction.value = false;
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolioTransactions', folio.value?.id),
-          store.dispatch('folios/fetchFolio', folio.value?.id),
-          store.dispatch('folios/fetchFolioInvoices', folio.value?.id),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('folios/fetchFolioTransactions', folio.value?.id),
+        store.dispatch('folios/fetchFolio', folio.value?.id),
+        store.dispatch('folios/fetchFolioInvoices', folio.value?.id),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const openDownPaymentDialog = (transaction: TransactionInterface) => {
@@ -566,33 +557,15 @@ export default defineComponent({
     watch(folio, async () => {
       if (folio.value) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await getPendingPayments();
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await getPendingPayments();
+        void store.dispatch('layout/showSpinner', false);
       }
     });
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await getPendingPayments();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await getPendingPayments();
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {
