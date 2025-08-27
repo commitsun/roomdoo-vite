@@ -455,18 +455,9 @@ export default defineComponent({
         // CONFIRM RESERVATION AND UPDATE DATA TAB
         if (code === 'to_confirm') {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('reservations/confirmReservation', currentReservation.value?.id);
-            void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('reservations/confirmReservation', currentReservation.value?.id);
+          void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
+          void store.dispatch('layout/showSpinner', false);
         }
         // SEGMENTATION / CHECKIN TAB
         if (code === 'checkin_done_precheckin') {
@@ -509,38 +500,29 @@ export default defineComponent({
             mailType: 'confirm',
           };
           void store.dispatch('layout/showSpinner', true);
-          try {
-            const response = (await store.dispatch(
-              'folios/fetchFolioMailData',
-              payload
-            )) as AxiosResponse<{ bodyMail: string; subject: string }>;
-            if (response.data) {
-              if (response.data.bodyMail) {
-                bodyMail.value = response.data.bodyMail;
-              }
-              if (response.data.subject) {
-                subject.value = response.data.subject;
-              }
+          const response = (await store.dispatch(
+            'folios/fetchFolioMailData',
+            payload
+          )) as AxiosResponse<{ bodyMail: string; subject: string }>;
+          if (response.data) {
+            if (response.data.bodyMail) {
+              bodyMail.value = response.data.bodyMail;
             }
-            mailDialog.value = true;
-            dialogService.open({
-              header: 'Enviar correo de confirmación',
-              content: markRaw(MailComponent),
-              closable: true,
-              props: {
-                template: bodyMail.value,
-                defaultSubject: subject.value,
-              },
-            });
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
+            if (response.data.subject) {
+              subject.value = response.data.subject;
+            }
           }
+          mailDialog.value = true;
+          dialogService.open({
+            header: 'Enviar correo de confirmación',
+            content: markRaw(MailComponent),
+            closable: true,
+            props: {
+              template: bodyMail.value,
+              defaultSubject: subject.value,
+            },
+          });
+          void store.dispatch('layout/showSpinner', false);
         }
 
         // open checkin modal
@@ -574,30 +556,21 @@ export default defineComponent({
         }
         if (code === 'checkout') {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('reservations/checkoutReservation', {
-              reservationId: currentReservation.value?.id,
-              toCheckout: true,
-            });
-            await Promise.all([
-              store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
-              store.dispatch('planning/fetchPlanning', {
-                dateStart: store.state.planning.dateStart,
-                dateEnd: store.state.planning.dateEnd,
-                propertyId: store.state.properties.activeProperty?.id,
-                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              }),
-            ]);
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-            context.emit('setTabValue', 'guests');
-          }
+          await store.dispatch('reservations/checkoutReservation', {
+            reservationId: currentReservation.value?.id,
+            toCheckout: true,
+          });
+          await Promise.all([
+            store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
+            store.dispatch('planning/fetchPlanning', {
+              dateStart: store.state.planning.dateStart,
+              dateEnd: store.state.planning.dateEnd,
+              propertyId: store.state.properties.activeProperty?.id,
+              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+            }),
+          ]);
+          void store.dispatch('layout/showSpinner', false);
+          context.emit('setTabValue', 'guests');
         }
       }
       await store.dispatch(
@@ -724,24 +697,15 @@ export default defineComponent({
         );
         pricelistName.value = store.state.pricelists.restrictedPricelist?.name ?? '';
       }
-      try {
-        await store.dispatch(
-          'reservations/fetchReservationWizardState',
-          store.state.reservations.currentReservation?.id
-        );
-        await store.dispatch(
-          'services/fetchServices',
-          store.state.reservations.currentReservation?.id
-        );
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch(
+        'reservations/fetchReservationWizardState',
+        store.state.reservations.currentReservation?.id
+      );
+      await store.dispatch(
+        'services/fetchServices',
+        store.state.reservations.currentReservation?.id
+      );
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

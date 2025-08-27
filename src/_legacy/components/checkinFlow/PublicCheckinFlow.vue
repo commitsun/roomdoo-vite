@@ -1214,74 +1214,66 @@ export default defineComponent({
     };
 
     const processOCR = async () => {
-      try {
-        void store.dispatch('layout/showSpinner', true);
-        await store.dispatch('ocrDocument/publicProcessDocument', {
-          imageBase64Front: documentImageBase64Front.value.split(';base64,')[1],
-          imageBase64Back: documentImageBase64Back?.value.split(';base64,')[1],
-          token: reservationToken,
-          reservationId,
-          pmsPropertyId: precheckinInfo.value?.pmsPropertyId,
-        });
-        // if the ocr process returns an object with all fields as
-        //          null, it means that the ocr process failed
-        if (
-          Object.values(checkinPartnerOcr.value).every(
-            (field) => field === null || field === '' || field === 0
-          )
-        ) {
-          dialogService.open({
-            header: t('not_scanned'),
-            content: t('enter_data_manually'),
-            btnAccept: t('continue'),
-          });
-        }
-
-        activeCheckinPartner.value = {
-          birthdate: checkinPartnerOcr.value.birthdate ?? null,
-          countryId: checkinPartnerOcr.value.countryId ?? 0,
-          countryState: checkinPartnerOcr.value.countryState ?? 0,
-          documentCountryId: checkinPartnerOcr.value.documentCountryId ?? 0,
-          documentNumber: checkinPartnerOcr.value.documentNumber ?? '',
-          documentSupportNumber: checkinPartnerOcr.value.documentSupportNumber ?? '',
-          documentType: checkinPartnerOcr.value.documentType ?? 0,
-          email: activeCheckinPartner.value.email ?? '',
-          firstname: checkinPartnerOcr.value.firstname ?? '',
-          gender: checkinPartnerOcr.value.gender ?? '',
-          id: activeCheckinPartner.value.id,
-          lastname: checkinPartnerOcr.value.lastname ?? '',
-          lastname2: checkinPartnerOcr.value.lastname2 ?? '',
-          mobile: activeCheckinPartner.value.mobile ?? '',
-          nationality: checkinPartnerOcr.value.nationality ?? 0,
-          originInputData: activeCheckinPartner.value.originInputData,
-          partnerId: activeCheckinPartner.value.partnerId,
-          relationship: activeCheckinPartner.value.relationship,
-          reservationId: activeCheckinPartner.value.reservationId,
-          residenceCity: checkinPartnerOcr.value.residenceCity ?? '',
-          residenceStreet: checkinPartnerOcr.value.residenceStreet ?? '',
-          responsibleCheckinPartnerId: activeCheckinPartner.value.responsibleCheckinPartnerId,
-          zip: checkinPartnerOcr.value.zip ?? '',
-        };
-        // /////////////////
-        // it the person is under legal age and no adults in the reservation
-        if (
-          activeCheckinPartner.value.birthdate &&
-          yearsFrom(activeCheckinPartner.value.birthdate) < 18
-        ) {
-          currentStep.value = 'birthDate';
-        } else {
-          currentStep.value = 'documentCountry';
-        }
-        currentStepNumber.value += 1;
-      } catch (error) {
+      void store.dispatch('layout/showSpinner', true);
+      await store.dispatch('ocrDocument/publicProcessDocument', {
+        imageBase64Front: documentImageBase64Front.value.split(';base64,')[1],
+        imageBase64Back: documentImageBase64Back?.value.split(';base64,')[1],
+        token: reservationToken,
+        reservationId,
+        pmsPropertyId: precheckinInfo.value?.pmsPropertyId,
+      });
+      // if the ocr process returns an object with all fields as
+      //          null, it means that the ocr process failed
+      if (
+        Object.values(checkinPartnerOcr.value).every(
+          (field) => field === null || field === '' || field === 0
+        )
+      ) {
         dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+          header: t('not_scanned'),
+          content: t('enter_data_manually'),
+          btnAccept: t('continue'),
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+
+      activeCheckinPartner.value = {
+        birthdate: checkinPartnerOcr.value.birthdate ?? null,
+        countryId: checkinPartnerOcr.value.countryId ?? 0,
+        countryState: checkinPartnerOcr.value.countryState ?? 0,
+        documentCountryId: checkinPartnerOcr.value.documentCountryId ?? 0,
+        documentNumber: checkinPartnerOcr.value.documentNumber ?? '',
+        documentSupportNumber: checkinPartnerOcr.value.documentSupportNumber ?? '',
+        documentType: checkinPartnerOcr.value.documentType ?? 0,
+        email: activeCheckinPartner.value.email ?? '',
+        firstname: checkinPartnerOcr.value.firstname ?? '',
+        gender: checkinPartnerOcr.value.gender ?? '',
+        id: activeCheckinPartner.value.id,
+        lastname: checkinPartnerOcr.value.lastname ?? '',
+        lastname2: checkinPartnerOcr.value.lastname2 ?? '',
+        mobile: activeCheckinPartner.value.mobile ?? '',
+        nationality: checkinPartnerOcr.value.nationality ?? 0,
+        originInputData: activeCheckinPartner.value.originInputData,
+        partnerId: activeCheckinPartner.value.partnerId,
+        relationship: activeCheckinPartner.value.relationship,
+        reservationId: activeCheckinPartner.value.reservationId,
+        residenceCity: checkinPartnerOcr.value.residenceCity ?? '',
+        residenceStreet: checkinPartnerOcr.value.residenceStreet ?? '',
+        responsibleCheckinPartnerId: activeCheckinPartner.value.responsibleCheckinPartnerId,
+        zip: checkinPartnerOcr.value.zip ?? '',
+      };
+      // /////////////////
+      // it the person is under legal age and no adults in the reservation
+      if (
+        activeCheckinPartner.value.birthdate &&
+        yearsFrom(activeCheckinPartner.value.birthdate) < 18
+      ) {
+        currentStep.value = 'birthDate';
+      } else {
+        currentStep.value = 'documentCountry';
+      }
+      currentStepNumber.value += 1;
+
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const registerOnEnter = (fn: () => void) => {

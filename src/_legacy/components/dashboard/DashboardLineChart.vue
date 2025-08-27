@@ -410,27 +410,18 @@ export default defineComponent({
         payloadBillingOccupancyComparative.dateFrom = firstDayLastYear;
         payloadBillingOccupancyComparative.dateTo = lastDayLastYear;
       }
-      try {
-        await store.dispatch('dashboard/fetchDailyBillings', payloadBillingOccupancy);
-        await store.dispatch(
-          'dashboard/fetchDailyBillingsComparative',
-          payloadBillingOccupancyComparative
-        );
-        await store.dispatch('dashboard/fetchOccupiedRooms', payloadBillingOccupancy);
-        await store.dispatch(
-          'dashboard/fetchOccupiedRoomsComparative',
-          payloadBillingOccupancyComparative
-        );
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        lineChartOPtionPeriodComparativeSelected.value = 1;
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('dashboard/fetchDailyBillings', payloadBillingOccupancy);
+      await store.dispatch(
+        'dashboard/fetchDailyBillingsComparative',
+        payloadBillingOccupancyComparative
+      );
+      await store.dispatch('dashboard/fetchOccupiedRooms', payloadBillingOccupancy);
+      await store.dispatch(
+        'dashboard/fetchOccupiedRoomsComparative',
+        payloadBillingOccupancyComparative
+      );
+      lineChartOPtionPeriodComparativeSelected.value = 1;
+      void store.dispatch('layout/showSpinner', false);
     });
 
     // watch comparative
@@ -481,24 +472,15 @@ export default defineComponent({
           payloadBillingOccupancyComparative.dateTo = lastDayTwoYearsAgo;
         }
       }
-      try {
-        await store.dispatch(
-          'dashboard/fetchDailyBillingsComparative',
-          payloadBillingOccupancyComparative
-        );
-        await store.dispatch(
-          'dashboard/fetchOccupiedRoomsComparative',
-          payloadBillingOccupancyComparative
-        );
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch(
+        'dashboard/fetchDailyBillingsComparative',
+        payloadBillingOccupancyComparative
+      );
+      await store.dispatch(
+        'dashboard/fetchOccupiedRoomsComparative',
+        payloadBillingOccupancyComparative
+      );
+      void store.dispatch('layout/showSpinner', false);
     });
 
     const data = computed<ChartData<'line'>>(() => ({

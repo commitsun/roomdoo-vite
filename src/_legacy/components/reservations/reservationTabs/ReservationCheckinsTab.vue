@@ -314,74 +314,56 @@ export default defineComponent({
 
     const doCheckout = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/checkoutReservation', {
-          reservationId: store.state.reservations.currentReservation?.id,
-          toCheckout: true,
+      await store.dispatch('reservations/checkoutReservation', {
+        reservationId: store.state.reservations.currentReservation?.id,
+        toCheckout: true,
+      });
+      await Promise.all([
+        store.dispatch(
+          'reservations/fetchReservation',
+          store.state.reservations.currentReservation?.id
+        ),
+        store.dispatch(
+          'checkinPartners/fetchCheckinPartners',
+          store.state.reservations.currentReservation?.id
+        ),
+      ]);
+      if (router.currentRoute.value.name === 'planning') {
+        await store.dispatch('planning/fetchPlanning', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
         });
-        await Promise.all([
-          store.dispatch(
-            'reservations/fetchReservation',
-            store.state.reservations.currentReservation?.id
-          ),
-          store.dispatch(
-            'checkinPartners/fetchCheckinPartners',
-            store.state.reservations.currentReservation?.id
-          ),
-        ]);
-        if (router.currentRoute.value.name === 'planning') {
-          await store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const undoOnboard = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/undoOnboard', {
-          reservationId: store.state.reservations.currentReservation?.id,
+      await store.dispatch('reservations/undoOnboard', {
+        reservationId: store.state.reservations.currentReservation?.id,
+      });
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
+        store.dispatch(
+          'reservations/fetchReservation',
+          store.state.reservations.currentReservation?.id
+        ),
+        store.dispatch(
+          'checkinPartners/fetchCheckinPartners',
+          store.state.reservations.currentReservation?.id
+        ),
+      ]);
+      if (router.currentRoute.value.name === 'planning') {
+        await store.dispatch('planning/fetchPlanning', {
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          propertyId: store.state.properties.activeProperty?.id,
+          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
         });
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
-          store.dispatch(
-            'reservations/fetchReservation',
-            store.state.reservations.currentReservation?.id
-          ),
-          store.dispatch(
-            'checkinPartners/fetchCheckinPartners',
-            store.state.reservations.currentReservation?.id
-          ),
-        ]);
-        if (router.currentRoute.value.name === 'planning') {
-          await store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const setActiveCheckinPartnerAndRemove = (checkinPartner: CheckinPartnerInterface) => {
@@ -398,24 +380,15 @@ export default defineComponent({
 
     const removeCheckinPartner = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('checkinPartners/deleteCheckinPartner', {
-          reservationId: reservation.value?.id,
-          checkinPartnerId: activeCheckinPartner.value?.id,
-        });
-        await Promise.all([
-          store.dispatch('reservations/fetchReservation', reservation.value?.id),
-          store.dispatch('checkinPartners/fetchCheckinPartners', reservation.value?.id),
-        ]);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('checkinPartners/deleteCheckinPartner', {
+        reservationId: reservation.value?.id,
+        checkinPartnerId: activeCheckinPartner.value?.id,
+      });
+      await Promise.all([
+        store.dispatch('reservations/fetchReservation', reservation.value?.id),
+        store.dispatch('checkinPartners/fetchCheckinPartners', reservation.value?.id),
+      ]);
+      void store.dispatch('layout/showSpinner', false);
       openRemoveCheckinConfirmation.value = false;
     };
 
@@ -632,28 +605,19 @@ export default defineComponent({
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch(
-          'checkinPartners/fetchCheckinPartners',
-          store.state.reservations.currentReservation?.id
-        );
-        isCheckinPartnerCardOpen.value = checkinPartners.value.map(() => false);
-        openCheckinsMenu.value = checkinPartners.value.map(() => false);
-        openEditModalCheckin.value = checkinPartners.value.map(() => false);
+      await store.dispatch(
+        'checkinPartners/fetchCheckinPartners',
+        store.state.reservations.currentReservation?.id
+      );
+      isCheckinPartnerCardOpen.value = checkinPartners.value.map(() => false);
+      openCheckinsMenu.value = checkinPartners.value.map(() => false);
+      openEditModalCheckin.value = checkinPartners.value.map(() => false);
 
-        if (store.state.layout.isMoveToGuestsTab) {
-          isCheckinFlowStepperOpen.value = true;
-          void store.dispatch('layout/setMoveToGuestsTab', false);
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      if (store.state.layout.isMoveToGuestsTab) {
+        isCheckinFlowStepperOpen.value = true;
+        void store.dispatch('layout/setMoveToGuestsTab', false);
       }
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

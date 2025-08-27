@@ -118,33 +118,24 @@ export default defineComponent({
 
     watch(dateOptionsReservationBySaleChannelSelected, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        const dateFrom = new Date();
-        if (dateOptionsReservationBySaleChannelSelected.value === 1) {
-          dateFrom.setDate(dateFrom.getDate() - 7);
-        } else if (dateOptionsReservationBySaleChannelSelected.value === 2) {
-          dateFrom.setDate(dateFrom.getDate() - 30);
-        } else if (dateOptionsReservationBySaleChannelSelected.value === 3) {
-          dateFrom.setDate(dateFrom.getDate() - 365);
-        }
-        const payloadReservationsBySaleChannel = {
-          pmsPropertyId: store.state.properties.activeProperty?.id,
-          dateFrom,
-          dateTo: new Date(),
-        };
-        await store.dispatch(
-          'dashboard/fetchReservationsBySaleChannel',
-          payloadReservationsBySaleChannel
-        );
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      const dateFrom = new Date();
+      if (dateOptionsReservationBySaleChannelSelected.value === 1) {
+        dateFrom.setDate(dateFrom.getDate() - 7);
+      } else if (dateOptionsReservationBySaleChannelSelected.value === 2) {
+        dateFrom.setDate(dateFrom.getDate() - 30);
+      } else if (dateOptionsReservationBySaleChannelSelected.value === 3) {
+        dateFrom.setDate(dateFrom.getDate() - 365);
       }
+      const payloadReservationsBySaleChannel = {
+        pmsPropertyId: store.state.properties.activeProperty?.id,
+        dateFrom,
+        dateTo: new Date(),
+      };
+      await store.dispatch(
+        'dashboard/fetchReservationsBySaleChannel',
+        payloadReservationsBySaleChannel
+      );
+      void store.dispatch('layout/showSpinner', false);
     });
 
     const donutData = computed<ChartData<'doughnut'>>(() => ({
