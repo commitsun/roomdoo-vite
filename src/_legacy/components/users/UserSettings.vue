@@ -229,28 +229,19 @@ export default defineComponent({
 
     const saveDataUser = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('user/updateUser', {
-          userId: activeUser.value?.userId,
-          userName: `${firstname.value} ${lastname.value}`,
-          userPhone: phone.value,
-          userEmail: email.value,
-          userImageBase64: imageUrl.value ? imageUrl.value.split(',')[1] : null,
-          defaultPropertyId: activeUser.value?.defaultPropertyId,
-          expirationDate: activeUser.value?.expirationDate,
-          availabilityRuleFields: activeUser.value?.availabilityRuleFields,
-        });
-        await store.dispatch('user/fetchUser', activeUser.value?.userId);
-        await store.dispatch('user/recoverCookies');
-      } catch {
-        dialogService.open({
-          header: 'Algo ha ido mal',
-          content: 'No se han podido guardar los cambios',
-          btnAccept: 'Aceptar',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('user/updateUser', {
+        userId: activeUser.value?.userId,
+        userName: `${firstname.value} ${lastname.value}`,
+        userPhone: phone.value,
+        userEmail: email.value,
+        userImageBase64: imageUrl.value ? imageUrl.value.split(',')[1] : null,
+        defaultPropertyId: activeUser.value?.defaultPropertyId,
+        expirationDate: activeUser.value?.expirationDate,
+        availabilityRuleFields: activeUser.value?.availabilityRuleFields,
+      });
+      await store.dispatch('user/fetchUser', activeUser.value?.userId);
+      await store.dispatch('user/recoverCookies');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const saveChanges = async () => {
@@ -277,34 +268,25 @@ export default defineComponent({
 
     const changePassword = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (currentPassword.value && newPassword.value && repeatedPassword.value) {
-          if (newPassword.value === repeatedPassword.value) {
-            await store.dispatch('user/changePassword', {
-              userId: activeUser.value?.userId,
-              password: currentPassword.value,
-              newPassword: newPassword.value,
-            });
-            currentPassword.value = '';
-            newPassword.value = '';
-            repeatedPassword.value = '';
-            isPasswordModalOpen.value = false;
-          } else {
-            isNotPasswordsMatch.value = true;
-            checkInputPasswordsEmpty();
-          }
+      if (currentPassword.value && newPassword.value && repeatedPassword.value) {
+        if (newPassword.value === repeatedPassword.value) {
+          await store.dispatch('user/changePassword', {
+            userId: activeUser.value?.userId,
+            password: currentPassword.value,
+            newPassword: newPassword.value,
+          });
+          currentPassword.value = '';
+          newPassword.value = '';
+          repeatedPassword.value = '';
+          isPasswordModalOpen.value = false;
         } else {
+          isNotPasswordsMatch.value = true;
           checkInputPasswordsEmpty();
         }
-      } catch {
-        dialogService.open({
-          header: 'Algo ha ido mal',
-          content: 'No se ha podido cambiar la contraseña',
-          btnAccept: 'Aceptar',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      } else {
+        checkInputPasswordsEmpty();
       }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const checkPasswordsMatch = () => {

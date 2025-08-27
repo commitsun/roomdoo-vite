@@ -318,20 +318,11 @@ export default defineComponent({
 
     const openReservation = async (id: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/fetchReservation', id).then(() => {
-          activeRow.value = getMenuCurrentRow('.menu-item-active');
-          isMenuExpanded.value = false;
-        });
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('reservations/fetchReservation', id).then(() => {
+        activeRow.value = getMenuCurrentRow('.menu-item-active');
+        isMenuExpanded.value = false;
+      });
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const goToPreviousReservation = async () => {
@@ -341,24 +332,15 @@ export default defineComponent({
         );
         if (index > 0) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch(
-              'reservations/fetchReservation',
-              currentReservations.value[index - 1].id
-            );
-            const item = document.querySelector('.menu-item-active');
-            if (item) {
-              activeRow.value = getMenuCurrentRow('.menu-item-active');
-            }
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
+          await store.dispatch(
+            'reservations/fetchReservation',
+            currentReservations.value[index - 1].id
+          );
+          const item = document.querySelector('.menu-item-active');
+          if (item) {
+            activeRow.value = getMenuCurrentRow('.menu-item-active');
           }
+          void store.dispatch('layout/showSpinner', false);
         }
       }
     };
@@ -370,24 +352,15 @@ export default defineComponent({
         );
         if (index < currentReservations.value.length - 1) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch(
-              'reservations/fetchReservation',
-              currentReservations.value[index + 1].id
-            );
-            const item = document.querySelector('.menu-item-active');
-            if (item) {
-              activeRow.value = getMenuCurrentRow('.menu-item-active');
-            }
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
+          await store.dispatch(
+            'reservations/fetchReservation',
+            currentReservations.value[index + 1].id
+          );
+          const item = document.querySelector('.menu-item-active');
+          if (item) {
+            activeRow.value = getMenuCurrentRow('.menu-item-active');
           }
+          void store.dispatch('layout/showSpinner', false);
         }
       }
     };
@@ -428,21 +401,12 @@ export default defineComponent({
     onMounted(async () => {
       if (currentReservations.value && currentReservations.value.length === 1) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store
-            .dispatch('reservations/fetchReservation', currentReservations.value[0].id)
-            .then(() => {
-              selectedReservation.value = currentReservation.value;
-            });
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
+        await store
+          .dispatch('reservations/fetchReservation', currentReservations.value[0].id)
+          .then(() => {
+            selectedReservation.value = currentReservation.value;
           });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        void store.dispatch('layout/showSpinner', false);
       } else {
         selectedReservation.value = currentReservation.value;
       }

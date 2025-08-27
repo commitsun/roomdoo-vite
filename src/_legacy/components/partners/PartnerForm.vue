@@ -710,24 +710,15 @@ export default defineComponent({
     const getPartnerByVat = async () => {
       if (vat.value && partner.value === null) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          const response = (await store.dispatch(
-            'partners/fetchPartnerByVat',
-            vat.value
-          )) as AxiosResponse<PartnerInterface>;
-          if (response && response.data.id) {
-            partnerToComplete.value = response.data;
-            showCompleteAllData.value = true;
-          }
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
+        const response = (await store.dispatch(
+          'partners/fetchPartnerByVat',
+          vat.value
+        )) as AxiosResponse<PartnerInterface>;
+        if (response && response.data.id) {
+          partnerToComplete.value = response.data;
+          showCompleteAllData.value = true;
         }
+        void store.dispatch('layout/showSpinner', false);
       }
     };
 
@@ -740,17 +731,8 @@ export default defineComponent({
       }
       if (zip !== '') {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('address/fetchAddressByZip', zip);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('address/fetchAddressByZip', zip);
+        void store.dispatch('layout/showSpinner', false);
         const { address } = store.state.address;
         if (address) {
           setAddressByZip.value = true;
@@ -884,51 +866,42 @@ export default defineComponent({
       };
       let partnerId: number;
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (!partner.value && partnerToComplete.value) {
-          dialogService.open({
-            header: 'Ya existe un contacto con este nº de documento',
-            content: '¿Quieres abrir la ficha del cliente?',
-            btnCancel: 'no',
-            btnAccept: 'Si',
-            onAccept: () => {
-              completeAllData();
-            },
-          });
-          return;
-        }
-
-        if (!partner.value) {
-          const response = (await store.dispatch(
-            'partners/createPartner',
-            payload
-          )) as AxiosResponse<number>;
-          partnerId = response.data;
-        } else {
-          payload = { ...payload, id: partner.value.id };
-          await store.dispatch('partners/updatePartner', payload);
-          partnerId = partner.value.id;
-        }
-        await store.dispatch('partners/removePartners');
-        fetchPartners({
-          limit: 20,
-          offset: 0,
-        });
-        await store.dispatch('partners/fetchCurrentPartner', partnerId);
-        context.emit('partnerCreated');
-        if (router.currentRoute.value.name === 'planning') {
-          await refreshPlanning();
-        }
-        context.emit('accept');
-      } catch {
+      if (!partner.value && partnerToComplete.value) {
         dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
+          header: 'Ya existe un contacto con este nº de documento',
+          content: '¿Quieres abrir la ficha del cliente?',
+          btnCancel: 'no',
+          btnAccept: 'Si',
+          onAccept: () => {
+            completeAllData();
+          },
         });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+        return;
       }
+
+      if (!partner.value) {
+        const response = (await store.dispatch(
+          'partners/createPartner',
+          payload
+        )) as AxiosResponse<number>;
+        partnerId = response.data;
+      } else {
+        payload = { ...payload, id: partner.value.id };
+        await store.dispatch('partners/updatePartner', payload);
+        partnerId = partner.value.id;
+      }
+      await store.dispatch('partners/removePartners');
+      fetchPartners({
+        limit: 20,
+        offset: 0,
+      });
+      await store.dispatch('partners/fetchCurrentPartner', partnerId);
+      context.emit('partnerCreated');
+      if (router.currentRoute.value.name === 'planning') {
+        await refreshPlanning();
+      }
+      context.emit('accept');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     watch(invoicingStreet, () => {
@@ -958,17 +931,8 @@ export default defineComponent({
     watch(residenceCountry, async () => {
       if (residenceCountry.value) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await store.dispatch('countryStates/fetchCountryStates', residenceCountry.value);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await store.dispatch('countryStates/fetchCountryStates', residenceCountry.value);
+        void store.dispatch('layout/showSpinner', false);
         if (store.state.countryStates.countryStates) {
           if (useInvoicingAddress.value && !setAddressByZip.value) {
             residenceCountryStates.value = store.state.countryStates.countryStates.map((el) => ({
@@ -1104,34 +1068,22 @@ export default defineComponent({
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('paymentTerms/fetchPaymentTerms'),
-          store.dispatch('categories/fetchCategories'),
-          store.dispatch('languages/fetchLanguages'),
-          store.dispatch(
-            'saleChannels/fetchSaleChannels',
-            store.state.properties.activeProperty?.id
-          ),
-          store.dispatch('pricelists/fetchPricelists', {
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-          }),
-          store.dispatch('users/fetchUsers', store.state.properties.activeProperty?.id),
-        ]);
-        await store.dispatch('countries/fetchCountries');
-        if (props.resetCurrentPartner) {
-          await store.dispatch('partners/removePartner');
-          partnerToComplete.value = null;
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await Promise.all([
+        store.dispatch('paymentTerms/fetchPaymentTerms'),
+        store.dispatch('categories/fetchCategories'),
+        store.dispatch('languages/fetchLanguages'),
+        store.dispatch('saleChannels/fetchSaleChannels', store.state.properties.activeProperty?.id),
+        store.dispatch('pricelists/fetchPricelists', {
+          pmsPropertyId: store.state.properties.activeProperty?.id,
+        }),
+        store.dispatch('users/fetchUsers', store.state.properties.activeProperty?.id),
+      ]);
+      await store.dispatch('countries/fetchCountries');
+      if (props.resetCurrentPartner) {
+        await store.dispatch('partners/removePartner');
+        partnerToComplete.value = null;
       }
+      void store.dispatch('layout/showSpinner', false);
       if (partner.value) {
         if (partner.value.firstname) {
           firstname.value = partner.value.firstname;
