@@ -292,42 +292,24 @@ export default defineComponent({
 
     const updateFolio = async (folioId: number | undefined) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', folioId),
-          store.dispatch('reservations/fetchReservations', folioId),
-        ]);
-        void store.dispatch('layout/changeRightDrawerContent', 'NewFolioStep1');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', folioId),
+        store.dispatch('reservations/fetchReservations', folioId),
+      ]);
+      void store.dispatch('layout/changeRightDrawerContent', 'NewFolioStep1');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const setCurrentReservation = async (folioId: number, reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await Promise.all([
-          store.dispatch('folios/fetchFolio', folioId),
-          store.dispatch('reservations/fetchReservations', folioId),
-          store.dispatch('reservations/fetchReservation', reservationId),
-          store.dispatch('reservationLines/fetchReservationLines', reservationId),
-        ]);
-        void store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await Promise.all([
+        store.dispatch('folios/fetchFolio', folioId),
+        store.dispatch('reservations/fetchReservations', folioId),
+        store.dispatch('reservations/fetchReservation', reservationId),
+        store.dispatch('reservationLines/fetchReservationLines', reservationId),
+      ]);
+      void store.dispatch('layout/changeRightDrawerContent', 'FolioDetail');
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const moveToFirstReservation = async (reservation: ReservationInterface | null) => {
@@ -367,103 +349,67 @@ export default defineComponent({
 
     watch(filterOptionSelected, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await filterFolios();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await filterFolios();
+      void store.dispatch('layout/showSpinner', false);
     });
 
     watch(orderOptionSelected, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await orderByOption();
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await orderByOption();
+      void store.dispatch('layout/showSpinner', false);
     });
 
     watch(searchFolio, async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('layout/setRightDrawerSearchParam', searchFolio.value);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-      }
+      await store.dispatch('layout/setRightDrawerSearchParam', searchFolio.value);
+      void store.dispatch('layout/showSpinner', false);
     });
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        if (store.state.layout.rightDrawerSearchParam) {
-          searchFolio.value = store.state.layout.rightDrawerSearchParam;
-          await filterFolios();
-        } else if (store.state.layout.rightDrawerFilter === 'toAssignFilter') {
-          filterOptionSelected.value = 4;
-        } else if (store.state.layout.rightDrawerFilter === 'yesterdayCheckins') {
-          filterOptionSelected.value = 6;
-        } else if (store.state.layout.rightDrawerFilter === 'todayPendingCheckins') {
-          filterOptionSelected.value = 7;
-        } else if (store.state.layout.rightDrawerFilter === 'todayCompletedCheckins') {
-          filterOptionSelected.value = 8;
-        } else if (store.state.layout.rightDrawerFilter === 'tomorrowPendingCheckins') {
-          filterOptionSelected.value = 9;
-        } else if (store.state.layout.rightDrawerFilter === 'todayPendingCheckouts') {
-          filterOptionSelected.value = 10;
-        } else if (store.state.layout.rightDrawerFilter === 'tomorrowPendingCheckouts') {
-          filterOptionSelected.value = 11;
-        } else if (store.state.layout.rightDrawerFilter === 'todayCompletedCheckouts') {
-          filterOptionSelected.value = 12;
-        } else if (store.state.layout.rightDrawerFilter === 'tomorrowCompletedCheckouts') {
-          filterOptionSelected.value = 13;
-        } else {
-          const payload = {
-            propertyId: store.state.properties.activeProperty?.id,
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            limit: 160,
-            offset: 0,
-          };
-          if (
-            store.state.layout.rightDrawerFilter === '' ||
-            store.state.layout.rightDrawerFilter !== 'overbookingReservations'
-          ) {
-            await store.dispatch('folios/fetchFolios', payload);
-          }
+      if (store.state.layout.rightDrawerSearchParam) {
+        searchFolio.value = store.state.layout.rightDrawerSearchParam;
+        await filterFolios();
+      } else if (store.state.layout.rightDrawerFilter === 'toAssignFilter') {
+        filterOptionSelected.value = 4;
+      } else if (store.state.layout.rightDrawerFilter === 'yesterdayCheckins') {
+        filterOptionSelected.value = 6;
+      } else if (store.state.layout.rightDrawerFilter === 'todayPendingCheckins') {
+        filterOptionSelected.value = 7;
+      } else if (store.state.layout.rightDrawerFilter === 'todayCompletedCheckins') {
+        filterOptionSelected.value = 8;
+      } else if (store.state.layout.rightDrawerFilter === 'tomorrowPendingCheckins') {
+        filterOptionSelected.value = 9;
+      } else if (store.state.layout.rightDrawerFilter === 'todayPendingCheckouts') {
+        filterOptionSelected.value = 10;
+      } else if (store.state.layout.rightDrawerFilter === 'tomorrowPendingCheckouts') {
+        filterOptionSelected.value = 11;
+      } else if (store.state.layout.rightDrawerFilter === 'todayCompletedCheckouts') {
+        filterOptionSelected.value = 12;
+      } else if (store.state.layout.rightDrawerFilter === 'tomorrowCompletedCheckouts') {
+        filterOptionSelected.value = 13;
+      } else {
+        const payload = {
+          propertyId: store.state.properties.activeProperty?.id,
+          dateStart: store.state.planning.dateStart,
+          dateEnd: store.state.planning.dateEnd,
+          limit: 160,
+          offset: 0,
+        };
+        if (
+          store.state.layout.rightDrawerFilter === '' ||
+          store.state.layout.rightDrawerFilter !== 'overbookingReservations'
+        ) {
+          await store.dispatch('folios/fetchFolios', payload);
         }
-        store.state.folios.folios.forEach((el, index) => {
-          openFolioOptionsMenu.value[index] = false;
-          cardOpened.value[index] = true;
-        });
-        showAllReservationsInClass.value.length = folios.value.length;
-        showAllReservationsInClass.value.fill(false);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
       }
+      store.state.folios.folios.forEach((el, index) => {
+        openFolioOptionsMenu.value[index] = false;
+        cardOpened.value[index] = true;
+      });
+      showAllReservationsInClass.value.length = folios.value.length;
+      showAllReservationsInClass.value.fill(false);
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {

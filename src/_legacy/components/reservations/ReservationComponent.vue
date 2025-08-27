@@ -340,34 +340,25 @@ export default defineComponent({
 
     const doCancelReservation = async (folioId: number, reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/cancelReservation', reservationId);
-        const payload = {
-          propertyId: store.state.properties.activeProperty?.id,
-          filter: store.state.layout.rightDrawerSearchParam,
-          limit: 40,
-          offset: 0,
-        };
-        await store.dispatch('reservations/fetchReservation', reservationId);
-        await store.dispatch('reservations/fetchReservations', folioId);
-        await store.dispatch('reservations/fetchReservationWizardState', reservationId);
-        await store.dispatch('folios/fetchFolios', payload);
-        if (store.state.folios.currentFolio) {
-          await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);
-        }
-        openReservationOptionsMenu.value = false;
-        if (router.currentRoute.value.name === 'planning') {
-          await refreshPlanning();
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch('reservations/cancelReservation', reservationId);
+      const payload = {
+        propertyId: store.state.properties.activeProperty?.id,
+        filter: store.state.layout.rightDrawerSearchParam,
+        limit: 40,
+        offset: 0,
+      };
+      await store.dispatch('reservations/fetchReservation', reservationId);
+      await store.dispatch('reservations/fetchReservations', folioId);
+      await store.dispatch('reservations/fetchReservationWizardState', reservationId);
+      await store.dispatch('folios/fetchFolios', payload);
+      if (store.state.folios.currentFolio) {
+        await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);
       }
+      openReservationOptionsMenu.value = false;
+      if (router.currentRoute.value.name === 'planning') {
+        await refreshPlanning();
+      }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     const cancelReservation = async (folioId: number, reservationId: number) => {
@@ -412,35 +403,26 @@ export default defineComponent({
     };
     const confirmReservation = async (folioId: number, reservationId: number) => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch('reservations/confirmReservation', reservationId);
-        const payload = {
-          propertyId: store.state.properties.activeProperty?.id,
-          filter: store.state.layout.rightDrawerSearchParam,
-          limit: 40,
-          offset: 0,
-        };
+      await store.dispatch('reservations/confirmReservation', reservationId);
+      const payload = {
+        propertyId: store.state.properties.activeProperty?.id,
+        filter: store.state.layout.rightDrawerSearchParam,
+        limit: 40,
+        offset: 0,
+      };
 
-        await store.dispatch('reservations/fetchReservation', reservationId);
-        await store.dispatch('reservations/fetchReservations', folioId);
-        await store.dispatch('reservations/fetchReservationWizardState', reservationId);
-        await store.dispatch('folios/fetchFolios', payload);
-        if (store.state.folios.currentFolio) {
-          await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);
-        }
-        openReservationOptionsMenu.value = false;
-        if (router.currentRoute.value.name === 'planning') {
-          await refreshPlanning();
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch('reservations/fetchReservation', reservationId);
+      await store.dispatch('reservations/fetchReservations', folioId);
+      await store.dispatch('reservations/fetchReservationWizardState', reservationId);
+      await store.dispatch('folios/fetchFolios', payload);
+      if (store.state.folios.currentFolio) {
+        await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio.id);
       }
+      openReservationOptionsMenu.value = false;
+      if (router.currentRoute.value.name === 'planning') {
+        await refreshPlanning();
+      }
+      void store.dispatch('layout/showSpinner', false);
     };
 
     onBeforeMount(async () => {

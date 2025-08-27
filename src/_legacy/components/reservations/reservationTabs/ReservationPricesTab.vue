@@ -402,61 +402,37 @@ export default defineComponent({
     watch(reservation, async () => {
       if (store.state.reservations.currentReservation) {
         void store.dispatch('layout/showSpinner', true);
-        try {
-          await Promise.all([
-            store.dispatch(
-              'services/fetchServices',
-              store.state.reservations.currentReservation?.id
-            ),
-            store.dispatch(
-              'reservationLines/fetchReservationLines',
-              store.state.reservations.currentReservation?.id
-            ),
-          ]);
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-        }
+        await Promise.all([
+          store.dispatch('services/fetchServices', store.state.reservations.currentReservation?.id),
+          store.dispatch(
+            'reservationLines/fetchReservationLines',
+            store.state.reservations.currentReservation?.id
+          ),
+        ]);
+        void store.dispatch('layout/showSpinner', false);
       }
     });
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        await store.dispatch(
-          'reservationLines/fetchReservationLines',
-          store.state.reservations.currentReservation?.id
-        );
-        await store.dispatch(
-          'services/fetchServices',
-          store.state.reservations.currentReservation?.id
-        );
-        const pricelist = store.state.pricelists.pricelists.find(
-          (el) => el.id === reservation.value?.pricelistId
-        );
-        if (pricelist) {
-          pricelistName.value = pricelist.name;
-        } else if (reservation.value?.pricelistId) {
-          await store.dispatch(
-            'pricelists/fetchRestrictedPricelist',
-            reservation.value?.pricelistId
-          );
-          pricelistName.value = store.state.pricelists.restrictedPricelist?.name ?? '';
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      await store.dispatch(
+        'reservationLines/fetchReservationLines',
+        store.state.reservations.currentReservation?.id
+      );
+      await store.dispatch(
+        'services/fetchServices',
+        store.state.reservations.currentReservation?.id
+      );
+      const pricelist = store.state.pricelists.pricelists.find(
+        (el) => el.id === reservation.value?.pricelistId
+      );
+      if (pricelist) {
+        pricelistName.value = pricelist.name;
+      } else if (reservation.value?.pricelistId) {
+        await store.dispatch('pricelists/fetchRestrictedPricelist', reservation.value?.pricelistId);
+        pricelistName.value = store.state.pricelists.restrictedPricelist?.name ?? '';
       }
+      void store.dispatch('layout/showSpinner', false);
     });
 
     return {
