@@ -933,74 +933,56 @@ export default defineComponent({
         editingCheckinPartner.value?.documentNumber &&
         !props.isPublicCheckinFlow
       ) {
-        try {
-          isLoadingData.value = true;
-          void store.dispatch('layout/showSpinner', true);
-          await store.dispatch('checkinPartners/fetchCheckinPartnerByDocNumber', {
-            documentNumber: editingCheckinPartner.value?.documentNumber,
-            documentType: editingCheckinPartner.value?.documentType,
-          });
-          const checkin = store.state.checkinPartners.checkinPartner;
+        isLoadingData.value = true;
+        void store.dispatch('layout/showSpinner', true);
+        await store.dispatch('checkinPartners/fetchCheckinPartnerByDocNumber', {
+          documentNumber: editingCheckinPartner.value?.documentNumber,
+          documentType: editingCheckinPartner.value?.documentType,
+        });
+        const checkin = store.state.checkinPartners.checkinPartner;
 
-          if (checkin) {
-            if (checkin.countryId) {
-              await store.dispatch('countryStates/fetchCountryStates', checkin.countryId);
-            }
-            editingCheckinPartner.value.id = props.checkinPartner.id;
-            editingCheckinPartner.value.reservationId = props.checkinPartner.reservationId;
-            editingCheckinPartner.value = {
-              ...editingCheckinPartner.value,
-              ...checkin,
-            };
-          } else {
-            editingCheckinPartner.value.partnerId = undefined;
+        if (checkin) {
+          if (checkin.countryId) {
+            await store.dispatch('countryStates/fetchCountryStates', checkin.countryId);
           }
-        } catch {
-          dialogService.open({
-            header: 'Error',
-            content: 'Algo ha ido mal',
-            btnAccept: 'Ok',
-          });
-        } finally {
-          void store.dispatch('layout/showSpinner', false);
-          isLoadingData.value = false;
-          validatorCheckin.value.editingCheckinPartner.documentNumber.$touch();
+          editingCheckinPartner.value.id = props.checkinPartner.id;
+          editingCheckinPartner.value.reservationId = props.checkinPartner.reservationId;
+          editingCheckinPartner.value = {
+            ...editingCheckinPartner.value,
+            ...checkin,
+          };
+        } else {
+          editingCheckinPartner.value.partnerId = undefined;
         }
+        void store.dispatch('layout/showSpinner', false);
+        isLoadingData.value = false;
+        validatorCheckin.value.editingCheckinPartner.documentNumber.$touch();
       }
     };
 
     const fetchAddressByZip = async () => {
       void store.dispatch('layout/showSpinner', true);
       isLoadingData.value = true;
-      try {
-        if (editingCheckinPartner.value?.zip !== '') {
-          await store.dispatch('address/fetchAddressByZip', editingCheckinPartner.value?.zip);
-          const { address } = store.state.address;
-          if (address && editingCheckinPartner.value) {
-            if (address.countryId) {
-              editingCheckinPartner.value.countryId = address.countryId;
-              await store.dispatch('countryStates/fetchCountryStates', address.countryId);
-            }
-            if (address.cityId) {
-              editingCheckinPartner.value.residenceCity = address.cityId;
-            }
-            if (address.stateId) {
-              editingCheckinPartner.value.countryState = address.stateId;
-            }
+      if (editingCheckinPartner.value?.zip !== '') {
+        await store.dispatch('address/fetchAddressByZip', editingCheckinPartner.value?.zip);
+        const { address } = store.state.address;
+        if (address && editingCheckinPartner.value) {
+          if (address.countryId) {
+            editingCheckinPartner.value.countryId = address.countryId;
+            await store.dispatch('countryStates/fetchCountryStates', address.countryId);
           }
-
-          void store.dispatch('address/removeAddress');
+          if (address.cityId) {
+            editingCheckinPartner.value.residenceCity = address.cityId;
+          }
+          if (address.stateId) {
+            editingCheckinPartner.value.countryState = address.stateId;
+          }
         }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        isLoadingData.value = false;
+
+        void store.dispatch('address/removeAddress');
       }
+      void store.dispatch('layout/showSpinner', false);
+      isLoadingData.value = false;
     };
 
     const resetDocumentCountryIdDependantData = () => {
@@ -1029,21 +1011,12 @@ export default defineComponent({
       () => editingCheckinPartner.value?.countryId,
       async (newValue, oldValue) => {
         if (newValue && !isLoadingData.value) {
-          try {
-            void store.dispatch('layout/showSpinner', true);
-            await store.dispatch('countryStates/fetchCountryStates', newValue);
-            if (editingCheckinPartner.value && oldValue !== 0 && newValue !== oldValue) {
-              editingCheckinPartner.value.countryState = 0;
-            }
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
+          void store.dispatch('layout/showSpinner', true);
+          await store.dispatch('countryStates/fetchCountryStates', newValue);
+          if (editingCheckinPartner.value && oldValue !== 0 && newValue !== oldValue) {
+            editingCheckinPartner.value.countryState = 0;
           }
+          void store.dispatch('layout/showSpinner', false);
         }
       }
     );
@@ -1105,26 +1078,17 @@ export default defineComponent({
         zip: props.checkinPartner.zip,
       };
 
-      try {
-        void store.dispatch('layout/showSpinner', true);
-        if (store.state.folios.currentFolio) {
-          await store.dispatch('folios/fetchAdultsInFolio', store.state.folios.currentFolio.id);
-        }
-        if (countries.value.length === 0) {
-          await store.dispatch('countries/fetchCountries');
-        }
-        if (props.checkinPartner.countryId && props.checkinPartner.countryState) {
-          await store.dispatch('countryStates/fetchCountryStates', props.checkinPartner.countryId);
-        }
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
+      void store.dispatch('layout/showSpinner', true);
+      if (store.state.folios.currentFolio) {
+        await store.dispatch('folios/fetchAdultsInFolio', store.state.folios.currentFolio.id);
       }
+      if (countries.value.length === 0) {
+        await store.dispatch('countries/fetchCountries');
+      }
+      if (props.checkinPartner.countryState) {
+        await store.dispatch('countryStates/fetchCountryStates', props.checkinPartner.countryId);
+      }
+      void store.dispatch('layout/showSpinner', false);
       isLoadingData.value = false;
     });
 

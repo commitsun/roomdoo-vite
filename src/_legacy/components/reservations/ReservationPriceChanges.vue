@@ -710,15 +710,14 @@ import ToggleSwitch from 'primevue/toggleswitch';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 
-import { type ReservationLineInterface } from '@/legacy/interfaces/ReservationLineInterface';
-import type { ServiceLineInterface } from '@/legacy/interfaces/ServiceLineInterface';
-import type { ServiceInterface } from '@/legacy/interfaces/ServiceInterface';
-import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
+import { type ReservationLineInterface } from '@/_legacy/interfaces/ReservationLineInterface';
+import type { ServiceLineInterface } from '@/_legacy/interfaces/ServiceLineInterface';
+import type { ServiceInterface } from '@/_legacy/interfaces/ServiceInterface';
+import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 
-import { useStore } from '@/legacy/store';
-import utilsDates, { localeSpain } from '@/legacy/utils/dates';
-import { dialogService } from '@/legacy/services/DialogService';
-import { useRouter } from 'vue-router';
+import { useStore } from '@/_legacy/store';
+import utilsDates, { localeSpain } from '@/_legacy/utils/dates';
+import { dialogService } from '@/_legacy/services/DialogService';
 
 interface CalendarChangeDatesInterface {
   date: Date;
@@ -763,7 +762,6 @@ export default defineComponent({
   },
   setup(props, context) {
     const store = useStore();
-    const router = useRouter();
     const selectedPricelistId = ref(-1);
     const selectedRoomTypeId = ref(-1);
     const isPricelistApplied = ref(false);
@@ -1241,116 +1239,103 @@ export default defineComponent({
 
     const saveChanges = async () => {
       void store.dispatch('layout/showSpinner', true);
-      try {
-        let pricePerNight = fixedPriceByNight.value;
+      let pricePerNight = fixedPriceByNight.value;
 
-        if (isFixedPriceTotalReservation.value) {
-          pricePerNight =
-            (fixedPriceTotalReservation.value ?? 0) / currentReservationLines.value.length;
-        }
-        const reservationLines = calendarDates.value
-          .filter((el) => el.reservationLine)
-          .map((el) => el.reservationLine)
-          .map((el) => ({
-            date: el?.date,
-            price:
-              isFixedPriceByNight.value || isFixedPriceTotalReservation.value
-                ? pricePerNight
-                : el?.price,
-            discount:
-              isFixedPriceByNight.value || isFixedPriceTotalReservation.value ? 0 : el?.discount,
-            roomId: el?.roomId,
-            pmsPropertyId: store.state.properties.activeProperty?.id,
-            reservationId: currentReservation.value?.id,
-          }));
-
-        await store.dispatch('reservations/updateReservation', {
+      if (isFixedPriceTotalReservation.value) {
+        pricePerNight =
+          (fixedPriceTotalReservation.value ?? 0) / currentReservationLines.value.length;
+      }
+      const reservationLines = calendarDates.value
+        .filter((el) => el.reservationLine)
+        .map((el) => el.reservationLine)
+        .map((el) => ({
+          date: el?.date,
+          price:
+            isFixedPriceByNight.value || isFixedPriceTotalReservation.value
+              ? pricePerNight
+              : el?.price,
+          discount:
+            isFixedPriceByNight.value || isFixedPriceTotalReservation.value ? 0 : el?.discount,
+          roomId: el?.roomId,
+          pmsPropertyId: store.state.properties.activeProperty?.id,
           reservationId: currentReservation.value?.id,
-          reservationLines,
-          pricelistId: selectedPricelistId.value,
-          roomTypeId: selectedRoomTypeId.value,
-        });
+        }));
 
-        await Promise.all(
-          calendarDatesByService.value
-            .filter((el) => el.items)
-            .map(async (el) => {
-              const serviceLines: ServiceLineInterface[] = [];
-              if (el.viewMode === 'calendar') {
-                el.items.forEach((i) => {
-                  if (i.serviceLine) {
+      await store.dispatch('reservations/updateReservation', {
+        reservationId: currentReservation.value?.id,
+        reservationLines,
+        pricelistId: selectedPricelistId.value,
+        roomTypeId: selectedRoomTypeId.value,
+      });
+
+      await Promise.all(
+        calendarDatesByService.value
+          .filter((el) => el.items)
+          .map(async (el) => {
+            const serviceLines: ServiceLineInterface[] = [];
+            if (el.viewMode === 'calendar') {
+              el.items.forEach((i) => {
+                if (i.serviceLine) {
+                  serviceLines.push({
+                    priceUnit: i.serviceLine.priceUnit,
+                    discount: i.serviceLine.discount,
+                    date: new Date(i.serviceLine.date),
+                    quantity: i.serviceLine.quantity,
+                  });
+                }
+              });
+            } else if (el.viewMode === 'modify') {
+              el.items.forEach((i) => {
+                if (i.serviceLine) {
+                  if (el.perDay) {
                     serviceLines.push({
-                      priceUnit: i.serviceLine.priceUnit,
-                      discount: i.serviceLine.discount,
-                      date: new Date(i.serviceLine.date),
+                      priceUnit: el.priceForAllLines ?? 0,
+                      discount: el.discountForAllLines ?? 0,
                       quantity: i.serviceLine.quantity,
+                      date: new Date(i.date),
+                    });
+                  } else {
+                    serviceLines.push({
+                      priceUnit: el.priceForAllLines ?? 0,
+                      discount: el.discountForAllLines ?? 0,
+                      quantity: el.quantity,
+                      date: new Date(i.date),
                     });
                   }
-                });
-              } else if (el.viewMode === 'modify') {
-                el.items.forEach((i) => {
-                  if (i.serviceLine) {
-                    if (el.perDay) {
-                      serviceLines.push({
-                        priceUnit: el.priceForAllLines ?? 0,
-                        discount: el.discountForAllLines ?? 0,
-                        quantity: i.serviceLine.quantity,
-                        date: new Date(i.date),
-                      });
-                    } else {
-                      serviceLines.push({
-                        priceUnit: el.priceForAllLines ?? 0,
-                        discount: el.discountForAllLines ?? 0,
-                        quantity: el.quantity,
-                        date: new Date(i.date),
-                      });
-                    }
-                  }
-                });
-              }
-              await store.dispatch('services/updateService', {
-                reservationId: currentReservation.value?.id,
-                serviceId: el.serviceId,
-                serviceLines,
+                }
               });
-            })
-        );
-        if (router.currentRoute.value.name === 'planning') {
-          void store.dispatch('planning/fetchAlertsPerDay', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-          });
-          void store.dispatch('planning/fetchDailyBillings', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-          });
-          void store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
-        }
-        await store.dispatch(
-          'reservationLines/fetchReservationLines',
-          currentReservation.value?.id
-        );
-        void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
-        void store.dispatch('folios/fetchFolio', currentReservation.value?.folioId);
-        void store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id);
-        void store.dispatch('services/fetchServices', currentReservation.value?.id);
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
-      } finally {
-        void store.dispatch('layout/showSpinner', false);
-        context.emit('close');
-      }
+            }
+            await store.dispatch('services/updateService', {
+              reservationId: currentReservation.value?.id,
+              serviceId: el.serviceId,
+              serviceLines,
+            });
+          })
+      );
+
+      void store.dispatch('planning/fetchAlertsPerDay', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+      });
+      void store.dispatch('planning/fetchDailyBillings', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+      });
+      void store.dispatch('planning/fetchPlanning', {
+        dateStart: store.state.planning.dateStart,
+        dateEnd: store.state.planning.dateEnd,
+        propertyId: store.state.properties.activeProperty?.id,
+        availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+      });
+      await store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id);
+      void store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
+      void store.dispatch('folios/fetchFolio', currentReservation.value?.folioId);
+      void store.dispatch('reservationLines/fetchReservationLines', currentReservation.value?.id);
+      void store.dispatch('services/fetchServices', currentReservation.value?.id);
+      void store.dispatch('layout/showSpinner', false);
+      context.emit('close');
     };
 
     watch(isFixedPriceByNight, (value) => {
