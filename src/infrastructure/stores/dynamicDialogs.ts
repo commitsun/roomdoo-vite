@@ -11,7 +11,6 @@ export const useDynamicDialogsStore = defineStore('dynamicDialogs', () => {
 
   const unRegisterDynamicDialog = (id: number) => {
     const indexDialogToClose = dynamicDialogs.value.findIndex((d) => d.id === id);
-    console.log('indexDialogToClose', indexDialogToClose);
     dynamicDialogs.value.splice(indexDialogToClose, 1);
   };
 
