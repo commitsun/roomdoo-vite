@@ -124,7 +124,7 @@ import ShareLinkModal from '@/_legacy/components/precheckin/ShareLinkModal.vue';
 import { dialogService } from '@/_legacy/services/DialogService';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { getLocale } from '@/ui/plugins/i18n';
+import { i18n } from '@/ui/plugins/i18n';
 export default defineComponent({
   components: {
     CustomIcon,
@@ -205,7 +205,7 @@ export default defineComponent({
     };
 
     const openReservationCheckin = () => {
-      const langParam = route.params.lang || getLocale();
+      const langParam = route.params.lang || i18n.global.locale.value;
       router.push({
         path: `/${props.id}/precheckin-reservation/${props.accessToken}/${langParam}`,
         query: {
