@@ -53,7 +53,7 @@
                   currentFolio?.state != 'done' &&
                   currentFolio?.state != 'cancel' &&
                   !(
-                    currentReservations?.filter((el) => el.isSplitted || el.stateCode === 'cancel')
+                    currentReservations?.filter((el: { isSplitted: any; stateCode: string; }) => el.isSplitted || el.stateCode === 'cancel')
                       .length === currentReservations?.length
                   )
                 "
@@ -64,7 +64,7 @@
               <div
                 v-if="
                   currentReservations?.some(
-                    (el) => el.stateCode === 'draft' || el.stateCode === 'cancel'
+                    (el: { stateCode: string; }) => el.stateCode === 'draft' || el.stateCode === 'cancel'
                   )
                 "
                 @click="confirmReservations()"
@@ -400,7 +400,7 @@
             </div>
             <div
               class="reservations"
-              v-for="reservation in classes.sort((a, b) => {
+              v-for="reservation in classes.sort((a: { folioSequence: number; }, b: { folioSequence: number; }) => {
                 if (a.folioSequence && b.folioSequence && a.folioSequence < b.folioSequence)
                   return -1;
                 if (a.folioSequence && b.folioSequence && a.folioSequence > b.folioSequence)
@@ -501,7 +501,7 @@ import FolioMessagesComponent from '@/_legacy/components/folios/FolioMessagesCom
 import FolioTransactions from '@/_legacy/components/folios/FolioTransactions.vue';
 import FolioCheckins from '@/_legacy/components/folios/FolioCheckins.vue';
 import FolioInvoicing from '@/_legacy/components/folios/FolioInvoicing.vue';
-import { getLocale } from '@/ui/plugins/i18n';
+import { i18n } from '@/ui/plugins/i18n';
 
 import { usePlanning } from '@/_legacy/utils/usePlanning';
 import { useRouter } from 'vue-router';
@@ -546,7 +546,7 @@ export default defineComponent({
       () =>
         `${window.location.origin}/${currentFolio.value?.id ?? 0}/precheckin/${
           currentFolio.value?.accessToken ?? ''
-        }/${getLocale()}`
+        }/${i18n.global.locale.value}`
     );
 
     const computedFolioClass = computed(() => {
