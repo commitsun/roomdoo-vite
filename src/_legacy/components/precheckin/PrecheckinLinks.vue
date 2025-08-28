@@ -124,7 +124,7 @@ import { defineComponent, computed } from 'vue';
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 import { useStore } from '@/_legacy/store';
 import { useRoute, useRouter } from 'vue-router';
-import { getLocale } from '@/ui/plugins/i18n';
+import { i18n } from '@/ui/plugins/i18n';
 
 export default defineComponent({
   emits: [
@@ -218,7 +218,7 @@ export default defineComponent({
         if (folioReservations.value?.length === 1) {
           const reservationId = folioReservations.value[0].id;
           const reservationToken = folioReservations.value[0].accessToken;
-          const langParam = route.params.lang || getLocale();
+          const langParam = route.params.lang || i18n.global.locale.value;
           router.push({
             path: `/${reservationId}/precheckin-reservation/${reservationToken}/${langParam}`,
             query: {
