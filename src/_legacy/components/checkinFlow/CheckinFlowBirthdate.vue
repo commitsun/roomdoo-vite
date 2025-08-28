@@ -109,7 +109,7 @@ import DatePicker from 'primevue/datepicker';
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 import utilsDates from '@/_legacy/utils/dates';
 import { useStore } from '@/_legacy/store';
-import { getLocale } from '@/ui/plugins/i18n';
+import { i18n } from '@/ui/plugins/i18n';
 
 export default defineComponent({
   components: {
@@ -202,7 +202,7 @@ export default defineComponent({
       const input = event.target as HTMLInputElement;
 
       //format of primevue datepicker
-      const format = getLocale() === 'es' ? 'dd/mm/yyyy' : 'mm/dd/yyyy';
+      const format = i18n.global.locale.value === 'es' ? 'dd/mm/yyyy' : 'mm/dd/yyyy';
 
       const digits = input.value.replace(/\D/g, '');
 

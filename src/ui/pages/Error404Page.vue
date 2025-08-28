@@ -21,13 +21,13 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { SUPPORTED_LOCALES, i18n } from '@/ui/plugins/i18n';
+import { availableLocales, i18n } from '@/ui/plugins/i18n';
 import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
 import AppSelect from 'primevue/select';
 
 const { t } = useI18n();
 
-const locales = ref(SUPPORTED_LOCALES);
+const locales = ref(availableLocales);
 const selectedLocale = ref(locales.value.find((l) => l.value === i18n.global.locale.value));
 
 watch(selectedLocale, (newLocale) => {
@@ -90,7 +90,6 @@ watch(selectedLocale, (newLocale) => {
     background-color: #f8fafc;
     text-align: left;
   }
-
 }
 
 @media (min-width: 1024px) {
@@ -101,5 +100,4 @@ watch(selectedLocale, (newLocale) => {
     }
   }
 }
-
 </style>
