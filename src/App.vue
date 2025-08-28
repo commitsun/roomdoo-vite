@@ -4,7 +4,7 @@
   <!-- start  remove this dialog component when removing legacy folder  -->
   <DialogContainer />
   <!-- end  remove this dialog component when removing legacy folder / -->
-  <DynamicDialog @close="hideDynamicDialog()" />
+  <DynamicDialog />
   <teleport to="body">
     <div v-if="uiStore.isLoading" class="overlay-spinner">
       <ProgressSpinner />
@@ -60,10 +60,6 @@ export default defineComponent({
       notificationStore.remove();
     };
 
-    const hideDynamicDialog = () => {
-      console.log('hideDynamicDialog');
-    };
-
     const closeTextMessage = () => {
       textMessageStore.removeTextMessage();
     };
@@ -88,7 +84,6 @@ export default defineComponent({
       textMessages,
       consumeNotification,
       closeTextMessage,
-      hideDynamicDialog,
     };
   },
 });
