@@ -6,7 +6,7 @@ import { createPinia } from 'pinia';
 import { store as legacyStore } from '@/_legacy/store';
 import router from '@/ui/plugins/router';
 import { createHead } from '@vueuse/head';
-import { i18n, locale } from '@/ui/plugins/i18n';
+import { i18n } from '@/ui/plugins/i18n';
 import primevuePlugin from '@/ui/plugins/primevue';
 import ToastService from 'primevue/toastservice';
 import DialogService from 'primevue/dialogservice';
@@ -18,7 +18,7 @@ createApp(App)
   .use(legacyStore)
   .use(i18n)
   .use(createHead())
-  .use(primevuePlugin, { locale })
+  .use(primevuePlugin)
   .use(DialogService)
   .use(ToastService)
   .mount('#app');
