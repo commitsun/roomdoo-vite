@@ -2,6 +2,9 @@ import { type App } from 'vue';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primevue/themes';
+import { en_GB } from 'primelocale/js/en_GB.js';
+import { en } from 'primelocale/js/en.js';
+import { es } from 'primelocale/js/es.js';
 
 export const RoomdooPreset = definePreset(Aura, {
   semantic: {
@@ -23,35 +26,29 @@ export const RoomdooPreset = definePreset(Aura, {
 
 let primevueApp: App | null = null;
 
-export function getPrimeVueApp(): App | null {
-  return primevueApp;
-}
-
-async function getPrimeVueLocale(newLocale: string) {
-  if (newLocale === 'es') {
-    const { es } = await import('primelocale/js/es.js');
+const getLocale = (localeCode: string) => {
+  let baseLang = localeCode.split('-')[0];
+  const area = localeCode.split('-')[1]?.toUpperCase();
+  if (baseLang === 'es' || baseLang === 'gl' || baseLang === 'ca' || baseLang === 'eu') {
     return es;
-  } else {
-    const { en } = await import('primelocale/js/en.js');
-    return en;
+  } else if (area === 'GB') {
+    return en_GB;
+  }
+  return en;
+};
+
+export function updatePrimevueLocale(newLocale: string) {
+  const primevueLocale = getLocale(newLocale);
+  if (primevueApp?.config.globalProperties.$primevue?.config?.locale) {
+    Object.assign(primevueApp.config.globalProperties.$primevue.config.locale, primevueLocale);
   }
 }
-
-export async function updatePrimevueLocale(newLocale: string) {
-  const app = getPrimeVueApp();
-  const primevueLocale = await getPrimeVueLocale(newLocale);
-  if (app?.config.globalProperties.$primevue?.config?.locale) {
-    Object.assign(app.config.globalProperties.$primevue.config.locale, primevueLocale);
-  }
-}
-
 export default {
-  install(app: App, options: any = {}) {
+  install(app: App) {
     primevueApp = app;
-
     app.use(PrimeVue, {
       theme: { preset: RoomdooPreset, options: { darkModeSelector: false } },
-      locale: options.locale || {},
+      locale: getLocale(window.navigator.language),
     });
   },
 };
