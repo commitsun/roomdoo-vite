@@ -14,13 +14,16 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    conditions: ['browser', 'import', 'module'],
   },
   test: {
     environment: 'jsdom',
     globals: true,
     css: true,
+
     setupFiles: ['./src/__tests__/setup.ts'],
     // You can also filter test files here if you prefer patterns:
     // include: ['src/**/*.test.ts', 'src/**/*.spec.ts']
+    include: ['src/**/*.spec.ts'],
   },
 });
