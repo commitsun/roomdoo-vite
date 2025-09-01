@@ -24,6 +24,6 @@ export default defineConfig({
     setupFiles: ['./src/__tests__/setup.ts'],
     // You can also filter test files here if you prefer patterns:
     // include: ['src/**/*.test.ts', 'src/**/*.spec.ts']
-    include: ['src/**/*.spec.ts'],
+    // include: ['src/**/*.spec.ts'],
   },
 });
