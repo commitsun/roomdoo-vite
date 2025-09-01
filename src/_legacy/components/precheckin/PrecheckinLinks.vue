@@ -124,7 +124,7 @@ import { defineComponent, computed } from 'vue';
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 import { useStore } from '@/_legacy/store';
 import { useRoute, useRouter } from 'vue-router';
-import { i18n } from '@/ui/plugins/i18n';
+import { i18n } from '@/infrastructure/plugins/i18n';
 
 export default defineComponent({
   emits: [
