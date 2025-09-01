@@ -6,12 +6,13 @@
     <div class="login-form-container">
       <div class="instance-name">{{ instanceName }}</div>
       <div class="first-input">
-        <label class="label">
+        <label class="label" for="username">
           {{ t('login.username') }}
         </label>
         <IconField>
           <InputIcon class="pi pi-user" />
           <InputText
+            id="username"
             v-model="username"
             :placeholder="t('login.email')"
             :style="{ width: '100%' }"
@@ -20,12 +21,14 @@
         </IconField>
       </div>
       <div class="second-input">
-        <label class="label">
+        <label class="label" for="password-input">
           {{ t('login.password') }}
         </label>
         <IconField>
           <InputIcon class="pi pi-lock" />
           <Password
+            id="password-input"
+            inputId="password-input"
             v-model="password"
             :placeholder="t('login.password')"
             :feedback="false"
@@ -59,6 +62,7 @@ import { useI18n } from 'vue-i18n';
 import { IconField, InputIcon, InputText, Password, Button, Message } from 'primevue';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useRoute, useRouter } from 'vue-router';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
@@ -76,19 +80,31 @@ export default defineComponent({
     const { t } = useI18n();
     const instanceStore = useInstanceStore();
     const userStore = useUserStore();
+    const pmsPropertiesStore = usePmsPropertiesStore();
     const router = useRouter();
     const route = useRoute();
+
     const username = ref('');
     const password = ref('');
     const errorMessage = ref('');
     const instanceName = computed(() => instanceStore.instance?.name ?? '');
     const doLogin = async () => {
+      let redirect = '/';
       try {
         await userStore.login(username.value, password.value);
         await useLegacyStore().doVuexLogin(username.value, password.value);
+        await pmsPropertiesStore.fetchPmsProperties();
+
         if (userStore.user) {
-          const redirect = (route.query.redirect as string) || '/';
+          if (route.query.redirect) {
+            redirect = route.query.redirect as string;
+          } else if (route.params.pmsPropertyId) {
+            const pmsPropertyId = route.params.pmsPropertyId as string;
+            redirect = `/${pmsPropertyId}`;
+          }
           router.replace(redirect);
+        } else {
+          console.log('not user');
         }
       } catch (error) {
         if (error instanceof UnauthorizedError) {
