@@ -3,7 +3,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import type { App } from 'vue';
 import { useDynamicDialogsStore } from '@/infrastructure/stores/dynamicDialogs';
-import { t } from '@/ui/plugins/i18n';
+import { t } from '@/infrastructure/plugins/i18n';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -73,7 +73,7 @@ api.interceptors.response.use(
           btnAccept: t('error.accept'),
         });
         useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
-        const { default: router } = await import('@/ui/plugins/router');
+        const { default: router } = await import('@/infrastructure/plugins/router');
         const current = router.currentRoute.value;
         const redirect = current?.fullPath || '/';
         if (current?.name !== 'login') {

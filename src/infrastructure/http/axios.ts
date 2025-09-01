@@ -6,7 +6,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import type { InternalAxiosRequestConfig } from 'axios';
 import { useTextMessagesStore } from '../stores/textMessages';
 import { useDynamicDialogsStore } from '../stores/dynamicDialogs';
-import { t } from '@/ui/plugins/i18n';
+import { t } from '@/infrastructure/plugins/i18n';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -85,7 +85,7 @@ api.interceptors.response.use(
         useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
 
         // Redirige a login preservando la ruta actual
-        const { default: router } = await import('@/ui/plugins/router'); // avoid loops
+        const { default: router } = await import('@/infrastructure/plugins/router'); // avoid loops
         const current = router.currentRoute.value;
         const redirect = current?.fullPath || '/';
         if (current?.name !== 'login') {
