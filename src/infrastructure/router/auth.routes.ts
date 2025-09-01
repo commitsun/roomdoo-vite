@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/login/:pmsPropertyId(\\d+)?',
-    component: () => import('@/ui/layouts/LoginLayout.vue'),
+    component: () => import('@/ui/layouts/InstanceLayout.vue'),
     children: [
       {
         name: 'login',
@@ -14,7 +14,7 @@ export const authRoutes: RouteRecordRaw[] = [
   },
   {
     path: '/reset-password/:token([^/]+)?',
-    component: () => import('@/ui/layouts/LoginLayout.vue'),
+    component: () => import('@/ui/layouts/InstanceLayout.vue'),
     children: [
       {
         name: 'reset-password',
@@ -25,7 +25,7 @@ export const authRoutes: RouteRecordRaw[] = [
   },
   {
     path: '/request-reset-password/:pmsPropertyId(\\d+)?',
-    component: () => import('@/ui/layouts/LoginLayout.vue'),
+    component: () => import('@/ui/layouts/InstanceLayout.vue'),
     children: [
       {
         name: 'request-reset-password',
