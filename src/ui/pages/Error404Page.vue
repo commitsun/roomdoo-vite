@@ -9,32 +9,33 @@
       {{ t('error404.button') }}
     </router-link>
     <AppSelect
-      v-if="locales.length > 1"
+      v-if="availableLocales.length > 1"
       class="select-language"
       v-model="selectedLocale"
-      :options="locales"
+      :options="[...availableLocales]"
       optionLabel="label"
+      optionValue="value"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { availableLocales, i18n } from '@/ui/plugins/i18n';
-import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
+import { availableLocales, i18n, updateI18nLocale } from '@/infrastructure/plugins/i18n';
 import AppSelect from 'primevue/select';
+import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 
 const { t } = useI18n();
-
-const locales = ref(availableLocales);
-const selectedLocale = ref(locales.value.find((l) => l.value === i18n.global.locale.value));
-
+const selectedLocale = ref('');
 watch(selectedLocale, (newLocale) => {
   if (newLocale) {
-    updateAppLocale(newLocale.value);
-    localStorage.setItem('roomdoo-locale', newLocale.value);
+    updateI18nLocale(newLocale);
+    updatePrimevueLocale(newLocale);
   }
+});
+onMounted(() => {
+  selectedLocale.value = i18n.global.locale.value;
 });
 </script>
 

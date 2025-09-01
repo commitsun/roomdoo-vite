@@ -7,54 +7,54 @@
     <div class="form-container">
       <router-view />
     </div>
-    <AppSelect
-      v-if="locales.length > 1"
+    <Select
+      v-if="availableLocales.length > 1"
       class="select-language"
       v-model="selectedLocale"
-      :options="locales"
+      :options="[...availableLocales]"
       optionLabel="label"
+      optionValue="value"
     />
   </div>
 </template>
 <script lang="ts" setup>
 import { type Ref, onMounted, ref, watch } from 'vue';
-import AppSelect from 'primevue/select';
-import { i18n, updateI18nAvailableLocales, availableLocales } from '@/ui/plugins/i18n';
+import Select from 'primevue/select';
+import {
+  i18n,
+  updateI18nLocale,
+  updateI18nAvailableLocales,
+  availableLocales,
+} from '@/infrastructure/plugins/i18n';
+
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useRouter } from 'vue-router';
-import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
+import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 
 const router = useRouter();
 const instanceStore = useInstanceStore();
 const uiStore = useUIStore();
 
-const locales = ref(availableLocales);
-
-const selectedLocale = ref(locales.value.find((l) => l.value === i18n.global.locale.value));
+const selectedLocale = ref('');
 const instanceImage: Ref<string | undefined> = ref('');
 
 watch(selectedLocale, (newLocale) => {
   if (newLocale) {
-    updateAppLocale(newLocale.value);
-    localStorage.setItem('roomdoo-locale', newLocale.value);
+    updateI18nLocale(newLocale);
+    updatePrimevueLocale(newLocale);
   }
 });
 
 onMounted(async () => {
+  selectedLocale.value = i18n.global.locale.value;
   try {
     uiStore.startLoading();
     await instanceStore.fetchInstance();
     instanceImage.value = instanceStore.instance?.image;
-    const savedLocale = localStorage.getItem('roomdoo-locale');
-    const foundLocale = locales.value.find(
-      (l) => l.value === (savedLocale || i18n.global.locale.value)
-    );
-    locales.value = updateI18nAvailableLocales(instanceStore.instance?.languages);
-    selectedLocale.value = foundLocale || locales.value[0];
-    updateAppLocale(selectedLocale.value.value);
+    updateI18nAvailableLocales(instanceStore.instance?.languages);
   } catch (err) {
-    router.push({ name: 'hotel-not-found' });
+    router.push({ name: 'instance-not-found' });
   } finally {
     uiStore.stopLoading();
   }

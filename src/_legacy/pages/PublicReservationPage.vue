@@ -108,7 +108,7 @@ export default defineComponent({
           await store.dispatch('documentType/fetchDocumentTypes');
           await store.dispatch('countries/fetchCountries');
         } catch (e) {
-          void router.push('/not-found');
+          void router.push('/404-not-found');
         }
       }
       if (route.query.wizard) {
