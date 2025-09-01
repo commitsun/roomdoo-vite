@@ -36,7 +36,7 @@ import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { updateI18nAvailableLocales } from '@/ui/plugins/i18n';
+import { updateI18nAvailableLocales } from '@/infrastructure/plugins/i18n';
 
 const route = useRoute();
 const pmsPropertiesStore = usePmsPropertiesStore();

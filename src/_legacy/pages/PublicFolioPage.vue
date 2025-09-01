@@ -139,7 +139,7 @@ export default defineComponent({
             globalErrors: false,
           });
         } catch (e) {
-          void router.push('/not-found');
+          void router.push('/404-not-found');
         }
       }
     });
