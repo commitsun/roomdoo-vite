@@ -69,7 +69,8 @@ import { dialogService } from '@/_legacy/services/DialogService';
 import Select from 'primevue/select';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
+import { updateI18nLocale } from '@/infrastructure/plugins/i18n';
+import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 
 export default defineComponent({
   props: {
@@ -165,7 +166,10 @@ export default defineComponent({
     watch(selectedLocale, (newLocale) => {
       if (newLocale?.value) {
         locale.value = newLocale.value;
-        updateAppLocale(newLocale.value);
+        // updateAppLocale(newLocale.value);
+        updateI18nLocale(newLocale.value);
+        updatePrimevueLocale(newLocale.value);
+
         const newParams = { ...route.params, lang: newLocale.value };
         router.push({ name: route.name!, params: newParams });
       }
