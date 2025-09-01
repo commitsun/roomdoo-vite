@@ -56,11 +56,17 @@
         <InputText v-model="email" />
       </div>
 
-      <div class="user__settings--field" v-if="locales.length > 1">
+      <div class="user__settings--field" v-if="availableLocales.length > 1">
         <label class="user__settings--label">
           {{ t('userSettings.language') }}
         </label>
-        <Select v-model="language" :options="locales" optionLabel="label" />
+        <Select
+          class="select-language"
+          v-model="selectedLocale"
+          :options="[...availableLocales]"
+          optionLabel="label"
+          optionValue="value"
+        />
       </div>
     </div>
     <div class="user__settings--footer-buttons">
@@ -77,71 +83,38 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { i18n, availableLocales } from '@/ui/plugins/i18n';
+import { availableLocales, updateI18nLocale } from '@/infrastructure/plugins/i18n';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import Panel from 'primevue/panel';
 import Select from 'primevue/select';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import Password from 'primevue/password';
-import { updateAppLocale } from '@/ui/localeManager/localeManagerService';
+import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 
-export default defineComponent({
-  components: {
-    Avatar,
-    Button,
-    InputText,
-    Select,
-    Panel,
-    IconField,
-    InputIcon,
-    Password,
-  },
-  setup() {
-    const userStore = useUserStore();
-    const { t } = useI18n({ useScope: 'global' });
-    const user = userStore.user;
-    const firstName = ref('');
-    const lastName = ref('');
-    const secondLastName = ref('');
-    const phone = ref('');
-    const email = ref('');
-    const locales = ref(availableLocales);
-    const language = ref(locales.value.find((l) => l.value === i18n.global.locale.value));
+const userStore = useUserStore();
+const { t } = useI18n({ useScope: 'global' });
+const user = userStore.user;
+const firstName = ref('');
+const lastName = ref('');
+const secondLastName = ref('');
+const phone = ref('');
+const email = ref('');
+const selectedLocale = ref('');
 
-    const save = () => {
-      if (language.value) {
-        updateAppLocale(language.value.value);
-        localStorage.setItem('roomdoo-locale', language.value.value);
-      }
-    };
+const save = () => {
+  updateI18nLocale(selectedLocale.value);
+  updatePrimevueLocale(selectedLocale.value);
+};
 
-    onMounted(() => {
-      firstName.value = user?.firstName || '';
-      lastName.value = user?.lastName || '';
-      secondLastName.value = user?.lastName2 || '';
-      phone.value = user?.phone || '';
-      email.value = user?.email || '';
-    });
-    return {
-      user,
-      firstName,
-      lastName,
-      secondLastName,
-      phone,
-      email,
-      locales,
-      language,
-      t,
-      save,
-    };
-  },
+onMounted(() => {
+  firstName.value = user?.firstName || '';
+  lastName.value = user?.lastName || '';
+  secondLastName.value = user?.lastName2 || '';
+  phone.value = user?.phone || '';
+  email.value = user?.email || '';
 });
 </script>
 <style scoped lang="scss">
