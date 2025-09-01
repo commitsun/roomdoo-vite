@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { User } from '@/domain/entities/User';
-import { ref } from 'vue';
+import { readonly, ref } from 'vue';
 import { UsersRepositoryImpl } from '../repositories/UserRepositoryImpl';
 import { UserService } from '@/application/user/UserService';
 import { CookieService } from '@/infrastructure/cookies/CookieService';
@@ -61,7 +61,7 @@ export const useUserStore = defineStore('user', () => {
   };
 
   return {
-    user,
+    user: readonly(user),
     refreshToken,
     login,
     requestChangePassword,
