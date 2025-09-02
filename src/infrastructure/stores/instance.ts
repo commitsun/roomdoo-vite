@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, type Ref } from 'vue';
+import { readonly, ref, type Ref } from 'vue';
 import { InstanceRepositoryImpl } from '../repositories/InstanceRepositoryImpl';
 import { InstanceService } from '@/application/instance/InstanceService';
 import type { Instance } from '@/domain/entities/Instance';
@@ -14,5 +14,5 @@ export const useInstanceStore = defineStore('instance', () => {
     instance.value = await instanceService.fetchInstance();
   }
 
-  return { instance, fetchInstance };
+  return { instance: readonly(instance), fetchInstance };
 });
