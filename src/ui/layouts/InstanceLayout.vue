@@ -14,6 +14,7 @@
       :options="[...availableLocales]"
       optionLabel="label"
       optionValue="value"
+      aria-label="language-select"
     />
   </div>
 </template>
@@ -52,7 +53,11 @@ onMounted(async () => {
     uiStore.startLoading();
     await instanceStore.fetchInstance();
     instanceImage.value = instanceStore.instance?.image;
-    updateI18nAvailableLocales(instanceStore.instance?.languages);
+    updateI18nAvailableLocales(
+      instanceStore.instance?.languages
+        ? instanceStore.instance.languages.map((lang) => ({ code: lang.code }))
+        : undefined
+    );
   } catch (err) {
     router.push({ name: 'instance-not-found' });
   } finally {
