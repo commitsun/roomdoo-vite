@@ -1,45 +1,22 @@
 <template>
   <div class="not-found">
-    <h1 class="code">404</h1>
-    <p class="title">{{ t('error404.title') }}</p>
-    <p class="message">
+    <h1 class="not-found__code">404</h1>
+    <p class="not-found__title">{{ t('error404.title') }}</p>
+    <p class="not-found__message">
       {{ t('error404.message') }}
     </p>
-    <router-link to="/" class="button">
+    <router-link to="/" class="not-found__button">
       {{ t('error404.button') }}
     </router-link>
-    <AppSelect
-      v-if="availableLocales.length > 1"
-      class="select-language"
-      v-model="selectedLocale"
-      :options="[...availableLocales]"
-      optionLabel="label"
-      optionValue="value"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { availableLocales, i18n, updateI18nLocale } from '@/infrastructure/plugins/i18n';
-import AppSelect from 'primevue/select';
-import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
-
 const { t } = useI18n();
-const selectedLocale = ref('');
-watch(selectedLocale, (newLocale) => {
-  if (newLocale) {
-    updateI18nLocale(newLocale);
-    updatePrimevueLocale(newLocale);
-  }
-});
-onMounted(() => {
-  selectedLocale.value = i18n.global.locale.value;
-});
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .not-found {
   display: flex;
   flex-direction: column;
@@ -51,27 +28,28 @@ onMounted(() => {
   background-color: #f9fafb;
   color: #111827;
   position: relative;
-  .code {
+
+  &__code {
     font-size: 6rem;
     font-weight: 800;
     letter-spacing: -1px;
     margin: 0;
   }
 
-  .title {
+  &__title {
     font-size: 1.5rem;
     font-weight: 600;
     margin-top: 1rem;
   }
 
-  .message {
+  &__message {
     font-size: 1rem;
     color: #6b7280;
     margin-top: 0.5rem;
     max-width: 400px;
   }
 
-  .button {
+  &__button {
     display: inline-block;
     margin-top: 2rem;
     padding: 0.75rem 1.5rem;
@@ -81,21 +59,11 @@ onMounted(() => {
     text-decoration: none;
     transition: background-color 0.2s ease;
   }
-
-  .select-language {
-    position: absolute;
-    bottom: 2.5rem;
-    right: 2rem;
-    width: 200px;
-    z-index: 10;
-    background-color: #f8fafc;
-    text-align: left;
-  }
 }
 
 @media (min-width: 1024px) {
   .not-found {
-    .select-language {
+    &__select-language {
       bottom: 2rem;
       right: 5rem;
     }

@@ -25,7 +25,6 @@ function getNavigatorLanguages(): string[] {
 }
 
 function getBase(lang: string): string {
-  console.log('getBase', lang);
   return lang.split(/[-_]/)[0];
 }
 
