@@ -12,8 +12,13 @@ export const useContactsStore = defineStore('contacts', () => {
   const contacts: Ref<Contact[] | null> = ref(null);
   const contactsCount = ref(0);
 
-  const fetchContacts = async (page: number, pageSize: number) => {
-    const result = await contactService.fetchContacts(page, pageSize);
+  const fetchContacts = async (
+    page: number,
+    pageSize: number,
+    filters?: any,
+    sortField?: string
+  ) => {
+    const result = await contactService.fetchContacts(page, pageSize, filters, sortField);
     contacts.value = result.items;
     contactsCount.value = result.count;
   };

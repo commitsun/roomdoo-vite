@@ -4,7 +4,12 @@ import type { EntityListResponse } from '@/domain/repositories/EntityListRespons
 
 export class ContactsService {
   constructor(private contactsRepository: ContactsRepository) {}
-  fetchContacts(page: number, pageSize: number): Promise<EntityListResponse<Contact>> {
-    return this.contactsRepository.fetchContacts(page, pageSize);
+  fetchContacts(
+    page: number,
+    pageSize: number,
+    filters?: any,
+    sortField?: string
+  ): Promise<EntityListResponse<Contact>> {
+    return this.contactsRepository.fetchContacts(page, pageSize, filters, sortField);
   }
 }
