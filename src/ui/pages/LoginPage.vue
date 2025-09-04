@@ -105,6 +105,7 @@ export default defineComponent({
           router.replace(redirect);
         } else {
           console.log('not user');
+          console.log(userStore.user);
         }
       } catch (error) {
         if (error instanceof UnauthorizedError) {
