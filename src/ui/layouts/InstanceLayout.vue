@@ -11,27 +11,23 @@
       v-if="availableLocales.length > 1"
       class="select-language"
       v-model="selectedLocale"
-      :options="[...availableLocales]"
-      optionLabel="label"
-      optionValue="value"
+      :options="availableLocales"
+      optionLabel="name"
+      optionValue="code"
       aria-label="language-select"
     />
   </div>
 </template>
 <script lang="ts" setup>
-import { type Ref, onMounted, ref, watch } from 'vue';
+import { type Ref, computed, onMounted, ref, watch } from 'vue';
 import Select from 'primevue/select';
-import {
-  i18n,
-  updateI18nLocale,
-  updateI18nAvailableLocales,
-  availableLocales,
-} from '@/infrastructure/plugins/i18n';
+import { i18n } from '@/infrastructure/plugins/i18n';
 
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useRouter } from 'vue-router';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
+import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 
 const router = useRouter();
 const instanceStore = useInstanceStore();
@@ -40,9 +36,20 @@ const uiStore = useUIStore();
 const selectedLocale = ref('');
 const instanceImage: Ref<string | undefined> = ref('');
 
+const availableLocales = computed(() => {
+  return (
+    instanceStore.instance?.languages?.map((lang) => ({
+      label: lang.name,
+      value: lang.code,
+    })) ?? APP_LANGUAGES
+  );
+});
+
 watch(selectedLocale, (newLocale) => {
   if (newLocale) {
-    updateI18nLocale(newLocale);
+    // update i18n locale
+    i18n.global.locale.value = newLocale;
+    // update primevue locale
     updatePrimevueLocale(newLocale);
   }
 });
@@ -53,12 +60,8 @@ onMounted(async () => {
     uiStore.startLoading();
     await instanceStore.fetchInstance();
     instanceImage.value = instanceStore.instance?.image;
-    updateI18nAvailableLocales(
-      instanceStore.instance?.languages
-        ? instanceStore.instance.languages.map((lang) => ({ code: lang.code }))
-        : undefined
-    );
   } catch (err) {
+    console.log('instance not found');
     router.push({ name: 'instance-not-found' });
   } finally {
     uiStore.stopLoading();
