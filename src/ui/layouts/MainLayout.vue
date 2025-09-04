@@ -36,7 +36,6 @@ import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { updateI18nAvailableLocales } from '@/infrastructure/plugins/i18n';
 
 const route = useRoute();
 const pmsPropertiesStore = usePmsPropertiesStore();
@@ -56,7 +55,7 @@ watch(
 
 onBeforeMount(async () => {
   await instanceStore.fetchInstance();
-  updateI18nAvailableLocales(instanceStore.instance?.languages);
+
   await pmsPropertiesStore.fetchPmsProperties();
   const pmsPropertyId = (route.params.pmsPropertyId as string) || '';
   if (pmsPropertyId) {

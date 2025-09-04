@@ -13,6 +13,7 @@ export class UsersRepositoryImpl implements UserRepository {
     const user = response.data;
     user.avatar = user.image;
     delete user.image;
+    // TODO: request to back end team language when fetch user
     user.languageId = 1;
     return user;
   }

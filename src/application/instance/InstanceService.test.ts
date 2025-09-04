@@ -15,23 +15,29 @@ describe('InstanceService - fetchInstance', () => {
     instanceService = new InstanceService(instanceRepoMock as InstanceRepository);
   });
 
-  it('should fetch instance and languages, then return merged object', async () => {
-    // Arrange
+  it('should propagate error if fetchInstance or fetchLanguages fails', async () => {
+    instanceRepoMock.fetchInstance.mockRejectedValue(new InternalServerError());
+    instanceRepoMock.fetchLanguages.mockResolvedValue([]);
+
+    await expect(instanceService.fetchInstance()).rejects.toThrow(InternalServerError);
+    expect(instanceRepoMock.fetchInstance).toHaveBeenCalled();
+    expect(instanceRepoMock.fetchLanguages).toHaveBeenCalled();
+  });
+
+  it('should fetch instance and languages, then return merged object (same languages app & instance)', async () => {
     const instanceData = {
       name: 'Roomdoo',
       image: '',
     };
     const languages = [
-      { id: 1, code: 'es', name: 'Español' },
-      { id: 2, code: 'en', name: 'English' },
+      { code: 'es', name: 'Español' },
+      { code: 'en', name: 'English' },
     ];
     instanceRepoMock.fetchInstance.mockResolvedValue(instanceData);
     instanceRepoMock.fetchLanguages.mockResolvedValue(languages);
 
-    // Act
     const result = await instanceService.fetchInstance();
 
-    // Assert
     expect(instanceRepoMock.fetchInstance).toHaveBeenCalled();
     expect(instanceRepoMock.fetchLanguages).toHaveBeenCalled();
     expect(result).toEqual({
@@ -40,12 +46,39 @@ describe('InstanceService - fetchInstance', () => {
     });
   });
 
-  it('should propagate error if fetchInstance or fetchLanguages fails', async () => {
-    instanceRepoMock.fetchInstance.mockRejectedValue(new InternalServerError());
-    instanceRepoMock.fetchLanguages.mockResolvedValue([]);
+  it('should fetch instance and languages, then return merged object (1 match 1 not match app languages)', async () => {
+    const instanceData = {
+      name: 'Roomdoo',
+      image: '',
+    };
+    const languages = [
+      { code: 'es', name: 'Español' },
+      { code: 'it', name: 'Italiano' },
+    ];
+    instanceRepoMock.fetchInstance.mockResolvedValue(instanceData);
+    instanceRepoMock.fetchLanguages.mockResolvedValue(languages);
 
-    await expect(instanceService.fetchInstance()).rejects.toThrow(InternalServerError);
-    expect(instanceRepoMock.fetchInstance).toHaveBeenCalled();
-    expect(instanceRepoMock.fetchLanguages).toHaveBeenCalled();
+    const result = await instanceService.fetchInstance();
+
+    expect(result).toEqual({
+      ...instanceData,
+      languages: [languages[0]],
+    });
+  });
+
+  it('should fetch instance and languages, then return merged object (1 match 1 not match app languages)', async () => {
+    const instanceData = {
+      name: 'Roomdoo',
+      image: '',
+    };
+    const languages = [{ code: 'de', name: 'Deutsch' }];
+    instanceRepoMock.fetchInstance.mockResolvedValue(instanceData);
+    instanceRepoMock.fetchLanguages.mockResolvedValue(languages);
+    const result = await instanceService.fetchInstance();
+
+    expect(result).toEqual({
+      ...instanceData,
+      languages: [{ code: 'en', name: 'English' }],
+    });
   });
 });
