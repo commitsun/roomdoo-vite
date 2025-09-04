@@ -63,9 +63,9 @@
         <Select
           class="select-language"
           v-model="selectedLocale"
-          :options="[...availableLocales]"
-          optionLabel="label"
-          optionValue="value"
+          :options="availableLocales"
+          optionLabel="name"
+          optionValue="code"
         />
       </div>
     </div>
@@ -84,17 +84,20 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { availableLocales, updateI18nLocale } from '@/infrastructure/plugins/i18n';
+import { useInstanceStore } from '@/infrastructure/stores/instance';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
+import { i18n } from '@/infrastructure/plugins/i18n';
+import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 
 const userStore = useUserStore();
+const instanceStore = useInstanceStore();
 const { t } = useI18n({ useScope: 'global' });
 const user = userStore.user;
 const firstName = ref('');
@@ -103,9 +106,18 @@ const secondLastName = ref('');
 const phone = ref('');
 const email = ref('');
 const selectedLocale = ref('');
-
+const availableLocales = computed(() => {
+  return (
+    instanceStore.instance?.languages?.map((lang) => ({
+      label: lang.name,
+      value: lang.code,
+    })) ?? APP_LANGUAGES
+  );
+});
 const save = () => {
-  updateI18nLocale(selectedLocale.value);
+  // update i18n locale
+  i18n.global.locale.value = selectedLocale.value;
+  // update primevue locale
   updatePrimevueLocale(selectedLocale.value);
 };
 

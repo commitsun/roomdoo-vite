@@ -18,6 +18,7 @@ export const useUserStore = defineStore('user', () => {
   };
 
   const login = async (email: string, password: string) => {
+    console.log('login called');
     user.value = await userService.loginAndGetUser(email, password);
     if (user.value) {
       CookieService.setUserCookies({

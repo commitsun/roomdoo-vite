@@ -7,27 +7,24 @@ import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import Login from './LoginPage.vue';
 import { reactive } from 'vue';
 
-type MockRoute = {
-  query: Record<string, string>;
-  params: Record<string, string>;
-  name?: string;
-  fullPath?: string;
-};
-
-const route = reactive<MockRoute>({
+// here the route is reactive because in some tests we change its query or params
+const route = reactive({
   query: {},
   params: {},
   name: 'login',
   fullPath: '/login',
 });
 
+// reference needed
 const replace = vi.fn();
 
+// mocking vue-router to allow changing route params, query, ...
 vi.mock('vue-router', () => ({
   useRouter: () => ({ replace }),
   useRoute: () => route,
 }));
 
+// mocking i18n (test isolated from translations, performance, ...)
 vi.mock('vue-i18n', () => {
   const tMap: Record<string, string> = {
     'login.username': 'Username',
@@ -40,27 +37,27 @@ vi.mock('vue-i18n', () => {
   };
   const global = {
     locale: { value: 'en' },
-    fallbackLocale: { value: 'en' },
     availableLocales: ['en', 'es'],
     t: (key: string, _params?: unknown) => tMap[key] ?? key,
-    setLocaleMessage: vi.fn(),
-    removeLocaleMessage: vi.fn(),
   };
-
   return {
     useI18n: () => ({ t: (k: string) => tMap[k] ?? k }),
     createI18n: vi.fn(() => ({ global, install: () => {} })),
   };
 });
 
+// mocking legacy store because LoginPage uses it to do a Vuex login
+// TODO: remove when LoginPage is refactored to not use legacy store
 vi.mock('@/_legacy/utils/useLegacyStore', () => ({
   useLegacyStore: () => ({ doVuexLogin: vi.fn().mockResolvedValue(undefined) }),
 }));
 
+// mocking instance store to show instance name
 vi.mock('@/infrastructure/stores/instance', () => ({
   useInstanceStore: () => ({ instance: { name: 'Roomdoo Cloud' } }),
 }));
 
+// minimal stubs for primevue components used in LoginPage
 const InputTextStub = {
   name: 'InputText',
   inheritAttrs: false,
@@ -93,15 +90,13 @@ const ButtonStub = {
 
 describe('LoginPage', () => {
   beforeEach(() => {
+    // necessary to reset between tests
     replace.mockClear();
     route.query = {};
     route.params = {};
     route.name = 'login';
     route.fullPath = '/login';
-    const pinia = createTestingPinia({
-      stubActions: true,
-      createSpy: vi.fn,
-    });
+    const pinia = createTestingPinia();
     render(Login, {
       global: {
         plugins: [pinia],
@@ -120,8 +115,10 @@ describe('LoginPage', () => {
     const inputEmail = screen.getByRole('textbox', { name: 'Username' });
     const inputPassword = screen.getByLabelText('Password');
     const btn = screen.getByRole('button', { name: 'Log in' });
+
     await fireEvent.update(inputEmail, 'username');
     await fireEvent.update(inputPassword, 'password');
+
     expect(btn).toBeEnabled();
   });
   it('disables button when the username or password are not filled in', async () => {
@@ -139,27 +136,26 @@ describe('LoginPage', () => {
 
     await fireEvent.update(inputEmail, 'username');
     await fireEvent.update(inputPassword, '');
+
     expect(btn).toBeDisabled();
   });
 
   it('displays "Invalid credentials" when login is incorrect', async () => {
-    const userStore = useUserStore();
-    vi.spyOn(userStore, 'login').mockRejectedValueOnce(new UnauthorizedError('bad'));
+    vi.spyOn(useUserStore(), 'login').mockRejectedValueOnce(new UnauthorizedError('bad'));
 
     const email = screen.getByRole('textbox', { name: 'Username' });
     const pass = screen.getByLabelText('Password');
     const btn = screen.getByRole('button', { name: 'Log in' });
 
-    await fireEvent.update(email, 'test@roomdoo.com');
-    await fireEvent.update(pass, 'wrong');
+    await fireEvent.update(email, 'user');
+    await fireEvent.update(pass, 'password');
     await fireEvent.click(btn);
 
+    expect(useUserStore().login).toHaveBeenCalledWith('user', 'password');
     expect(await screen.findByRole('alert')).toHaveTextContent('Invalid credentials');
   });
 
   it('call login with credentials & redirects to "/" when login is correct', async () => {
-    const userStore = useUserStore();
-    vi.spyOn(userStore, 'login');
     vi.spyOn(useUserStore(), 'user', 'get').mockReturnValue({
       id: 1,
       email: 'a@b.c',
@@ -173,20 +169,18 @@ describe('LoginPage', () => {
     const inputPassword = screen.getByLabelText('Password');
     const btn = screen.getByRole('button', { name: 'Log in' });
 
-    await fireEvent.update(inputEmail, 'user@example.com');
-    await fireEvent.update(inputPassword, 'secret');
+    await fireEvent.update(inputEmail, 'user');
+    await fireEvent.update(inputPassword, 'pass');
     await fireEvent.click(btn);
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/'));
-    expect(userStore.login).toHaveBeenCalledWith('user@example.com', 'secret');
+    expect(useUserStore().login).toHaveBeenCalledWith('user', 'pass');
   });
 
   it('redirects to query in url params', async () => {
     const routeToRedirect = '/planning';
     route.query = { redirect: routeToRedirect };
 
-    const userStore = useUserStore();
-    vi.spyOn(userStore, 'login').mockResolvedValueOnce();
     vi.spyOn(useUserStore(), 'user', 'get').mockReturnValue({
       id: 1,
       email: 'a@b.c',
@@ -200,8 +194,8 @@ describe('LoginPage', () => {
     const inputPassword = screen.getByLabelText('Password');
     const btn = screen.getByRole('button', { name: 'Log in' });
 
-    await fireEvent.update(inputEmail, 'user@example.com');
-    await fireEvent.update(inputPassword, 'secret');
+    await fireEvent.update(inputEmail, 'user');
+    await fireEvent.update(inputPassword, 'pass');
     await fireEvent.click(btn);
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith(routeToRedirect));
@@ -212,8 +206,6 @@ describe('LoginPage', () => {
     route.params = { pmsPropertyId: '1' };
     route.fullPath = '/login/1';
 
-    const userStore = useUserStore();
-    vi.spyOn(userStore, 'login').mockResolvedValueOnce();
     vi.spyOn(useUserStore(), 'user', 'get').mockReturnValue({
       id: 1,
       email: 'a@b.c',
