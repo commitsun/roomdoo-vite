@@ -2,10 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/vue';
 import '@testing-library/jest-dom/vitest';
 import InstanceLayout from '@/ui/layouts/InstanceLayout.vue';
-import { createTestingPinia } from '@pinia/testing';
+import { createTestingPinia, type TestingPinia } from '@pinia/testing';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
-import { ref } from 'vue';
-import { renderHeadToString } from '@vueuse/head';
 
 const push = vi.fn();
 vi.mock('vue-router', () => ({
@@ -20,15 +18,7 @@ const SelectStub = {
 };
 const RouterViewStub = { template: `<div data-testid="router-view-stub"></div>` };
 
-const languages = ref([
-  { name: 'English', code: 'en' },
-  { name: 'Spanish', code: 'es' },
-]);
-
-const pinia = createTestingPinia({
-  stubActions: true,
-  createSpy: vi.fn,
-});
+let testPinia: TestingPinia;
 
 const renderInstanceLayout = (pinia: any) => {
   return render(InstanceLayout, {
@@ -40,8 +30,7 @@ const renderInstanceLayout = (pinia: any) => {
 };
 
 beforeEach(() => {
-  // @ts-ignore
-  global.__TEST_PINIA__ = createTestingPinia({
+  testPinia = createTestingPinia({
     stubActions: true,
     createSpy: vi.fn,
   });
@@ -55,7 +44,7 @@ afterEach(() => {
 });
 
 describe('InstanceLayout', () => {
-  it('renderiza el select cuando hay varios locales', async () => {
+  it('renders select when there are several locales', async () => {
     const store = useInstanceStore();
     vi.spyOn(store, 'instance', 'get').mockReturnValue({
       name: 'Roomdoo Cloud',
@@ -64,34 +53,31 @@ describe('InstanceLayout', () => {
         { name: 'Spanish', code: 'es' },
       ],
     });
-    // @ts-ignore
-    renderInstanceLayout(global.__TEST_PINIA__);
+
+    renderInstanceLayout(testPinia);
 
     expect(screen.getByRole('combobox', { name: 'language-select' })).toBeInTheDocument();
   });
 
-  it('NO renderiza el select cuando solo hay un locale', async () => {
+  it("doesn't render select when there's only one locale", async () => {
     const store = useInstanceStore();
     vi.spyOn(store, 'instance', 'get').mockReturnValue({
       name: 'Roomdoo Cloud',
       languages: [{ name: 'English', code: 'en' }],
     });
 
-    // @ts-ignore
-    renderInstanceLayout(global.__TEST_PINIA__);
+    renderInstanceLayout(testPinia);
 
     expect(screen.queryByRole('combobox', { name: 'language-select' })).not.toBeInTheDocument();
   });
 
-  it('renderiza el select con idiomas por defecto cuando falla fetchInstance', async () => {
+  it("renders select with default locales and redirects to hotel not found page whene there's no instance", async () => {
     const store = useInstanceStore();
     vi.spyOn(store, 'fetchInstance').mockRejectedValueOnce(new Error('bad'));
 
-    // @ts-ignore
-    renderInstanceLayout(global.__TEST_PINIA__);
+    renderInstanceLayout(testPinia);
 
-    const combo = await screen.findByRole('combobox', { name: 'language-select' });
-    expect(combo).toBeInTheDocument();
+    expect(await screen.findByRole('combobox', { name: 'language-select' })).toBeInTheDocument();
     expect(push).toHaveBeenCalledWith({ name: 'instance-not-found' });
   });
 });
