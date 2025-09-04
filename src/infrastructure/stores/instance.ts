@@ -14,5 +14,8 @@ export const useInstanceStore = defineStore('instance', () => {
     instance.value = await instanceService.fetchInstance();
   }
 
-  return { instance: readonly(instance), fetchInstance };
+  return {
+    instance: readonly(instance),
+    fetchInstance,
+  };
 });

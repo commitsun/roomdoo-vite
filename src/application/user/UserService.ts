@@ -34,6 +34,7 @@ export class UserService {
   async updateUser(user: Partial<User>): Promise<void> {
     await this.userRepository.updateUser(user);
   }
+
   logout(): void {
     this.userRepository.logout();
   }
