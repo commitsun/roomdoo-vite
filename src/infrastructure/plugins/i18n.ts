@@ -8,8 +8,8 @@ const baseLang = browserLang.substring(0, 2);
 export const i18n = createI18n({
   legacy: false,
   globalInjection: true,
-  locale: ['es', 'gl', 'ca', 'eu'].includes(baseLang) ? 'es' : 'en',
-  fallbackLocale: 'en',
+  locale: ['es-ES', 'gl', 'ca', 'eu'].includes(baseLang) ? 'es-ES' : 'en-US',
+  fallbackLocale: 'en-US',
   availableLocales: APP_LANGUAGES.map((l) => l.code),
   messages,
 });
