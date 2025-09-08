@@ -61,7 +61,13 @@
     "type": "Tipo",
     "email": "Email",
     "phone": "Teléfono",
-    "country": "País"
+    "country": "País",
+    "types": {
+      "guest": "Huésped",
+      "customer": "Cliente",
+      "agency": "Agencia",
+      "supplier": "Proveedor"
+    }
   },
   "userSettings": {
     "replaceImage": "Reemplazar foto",
