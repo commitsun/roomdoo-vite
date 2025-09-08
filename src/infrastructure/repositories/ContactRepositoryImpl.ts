@@ -3,37 +3,30 @@ import type { ContactsRepository } from '@/domain/repositories/ContactsRepositor
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import { api } from '../http/axios';
 
-function readPrimeFilterValue(meta: any) {
-  if (!meta) return null;
-  if (Array.isArray(meta?.constraints) && meta.constraints.length) {
-    return meta.constraints[0]?.value ?? null;
-  }
-  return meta?.value ?? null;
-}
-
-function buildQueryParamsFromPrimeFilters(filters: any) {
+function buildQueryParamsFromFilters(
+  globalSearch: string | undefined,
+  nameContains: string | undefined,
+  emailContains: string | undefined,
+  typeIn: string[] | undefined,
+  countryIn: string[] | undefined
+) {
   const params = new URLSearchParams();
 
-  const name = readPrimeFilterValue(filters?.name);
-  if (name) params.set('name', String(name).trim());
-
-  const email = readPrimeFilterValue(filters?.email);
-  if (email) params.set('email', String(email).trim());
-
-  const type = readPrimeFilterValue(filters?.type);
-  if (type != null && type !== '') {
-    if (Array.isArray(type)) {
-      params.set('type', type.join(','));
-    } else {
-      params.set('type', String(type));
-    }
+  if (globalSearch) {
+    params.set('globalSearch', globalSearch);
   }
-
-  const country = readPrimeFilterValue(filters?.country);
-  if (country != null && country !== '') {
-    params.set('country', String(country));
+  if (nameContains) {
+    params.set('name', nameContains);
   }
-
+  if (emailContains) {
+    params.set('email', emailContains);
+  }
+  if (typeIn && typeIn.length > 0) {
+    params.set('type', typeIn.join(','));
+  }
+  if (countryIn && countryIn.length > 0) {
+    params.set('country', countryIn.join(','));
+  }
   return params;
 }
 
@@ -41,10 +34,21 @@ export class ContactsRepositoryImpl implements ContactsRepository {
   async fetchContacts(
     page: number,
     pageSize: number,
-    primeFilters?: any, // ahora espera el objeto de filtros de PrimeVue
-    orderBy?: string // p. ej. 'name' o '-country'
+    globalSearch?: string,
+    nameContains?: string,
+    emailContains?: string,
+    typeIn?: string[],
+    countryIn?: string[],
+    orderBy?: string
   ): Promise<EntityListResponse<Contact>> {
-    const params = buildQueryParamsFromPrimeFilters(primeFilters ?? {});
+    console.log('globalSearch:', globalSearch);
+    const params = buildQueryParamsFromFilters(
+      globalSearch,
+      nameContains,
+      emailContains,
+      typeIn,
+      countryIn
+    );
     params.set('page', String(page));
     params.set('page_size', String(pageSize));
 

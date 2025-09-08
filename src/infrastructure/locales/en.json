@@ -61,7 +61,13 @@
     "type": "Type",
     "email": "Email",
     "phone": "Phone",
-    "country": "Country"
+    "country": "Country",
+    "types": {
+      "guest": "Guest",
+      "customer": "Customer",
+      "agency": "Agency",
+      "supplier": "Supplier"
+    }
   },
   "userSettings": {
     "replaceImage": "Replace image",
