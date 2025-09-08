@@ -27,7 +27,7 @@
             <InputIcon>
               <i class="pi pi-search" />
             </InputIcon>
-            <InputText v-model="globalQuery" placeholder="Keyword Search" />
+            <InputText v-model="globalQuery" placeholder="Keyword Search" @input="loadLazy()" />
           </IconField>
           <Button
             type="button"
@@ -77,7 +77,7 @@
             v-for="type in data.types"
             :key="type"
             :severity="severityType(type)"
-            :value="type.charAt(0).toUpperCase() + type.slice(1)"
+            :value="t('contacts.types.' + type)"
             class="mr-2 mt-1"
           />
         </template>
@@ -85,7 +85,7 @@
         <template #filter="{ filterModel }">
           <Select
             v-model="filterModel.value"
-            :options="typesOptions"
+            :options="CONTACT_TYPES.map((v) => ({ name: t('contacts.types.' + v), value: v }))"
             optionLabel="name"
             optionValue="value"
             placeholder="Any"
@@ -171,7 +171,8 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-
+import { useDebounceFn } from '@vueuse/core';
+import { CONTACT_TYPES } from '@/domain/types/ContactType';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
@@ -208,6 +209,8 @@ export default defineComponent({
     const uiStore = useUIStore();
     const { t } = useI18n();
 
+    const test = ref(true);
+
     const numTotalRecords = ref(0);
     const page = ref(1);
     const rows = ref(50);
@@ -228,7 +231,6 @@ export default defineComponent({
     );
 
     const filters = ref({
-      global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
       name: {
         operator: FilterOperator.AND,
         constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
@@ -268,23 +270,27 @@ export default defineComponent({
     const customers = computed(() => contactsStore.contacts || []);
     const setCountFromStore = () => (numTotalRecords.value = contactsStore.contactsCount);
 
-    let debounceId: number | undefined;
-    const debounced = (fn: () => void, ms = 250) => {
-      if (debounceId) window.clearTimeout(debounceId);
-      debounceId = window.setTimeout(fn, ms);
-    };
-
     const fetchNow = async () => {
       uiStore.startLoading();
       try {
-        await contactsStore.fetchContacts(page.value, rows.value, filters.value, orderBy.value);
+        await contactsStore.fetchContacts(
+          page.value,
+          rows.value,
+          globalQuery.value || undefined,
+          filters.value.name.constraints[0].value || undefined,
+          filters.value.email.constraints[0].value || undefined,
+          (filters.value.type.constraints[0].value as string[] | null) || undefined,
+          (filters.value.country.constraints[0].value as string[] | null) || undefined,
+          orderBy.value
+        );
         setCountFromStore();
       } finally {
         uiStore.stopLoading();
       }
     };
+    const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
 
-    const loadLazy = (e?: any) => {
+    const loadLazy = async (e?: any) => {
       if (e?.page !== undefined) {
         page.value = e.page + 1;
         rows.value = e.rows;
@@ -298,8 +304,7 @@ export default defineComponent({
         filters.value = e.filters;
         page.value = 1;
       }
-      const ms = e?.filters ? 250 : 0;
-      debounced(fetchNow, ms);
+      await debouncedFetchNow();
     };
 
     const clearAll = () => {
@@ -309,7 +314,6 @@ export default defineComponent({
       page.value = 1;
 
       filters.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: {
           operator: FilterOperator.AND,
           constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
@@ -362,7 +366,7 @@ export default defineComponent({
       loadLazy,
       clearAll,
       severityType,
-      typesOptions,
+      CONTACT_TYPES,
       countryOptions,
     };
   },
