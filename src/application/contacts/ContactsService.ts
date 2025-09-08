@@ -4,12 +4,26 @@ import type { EntityListResponse } from '@/domain/repositories/EntityListRespons
 
 export class ContactsService {
   constructor(private contactsRepository: ContactsRepository) {}
-  fetchContacts(
+  async fetchContacts(
     page: number,
     pageSize: number,
-    filters?: any,
-    sortField?: string
+    globalSearch?: string,
+    nameContains?: string,
+    emailContains?: string,
+    typeIn?: string[],
+    countryIn?: string[],
+    orderBy?: string
   ): Promise<EntityListResponse<Contact>> {
-    return this.contactsRepository.fetchContacts(page, pageSize, filters, sortField);
+    const response = await this.contactsRepository.fetchContacts(
+      page,
+      pageSize,
+      globalSearch,
+      nameContains,
+      emailContains,
+      typeIn,
+      countryIn,
+      orderBy
+    );
+    return response;
   }
 }
