@@ -39,9 +39,12 @@ const instanceImage: Ref<string | undefined> = ref('');
 const availableLocales = computed(() => {
   return (
     instanceStore.instance?.languages?.map((lang) => ({
-      label: lang.name,
-      value: lang.code,
-    })) ?? APP_LANGUAGES
+      name: lang.name,
+      code: lang.code,
+    })) ?? [
+      window.navigator.language === 'en-GB' ? APP_LANGUAGES[2] : APP_LANGUAGES[0],
+      APP_LANGUAGES[1],
+    ]
   );
 });
 
@@ -61,7 +64,6 @@ onMounted(async () => {
     await instanceStore.fetchInstance();
     instanceImage.value = instanceStore.instance?.image;
   } catch (err) {
-    console.log('instance not found');
     router.push({ name: 'instance-not-found' });
   } finally {
     uiStore.stopLoading();
