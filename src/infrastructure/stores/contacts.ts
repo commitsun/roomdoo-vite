@@ -15,10 +15,23 @@ export const useContactsStore = defineStore('contacts', () => {
   const fetchContacts = async (
     page: number,
     pageSize: number,
-    filters?: any,
-    sortField?: string
+    globalSearch?: string,
+    nameContains?: string,
+    emailContains?: string,
+    typeIn?: string[],
+    countryIn?: string[],
+    orderBy?: string
   ) => {
-    const result = await contactService.fetchContacts(page, pageSize, filters, sortField);
+    const result = await contactService.fetchContacts(
+      page,
+      pageSize,
+      globalSearch,
+      nameContains,
+      emailContains,
+      typeIn,
+      countryIn,
+      orderBy
+    );
     contacts.value = result.items;
     contactsCount.value = result.count;
   };
