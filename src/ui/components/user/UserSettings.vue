@@ -56,16 +56,16 @@
         <InputText v-model="email" />
       </div>
 
-      <div class="user__settings--field" v-if="availableLocales.length > 1">
+      <div class="user__settings--field" v-if="availableLocales && availableLocales.length > 1">
         <label class="user__settings--label">
           {{ t('userSettings.language') }}
         </label>
         <Select
           class="select-language"
           v-model="selectedLocale"
-          :options="availableLocales"
           optionLabel="name"
           optionValue="code"
+          :options="availableLocales as any[]"
         />
       </div>
     </div>
@@ -106,14 +106,7 @@ const secondLastName = ref('');
 const phone = ref('');
 const email = ref('');
 const selectedLocale = ref('');
-const availableLocales = computed(() => {
-  return (
-    instanceStore.instance?.languages?.map((lang) => ({
-      label: lang.name,
-      value: lang.code,
-    })) ?? APP_LANGUAGES
-  );
-});
+const availableLocales = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
 const save = () => {
   // update i18n locale
   i18n.global.locale.value = selectedLocale.value;
