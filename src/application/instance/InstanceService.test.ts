@@ -30,14 +30,13 @@ describe('InstanceService - fetchInstance', () => {
       image: '',
     };
     const languages = [
-      { code: 'es', name: 'Español' },
-      { code: 'en', name: 'English' },
+      { code: 'es-ES', name: 'Español' },
+      { code: 'en-US', name: 'English' },
     ];
     instanceRepoMock.fetchInstance.mockResolvedValue(instanceData);
     instanceRepoMock.fetchLanguages.mockResolvedValue(languages);
 
     const result = await instanceService.fetchInstance();
-
     expect(instanceRepoMock.fetchInstance).toHaveBeenCalled();
     expect(instanceRepoMock.fetchLanguages).toHaveBeenCalled();
     expect(result).toEqual({
@@ -52,7 +51,7 @@ describe('InstanceService - fetchInstance', () => {
       image: '',
     };
     const languages = [
-      { code: 'es', name: 'Español' },
+      { code: 'es-ES', name: 'Español' },
       { code: 'it', name: 'Italiano' },
     ];
     instanceRepoMock.fetchInstance.mockResolvedValue(instanceData);
@@ -78,7 +77,7 @@ describe('InstanceService - fetchInstance', () => {
 
     expect(result).toEqual({
       ...instanceData,
-      languages: [{ code: 'en', name: 'English' }],
+      languages: [{ code: 'en-US', name: 'English' }],
     });
   });
 });

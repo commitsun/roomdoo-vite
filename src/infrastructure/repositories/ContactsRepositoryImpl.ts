@@ -1,13 +1,13 @@
 import type { Contact } from '@/domain/entities/Contact';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
-import { api } from '../http/axios';
+import { api } from '@/infrastructure/http/axios';
 
 function buildQueryParamsFromFilters(
   globalSearch: string | undefined,
   nameContains: string | undefined,
   emailContains: string | undefined,
-  typeIn: string[] | undefined,
+  typeIn: string | undefined,
   countryIn: string[] | undefined
 ) {
   const params = new URLSearchParams();
@@ -21,11 +21,13 @@ function buildQueryParamsFromFilters(
   if (emailContains) {
     params.set('email', emailContains);
   }
-  if (typeIn && typeIn.length > 0) {
-    params.set('type', typeIn.join(','));
+  if (typeIn) {
+    params.set('type', typeIn);
   }
   if (countryIn && countryIn.length > 0) {
-    params.set('country', countryIn.join(','));
+    countryIn.forEach((country) => {
+      params.append('countries', country);
+    });
   }
   return params;
 }
@@ -37,11 +39,10 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     globalSearch?: string,
     nameContains?: string,
     emailContains?: string,
-    typeIn?: string[],
+    typeIn?: string,
     countryIn?: string[],
     orderBy?: string
   ): Promise<EntityListResponse<Contact>> {
-    console.log('globalSearch:', globalSearch);
     const params = buildQueryParamsFromFilters(
       globalSearch,
       nameContains,
