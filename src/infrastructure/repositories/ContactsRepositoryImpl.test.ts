@@ -61,8 +61,9 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       'john', // globalSearch
       'doe', // nameContains
       'email@gmail.com', // emailContains
-      'guest', // typeIn
+      ['guest'], // typeIn
       ['Argentina', 'Spain'], // countryIn
+      '555444333', // phonesContains
       '-name' // orderBy
     );
 
@@ -77,11 +78,12 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     expect(url.searchParams.get('globalSearch')).toBe('john');
     expect(url.searchParams.get('name')).toBe('doe');
     expect(url.searchParams.get('email')).toBe('email@gmail.com');
-    expect(url.searchParams.get('type')).toBe('guest');
+    expect(url.searchParams.get('types')).toBe('guest');
 
     const countryParams = url.searchParams.getAll('countries');
     expect(new Set(countryParams)).toEqual(new Set(['Argentina', 'Spain']));
 
+    expect(url.searchParams.get('phone')).toBe('555444333');
     expect(url.searchParams.get('orderBy')).toBe('-name');
   });
 
@@ -94,8 +96,9 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       '', // empty -> should NOT be set
       undefined,
       undefined,
-      'supplier',
+      ['supplier'],
       [], // empty array -> should NOT be set
+      '', // phonesContains
       '-name'
     );
 
@@ -103,8 +106,9 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     const url = new URL(calledUrl, 'http://localhost');
 
     expect(url.searchParams.has('globalSearch')).toBe(false);
-    expect(url.searchParams.get('type')).toBe('supplier');
+    expect(url.searchParams.get('types')).toBe('supplier');
     expect(url.searchParams.has('countries')).toBe(false);
+    expect(url.searchParams.has('phone')).toBe(false);
     expect(url.searchParams.get('orderBy')).toBe('-name');
   });
 
