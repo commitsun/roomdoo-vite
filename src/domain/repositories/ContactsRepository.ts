@@ -8,7 +8,7 @@ export interface ContactsRepository {
     globalSearch?: string,
     nameContains?: string,
     emailContains?: string,
-    typeIn?: string[],
+    typeIn?: string,
     countryIn?: string[],
     orderBy?: string
   ): Promise<EntityListResponse<Contact>>;
