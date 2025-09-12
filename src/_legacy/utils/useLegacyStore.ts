@@ -11,8 +11,15 @@ export function useLegacyStore() {
     store.dispatch('user/reset');
   };
 
+  const fetchAndSetVuexPartnerAndACtiveProperty = async (partnerId: number, propertyId: number) => {
+    await store.dispatch('properties/fetchProperties');
+    await store.dispatch('properties/setActiveProperty', propertyId);
+    await store.dispatch('partners/fetchCurrentPartner', partnerId);
+  };
+
   return {
     doVuexLogin,
     removeVuexAndOldCookiesUser,
+    fetchAndSetVuexPartnerAndACtiveProperty,
   };
 }

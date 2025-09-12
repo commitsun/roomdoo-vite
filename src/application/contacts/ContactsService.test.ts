@@ -27,6 +27,7 @@ describe('ContactsService.fetchContacts', () => {
       undefined,
       undefined,
       undefined,
+      undefined,
       undefined
     );
     expect(result).toBe(response);
@@ -48,8 +49,9 @@ describe('ContactsService.fetchContacts', () => {
       'john',
       'doe',
       'gmail.com',
-      'GUEST',
+      ['GUEST'],
       ['ES', 'PT'],
+      undefined,
       'name:asc'
     );
 
@@ -59,8 +61,9 @@ describe('ContactsService.fetchContacts', () => {
       'john',
       'doe',
       'gmail.com',
-      'GUEST',
+      ['GUEST'],
       ['ES', 'PT'],
+      undefined,
       'name:asc'
     );
     expect(result).toBe(response);
