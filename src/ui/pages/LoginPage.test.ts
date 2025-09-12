@@ -4,8 +4,8 @@ import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
-import Login from './LoginPage.vue';
 import { reactive } from 'vue';
+import Login from './LoginPage.vue';
 
 // here the route is reactive because in some tests we change its query or params
 const route = reactive({
