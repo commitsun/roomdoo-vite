@@ -27,12 +27,18 @@
             <InputIcon>
               <i class="pi pi-search" />
             </InputIcon>
-            <InputText v-model="globalQuery" placeholder="Keyword Search" @input="loadLazy()" />
+            <InputText
+              v-model="globalQuery"
+              :placeholder="t('contacts.globalSearch')"
+              @input="debouncedFetchNow()"
+              :aria-label="t('contacts.globalSearch')"
+            />
           </IconField>
           <Button
             type="button"
             icon="pi pi-filter-slash"
-            label="Clear"
+            :label="t('contacts.clear')"
+            :aria-label="t('contacts.clear')"
             variant="outlined"
             @click="clearAll"
           />
@@ -57,7 +63,11 @@
         </template>
 
         <template #filter="{ filterModel }">
-          <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            :placeholder="t('contacts.searchByName')"
+          />
         </template>
       </Column>
 
@@ -88,8 +98,8 @@
             :options="CONTACT_TYPES.map((v) => ({ name: t('contacts.types.' + v), value: v }))"
             optionLabel="name"
             optionValue="value"
-            placeholder="Any"
             showClear
+            :placeholder="t('contacts.searchByType')"
           />
         </template>
       </Column>
@@ -110,7 +120,11 @@
         </template>
 
         <template #filter="{ filterModel }">
-          <InputText v-model="filterModel.value" type="text" placeholder="Search by email" />
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            :placeholder="t('contacts.searchByEmail')"
+          />
         </template>
       </Column>
 
@@ -153,15 +167,35 @@
         <template #filter="{ filterModel }">
           <MultiSelect
             v-model="filterModel.value"
-            :options="countryOptions"
+            :options="countries"
             optionLabel="label"
             optionValue="value"
-            display="chip"
-            placeholder="Any"
-            class="w-full"
-            :maxSelectedLabels="2"
+            filter
+            :placeholder="t('contacts.searchByCountry')"
+            class="w-full ms-eq"
             showClear
-          />
+            :showToggleAll="false"
+            :maxSelectedLabels="1"
+            appendTo="self"
+            :panelStyle="{ width: '100%' }"
+            :selectedItemsLabel="
+              t('contacts.n_countries_selected', {
+                count: filterModel.value ? filterModel.value.length : 0,
+              })
+            "
+          >
+            <template #option="slotProps">
+              <div class="flex items-center gap-2 leading-none">
+                <CountryFlag
+                  :country="slotProps.option.code"
+                  size="normal"
+                  shadow
+                  style="margin-bottom: 1px"
+                />
+                <span>{{ slotProps.option.label }}</span>
+              </div>
+            </template>
+          </MultiSelect>
         </template>
       </Column>
     </DataTable>
@@ -169,7 +203,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
@@ -187,7 +221,13 @@ import InputIcon from 'primevue/inputicon';
 
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
+import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
+
+const truncateLabel = (label: string, maxLength = 20) => {
+  if (!label) return '';
+  return label.length > maxLength ? label.substring(0, maxLength) + '…' : label;
+};
 
 export default defineComponent({
   name: 'ContactsPage',
@@ -206,10 +246,9 @@ export default defineComponent({
   },
   setup() {
     const contactsStore = useContactsStore();
+    const countriesStore = useCountriesStore();
     const uiStore = useUIStore();
     const { t } = useI18n();
-
-    const test = ref(true);
 
     const numTotalRecords = ref(0);
     const page = ref(1);
@@ -251,21 +290,13 @@ export default defineComponent({
 
     const globalQuery = ref<string>('');
 
-    const TYPES = ['guest', 'customer', 'agency', 'supplier'];
-    const typesOptions = TYPES.map((v) => ({
-      name: v.charAt(0).toUpperCase() + v.slice(1),
-      value: v,
-    }));
-
-    const countryOptions = computed(() => {
-      const set = new Set<string>();
-      for (const c of contactsStore.contacts || []) {
-        if (c?.country?.name) set.add(c.country.name);
-      }
-      return Array.from(set)
-        .sort()
-        .map((name) => ({ label: name, value: name }));
-    });
+    const countries = computed(() =>
+      countriesStore.countries.map((c) => ({
+        label: truncateLabel(c.name),
+        value: c.name,
+        code: c.code,
+      }))
+    );
 
     const customers = computed(() => contactsStore.contacts || []);
     const setCountFromStore = () => (numTotalRecords.value = contactsStore.contactsCount);
@@ -279,7 +310,7 @@ export default defineComponent({
           globalQuery.value || undefined,
           filters.value.name.constraints[0].value || undefined,
           filters.value.email.constraints[0].value || undefined,
-          (filters.value.type.constraints[0].value as string[] | null) || undefined,
+          filters.value.type.constraints[0].value || undefined,
           (filters.value.country.constraints[0].value as string[] | null) || undefined,
           orderBy.value
         );
@@ -288,6 +319,7 @@ export default defineComponent({
         uiStore.stopLoading();
       }
     };
+
     const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
 
     const loadLazy = async (e?: any) => {
@@ -304,7 +336,7 @@ export default defineComponent({
         filters.value = e.filters;
         page.value = 1;
       }
-      await debouncedFetchNow();
+      await fetchNow();
     };
 
     const clearAll = () => {
@@ -352,22 +384,27 @@ export default defineComponent({
     onBeforeMount(async () => {
       await fetchNow();
     });
+    onMounted(async () => {
+      await useCountriesStore().fetchCountries();
+    });
 
     return {
       rowsPerPageOptions,
       rows,
       customers,
       numTotalRecords,
-      t,
-      sortField,
-      sortOrder,
-      filters,
       globalQuery,
+      filters,
+      CONTACT_TYPES,
+      countries,
+      sortOrder,
+      sortField,
+      t,
       loadLazy,
+      fetchNow,
+      debouncedFetchNow,
       clearAll,
       severityType,
-      CONTACT_TYPES,
-      countryOptions,
     };
   },
 });

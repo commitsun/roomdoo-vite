@@ -26,7 +26,8 @@ const api: AxiosInstance = axios.create({
 });
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const locale = i18n.global.locale.value;
+  let locale = i18n.global.locale.value;
+  locale = locale.replace('-', '_');
 
   if (config.headers instanceof AxiosHeaders) {
     config.headers.set('Accept-Language', locale);
