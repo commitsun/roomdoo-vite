@@ -41,7 +41,6 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "planning": "Planning de reservas",
-    "contacts": "Contactos",
     "cashRegister": "Registro de caja",
     "billing": "Facturación",
     "reports": "Informes",
@@ -54,7 +53,15 @@
     "settings": "Configuración",
     "userSettings": "Configuración de usuario",
     "changePassword": "Cambiar contraseña",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "contacts": {
+      "title": "Contactos",
+      "all": "Todos",
+      "customers": "Clientes",
+      "guests": "Huéspedes",
+      "agencies": "Agencias",
+      "suppliers": "Proveedores"
+    }
   },
   "contacts": {
     "fullName": "Nombre",
@@ -74,7 +81,11 @@
     "searchByName": "Buscar por nombre",
     "searchByType": "Buscar por tipo",
     "searchByEmail": "Buscar por email",
-    "searchByCountry": "Buscar por país"
+    "searchByCountry": "Buscar por país",
+    "vat": "NIF/CIF",
+    "totalInvoiced": "Total facturado",
+    "searchByVat": "Buscar por NIF/CIF",
+    "selectCountries": "Seleccionar países"
   },
   "userSettings": {
     "replaceImage": "Reemplazar foto",

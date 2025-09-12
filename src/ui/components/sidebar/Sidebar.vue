@@ -4,6 +4,7 @@
     class="layout__sidebar"
     :class="{ 'layout__sidebar--open': menuOpen }"
     @mouseleave="collapseSidebar"
+    @mouseenter="checkPathAndExpandContacts()"
     @click="hideUserMenu()"
   >
     <!-- LOGO -->
@@ -31,14 +32,72 @@
         <span>{{ t('sidebar.planning') }}</span>
       </router-link>
 
-      <router-link
-        :to="`/contacts${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
-        class="layout__nav-link"
-        :class="{ 'layout__nav-link--active': isActive('/contacts') }"
+      <!-- CONTACTS (dropdown) -->
+      <div
+        class="layout__nav-link layout__nav-link--toggle"
+        :class="{ 'layout__nav-link--active': isContactsSectionActive }"
+        @click="isContactsOptionsOpen = !isContactsOptionsOpen"
       >
         <i class="pi pi-user layout__nav-link-icon" />
-        <span>{{ t('sidebar.contacts') }}</span>
-      </router-link>
+        <span>{{ t('sidebar.contacts.title') }}</span>
+        <i
+          class="pi pi-sort-down-fill layout__nav-link-caret"
+          :class="{ 'layout__nav-link-caret--rotated': isContactsOptionsOpen }"
+        />
+      </div>
+
+      <ul class="layout__submenu" :class="{ 'layout__submenu--open': isContactsOptionsOpen }">
+        <li class="layout__submenu-item">
+          <router-link
+            class="layout__submenu-link"
+            :to="`/contacts${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
+            :class="{ 'router-link-exact-active': route.path.startsWith('/contacts') }"
+          >
+            <i class="pi pi-address-book layout__submenu-link-icon" />
+            <span>{{ t('sidebar.contacts.all') }}</span>
+          </router-link>
+        </li>
+        <li class="layout__submenu-item">
+          <router-link
+            class="layout__submenu-link"
+            :to="`/customers${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
+            :class="{ 'router-link-exact-active': route.path.startsWith('/customers') }"
+          >
+            <i class="pi pi-users layout__submenu-link-icon" />
+            <span>{{ t('sidebar.contacts.customers') }}</span>
+          </router-link>
+        </li>
+        <li class="layout__submenu-item">
+          <router-link
+            class="layout__submenu-link"
+            :to="`/guests${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
+            :class="{ 'router-link-exact-active': route.path.startsWith('/guests') }"
+          >
+            <i class="pi pi-id-card layout__submenu-link-icon" />
+            <span>{{ t('sidebar.contacts.guests') }}</span>
+          </router-link>
+        </li>
+        <li class="layout__submenu-item">
+          <router-link
+            class="layout__submenu-link"
+            :to="`/agencies${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
+            :class="{ 'router-link-exact-active': route.path.startsWith('/agencies') }"
+          >
+            <i class="pi pi-briefcase layout__submenu-link-icon" />
+            <span>{{ t('sidebar.contacts.agencies') }}</span>
+          </router-link>
+        </li>
+        <li class="layout__submenu-item">
+          <router-link
+            class="layout__submenu-link"
+            :to="`/suppliers${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
+            :class="{ 'router-link-exact-active': route.path.startsWith('/suppliers') }"
+          >
+            <i class="pi pi-truck layout__submenu-link-icon" />
+            <span>{{ t('sidebar.contacts.suppliers') }}</span>
+          </router-link>
+        </li>
+      </ul>
 
       <router-link
         :to="`/transactions${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
@@ -188,8 +247,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import Avatar from 'primevue/avatar';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
@@ -199,8 +258,6 @@ import { useI18n } from 'vue-i18n';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import UserChangePassword from '../user/UserChangePassword.vue';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
-import { useRouter } from 'vue-router';
-import { useDynamicDialogsStore } from '@/infrastructure/stores/dynamicDialogs';
 
 defineProps<{
   menuOpen: boolean;
@@ -208,7 +265,6 @@ defineProps<{
 
 const route = useRoute();
 const userStore = useUserStore();
-const dynamicDialogsStore = useDynamicDialogsStore();
 const pmsPropertiesStore = usePmsPropertiesStore();
 const router = useRouter();
 const { t } = useI18n();
@@ -219,6 +275,8 @@ const hash = import.meta.env.VITE_COMMIT_HASH || 'dev';
 const isUserMenuOpen = ref(false);
 const isReportOptionsOpen = ref(false);
 const isLinkOptionsOpen = ref(false);
+const isContactsOptionsOpen = ref(false);
+
 const nav = ref<HTMLElement | null>(null);
 const userSettingsHeader = computed(() => t('sidebar.userSettings'));
 const userChangePasswordHeader = computed(() => t('sidebar.changePassword'));
@@ -272,10 +330,30 @@ const pmsPropertiesLinks = computed(() =>
 
 const isActive = (path: string) => route.path === path;
 
+const isContactsSectionActive = computed(() =>
+  ['/contacts', '/customers', '/guests', '/suppliers', '/agencies'].some((p) =>
+    route.path.startsWith(p)
+  )
+);
+
 const collapseSidebar = () => {
   isReportOptionsOpen.value = false;
   isLinkOptionsOpen.value = false;
+  isContactsOptionsOpen.value = false;
   isUserMenuOpen.value = false;
+  if (nav.value) nav.value.scrollTop = 0;
+};
+
+const checkPathAndExpandContacts = () => {
+  if (
+    route.path.startsWith('/contacts') ||
+    route.path.startsWith('/customers') ||
+    route.path.startsWith('/guests') ||
+    route.path.startsWith('/suppliers') ||
+    route.path.startsWith('/agencies')
+  ) {
+    isContactsOptionsOpen.value = true;
+  }
   if (nav.value) nav.value.scrollTop = 0;
 };
 
@@ -423,6 +501,15 @@ const hideUserMenu = () => {
       font-weight: bold;
     }
   }
+}
+
+.layout__submenu-link.router-link-active .layout__submenu-link-icon,
+.layout__submenu-link.router-link-exact-active .layout__submenu-link-icon {
+  color: black;
+}
+.layout__submenu-link.router-link-active span,
+.layout__submenu-link.router-link-exact-active span {
+  font-weight: bold;
 }
 
 .layout__nav-footer {
