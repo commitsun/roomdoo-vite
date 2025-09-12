@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { UserService } from './UserService';
 import type { UserRepository } from '@/domain/repositories/UserRepository';
 import { UnauthorizedError } from '../shared/UnauthorizedError';
@@ -20,7 +20,6 @@ describe('UserService - loginAndGetUser', () => {
   });
 
   it('should login, fetch user, fetch fields and return merged user', async () => {
-    // arrange
     userRepoMock.login.mockResolvedValue(undefined);
     const userData = {
       id: 2,
@@ -37,10 +36,8 @@ describe('UserService - loginAndGetUser', () => {
     userRepoMock.fetchUser.mockResolvedValue(userData);
     userRepoMock.fetchAvailabilityRuleFields.mockResolvedValue(ruleFields);
 
-    // act
     const result = await userService.loginAndGetUser('roomdoo@roomdoo.com', 'pw');
 
-    // assert
     expect(userRepoMock.login).toHaveBeenCalledWith('roomdoo@roomdoo.com', 'pw');
     expect(userRepoMock.fetchUser).toHaveBeenCalled();
     expect(userRepoMock.fetchAvailabilityRuleFields).toHaveBeenCalled();
@@ -51,10 +48,8 @@ describe('UserService - loginAndGetUser', () => {
   });
 
   it('should propagate error if login fails', async () => {
-    // arrange
     userRepoMock.login.mockRejectedValue(new UnauthorizedError());
 
-    // act & assert
     await expect(userService.loginAndGetUser('fail@roomdoo.com', 'failpw')).rejects.toThrowError(
       UnauthorizedError
     );
@@ -64,7 +59,6 @@ describe('UserService - loginAndGetUser', () => {
   });
 
   it('should call repo methods in order: login, fetchUser, fetchAvailabilityRuleFields', async () => {
-    // arrange
     const callOrder: string[] = [];
     userRepoMock.login.mockImplementation(() => {
       callOrder.push('login');
@@ -79,10 +73,8 @@ describe('UserService - loginAndGetUser', () => {
       return Promise.resolve([]);
     });
 
-    // act
     await userService.loginAndGetUser('admin@yourcompany.example.com', 'pw');
 
-    // assert
     expect(callOrder[0]).toBe('login');
   });
 
