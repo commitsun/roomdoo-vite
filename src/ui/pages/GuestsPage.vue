@@ -1,7 +1,7 @@
 <template>
   <div class="main-content">
     <DataTable
-      :value="contacts"
+      :value="guests || []"
       scrollable
       scrollHeight="flex"
       class="contacts-table"
@@ -17,7 +17,7 @@
       selectionMode="single"
       :sortField="sortField || undefined"
       :sortOrder="sortOrder"
-      :globalFilterFields="['name', 'email', 'phones']"
+      :globalFilterFields="['name']"
       @page="loadLazy"
       @filter="loadLazy"
       @sort="loadLazy"
@@ -29,144 +29,69 @@
             <InputIcon>
               <i class="pi pi-search" />
             </InputIcon>
-            <InputText
-              v-model="globalQuery"
-              :placeholder="t('contacts.globalSearch')"
-              @input="debouncedFetchNow()"
-              :aria-label="t('contacts.globalSearch')"
-            />
+            <InputText v-model="globalQuery" placeholder="Keyword Search" @input="loadLazy()" />
           </IconField>
           <Button
             type="button"
             icon="pi pi-filter-slash"
-            :label="t('contacts.clear')"
-            :aria-label="t('contacts.clear')"
+            label="Clear"
             variant="outlined"
             @click="clearAll"
           />
         </div>
       </template>
 
-      <!-- Nombre -->
+      <!-- Nombre completo -->
       <Column
         field="name"
-        :header="t('contacts.fullName')"
-        style="max-width: 200px"
-        frozen
-        :showFilterMatchModes="false"
-        :showFilterOperator="false"
-        :showAddButton="false"
-        :showFilterApplyButton="false"
-        filter
-        sortable
-      >
-        <template #body="{ data }">
-          {{ data.name }}
-        </template>
-
-        <template #filter="{ filterModel }">
-          <InputText
-            v-model="filterModel.value"
-            type="text"
-            :placeholder="t('contacts.searchByName')"
-          />
-        </template>
-      </Column>
-
-      <!-- Tipo -->
-      <Column
-        :header="t('contacts.type')"
-        filter
-        filterField="type"
-        :showFilterMatchModes="false"
-        :showFilterOperator="false"
-        :showAddButton="false"
-        :showFilterApplyButton="false"
-        :filterMenuStyle="{ width: '14rem' }"
-        style="min-width: 100px"
-      >
-        <template #body="{ data }">
-          <Tag
-            v-for="type in data.types"
-            :key="type"
-            :severity="severityType(type)"
-            :value="t('contacts.types.' + type)"
-            class="mr-2 mt-1"
-          />
-        </template>
-
-        <template #filter="{ filterModel }">
-          <MultiSelect
-            v-model="filterModel.value"
-            :options="CONTACT_TYPES.map((v) => ({ label: t('contacts.types.' + v), value: v }))"
-            optionLabel="label"
-            optionValue="value"
-            :placeholder="t('contacts.searchByType')"
-            class="w-full"
-            showClear
-            :showToggleAll="false"
-            :maxSelectedLabels="2"
-            appendTo="self"
-            :panelStyle="{ width: '100%' }"
-          />
-        </template>
-      </Column>
-
-      <!-- Email -->
-      <Column
-        field="email"
-        :header="t('contacts.email')"
-        style="min-width: 200px"
-        :showFilterMatchModes="false"
-        :showFilterOperator="false"
-        :showAddButton="false"
-        :showFilterApplyButton="false"
-        filter
-        sortable
-      >
-        <template #body="{ data }">
-          {{ data.email }}
-        </template>
-
-        <template #filter="{ filterModel }">
-          <InputText
-            v-model="filterModel.value"
-            type="text"
-            :placeholder="t('contacts.searchByEmail')"
-          />
-        </template>
-      </Column>
-
-      <!-- Teléfonos -->
-      <Column
-        field="phones"
-        :header="t('contacts.phone')"
+        header="Nombre completo"
         style="min-width: 220px"
-        filter
         :showFilterMatchModes="false"
         :showFilterOperator="false"
         :showAddButton="false"
         :showFilterApplyButton="false"
+        filter
+        sortable
+        frozen
+      >
+        <template #body="{ data }">{{ data.name }}</template>
+
+        <template #filter="{ filterModel }">
+          <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
+        </template>
+      </Column>
+
+      <!-- Documento principal -->
+      <Column
+        field="documents"
+        header="Documento"
+        style="min-width: 200px"
+        filter
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
       >
         <template #body="{ data }">
-          <span v-for="(phone, index) in data.phones" :key="`${phone.type}-${index}`">
-            <Chip
-              :label="phone.number"
-              :style="{ fontSize: '11px', padding: '0 6px', height: '18px', lineHeight: '18px' }"
-              :icon="phone.type === 'phone' ? 'pi pi-phone' : 'pi pi-mobile'"
-              class="mr-1 mb-1"
-            />
+          <span v-if="data.documents?.length">
+            {{ data.documents[0]?.type }} {{ data.documents[0]?.number }}
+            <span
+              v-if="data.documents.length > 1"
+              :title="data.documents.map((d: any) => ((d?.type ?? 'Doc') + ' ' + (d?.number ?? ''))).join('\n')"
+              style="cursor: help; opacity: 0.8"
+            >
+              (+{{ data.documents.length - 1 }})
+            </span>
           </span>
         </template>
         <template #filter="{ filterModel }">
-          <InputText v-model="filterModel.value" type="text" placeholder="Search by phone" />
+          <InputText v-model="filterModel.value" type="text" placeholder="Search by document" />
         </template>
       </Column>
 
       <!-- País -->
       <Column
         field="country"
-        :header="t('contacts.country')"
+        header="País"
         filter
         filterField="country"
         :showFilterMatchModes="false"
@@ -196,23 +121,18 @@
             optionLabel="label"
             optionValue="label"
             filter
-            :placeholder="t('contacts.searchByCountry')"
+            placeholder="Select Countries"
             class="w-full ms-eq"
             showClear
             :showToggleAll="false"
             :maxSelectedLabels="1"
             appendTo="self"
             :panelStyle="{ width: '100%' }"
-            :selectedItemsLabel="
-              t('contacts.n_countries_selected', {
-                count: filterModel.value ? filterModel.value.length : 0,
-              })
-            "
           >
             <template #option="slotProps">
               <div class="flex items-center gap-2 leading-none">
                 <CountryFlag
-                  :country="slotProps.option.value"
+                  :country="slotProps.option.code"
                   size="normal"
                   shadow
                   style="margin-bottom: 1px"
@@ -223,76 +143,102 @@
           </MultiSelect>
         </template>
       </Column>
+
+      <!-- Última reserva (nombre) -->
+      <Column field="lastReservationName" header="Última reserva" style="min-width: 180px">
+        <template #body="{ data }">
+          <span>{{ data.lastReservationName }}</span>
+        </template>
+      </Column>
+
+      <!-- Comentarios internos (truncado + tooltip) -->
+      <Column field="internalNotes" header="Comentarios internos" style="max-width: 300px">
+        <template #body="{ data }">
+          <span v-if="data.internalNotes" class="ellipsis-2" :title="data.internalNotes">
+            {{ data.internalNotes }}
+          </span>
+        </template>
+      </Column>
+
+      <!-- Actualmente alojado -->
+      <Column field="inHouse" style="width: 160px; text-align: center">
+        <template #header>
+          <div class="flex items-center gap-2">
+            <label for="inhouse-toggle" class="cursor-pointer select-none font-bold">
+              Inhouse
+            </label>
+            <ToggleSwitch
+              inputId="inhouse-toggle"
+              :modelValue="filters.inHouse?.constraints?.[0]?.value === true"
+              @update:modelValue="onToggleInhouse"
+              aria-label="Filtrar inhouse"
+            />
+          </div>
+        </template>
+
+        <template #body="{ data }">
+          <i v-if="data.inHouse" class="pi pi-home" style="font-size: 1rem; color: #22c55e" />
+        </template>
+      </Column>
     </DataTable>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed, defineComponent, onBeforeMount, ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
-import { CONTACT_TYPES } from '@/domain/types/ContactType';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Tag from 'primevue/tag';
-import Chip from 'primevue/chip';
 import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
 import MultiSelect from 'primevue/multiselect';
-import CountryFlag from 'vue-country-flag-next';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
+import ToggleSwitch from 'primevue/toggleswitch';
+
+import CountryFlag from 'vue-country-flag-next';
 
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
-import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
 import type { Contact } from '@/domain/entities/Contact';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
-
-const truncateLabel = (label: string, maxLength = 20) => {
-  if (!label) return '';
-  return label.length > maxLength ? label.substring(0, maxLength) + '…' : label;
-};
+import { useUIStore } from '@/infrastructure/stores/ui';
 
 export default defineComponent({
   components: {
     DataTable,
     Column,
-    Tag,
-    Chip,
     InputText,
-    Select,
     MultiSelect,
     Button,
     IconField,
     InputIcon,
+    ToggleSwitch,
     CountryFlag,
   },
   setup() {
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
-    const uiStore = useUIStore();
-    const pmsPropertiesStore = usePmsPropertiesStore();
-    const { t } = useI18n();
     const { open } = useAppDialog();
+    const pmsPropertiesStore = usePmsPropertiesStore();
+    const uiStore = useUIStore();
 
-    const numTotalRecords = ref(0);
+    const guests = computed(() => contactsStore.guests);
+    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
+
+    const numTotalRecords = ref<number>(contactsStore.contactsCount || 0);
+
     const page = ref(1);
     const rows = ref(50);
     const rowsPerPageOptions = ref([50, 100, 200]);
 
     const sortField = ref<string | null>(null);
     const sortOrder = ref<number>(1);
-    const SORT_FIELD_MAP: Record<string, string> = {
-      name: 'name',
-      country: 'country',
-      email: 'email',
-    };
+    const SORT_FIELD_MAP: Record<string, string> = { name: 'name', country: 'country' };
     const orderBy = computed(() =>
       sortField.value
         ? `${sortOrder.value === -1 ? '-' : ''}${
@@ -306,55 +252,47 @@ export default defineComponent({
         operator: FilterOperator.AND,
         constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
       },
-      email: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      type: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string[] | null, matchMode: FilterMatchMode.IN }],
-      },
-      phones: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
       country: {
         operator: FilterOperator.AND,
         constraints: [{ value: null as string[] | string | null, matchMode: FilterMatchMode.IN }],
+      },
+      documents: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      inHouse: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null as boolean | null, matchMode: FilterMatchMode.EQUALS }],
       },
     });
 
     const globalQuery = ref<string>('');
 
-    const countryOptions = computed(() =>
-      countriesStore.countries?.map((country) => ({
-        label: country.name,
-        value: country.code,
-      }))
+    const countryOptions = computed(
+      () =>
+        countriesStore.countries?.map((c) => ({
+          label: c.name,
+          value: c.name,
+          code: c.code,
+        })) ?? []
     );
 
-    const contacts = computed(() => contactsStore.contacts || []);
-    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
-    const setCountFromStore = () => (numTotalRecords.value = contactsStore.contactsCount);
-
     const fetchNow = async () => {
+      const inhouseOnly =
+        filters.value.inHouse?.constraints?.[0]?.value === true ? true : undefined;
       uiStore.startLoading();
-      try {
-        await contactsStore.fetchContacts(
-          page.value,
-          rows.value,
-          globalQuery.value || undefined,
-          filters.value.name.constraints[0].value || undefined,
-          filters.value.email.constraints[0].value || undefined,
-          (filters.value.type.constraints[0].value as string[] | null) || undefined,
-          (filters.value.country.constraints[0].value as string[] | null) || undefined,
-          filters.value.phones.constraints[0].value || undefined,
-          orderBy.value
-        );
-        setCountFromStore();
-      } finally {
-        uiStore.stopLoading();
-      }
+      await contactsStore.fetchGuests(
+        page.value,
+        rows.value,
+        globalQuery.value || undefined,
+        filters.value.name.constraints[0].value || undefined,
+        filters.value.documents.constraints[0].value || undefined,
+        (filters.value.country.constraints[0].value as string[] | null) || undefined,
+        inhouseOnly,
+        orderBy.value
+      );
+      numTotalRecords.value = contactsStore.contactsCount ?? numTotalRecords.value;
+      uiStore.stopLoading();
     };
 
     const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
@@ -387,7 +325,8 @@ export default defineComponent({
         filters.value = e.filters;
         page.value = 1;
       }
-      await fetchNow();
+
+      await debouncedFetchNow();
     };
 
     const clearAll = () => {
@@ -401,21 +340,17 @@ export default defineComponent({
           operator: FilterOperator.AND,
           constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
         },
-        email: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        type: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null as string[] | null, matchMode: FilterMatchMode.IN }],
-        },
-        phones: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
         country: {
           operator: FilterOperator.AND,
           constraints: [{ value: null, matchMode: FilterMatchMode.IN }],
+        },
+        documents: {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+        },
+        inHouse: {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
         },
       };
 
@@ -428,12 +363,17 @@ export default defineComponent({
       });
     };
 
-    const severityType = (type: string) => {
-      if (type === 'guest') return 'warning';
-      if (type === 'customer') return 'success';
-      if (type === 'agency') return 'danger';
-      if (type === 'supplier') return 'info';
-      return 'secondary';
+    const onToggleInhouse = (val: boolean) => {
+      const newVal = val ? true : null;
+      filters.value = {
+        ...filters.value,
+        inHouse: {
+          ...filters.value.inHouse,
+          constraints: [{ value: newVal, matchMode: FilterMatchMode.EQUALS }],
+        },
+      };
+      page.value = 1;
+      loadLazy({ filters: { ...filters.value } });
     };
 
     const openContactDetail = async (contact: Contact) => {
@@ -442,7 +382,7 @@ export default defineComponent({
         currentPmsPropertyId.value!
       );
       open(PartnerForm, {
-        props: { header: contact.name || t('contacts.detail') },
+        props: { header: contact.name || 'Contact Detail' },
         onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
           if (data?.refresh || data?.action === 'saved') {
             fetchNow();
@@ -451,37 +391,42 @@ export default defineComponent({
       });
     };
 
-    onMounted(async () => {
+    onBeforeMount(async () => {
       await fetchNow();
-      await useCountriesStore().fetchCountries();
+      await countriesStore.fetchCountries();
     });
 
     return {
-      rowsPerPageOptions,
-      rows,
-      contacts,
+      guests,
       numTotalRecords,
-      globalQuery,
-      filters,
-      CONTACT_TYPES,
-      sortOrder,
+      rows,
+      rowsPerPageOptions,
       sortField,
+      sortOrder,
+      filters,
+      globalQuery,
       countryOptions,
-      t,
       loadLazy,
-      fetchNow,
-      debouncedFetchNow,
       clearAll,
-      severityType,
+      onToggleInhouse,
       openContactDetail,
     };
   },
 });
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .main-content {
   height: 100%;
   background-color: #f9f9f9;
+}
+
+.ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  max-width: 100%;
 }
 </style>

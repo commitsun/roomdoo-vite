@@ -1,1 +1,458 @@
-<template>customers</template>
+<template>
+  <div class="main-content">
+    <DataTable
+      :value="customers"
+      scrollable
+      scrollHeight="flex"
+      class="contacts-table"
+      paginator
+      :rows="rows"
+      :rowsPerPageOptions="rowsPerPageOptions"
+      :rowStyle="() => ({ height: '58px' })"
+      :totalRecords="numTotalRecords"
+      lazy
+      v-model:filters="filters"
+      filterDisplay="menu"
+      sortMode="single"
+      selectionMode="single"
+      :sortField="sortField || undefined"
+      :sortOrder="sortOrder"
+      :globalFilterFields="['name', 'vat', 'email', 'phone']"
+      @page="loadLazy"
+      @filter="loadLazy"
+      @sort="loadLazy"
+      @row-click="openContactDetail($event.data)"
+    >
+      <template #header>
+        <div class="flex gap-3 items-center">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
+            <InputText
+              v-model="globalQuery"
+              :placeholder="t('contacts.globalSearch')"
+              @input="loadLazy()"
+            />
+          </IconField>
+          <Button
+            type="button"
+            icon="pi pi-filter-slash"
+            :label="t('contacts.clear')"
+            variant="outlined"
+            @click="clearAll"
+          />
+        </div>
+      </template>
+
+      <!-- Nombre -->
+      <Column
+        field="name"
+        :header="t('contacts.fullName')"
+        style="min-width: 200px"
+        frozen
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
+        :showFilterApplyButton="false"
+        filter
+        sortable
+      >
+        <template #body="{ data }">
+          {{ data.name }}
+        </template>
+
+        <template #filter="{ filterModel }">
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            :placeholder="t('contacts.searchByName')"
+          />
+        </template>
+      </Column>
+
+      <!-- VAT -->
+      <Column
+        field="vat"
+        :header="t('contacts.vat')"
+        style="min-width: 150px"
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
+        :showFilterApplyButton="false"
+        filter
+      >
+        <template #body="{ data }">
+          {{ data.vat }}
+        </template>
+        <template #filter="{ filterModel }">
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            :placeholder="t('contacts.searchByVat')"
+          />
+        </template>
+      </Column>
+
+      <!-- Email -->
+      <Column
+        field="email"
+        :header="t('contacts.email')"
+        style="min-width: 200px"
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
+        :showFilterApplyButton="false"
+        filter
+        sortable
+      >
+        <template #body="{ data }">
+          {{ data.email }}
+        </template>
+
+        <template #filter="{ filterModel }">
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            :placeholder="t('contacts.searchByEmail')"
+          />
+        </template>
+      </Column>
+
+      <!-- Teléfonos -->
+      <Column
+        field="phones"
+        :header="t('contacts.phone')"
+        style="min-width: 220px"
+        filter
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
+        :showFilterApplyButton="false"
+      >
+        <template #body="{ data }">
+          <span v-for="(phone, index) in data.phones" :key="`${phone.type}-${index}`">
+            <Chip
+              :label="phone.number"
+              :style="{ fontSize: '11px', padding: '0 6px', height: '18px', lineHeight: '18px' }"
+              :icon="phone.type === 'phone' ? 'pi pi-phone' : 'pi pi-mobile'"
+              class="mr-1 mb-1"
+            />
+          </span>
+        </template>
+        <template #filter="{ filterModel }">
+          <InputText v-model="filterModel.value" type="text" placeholder="Search by phone" />
+        </template>
+      </Column>
+
+      <!-- País -->
+      <Column
+        field="country"
+        :header="t('contacts.country')"
+        filter
+        filterField="country"
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
+        :filterMenuStyle="{ width: '18rem' }"
+        style="min-width: 220px"
+        sortable
+      >
+        <template #body="{ data }">
+          <div class="flex items-center gap-2 h-full">
+            <div v-if="data.country">
+              <CountryFlag
+                :country="data.country.code ? data.country.code : ''"
+                size="normal"
+                shadow
+              />
+            </div>
+            <div v-if="data.country">{{ data.country.name }}</div>
+          </div>
+        </template>
+
+        <template #filter="{ filterModel }">
+          <MultiSelect
+            v-model="filterModel.value"
+            :options="countryOptions"
+            optionLabel="label"
+            optionValue="label"
+            filter
+            :placeholder="t('contacts.selectCountries')"
+            class="w-full ms-eq"
+            showClear
+            :showToggleAll="false"
+            :maxSelectedLabels="1"
+            appendTo="self"
+            :panelStyle="{ width: '100%' }"
+          >
+            <template #option="slotProps">
+              <div class="flex items-center gap-2 leading-none">
+                <CountryFlag
+                  :country="slotProps.option.value"
+                  size="normal"
+                  shadow
+                  style="margin-bottom: 1px"
+                />
+                <span>{{ slotProps.option.label }}</span>
+              </div>
+            </template>
+          </MultiSelect>
+        </template>
+      </Column>
+      <!-- Total facturado -->
+      <Column
+        field="totalInvoiced"
+        :header="t('contacts.totalInvoiced')"
+        style="min-width: 150px"
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
+        :showFilterApplyButton="false"
+        filter
+      />
+    </DataTable>
+  </div>
+</template>
+
+<script lang="ts">
+import { computed, defineComponent, onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useDebounceFn } from '@vueuse/core';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Tag from 'primevue/tag';
+import Chip from 'primevue/chip';
+import InputText from 'primevue/inputtext';
+import Select from 'primevue/select';
+import MultiSelect from 'primevue/multiselect';
+import CountryFlag from 'vue-country-flag-next';
+import Button from 'primevue/button';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+
+import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useCountriesStore } from '@/infrastructure/stores/countries';
+import type { Contact } from '@/domain/entities/Contact';
+import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
+import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
+import { useAppDialog } from '@/ui/composables/useAppDialog';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
+
+export default defineComponent({
+  components: {
+    DataTable,
+    Column,
+    Tag,
+    Chip,
+    InputText,
+    Select,
+    MultiSelect,
+    Button,
+    IconField,
+    InputIcon,
+    CountryFlag,
+  },
+  setup() {
+    const contactsStore = useContactsStore();
+    const uiStore = useUIStore();
+    const { t } = useI18n();
+    const countriesStore = useCountriesStore();
+    const { open } = useAppDialog();
+    const pmsPropertiesStore = usePmsPropertiesStore();
+
+    const numTotalRecords = ref(0);
+    const page = ref(1);
+    const rows = ref(50);
+    const rowsPerPageOptions = ref([50, 100, 200]);
+
+    const sortField = ref<string | null>(null);
+    const sortOrder = ref<number>(1);
+    const SORT_FIELD_MAP: Record<string, string> = {
+      name: 'name',
+      country: 'country',
+      email: 'email',
+    };
+    const orderBy = computed(() =>
+      sortField.value
+        ? `${sortOrder.value === -1 ? '-' : ''}${
+            SORT_FIELD_MAP[sortField.value] ?? sortField.value
+          }`
+        : undefined
+    );
+
+    const filters = ref({
+      name: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      email: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      vat: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      phones: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      country: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null as string[] | string | null, matchMode: FilterMatchMode.IN }],
+      },
+    });
+
+    const globalQuery = ref<string>('');
+
+    const countryOptions = computed(() =>
+      countriesStore.countries?.map((country) => ({
+        label: country.name,
+        value: country.code,
+      }))
+    );
+
+    const customers = computed(() => contactsStore.customers || []);
+    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
+
+    const setCountFromStore = () => (numTotalRecords.value = contactsStore.contactsCount);
+
+    const fetchNow = async () => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchCustomers(
+          page.value,
+          rows.value,
+          globalQuery.value || undefined,
+          filters.value.name.constraints[0].value || undefined,
+          filters.value.email.constraints[0].value || undefined,
+          (filters.value.vat.constraints[0].value as string | null) || undefined,
+          (filters.value.country.constraints[0].value as string[] | null) || undefined,
+          filters.value.phones.constraints[0].value || undefined,
+          orderBy.value
+        );
+        setCountFromStore();
+      } finally {
+        uiStore.stopLoading();
+      }
+    };
+    const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
+
+    const loadLazy = async (e?: any) => {
+      if (e?.page !== undefined) {
+        page.value = e.page + 1;
+        rows.value = e.rows;
+        return await debouncedFetchNow();
+      }
+
+      if (e === undefined) {
+        const q = (globalQuery.value ?? '').trim();
+        if (q.length === 0) {
+          page.value = 1;
+          return await debouncedFetchNow();
+        }
+        if (q.length < 3) return;
+        page.value = 1;
+        return await debouncedFetchNow();
+      }
+
+      if (e?.sortField !== undefined) {
+        sortField.value = e.sortField || null;
+        sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
+        page.value = 1;
+      }
+
+      if (e?.filters) {
+        filters.value = e.filters;
+        page.value = 1;
+      }
+
+      await debouncedFetchNow();
+    };
+
+    const clearAll = () => {
+      globalQuery.value = '';
+      sortField.value = null;
+      sortOrder.value = 1;
+      page.value = 1;
+
+      filters.value = {
+        name: {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+        },
+        email: {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+        },
+        vat: {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+        },
+        phones: {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+        },
+        country: {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.IN }],
+        },
+      };
+
+      loadLazy({
+        filters: { ...filters.value },
+        page: 0,
+        rows: rows.value,
+        sortField: null,
+        sortOrder: 1,
+      });
+    };
+
+    const openContactDetail = async (contact: Contact) => {
+      await useLegacyStore().fetchAndSetVuexPartnerAndACtiveProperty(
+        contact.id,
+        currentPmsPropertyId.value!
+      );
+      open(PartnerForm, {
+        props: { header: contact.name || t('contacts.detail') },
+        onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+          if (data?.refresh || data?.action === 'saved') {
+            fetchNow();
+          }
+        },
+      });
+    };
+
+    onBeforeMount(async () => {
+      await fetchNow();
+      await countriesStore.fetchCountries();
+    });
+
+    return {
+      rowsPerPageOptions,
+      rows,
+      customers,
+      numTotalRecords,
+      sortField,
+      sortOrder,
+      filters,
+      globalQuery,
+      countryOptions,
+      t,
+      loadLazy,
+      clearAll,
+      openContactDetail,
+    };
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+.main-content {
+  height: 100%;
+  background-color: #f9f9f9;
+}
+</style>
