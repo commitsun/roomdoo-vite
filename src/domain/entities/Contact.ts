@@ -12,7 +12,7 @@ export interface Contact {
   phones?: string[];
 }
 
-export interface AgencyContact extends Contact {}
+export interface Agency extends Contact {}
 export interface Supplier extends Contact {
   vat: string;
   totalInvoiced: number;
@@ -25,5 +25,7 @@ export interface Customer extends Contact {
 export interface Guest extends Contact {
   documents: PersonalDocument[];
   lastReservationId?: Id;
+  lastReservationName?: string;
   internalNotes?: string;
+  inHouse?: boolean;
 }

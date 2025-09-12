@@ -20,20 +20,21 @@ const DEFAULT_PROPS = {
 
 export function useAppDialog() {
   const dialog = useDialog();
-
   const dynamicDialogStore = useDynamicDialogsStore();
+
   const open = (component: any, options: any = {}) => {
     const newId = Date.now();
     const merged = {
       ...options,
-      onClose: () => {
+      onClose: (e: any) => {
+        options.onClose?.(e);
         dynamicDialogStore.unRegisterDynamicDialog(newId);
       },
       props: { ...DEFAULT_PROPS, ...(options.props || {}) },
     };
-    const dynamicDialog = dialog.open(component, merged);
-    dynamicDialogStore.registerDynamicDialog(newId, dynamicDialog);
-    return dynamicDialog;
+    const instance = dialog.open(component, merged);
+    dynamicDialogStore.registerDynamicDialog(newId, instance);
+    return instance;
   };
 
   return { open };

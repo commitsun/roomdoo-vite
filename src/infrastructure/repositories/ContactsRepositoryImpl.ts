@@ -1,33 +1,50 @@
-import type { Contact } from '@/domain/entities/Contact';
+import type { Agency, Contact, Customer, Guest, Supplier } from '@/domain/entities/Contact';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import { api } from '@/infrastructure/http/axios';
 
-function buildQueryParamsFromFilters(
-  globalSearch: string | undefined,
-  nameContains: string | undefined,
-  emailContains: string | undefined,
-  typeIn: string | undefined,
-  countryIn: string[] | undefined
-) {
+function buildQueryParamsFromFilters(opts: {
+  globalSearch?: string;
+  nameContains?: string;
+  documentContains?: string;
+  emailContains?: string;
+  countryIn?: string[];
+  typeIn?: string[];
+  phonesContains?: string;
+  vatContains?: string;
+  inhouseOnly?: boolean;
+}) {
   const params = new URLSearchParams();
-
-  if (globalSearch) {
-    params.set('globalSearch', globalSearch);
+  if (opts.globalSearch) {
+    params.set('globalSearch', opts.globalSearch);
   }
-  if (nameContains) {
-    params.set('name', nameContains);
+  if (opts.nameContains) {
+    params.set('name', opts.nameContains);
   }
-  if (emailContains) {
-    params.set('email', emailContains);
+  if (opts.emailContains) {
+    params.set('email', opts.emailContains);
   }
-  if (typeIn) {
-    params.set('type', typeIn);
+  if (opts.documentContains) {
+    params.set('vat', opts.documentContains);
   }
-  if (countryIn && countryIn.length > 0) {
-    countryIn.forEach((country) => {
-      params.append('countries', country);
-    });
+  if (opts.typeIn?.length) {
+    for (const c of opts.typeIn) {
+      if (c) params.append('types', c);
+    }
+  }
+  if (opts.phonesContains) {
+    params.set('phone', opts.phonesContains);
+  }
+  if (opts.countryIn?.length) {
+    for (const c of opts.countryIn) {
+      if (c) params.append('countries', c);
+    }
+  }
+  if (opts.vatContains) {
+    params.set('vat', opts.vatContains);
+  }
+  if (opts.inhouseOnly !== undefined) {
+    params.set('inHouse', String(opts.inhouseOnly));
   }
   return params;
 }
@@ -39,17 +56,19 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     globalSearch?: string,
     nameContains?: string,
     emailContains?: string,
-    typeIn?: string,
+    typeIn?: string[],
     countryIn?: string[],
+    phonesContains?: string,
     orderBy?: string
   ): Promise<EntityListResponse<Contact>> {
-    const params = buildQueryParamsFromFilters(
+    const params = buildQueryParamsFromFilters({
       globalSearch,
       nameContains,
       emailContains,
+      countryIn,
       typeIn,
-      countryIn
-    );
+      phonesContains,
+    });
     params.set('page', String(page));
     params.set('page_size', String(pageSize));
 
@@ -59,6 +78,126 @@ export class ContactsRepositoryImpl implements ContactsRepository {
 
     const url = `/contacts?${params.toString()}`;
     const { data } = await api.get<EntityListResponse<Contact>>(url);
+    return data;
+  }
+
+  async fetchCustomers(
+    page: number,
+    pageSize: number,
+    globalSearch?: string,
+    nameContains?: string,
+    emailContains?: string,
+    vatContains?: string,
+    countryIn?: string[],
+    phonesContains?: string,
+    orderBy?: string
+  ): Promise<EntityListResponse<Customer>> {
+    const params = buildQueryParamsFromFilters({
+      globalSearch,
+      nameContains,
+      emailContains,
+      countryIn,
+      vatContains,
+      phonesContains,
+    });
+    params.set('page', String(page));
+    params.set('page_size', String(pageSize));
+    if (orderBy) params.set('orderBy', orderBy);
+
+    const url = `/customers?${params.toString()}`;
+    const { data } = await api.get<EntityListResponse<Customer>>(url);
+    return data;
+  }
+  async fetchGuests(
+    page: number,
+    pageSize: number,
+    globalSearch?: string,
+    nameContains?: string,
+    documentContains?: string,
+    countryIn?: string[],
+    inhouseOnly?: boolean,
+    orderBy?: string
+  ): Promise<EntityListResponse<Guest>> {
+    const params = buildQueryParamsFromFilters({
+      globalSearch,
+      nameContains,
+      documentContains,
+      countryIn,
+      inhouseOnly,
+    });
+    params.set('page', String(page));
+    params.set('page_size', String(pageSize));
+    if (orderBy) params.set('orderBy', orderBy);
+
+    const url = `/guests?${params.toString()}`;
+    const { data } = await api.get<EntityListResponse<any>>(url);
+
+    const guests: Guest[] = data.items.map((raw: any) => ({
+      id: raw.id,
+      name: raw.name,
+      types: raw.types ?? [],
+      country: raw.country,
+      documents: raw.identificationDocuments ?? [],
+      inHouse: raw.inHouse,
+      internalNotes: raw.internalNotes,
+      lastReservationId: raw.lastReservation?.id,
+      lastReservationName: raw.lastReservation?.name,
+    }));
+
+    return { ...data, items: guests };
+  }
+
+  async fetchAgencies(
+    page: number,
+    pageSize: number,
+    globalSearch?: string,
+    nameContains?: string,
+    emailContains?: string,
+    countryIn?: string[],
+    phonesContains?: string,
+    orderBy?: string
+  ): Promise<EntityListResponse<Agency>> {
+    const params = buildQueryParamsFromFilters({
+      globalSearch,
+      nameContains,
+      emailContains,
+      countryIn,
+      phonesContains,
+    });
+    params.set('page', String(page));
+    params.set('page_size', String(pageSize));
+    if (orderBy) params.set('orderBy', orderBy);
+
+    const url = `/agencies?${params.toString()}`;
+    const { data } = await api.get<EntityListResponse<Agency>>(url);
+    return data;
+  }
+
+  async fetchSuppliers(
+    page: number,
+    pageSize: number,
+    globalSearch?: string,
+    nameContains?: string,
+    vatContains?: string,
+    emailContains?: string,
+    countryIn?: string[],
+    phonesContains?: string,
+    orderBy?: string
+  ): Promise<EntityListResponse<Supplier>> {
+    const params = buildQueryParamsFromFilters({
+      globalSearch,
+      nameContains,
+      emailContains,
+      countryIn,
+      phonesContains,
+      vatContains,
+    });
+    params.set('page', String(page));
+    params.set('page_size', String(pageSize));
+    if (orderBy) params.set('orderBy', orderBy);
+
+    const url = `/suppliers?${params.toString()}`;
+    const { data } = await api.get<EntityListResponse<Supplier>>(url);
     return data;
   }
 }
