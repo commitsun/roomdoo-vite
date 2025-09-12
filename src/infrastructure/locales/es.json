@@ -67,7 +67,14 @@
       "customer": "Cliente",
       "agency": "Agencia",
       "supplier": "Proveedor"
-    }
+    },
+    "n_countries_selected": "{count} países",
+    "globalSearch": "Búsqueda global",
+    "clear": "Borrar",
+    "searchByName": "Buscar por nombre",
+    "searchByType": "Buscar por tipo",
+    "searchByEmail": "Buscar por email",
+    "searchByCountry": "Buscar por país"
   },
   "userSettings": {
     "replaceImage": "Reemplazar foto",
