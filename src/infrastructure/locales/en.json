@@ -41,7 +41,6 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "planning": "Reservations calendar",
-    "contacts": "Contacts",
     "cashRegister": "Cash register",
     "billing": "Billing",
     "reports": "Reports",
@@ -54,7 +53,15 @@
     "settings": "Settings",
     "userSettings": "User settings",
     "changePassword": "Change password",
-    "logout": "Logout"
+    "logout": "Logout",
+    "contacts": {
+      "title": "Contacts",
+      "all": "All",
+      "customers": "Customers",
+      "guests": "Guests",
+      "agencies": "Agencies",
+      "suppliers": "Suppliers"
+    }
   },
   "contacts": {
     "fullName": "Name",
@@ -74,7 +81,11 @@
     "searchByName": "Search by name",
     "searchByType": "Search by type",
     "searchByEmail": "Search by email",
-    "searchByCountry": "Search by country"
+    "searchByCountry": "Search by country",
+    "vat": "VAT",
+    "totalInvoiced": "Total invoiced",
+    "searchByVat": "Search by VAT",
+    "selectCountries": "Select Countries"
   },
   "userSettings": {
     "replaceImage": "Replace image",

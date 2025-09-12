@@ -514,13 +514,13 @@
             (contactType === 'agency' && !lastname),
         }"
       />
-      <AppButton class="button cancel" label="Cancelar" size="small" @click="$emit('close')" />
+      <AppButton class="button cancel" label="Cancelar" size="small" @click="handleCancel()" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, type Ref, onMounted, watch } from 'vue';
+import { computed, defineComponent, ref, type Ref, onMounted, watch, inject } from 'vue';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
@@ -814,6 +814,12 @@ export default defineComponent({
         showCompleteAllData.value = false;
       }
     };
+    const dialogRef = inject<any>('dialogRef');
+
+    const handleCancel = () => {
+      context.emit('close');
+      dialogRef?.value?.close({ action: 'cancel' });
+    };
 
     const savePartner = async () => {
       let isAgency = false;
@@ -901,6 +907,7 @@ export default defineComponent({
         await refreshPlanning();
       }
       context.emit('accept');
+      dialogRef?.value?.close({ action: 'saved', refresh: true });
       void store.dispatch('layout/showSpinner', false);
     };
 
@@ -1293,6 +1300,7 @@ export default defineComponent({
       getPartnerByVat,
       getAddressByZip,
       completeAllData,
+      handleCancel,
       savePartner,
     };
   },
