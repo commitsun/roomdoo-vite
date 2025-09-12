@@ -12,7 +12,7 @@ const actions: ActionTree<LinksStateInterface, StateInterface> = {
       endPoint = '/pmsApi';
     }
     const response = await fetch(
-      `${endPoint}/pmsProperties/${params.pmsPropertyId}/links/${params.linkId}`,
+      `${endPoint}/pms-properties/${params.pmsPropertyId}/links/${params.linkId}`,
       {
         method: 'GET',
         headers: {
