@@ -76,6 +76,7 @@
       "supplier": "Proveedor"
     },
     "n_countries_selected": "{count} países",
+    "n_types_selected": "{count} tipos",
     "globalSearch": "Búsqueda global",
     "clear": "Borrar",
     "searchByName": "Buscar por nombre",

@@ -1,6 +1,7 @@
 <template>
   <div class="main-content">
     <DataTable
+      v-model:first="first"
       :value="contacts"
       scrollable
       scrollHeight="flex"
@@ -18,9 +19,9 @@
       :sortField="sortField || undefined"
       :sortOrder="sortOrder"
       :globalFilterFields="['name', 'email', 'phones']"
-      @page="loadLazy"
-      @filter="loadLazy"
-      @sort="loadLazy"
+      @page="handlePageChange"
+      @filter="handleFilterChange"
+      @sort="handleSortChange"
       @row-click="openContactDetail($event.data)"
     >
       <template #header>
@@ -32,7 +33,7 @@
             <InputText
               v-model="globalQuery"
               :placeholder="t('contacts.globalSearch')"
-              @input="debouncedFetchNow()"
+              @input="globalQuery.length >= 3 ? debouncedFetchNow() : null"
               :aria-label="t('contacts.globalSearch')"
             />
           </IconField>
@@ -40,7 +41,7 @@
             type="button"
             icon="pi pi-filter-slash"
             :label="t('contacts.clear')"
-            :aria-label="t('contacts.clear')"
+            :aria-label="t('contacts.clear') + ' ' + t('contacts.globalSearch')"
             variant="outlined"
             @click="clearAll"
           />
@@ -108,6 +109,11 @@
             :maxSelectedLabels="2"
             appendTo="self"
             :panelStyle="{ width: '100%' }"
+            :selectedItemsLabel="
+              t('contacts.n_types_selected', {
+                count: filterModel.value ? filterModel.value.length : 0,
+              })
+            "
           />
         </template>
       </Column>
@@ -232,7 +238,11 @@ import { computed, defineComponent, onBeforeMount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
-import DataTable from 'primevue/datatable';
+import DataTable, {
+  type DataTableFilterEvent,
+  type DataTablePageEvent,
+  type DataTableSortEvent,
+} from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import Chip from 'primevue/chip';
@@ -254,11 +264,6 @@ import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
 import type { Contact } from '@/domain/entities/Contact';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
-const truncateLabel = (label: string, maxLength = 20) => {
-  if (!label) return '';
-  return label.length > maxLength ? label.substring(0, maxLength) + '…' : label;
-};
-
 export default defineComponent({
   components: {
     DataTable,
@@ -274,6 +279,7 @@ export default defineComponent({
     CountryFlag,
   },
   setup() {
+    const first = ref(0);
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
     const uiStore = useUIStore();
@@ -283,8 +289,8 @@ export default defineComponent({
 
     const numTotalRecords = ref(0);
     const page = ref(1);
-    const rows = ref(50);
-    const rowsPerPageOptions = ref([50, 100, 200]);
+    const rows = ref(5);
+    const rowsPerPageOptions = ref([5, 100, 200]);
 
     const sortField = ref<string | null>(null);
     const sortOrder = ref<number>(1);
@@ -356,41 +362,32 @@ export default defineComponent({
         uiStore.stopLoading();
       }
     };
-
     const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
-
-    const loadLazy = async (e?: any) => {
-      if (e?.page !== undefined) {
+    const handlePageChange = async (e: DataTablePageEvent) => {
+      if (e.page !== undefined) {
         page.value = e.page + 1;
         rows.value = e.rows;
-        return await debouncedFetchNow();
+        return await fetchNow();
       }
-
-      if (e === undefined) {
-        const q = (globalQuery.value ?? '').trim();
-        if (q.length === 0) {
-          page.value = 1;
-          return await debouncedFetchNow();
-        }
-        if (q.length < 3) return;
-        page.value = 1;
-        return await debouncedFetchNow();
-      }
-
-      if (e?.sortField !== undefined) {
-        sortField.value = e.sortField || null;
-        sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
-        page.value = 1;
-      }
-
-      if (e?.filters) {
-        filters.value = e.filters;
-        page.value = 1;
-      }
-      await fetchNow();
     };
 
-    const clearAll = () => {
+    const handleFilterChange = async (e: DataTableFilterEvent) => {
+      if (e.filters) {
+        filters.value = e.filters as typeof filters.value; // TODO: check type
+        page.value = 1;
+        return await fetchNow();
+      }
+    };
+    const handleSortChange = async (e: DataTableSortEvent) => {
+      if (e.sortField !== undefined) {
+        sortField.value = (e.sortField as typeof sortField.value) || null; // TODO: check type
+        sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
+        page.value = 1;
+        return await fetchNow();
+      }
+    };
+
+    const clearAll = async () => {
       globalQuery.value = '';
       sortField.value = null;
       sortOrder.value = 1;
@@ -418,14 +415,8 @@ export default defineComponent({
           constraints: [{ value: null, matchMode: FilterMatchMode.IN }],
         },
       };
-
-      loadLazy({
-        filters: { ...filters.value },
-        page: 0,
-        rows: rows.value,
-        sortField: null,
-        sortOrder: 1,
-      });
+      first.value = 0;
+      await fetchNow();
     };
 
     const severityType = (type: string) => {
@@ -467,13 +458,16 @@ export default defineComponent({
       sortOrder,
       sortField,
       countryOptions,
+      handlePageChange,
+      handleFilterChange,
+      handleSortChange,
       t,
-      loadLazy,
       fetchNow,
       debouncedFetchNow,
       clearAll,
       severityType,
       openContactDetail,
+      first,
     };
   },
 });
