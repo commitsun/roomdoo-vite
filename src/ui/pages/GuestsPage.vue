@@ -1,7 +1,8 @@
 <template>
   <div class="main-content">
     <DataTable
-      :value="guests || []"
+      v-model:first="first"
+      :value="guests"
       scrollable
       scrollHeight="flex"
       class="contacts-table"
@@ -18,10 +19,10 @@
       :sortField="sortField || undefined"
       :sortOrder="sortOrder"
       :globalFilterFields="['name']"
-      @page="loadLazy"
-      @filter="loadLazy"
-      @sort="loadLazy"
-      @row-click="openContactDetail($event.data)"
+      @page="handlePageChange"
+      @filter="handleFilterChange"
+      @sort="handleSortChange"
+      @rowClick="openContactDetail($event.data)"
     >
       <template #header>
         <div class="flex gap-3 items-center">
@@ -29,7 +30,13 @@
             <InputIcon>
               <i class="pi pi-search" />
             </InputIcon>
-            <InputText v-model="globalQuery" placeholder="Keyword Search" @input="loadLazy()" />
+            <InputText
+              v-model="globalQuery"
+              :placeholder="t('contacts.globalSearch')"
+              @input="
+                globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
+              "
+            />
           </IconField>
           <Button
             type="button"
@@ -44,7 +51,7 @@
       <!-- Nombre completo -->
       <Column
         field="name"
-        header="Nombre completo"
+        :header="t('contacts.fullName')"
         style="min-width: 220px"
         :showFilterMatchModes="false"
         :showFilterOperator="false"
@@ -57,14 +64,18 @@
         <template #body="{ data }">{{ data.name }}</template>
 
         <template #filter="{ filterModel }">
-          <InputText v-model="filterModel.value" type="text" placeholder="Search by name" />
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            :placeholder="t('contacts.searchByName')"
+          />
         </template>
       </Column>
 
       <!-- Documento principal -->
       <Column
         field="documents"
-        header="Documento"
+        :header="t('contacts.document')"
         style="min-width: 200px"
         filter
         :showFilterMatchModes="false"
@@ -84,14 +95,18 @@
           </span>
         </template>
         <template #filter="{ filterModel }">
-          <InputText v-model="filterModel.value" type="text" placeholder="Search by document" />
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            :placeholder="t('contacts.searchByDocument')"
+          />
         </template>
       </Column>
 
       <!-- País -->
       <Column
         field="country"
-        header="País"
+        :header="t('contacts.country')"
         filter
         filterField="country"
         :showFilterMatchModes="false"
@@ -121,13 +136,18 @@
             optionLabel="label"
             optionValue="label"
             filter
-            placeholder="Select Countries"
+            :placeholder="t('contacts.selectCountries')"
             class="w-full ms-eq"
             showClear
             :showToggleAll="false"
             :maxSelectedLabels="1"
             appendTo="self"
             :panelStyle="{ width: '100%' }"
+            :selectedItemsLabel="
+              t('contacts.n_countries_selected', {
+                count: filterModel.value ? filterModel.value.length : 0,
+              })
+            "
           >
             <template #option="slotProps">
               <div class="flex items-center gap-2 leading-none">
@@ -145,14 +165,18 @@
       </Column>
 
       <!-- Última reserva (nombre) -->
-      <Column field="lastReservationName" header="Última reserva" style="min-width: 180px">
+      <Column
+        field="lastReservationName"
+        :header="t('contacts.lastReservation')"
+        style="min-width: 180px"
+      >
         <template #body="{ data }">
           <span>{{ data.lastReservationName }}</span>
         </template>
       </Column>
 
       <!-- Comentarios internos (truncado + tooltip) -->
-      <Column field="internalNotes" header="Comentarios internos" style="max-width: 300px">
+      <Column field="internalNotes" :header="t('contacts.internalNotes')" style="max-width: 300px">
         <template #body="{ data }">
           <span v-if="data.internalNotes" class="ellipsis-2" :title="data.internalNotes">
             {{ data.internalNotes }}
@@ -169,9 +193,9 @@
             </label>
             <ToggleSwitch
               inputId="inhouse-toggle"
-              :modelValue="filters.inHouse?.constraints?.[0]?.value === true"
+              :modelValue="filters.inHouse?.value === true"
               @update:modelValue="onToggleInhouse"
-              aria-label="Filtrar inhouse"
+              aria-label="In-house"
             />
           </div>
         </template>
@@ -187,7 +211,12 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeMount, ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
-import DataTable from 'primevue/datatable';
+import { useI18n } from 'vue-i18n';
+import DataTable, {
+  type DataTableFilterEvent,
+  type DataTablePageEvent,
+  type DataTableSortEvent,
+} from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import MultiSelect from 'primevue/multiselect';
@@ -226,12 +255,10 @@ export default defineComponent({
     const { open } = useAppDialog();
     const pmsPropertiesStore = usePmsPropertiesStore();
     const uiStore = useUIStore();
-
-    const guests = computed(() => contactsStore.guests);
-    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
+    const { t } = useI18n();
 
     const numTotalRecords = ref<number>(contactsStore.contactsCount || 0);
-
+    const first = ref(0);
     const page = ref(1);
     const rows = ref(50);
     const rowsPerPageOptions = ref([50, 100, 200]);
@@ -248,22 +275,10 @@ export default defineComponent({
     );
 
     const filters = ref({
-      name: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      country: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string[] | string | null, matchMode: FilterMatchMode.IN }],
-      },
-      documents: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      inHouse: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as boolean | null, matchMode: FilterMatchMode.EQUALS }],
-      },
+      name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      country: { value: null as string[] | string | null, matchMode: FilterMatchMode.IN },
+      documents: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      inHouse: { value: null as boolean | null, matchMode: FilterMatchMode.EQUALS },
     });
 
     const globalQuery = ref<string>('');
@@ -277,17 +292,19 @@ export default defineComponent({
         })) ?? []
     );
 
+    const guests = computed(() => contactsStore.guests);
+    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
+
     const fetchNow = async () => {
-      const inhouseOnly =
-        filters.value.inHouse?.constraints?.[0]?.value === true ? true : undefined;
+      const inhouseOnly = filters.value.inHouse?.value === true ? true : undefined;
       uiStore.startLoading();
       await contactsStore.fetchGuests(
         page.value,
         rows.value,
         globalQuery.value || undefined,
-        filters.value.name.constraints[0].value || undefined,
-        filters.value.documents.constraints[0].value || undefined,
-        (filters.value.country.constraints[0].value as string[] | null) || undefined,
+        filters.value.name.value || undefined,
+        filters.value.documents.value || undefined,
+        (filters.value.country.value as string[] | null) || undefined,
         inhouseOnly,
         orderBy.value
       );
@@ -296,37 +313,28 @@ export default defineComponent({
     };
 
     const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
-
-    const loadLazy = async (e?: any) => {
-      if (e?.page !== undefined) {
+    const handlePageChange = async (e: DataTablePageEvent) => {
+      if (e.page !== undefined) {
         page.value = e.page + 1;
         rows.value = e.rows;
-        return await debouncedFetchNow();
+        return await fetchNow();
       }
+    };
 
-      if (e === undefined) {
-        const q = (globalQuery.value ?? '').trim();
-        if (q.length === 0) {
-          page.value = 1;
-          return await debouncedFetchNow();
-        }
-        if (q.length < 3) return;
+    const handleFilterChange = async (e: DataTableFilterEvent) => {
+      if (e.filters) {
+        filters.value = e.filters as typeof filters.value;
         page.value = 1;
-        return await debouncedFetchNow();
+        return await fetchNow();
       }
-
-      if (e?.sortField !== undefined) {
-        sortField.value = e.sortField || null;
+    };
+    const handleSortChange = async (e: DataTableSortEvent) => {
+      if (e.sortField !== undefined) {
+        sortField.value = (e.sortField as typeof sortField.value) || null; // TODO: check type
         sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
         page.value = 1;
+        return await fetchNow();
       }
-
-      if (e?.filters) {
-        filters.value = e.filters;
-        page.value = 1;
-      }
-
-      await debouncedFetchNow();
     };
 
     const clearAll = () => {
@@ -336,31 +344,12 @@ export default defineComponent({
       page.value = 1;
 
       filters.value = {
-        name: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        country: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.IN }],
-        },
-        documents: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        inHouse: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
-        },
+        name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+        country: { value: null as string[] | string | null, matchMode: FilterMatchMode.IN },
+        documents: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+        inHouse: { value: null as boolean | null, matchMode: FilterMatchMode.EQUALS },
       };
-
-      loadLazy({
-        filters: { ...filters.value },
-        page: 0,
-        rows: rows.value,
-        sortField: null,
-        sortOrder: 1,
-      });
+      fetchNow();
     };
 
     const onToggleInhouse = (val: boolean) => {
@@ -368,12 +357,12 @@ export default defineComponent({
       filters.value = {
         ...filters.value,
         inHouse: {
-          ...filters.value.inHouse,
-          constraints: [{ value: newVal, matchMode: FilterMatchMode.EQUALS }],
+          value: newVal,
+          matchMode: FilterMatchMode.EQUALS,
         },
       };
       page.value = 1;
-      loadLazy({ filters: { ...filters.value } });
+      fetchNow();
     };
 
     const openContactDetail = async (contact: Contact) => {
@@ -406,10 +395,16 @@ export default defineComponent({
       filters,
       globalQuery,
       countryOptions,
-      loadLazy,
+      first,
+      t,
       clearAll,
       onToggleInhouse,
       openContactDetail,
+      handlePageChange,
+      handleFilterChange,
+      handleSortChange,
+      fetchNow,
+      debouncedFetchNow,
     };
   },
 });
