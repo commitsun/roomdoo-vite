@@ -1,7 +1,7 @@
 import type { ActionTree } from 'vuex';
-import type { StateInterface } from '../index';
+import type { StateInterface } from '../../../_legacy/store/index';
 import type { LinksStateInterface } from '.';
-import { getCookie } from '@/legacy/utils/cookies';
+import { getCookie } from '@/_legacy/utils/cookies';
 
 const actions: ActionTree<LinksStateInterface, StateInterface> = {
   async fetchLink(context, params: { pmsPropertyId: number; linkId: number }) {
