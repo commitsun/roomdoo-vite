@@ -22,7 +22,7 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
-      @row-click="openContactDetail($event.data)"
+      @rowClick="openContactDetail($event.data)"
     >
       <template #header>
         <div class="flex gap-3 items-center">
@@ -33,7 +33,9 @@
             <InputText
               v-model="globalQuery"
               :placeholder="t('contacts.globalSearch')"
-              @input="globalQuery.length >= 3 ? debouncedFetchNow() : null"
+              @input="
+                globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
+              "
               :aria-label="t('contacts.globalSearch')"
             />
           </IconField>
@@ -234,7 +236,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
@@ -279,7 +281,6 @@ export default defineComponent({
     CountryFlag,
   },
   setup() {
-    const first = ref(0);
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
     const uiStore = useUIStore();
@@ -287,10 +288,11 @@ export default defineComponent({
     const { t } = useI18n();
     const { open } = useAppDialog();
 
+    const first = ref(0);
     const numTotalRecords = ref(0);
     const page = ref(1);
-    const rows = ref(5);
-    const rowsPerPageOptions = ref([5, 100, 200]);
+    const rows = ref(50);
+    const rowsPerPageOptions = ref([50, 100, 200]);
 
     const sortField = ref<string | null>(null);
     const sortOrder = ref<number>(1);
@@ -308,26 +310,11 @@ export default defineComponent({
     );
 
     const filters = ref({
-      name: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      email: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      type: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string[] | null, matchMode: FilterMatchMode.IN }],
-      },
-      phones: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      country: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string[] | string | null, matchMode: FilterMatchMode.IN }],
-      },
+      name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      email: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      phones: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      type: { value: null as string[] | null, matchMode: FilterMatchMode.IN },
+      country: { value: null as string[] | string | null, matchMode: FilterMatchMode.IN },
     });
 
     const globalQuery = ref<string>('');
@@ -350,11 +337,11 @@ export default defineComponent({
           page.value,
           rows.value,
           globalQuery.value || undefined,
-          filters.value.name.constraints[0].value || undefined,
-          filters.value.email.constraints[0].value || undefined,
-          (filters.value.type.constraints[0].value as string[] | null) || undefined,
-          (filters.value.country.constraints[0].value as string[] | null) || undefined,
-          filters.value.phones.constraints[0].value || undefined,
+          filters.value.name.value || undefined,
+          filters.value.email.value || undefined,
+          (filters.value.type.value as string[] | null) || undefined,
+          (filters.value.country.value as string[] | null) || undefined,
+          filters.value.phones.value || undefined,
           orderBy.value
         );
         setCountFromStore();
@@ -392,30 +379,16 @@ export default defineComponent({
       sortField.value = null;
       sortOrder.value = 1;
       page.value = 1;
+      first.value = 0;
 
       filters.value = {
-        name: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        email: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        type: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null as string[] | null, matchMode: FilterMatchMode.IN }],
-        },
-        phones: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        country: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.IN }],
-        },
+        name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        email: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        phones: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        type: { value: null as string[] | null, matchMode: FilterMatchMode.IN },
+        country: { value: null as string[] | null, matchMode: FilterMatchMode.IN },
       };
-      first.value = 0;
+
       await fetchNow();
     };
 
@@ -458,6 +431,7 @@ export default defineComponent({
       sortOrder,
       sortField,
       countryOptions,
+      first,
       handlePageChange,
       handleFilterChange,
       handleSortChange,
@@ -467,7 +441,6 @@ export default defineComponent({
       clearAll,
       severityType,
       openContactDetail,
-      first,
     };
   },
 });

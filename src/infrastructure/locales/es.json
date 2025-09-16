@@ -69,12 +69,15 @@
     "email": "Email",
     "phone": "Teléfono",
     "country": "País",
+    "document": "Documento",
     "types": {
       "guest": "Huésped",
       "customer": "Cliente",
       "agency": "Agencia",
       "supplier": "Proveedor"
     },
+    "lastReservation": "Última reserva",
+    "internalNotes": "Comentarios internos",
     "n_countries_selected": "{count} países",
     "n_types_selected": "{count} tipos",
     "globalSearch": "Búsqueda global",
@@ -86,7 +89,8 @@
     "vat": "NIF/CIF",
     "totalInvoiced": "Total facturado",
     "searchByVat": "Buscar por NIF/CIF",
-    "selectCountries": "Seleccionar países"
+    "selectCountries": "Seleccionar países",
+    "searchByDocument": "Buscar por documento"
   },
   "userSettings": {
     "replaceImage": "Reemplazar foto",
