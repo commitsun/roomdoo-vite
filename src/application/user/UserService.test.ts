@@ -19,7 +19,7 @@ describe('UserService - loginAndGetUser', () => {
     userService = new UserService(userRepoMock as UserRepository);
   });
 
-  it('should login, fetch user, fetch fields and return merged user', async () => {
+  it('does login, fetch user, fetch fields and return merged user', async () => {
     userRepoMock.login.mockResolvedValue(undefined);
     const userData = {
       id: 2,
@@ -47,7 +47,7 @@ describe('UserService - loginAndGetUser', () => {
     });
   });
 
-  it('should propagate error if login fails', async () => {
+  it('propagate error if login fails', async () => {
     userRepoMock.login.mockRejectedValue(new UnauthorizedError());
 
     await expect(userService.loginAndGetUser('fail@roomdoo.com', 'failpw')).rejects.toThrowError(
@@ -58,7 +58,7 @@ describe('UserService - loginAndGetUser', () => {
     expect(userRepoMock.fetchAvailabilityRuleFields).not.toHaveBeenCalled();
   });
 
-  it('should call repo methods in order: login, fetchUser, fetchAvailabilityRuleFields', async () => {
+  it('call repo methods in order: login, fetchUser, fetchAvailabilityRuleFields', async () => {
     const callOrder: string[] = [];
     userRepoMock.login.mockImplementation(() => {
       callOrder.push('login');
@@ -78,29 +78,29 @@ describe('UserService - loginAndGetUser', () => {
     expect(callOrder[0]).toBe('login');
   });
 
-  it('should call requestPassword with email', async () => {
+  it('call requestPassword with email', async () => {
     await userService.requestChangePassword('test@roomdoo.com');
     expect(userRepoMock.requestChangePassword).toHaveBeenCalledWith('test@roomdoo.com');
   });
 
-  it('should call resetPassword with password and token', async () => {
+  it('call resetPassword with password and token', async () => {
     await userService.resetPassword('newpass', 'token123');
     expect(userRepoMock.resetPassword).toHaveBeenCalledWith('newpass', 'token123');
   });
 
-  it('should propagate errors from resetPassword', async () => {
+  it('propagate errors from resetPassword', async () => {
     userRepoMock.resetPassword.mockRejectedValue(new UnauthorizedError());
     await expect(userService.resetPassword('newpass', 'notValidToken')).rejects.toThrow(
       UnauthorizedError
     );
   });
 
-  it('should call refreshToken', async () => {
+  it('call refreshToken', async () => {
     await userService.refreshToken();
     expect(userRepoMock.refreshToken).toHaveBeenCalled();
   });
 
-  it('should propagate errors from refreshToken', async () => {
+  it('propagate errors from refreshToken', async () => {
     userRepoMock.refreshToken.mockRejectedValue(new UnauthorizedError());
     await expect(userService.refreshToken()).rejects.toThrow(UnauthorizedError);
   });
