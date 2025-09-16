@@ -69,12 +69,15 @@
     "email": "Email",
     "phone": "Phone",
     "country": "Country",
+    "document": "Document",
     "types": {
       "guest": "Guest",
       "customer": "Customer",
       "agency": "Agency",
       "supplier": "Supplier"
     },
+    "lastReservation": "Last reservation",
+    "internalNotes": "Internal notes",
     "n_countries_selected": "{count} countries",
     "n_types_selected": "{count} types",
     "globalSearch": "Global search",
@@ -86,7 +89,8 @@
     "vat": "VAT",
     "totalInvoiced": "Total invoiced",
     "searchByVat": "Search by VAT",
-    "selectCountries": "Select Countries"
+    "selectCountries": "Select Countries",
+    "searchByDocument": "Search by document"
   },
   "userSettings": {
     "replaceImage": "Replace image",
