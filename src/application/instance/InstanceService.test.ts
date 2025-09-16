@@ -15,7 +15,7 @@ describe('InstanceService - fetchInstance', () => {
     instanceService = new InstanceService(instanceRepoMock as InstanceRepository);
   });
 
-  it('should propagate error if fetchInstance or fetchLanguages fails', async () => {
+  it('propagate error if fetchInstance or fetchLanguages fails', async () => {
     instanceRepoMock.fetchInstance.mockRejectedValue(new InternalServerError());
     instanceRepoMock.fetchLanguages.mockResolvedValue([]);
 
@@ -24,7 +24,7 @@ describe('InstanceService - fetchInstance', () => {
     expect(instanceRepoMock.fetchLanguages).toHaveBeenCalled();
   });
 
-  it('should fetch instance and languages, then return merged object (same languages app & instance)', async () => {
+  it('fetch instance and languages, then return merged object (same languages app & instance)', async () => {
     const instanceData = {
       name: 'Roomdoo',
       image: '',
@@ -45,7 +45,7 @@ describe('InstanceService - fetchInstance', () => {
     });
   });
 
-  it('should fetch instance and languages, then return merged object (1 match 1 not match app languages)', async () => {
+  it('fetch instance and languages, then return merged object (1 match 1 not match app languages)', async () => {
     const instanceData = {
       name: 'Roomdoo',
       image: '',
@@ -65,7 +65,7 @@ describe('InstanceService - fetchInstance', () => {
     });
   });
 
-  it('should fetch instance and languages, then return merged object (1 match 1 not match app languages)', async () => {
+  it('fetch instance and languages, then return merged object (1 match 1 not match app languages)', async () => {
     const instanceData = {
       name: 'Roomdoo',
       image: '',
