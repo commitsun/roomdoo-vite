@@ -82,7 +82,10 @@ const testContacts: Contact[] = [
     id: 2,
     name: 'Jane Doe',
     email: 'jane@gmail.com',
-    phones: ['1', '2'],
+    phones: [
+      { number: '555-123-4567', type: 'mobile' },
+      { number: '555-987-6543', type: 'phone' },
+    ],
     country: {
       code: 'PT',
       name: 'Portugal',
@@ -157,7 +160,9 @@ describe('ContactsPage', () => {
     );
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testContacts[0].phones && testContacts[0].phones.length > 0 ? testContacts[0].phones[0] : ''
+      testContacts[0].phones && testContacts[0].phones.length > 0
+        ? testContacts[0].phones[0].number
+        : ''
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
@@ -179,10 +184,14 @@ describe('ContactsPage', () => {
     );
     // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testContacts[1].phones && testContacts[1].phones.length > 0 ? testContacts[1].phones[0] : ''
+      testContacts[1].phones && testContacts[1].phones.length > 0
+        ? testContacts[1].phones[0].number
+        : ''
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testContacts[1].phones && testContacts[1].phones.length > 0 ? testContacts[1].phones[1] : ''
+      testContacts[1].phones && testContacts[1].phones.length > 0
+        ? testContacts[1].phones[1].number
+        : ''
     );
     // country
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent(
