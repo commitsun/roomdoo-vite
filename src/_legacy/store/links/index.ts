@@ -1,8 +1,8 @@
 import type { Module } from 'vuex';
-import type { StateInterface } from '../index';
+import type { StateInterface } from '../../../legacy/store/index';
 import state from './state';
 import actions from './actions';
-import type { Link } from '@/legacy/interfaces/LinkInterface';
+import type { Link } from '@/_legacy/interfaces/LinkInterface';
 
 export interface LinksStateInterface {
   links: Link[];
