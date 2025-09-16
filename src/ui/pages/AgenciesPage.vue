@@ -1,6 +1,7 @@
 <template>
   <div class="main-content">
     <DataTable
+      v-model:first="first"
       :value="agencies"
       scrollable
       scrollHeight="flex"
@@ -18,10 +19,10 @@
       :sortField="sortField || undefined"
       :sortOrder="sortOrder"
       :globalFilterFields="['name', 'email', 'phone']"
-      @page="loadLazy"
-      @filter="loadLazy"
-      @sort="loadLazy"
-      @row-click="openContactDetail($event.data)"
+      @page="handlePageChange"
+      @filter="handleFilterChange"
+      @sort="handleSortChange"
+      @rowClick="openContactDetail($event.data)"
     >
       <template #header>
         <div class="flex gap-3 items-center">
@@ -32,7 +33,9 @@
             <InputText
               v-model="globalQuery"
               :placeholder="t('contacts.globalSearch')"
-              @input="loadLazy()"
+              @input="
+                globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
+              "
             />
           </IconField>
           <Button
@@ -155,13 +158,18 @@
             optionLabel="label"
             optionValue="label"
             filter
-            placeholder="Select Countries"
+            :placeholder="t('contacts.selectCountries')"
             class="w-full ms-eq"
             showClear
             :showToggleAll="false"
             :maxSelectedLabels="1"
             appendTo="self"
             :panelStyle="{ width: '100%' }"
+            :selectedItemsLabel="
+              t('contacts.n_countries_selected', {
+                count: filterModel.value ? filterModel.value.length : 0,
+              })
+            "
           >
             <template #option="slotProps">
               <div class="flex items-center gap-2 leading-none">
@@ -185,7 +193,11 @@
 import { computed, defineComponent, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
-import DataTable from 'primevue/datatable';
+import DataTable, {
+  type DataTableFilterEvent,
+  type DataTablePageEvent,
+  type DataTableSortEvent,
+} from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import Chip from 'primevue/chip';
@@ -229,6 +241,7 @@ export default defineComponent({
     const { open } = useAppDialog();
     const pmsPropertiesStore = usePmsPropertiesStore();
 
+    const first = ref(0);
     const numTotalRecords = ref(0);
     const page = ref(1);
     const rows = ref(50);
@@ -252,24 +265,11 @@ export default defineComponent({
     );
 
     const filters = ref({
-      name: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      email: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      phones: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string | null, matchMode: FilterMatchMode.CONTAINS }],
-      },
-      country: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: null as string[] | string | null, matchMode: FilterMatchMode.IN }],
-      },
+      name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      email: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      phones: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      country: { value: null as string[] | string | null, matchMode: FilterMatchMode.IN },
     });
-
     const globalQuery = ref<string>('');
 
     const countryOptions = computed(() =>
@@ -289,10 +289,10 @@ export default defineComponent({
           page.value,
           rows.value,
           globalQuery.value || undefined,
-          filters.value.name.constraints[0].value || undefined,
-          filters.value.email.constraints[0].value || undefined,
-          (filters.value.country.constraints[0].value as string[] | null) || undefined,
-          filters.value.phones.constraints[0].value || undefined,
+          filters.value.name.value || undefined,
+          filters.value.email.value || undefined,
+          (filters.value.country.value as string[] | null) || undefined,
+          filters.value.phones.value || undefined,
           orderBy.value
         );
         setCountFromStore();
@@ -301,71 +301,45 @@ export default defineComponent({
       }
     };
     const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
-
-    const loadLazy = async (e?: any) => {
-      if (e?.page !== undefined) {
+    const handlePageChange = async (e: DataTablePageEvent) => {
+      if (e.page !== undefined) {
         page.value = e.page + 1;
         rows.value = e.rows;
-        return await debouncedFetchNow();
+        return await fetchNow();
       }
-
-      if (e === undefined) {
-        const q = (globalQuery.value ?? '').trim();
-        if (q.length === 0) {
-          page.value = 1;
-          return await debouncedFetchNow();
-        }
-        if (q.length < 3) return;
-        page.value = 1;
-        return await debouncedFetchNow();
-      }
-
-      if (e?.sortField !== undefined) {
-        sortField.value = e.sortField || null;
-        sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
-        page.value = 1;
-      }
-
-      if (e?.filters) {
-        filters.value = e.filters;
-        page.value = 1;
-      }
-
-      await debouncedFetchNow();
     };
 
-    const clearAll = () => {
+    const handleFilterChange = async (e: DataTableFilterEvent) => {
+      if (e.filters) {
+        filters.value = e.filters as typeof filters.value;
+        page.value = 1;
+        return await fetchNow();
+      }
+    };
+    const handleSortChange = async (e: DataTableSortEvent) => {
+      if (e.sortField !== undefined) {
+        sortField.value = (e.sortField as typeof sortField.value) || null; // TODO: check type
+        sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
+        page.value = 1;
+        return await fetchNow();
+      }
+    };
+
+    const clearAll = async () => {
       globalQuery.value = '';
       sortField.value = null;
       sortOrder.value = 1;
       page.value = 1;
+      first.value = 0;
 
       filters.value = {
-        name: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        email: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        phones: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
-        },
-        country: {
-          operator: FilterOperator.AND,
-          constraints: [{ value: null, matchMode: FilterMatchMode.IN }],
-        },
+        name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        email: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        phones: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        country: { value: null as string[] | null, matchMode: FilterMatchMode.IN },
       };
 
-      loadLazy({
-        filters: { ...filters.value },
-        page: 0,
-        rows: rows.value,
-        sortField: null,
-        sortOrder: 1,
-      });
+      await fetchNow();
     };
 
     const openContactDetail = async (contact: Contact) => {
@@ -398,10 +372,15 @@ export default defineComponent({
       filters,
       globalQuery,
       countryOptions,
+      first,
       t,
-      loadLazy,
       clearAll,
       openContactDetail,
+      handlePageChange,
+      handleFilterChange,
+      handleSortChange,
+      fetchNow,
+      debouncedFetchNow,
     };
   },
 });
