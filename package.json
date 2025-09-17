@@ -59,7 +59,7 @@
     "autoprefixer": "^10.4.21",
     "axios-mock-adapter": "^2.1.0",
     "jsdom": "^26.1.0",
-    "rollup-plugin-visualizer": "^6.0.3",
+    "rollup-plugin-visualizer": "6.0.3",
     "sass": "^1.85.1",
     "tailwindcss": "^4.1.11",
     "typescript": "~5.7.2",
