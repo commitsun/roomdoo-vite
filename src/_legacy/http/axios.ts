@@ -4,6 +4,7 @@ import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig 
 import type { App } from 'vue';
 import { useDynamicDialogsStore } from '@/infrastructure/stores/dynamicDialogs';
 import { t } from '@/infrastructure/plugins/i18n';
+import router from '@/infrastructure/plugins/router';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -56,8 +57,6 @@ api.interceptors.response.use(
 
       isRefreshing = true;
       try {
-        // Lazy import to avoid circular dependencies
-        const { useUserStore } = await import('@/infrastructure/stores/user');
         await useUserStore().refreshToken();
 
         // Success: retry queued + current request
@@ -73,7 +72,7 @@ api.interceptors.response.use(
           btnAccept: t('error.accept'),
         });
         useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
-        const { default: router } = await import('@/infrastructure/plugins/router');
+        // const { default: router } = await import('@/infrastructure/plugins/router');
         const current = router.currentRoute.value;
         const redirect = current?.fullPath || '/';
         if (current?.name !== 'login') {
