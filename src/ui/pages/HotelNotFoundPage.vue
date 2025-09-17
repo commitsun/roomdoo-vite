@@ -15,10 +15,7 @@
       </div>
       <div>{{ t('hotel_not_found_contact_description') }}</div>
       <div class="button">
-        <Button
-          :label="t('sign_up')"
-          @click="openRoomdoo"
-        />
+        <Button :label="t('sign_up')" @click="openRoomdoo" />
       </div>
     </div>
   </div>
@@ -26,7 +23,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Button } from 'primevue';
+import Button from 'primevue/button';
 
 export default defineComponent({
   components: {
