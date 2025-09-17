@@ -1,5 +1,5 @@
 import type { ActionTree } from 'vuex';
-import type { StateInterface } from '../../../_legacy/store/index';
+import type { StateInterface } from '@/_legacy/store/index';
 import type { LinksStateInterface } from '.';
 import { getCookie } from '@/_legacy/utils/cookies';
 
