@@ -78,8 +78,14 @@ export default defineConfig({
       plugins: [autoprefixer()],
     },
   },
+  optimizeDeps: { include: ['quill', 'parchment', 'quill-delta'] },
+
   build: {
     chunkSizeWarningLimit: 750,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      defaultIsModuleExports: 'auto',
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {
