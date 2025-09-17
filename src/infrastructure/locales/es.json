@@ -64,6 +64,7 @@
     }
   },
   "contacts": {
+    "apply": "Aplicar",
     "fullName": "Nombre",
     "type": "Tipo",
     "email": "Email",
@@ -90,7 +91,8 @@
     "totalInvoiced": "Total facturado",
     "searchByVat": "Buscar por NIF/CIF",
     "selectCountries": "Seleccionar países",
-    "searchByDocument": "Buscar por documento"
+    "searchByDocument": "Buscar por documento",
+    "phoneFilterMinChars": "Introduce al menos 3 caracteres"
   },
   "userSettings": {
     "replaceImage": "Reemplazar foto",
