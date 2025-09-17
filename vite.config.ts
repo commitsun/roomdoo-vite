@@ -99,7 +99,6 @@ export default defineConfig({
             if (id.includes('pinia')) return 'pinia';
             if (id.includes('axios')) return 'vendor';
             if (id.includes('@vueuse/head')) return 'head';
-            if (id.includes('quill')) return 'editor';
             if (id.includes('pdfjs')) return 'pdf';
             if (id.includes('fullcalendar')) return 'calendar';
             return 'vendor';
