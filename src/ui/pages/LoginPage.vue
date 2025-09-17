@@ -59,7 +59,14 @@
 <script lang="ts">
 import { defineComponent, computed, type Ref, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IconField, InputIcon, InputText, Password, Button, Message } from 'primevue';
+// several imports
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Button from 'primevue/button';
+import Message from 'primevue/message';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
