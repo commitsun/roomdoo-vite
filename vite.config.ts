@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from 'node:url';
 import autoprefixer from 'autoprefixer';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 import { defineConfig, Plugin } from 'vite';
 import { execSync } from 'child_process';
@@ -27,6 +28,7 @@ function commitHashPlugin(): Plugin {
 export default defineConfig({
   plugins: [
     vue(),
+    visualizer({ filename: 'dist/stats.html', gzipSize: true }),
     tailwindcss(),
     vueI18n({
       include: path.resolve(__dirname, './src/**/locales/**'),
@@ -77,7 +79,7 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 750,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -94,6 +96,7 @@ export default defineConfig({
             if (id.includes('quill')) return 'editor';
             if (id.includes('pdfjs')) return 'pdf';
             if (id.includes('fullcalendar')) return 'calendar';
+            return 'vendor';
           }
         },
       },
