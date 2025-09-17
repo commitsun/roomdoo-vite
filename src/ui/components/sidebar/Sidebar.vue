@@ -492,18 +492,20 @@ const openLegacyReport = (type: LegacyReportType) => {
   overflow: hidden;
   opacity: 0;
   transform: translateY(-4px);
-  transition: height 200ms ease, opacity 160ms ease, transform 160ms ease;
+  margin-top: -0.5rem;
+  transition: max-height 200ms ease, opacity 160ms ease, transform 160ms ease;
 
   &--open {
     max-height: 1000px;
     opacity: 1;
     transform: translateY(0);
     overflow: visible;
+    margin-bottom: 0.75rem;
   }
 }
 
 .layout__submenu-item {
-  margin: 0.25rem 0;
+  margin-left: 1.8rem;
 }
 
 .layout__submenu-link {
