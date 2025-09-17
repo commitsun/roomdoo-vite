@@ -93,16 +93,16 @@
 <script lang="ts">
 import { defineComponent, computed, type Ref, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  IconField,
-  InputIcon,
-  InputText,
-  Password,
-  Button,
-  Select,
-  Divider,
-  Message,
-} from 'primevue';
+
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Button from 'primevue/button';
+import Select from 'primevue/select';
+import Divider from 'primevue/divider';
+import Message from 'primevue/message';
+
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { resetPasswordSchema } from '@/application/user/UserSchemas';

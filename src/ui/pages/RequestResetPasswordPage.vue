@@ -39,7 +39,10 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Button, InputText, IconField, InputIcon } from 'primevue';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 
