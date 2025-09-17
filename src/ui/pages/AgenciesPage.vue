@@ -108,7 +108,8 @@
         :showFilterMatchModes="false"
         :showFilterOperator="false"
         :showAddButton="false"
-        :showFilterApplyButton="false"
+        :showApplyButton="false"
+        :showClearButton="false"
       >
         <template #body="{ data }">
           <span v-for="(phone, index) in data.phones" :key="`${phone.type}-${index}`">
@@ -120,8 +121,33 @@
             />
           </span>
         </template>
-        <template #filter="{ filterModel }">
-          <InputText v-model="filterModel.value" type="text" placeholder="Search by phone" />
+
+        <template #filter="{ filterModel, filterCallback }">
+          <div class="flex flex-col gap-2">
+            <InputText
+              v-model="phoneDraft"
+              type="text"
+              placeholder="Search by phone"
+              :aria-label="t('contacts.searchByPhone')"
+            />
+            <span v-if="phoneDraft.length < 3" class="text-xs">
+              {{ t('contacts.phoneFilterMinChars') }}
+            </span>
+            <div class="flex justify-between">
+              <Button
+                size="small"
+                variant="outlined"
+                :label="t('contacts.clear')"
+                @click="onClearPhoneFilter(filterModel, filterCallback)"
+              />
+              <Button
+                :label="t('contacts.apply')"
+                :disabled="!phoneDraft || phoneDraft.length < 3"
+                class="p-button p-component p-button-sm p-datatable-filter-apply-button"
+                @click="onApplyPhoneFilter(filterModel, filterCallback)"
+              />
+            </div>
+          </div>
         </template>
       </Column>
 
@@ -241,6 +267,7 @@ export default defineComponent({
     const { open } = useAppDialog();
     const pmsPropertiesStore = usePmsPropertiesStore();
 
+    const phoneDraft = ref('');
     const first = ref(0);
     const numTotalRecords = ref(0);
     const page = ref(1);
@@ -357,6 +384,23 @@ export default defineComponent({
       });
     };
 
+    const onClearPhoneFilter = (
+      filterModel: { value: unknown },
+      filterCallback: (value?: unknown) => void
+    ) => {
+      phoneDraft.value = '';
+      filterModel.value = null;
+      filterCallback();
+    };
+
+    const onApplyPhoneFilter = (
+      filterModel: { value: unknown },
+      filterCallback: (value?: unknown) => void
+    ) => {
+      if (!phoneDraft.value || phoneDraft.value.length < 3) return;
+      filterModel.value = phoneDraft.value;
+      filterCallback();
+    };
     onBeforeMount(async () => {
       await fetchNow();
       await countriesStore.fetchCountries();
@@ -373,6 +417,7 @@ export default defineComponent({
       globalQuery,
       countryOptions,
       first,
+      phoneDraft,
       t,
       clearAll,
       openContactDetail,
@@ -381,6 +426,8 @@ export default defineComponent({
       handleSortChange,
       fetchNow,
       debouncedFetchNow,
+      onClearPhoneFilter,
+      onApplyPhoneFilter,
     };
   },
 });

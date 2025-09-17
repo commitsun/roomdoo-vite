@@ -64,6 +64,7 @@
     }
   },
   "contacts": {
+    "apply": "Apply",
     "fullName": "Name",
     "type": "Type",
     "email": "Email",
@@ -90,7 +91,8 @@
     "totalInvoiced": "Total invoiced",
     "searchByVat": "Search by VAT",
     "selectCountries": "Select Countries",
-    "searchByDocument": "Search by document"
+    "searchByDocument": "Search by document",
+    "phoneFilterMinChars": "Enter at least 3 characters"
   },
   "userSettings": {
     "replaceImage": "Replace image",
