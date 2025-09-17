@@ -54,8 +54,7 @@
                   currentFolio?.state != 'cancel' &&
                   !(
                     currentReservations?.filter(
-                      (el: { isSplitted: any; stateCode: string }) =>
-                        el.isSplitted || el.stateCode === 'cancel',
+                      (el: ReservationInterface) => el.isSplitted || el.stateCode === 'cancel',
                     ).length === currentReservations?.length
                   )
                 "
@@ -453,12 +452,12 @@
             <div
               class="reservations"
               v-for="reservation in classes.sort(
-                (a: { folioSequence: number }, b: { folioSequence: number }) => {
-                  if (a.folioSequence && b.folioSequence && a.folioSequence < b.folioSequence)
-                    return -1;
-                  if (a.folioSequence && b.folioSequence && a.folioSequence > b.folioSequence)
-                    return 1;
-                  else return 0;
+                (a: ReservationInterface, b: ReservationInterface) => {
+                  const aSeq = a.folioSequence ?? 0;
+                  const bSeq = b.folioSequence ?? 0;
+                  if (aSeq < bSeq) return -1;
+                  if (aSeq > bSeq) return 1;
+                  return 0;
                 },
               )"
               :key="reservation.id"
