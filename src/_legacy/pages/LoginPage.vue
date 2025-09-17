@@ -204,8 +204,6 @@ export default {
       height: 46px;
       font-size: 16px;
       cursor: pointer;
-
-      // font-family: 'rethink-sans', sans-serif;
     }
     .send-email-feedback {
       display: flex;
