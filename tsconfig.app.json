@@ -7,11 +7,15 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "vuex": ["./node_modules/vuex/types/index.d.ts"]
     },
-    "skipLibCheck": true, // Ignora los tipos conflictivos de dependencias
-    "esModuleInterop": true, // Asegura la compatibilidad con ESM y CommonJS
-    "moduleResolution": "Node", // Usa la resolución de módulos adecuada
-    "allowSyntheticDefaultImports": true // Permite importar módulos como si tuvieran `default`
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   }
 }
