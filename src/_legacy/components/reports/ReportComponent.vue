@@ -35,13 +35,7 @@
       </div>
     </div>
     <div class="bottom">
-      <AppButton
-        label="Cancelar"
-        raised
-        size="small"
-        severity="secondary"
-        @click="$emit('close')"
-      />
+      <AppButton label="Cancelar" raised size="small" severity="secondary" @click="closeDialog()" />
       <AppButton
         class="ml-3"
         label="Generar informe"
@@ -53,7 +47,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, inject, ref } from 'vue';
 import DatePicker from 'primevue/datepicker';
 import { useStore } from '@/_legacy/store';
 import type { AxiosResponse } from 'axios';
@@ -71,8 +65,9 @@ export default defineComponent({
     },
   },
   emits: ['close'],
-  setup(props) {
+  setup(props, context) {
     const store = useStore();
+    const dialogRef = inject<any>('dialogRef');
 
     const isCalendarRange = ref(false);
     const dateFrom = ref();
@@ -115,24 +110,34 @@ export default defineComponent({
         pmsPropertyId: activeProperty.value?.id,
       };
       void store.dispatch('layout/showSpinner', true);
-      await store
-        .dispatch(path, payload)
-        .then((response: AxiosResponse<{ fileName: string; binary: string }>) => {
-          const a: HTMLAnchorElement = document.createElement('a');
-          if (response.data && response.data.binary && response.data.fileName) {
-            a.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${response.data.binary}`;
-          }
-          a.download = response.data.fileName;
-          document.body.appendChild(a);
-          a.click();
-        });
-      void store.dispatch('layout/showSpinner', false);
+      try {
+        await store
+          .dispatch(path, payload)
+          .then((response: AxiosResponse<{ fileName: string; binary: string }>) => {
+            const a: HTMLAnchorElement = document.createElement('a');
+            if (response.data && response.data.binary && response.data.fileName) {
+              a.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${response.data.binary}`;
+            }
+            a.download = response.data.fileName;
+            document.body.appendChild(a);
+            a.click();
+          });
+      } catch (error) {
+        console.error('Error downloading report:', error);
+      } finally {
+        void store.dispatch('layout/showSpinner', false);
+      }
+    };
+    const closeDialog = () => {
+      context.emit('close');
+      dialogRef?.value?.close({ action: 'saved', refresh: true });
     };
     return {
       isCalendarRange,
       dateFrom,
       dateTo,
       downloadReport,
+      closeDialog,
     };
   },
 });

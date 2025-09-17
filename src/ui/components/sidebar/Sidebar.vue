@@ -131,37 +131,37 @@
       </div>
 
       <ul class="layout__submenu" :class="{ 'layout__submenu--open': isReportOptionsOpen }">
-        <li class="layout__submenu-item">
+        <li class="layout__submenu-item" @click="openLegacyReport('kelly')">
           <div class="layout__submenu-link">
             <i class="pi pi-list-check layout__submenu-link-icon" />
             <span>{{ t('sidebar.housekeeping') }}</span>
           </div>
         </li>
-        <li class="layout__submenu-item">
+        <li class="layout__submenu-item" @click="openLegacyReport('arrivals')">
           <div class="layout__submenu-link">
             <i class="pi pi-sign-in layout__submenu-link-icon" />
             <span>{{ t('sidebar.arrivals') }}</span>
           </div>
         </li>
-        <li class="layout__submenu-item">
+        <li class="layout__submenu-item" @click="openLegacyReport('departures')">
           <div class="layout__submenu-link">
             <i class="pi pi-sign-out layout__submenu-link-icon" />
             <span>{{ t('sidebar.departures') }}</span>
           </div>
         </li>
-        <li class="layout__submenu-item">
+        <li class="layout__submenu-item" @click="openLegacyReport('transactions')">
           <div class="layout__submenu-link">
             <i class="pi pi-tags layout__submenu-link-icon" />
             <span>{{ t('sidebar.services') }}</span>
           </div>
         </li>
-        <li class="layout__submenu-item">
+        <li class="layout__submenu-item" @click="openLegacyReport('services')">
           <div class="layout__submenu-link">
             <i class="pi pi-money-bill layout__submenu-link-icon" />
             <span>{{ t('sidebar.payments') }}</span>
           </div>
         </li>
-        <li class="layout__submenu-item">
+        <li class="layout__submenu-item" @click="openLegacyReport('INE')">
           <div class="layout__submenu-link">
             <i class="pi pi-chart-pie layout__submenu-link-icon" />
             <span>INE</span>
@@ -258,10 +258,13 @@ import { useI18n } from 'vue-i18n';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import UserChangePassword from '../user/UserChangePassword.vue';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
+import LegacyReport from '@/_legacy/components/reports/ReportComponent.vue';
 
 defineProps<{
   menuOpen: boolean;
 }>();
+
+type LegacyReportType = 'kelly' | 'arrivals' | 'departures' | 'transactions' | 'services' | 'INE';
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -372,6 +375,23 @@ const hideUserMenu = () => {
   if (isUserMenuOpen.value) {
     isUserMenuOpen.value = false;
   }
+};
+
+const openLegacyReport = (type: LegacyReportType) => {
+  console.log('Opening legacy report:', type);
+  const titles: Record<LegacyReportType, string> = {
+    kelly: t('sidebar.housekeeping'),
+    arrivals: t('sidebar.arrivals'),
+    departures: t('sidebar.departures'),
+    services: t('sidebar.services'),
+    transactions: t('sidebar.payments'),
+    INE: 'INE',
+  };
+
+  open(LegacyReport, {
+    props: { header: titles[type] },
+    contentProps: { reportType: type },
+  });
 };
 </script>
 
