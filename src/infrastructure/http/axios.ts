@@ -118,9 +118,16 @@ api.interceptors.response.use(
       case 401:
         throw new UnauthorizedError();
       case 500:
-        throw new InternalServerError();
+        useTextMessagesStore().addTextMessage(
+          t('error.somethingWentWrong'),
+          t('error.internalError')
+        );
+        break;
       default:
-        throw new UnknownError();
+        useTextMessagesStore().addTextMessage(
+          t('error.somethingWentWrong'),
+          t('error.unknownError')
+        );
     }
   }
 );
