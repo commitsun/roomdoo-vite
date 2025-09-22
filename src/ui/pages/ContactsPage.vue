@@ -50,7 +50,7 @@
         </div>
       </template>
 
-      <!-- Nombre -->
+      <!-- Name -->
       <Column
         field="name"
         :header="t('contacts.fullName')"
@@ -76,7 +76,7 @@
         </template>
       </Column>
 
-      <!-- Tipo -->
+      <!-- Type -->
       <Column
         :header="t('contacts.type')"
         filter
@@ -145,7 +145,7 @@
         </template>
       </Column>
 
-      <!-- Teléfonos -->
+      <!-- Phones -->
       <Column
         field="phones"
         :header="t('contacts.phone')"
@@ -156,6 +156,7 @@
         :showAddButton="false"
         :showApplyButton="false"
         :showClearButton="false"
+        :filterMenuStyle="{ padding: '0.75rem 0.75rem 0.25rem' }"
       >
         <template #body="{ data }">
           <span v-for="(phone, index) in data.phones" :key="`${phone.type}-${index}`">
@@ -168,7 +169,7 @@
           </span>
         </template>
 
-        <template #filter="{ filterModel, filterCallback }">
+        <template #filter="{ filterModel, filterCallback, applyFilter }">
           <div class="flex flex-col gap-2">
             <InputText
               v-model="phoneDraft"
@@ -184,20 +185,20 @@
                 size="small"
                 variant="outlined"
                 :label="t('contacts.clear')"
-                @click="onClearPhoneFilter(filterModel, filterCallback)"
+                @click="onClearPhoneFilter(filterModel, filterCallback, applyFilter)"
               />
               <Button
                 :label="t('contacts.apply')"
                 :disabled="!phoneDraft || phoneDraft.length < 3"
                 class="p-button p-component p-button-sm p-datatable-filter-apply-button"
-                @click="onApplyPhoneFilter(filterModel, filterCallback)"
+                @click="onApplyPhoneFilter(filterModel, filterCallback, applyFilter)"
               />
             </div>
           </div>
         </template>
       </Column>
 
-      <!-- País -->
+      <!-- Country -->
       <Column
         field="country"
         :header="t('contacts.country')"
@@ -444,20 +445,24 @@ export default defineComponent({
 
     const onClearPhoneFilter = (
       filterModel: { value: unknown },
-      filterCallback: (value?: unknown) => void
+      filterCallback: (value?: unknown) => void,
+      applyFilter: () => void
     ) => {
       phoneDraft.value = '';
       filterModel.value = null;
       filterCallback();
+      applyFilter?.();
     };
 
     const onApplyPhoneFilter = (
       filterModel: { value: unknown },
-      filterCallback: (value?: unknown) => void
+      filterCallback: (value?: unknown) => void,
+      applyFilter: () => void
     ) => {
       if (!phoneDraft.value || phoneDraft.value.length < 3) return;
       filterModel.value = phoneDraft.value;
       filterCallback();
+      applyFilter?.();
     };
 
     onMounted(async () => {
