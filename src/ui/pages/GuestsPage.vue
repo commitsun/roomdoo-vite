@@ -48,7 +48,7 @@
         </div>
       </template>
 
-      <!-- Nombre completo -->
+      <!-- Name -->
       <Column
         field="name"
         :header="t('contacts.fullName')"
@@ -72,7 +72,7 @@
         </template>
       </Column>
 
-      <!-- Documento principal -->
+      <!-- Main Document -->
       <Column
         field="documents"
         :header="t('contacts.document')"
@@ -103,7 +103,7 @@
         </template>
       </Column>
 
-      <!-- País -->
+      <!-- Country -->
       <Column
         field="country"
         :header="t('contacts.country')"
@@ -164,7 +164,7 @@
         </template>
       </Column>
 
-      <!-- Última reserva (nombre) -->
+      <!-- Last reservation (name) -->
       <Column
         field="lastReservationName"
         :header="t('contacts.lastReservation')"
@@ -175,7 +175,7 @@
         </template>
       </Column>
 
-      <!-- Comentarios internos (truncado + tooltip) -->
+      <!-- Internal comments -->
       <Column field="internalNotes" :header="t('contacts.internalNotes')" style="max-width: 300px">
         <template #body="{ data }">
           <span v-if="data.internalNotes" class="ellipsis-2" :title="data.internalNotes">
@@ -184,7 +184,7 @@
         </template>
       </Column>
 
-      <!-- Actualmente alojado -->
+      <!-- In house -->
       <Column field="inHouse" style="width: 160px; text-align: center">
         <template #header>
           <div class="flex items-center gap-2">
