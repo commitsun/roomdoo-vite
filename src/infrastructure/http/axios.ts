@@ -4,8 +4,7 @@ import axios, {
   AxiosHeaders,
   type InternalAxiosRequestConfig,
 } from 'axios';
-import { InternalServerError } from '@/application/shared/InternalServerError';
-import { UnknownError } from '@/application/shared/UnknownError';
+
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useTextMessagesStore } from '../stores/textMessages';
