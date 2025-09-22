@@ -6,9 +6,11 @@ import { createTestingPinia, type TestingPinia } from '@pinia/testing';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 
 const push = vi.fn();
-vi.mock('vue-router', () => ({
-  useRouter: () => ({ push }),
-}));
+
+vi.mock('vue-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-router')>();
+  return { ...actual, useRouter: () => ({ push }) };
+});
 
 const SelectStub = {
   name: 'Select',
