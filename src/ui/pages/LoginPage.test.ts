@@ -18,11 +18,14 @@ const route = reactive({
 // reference needed
 const replace = vi.fn();
 
-// mocking vue-router to allow changing route params, query, ...
-vi.mock('vue-router', () => ({
-  useRouter: () => ({ replace }),
-  useRoute: () => route,
-}));
+vi.mock('vue-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-router')>();
+  return {
+    ...actual,
+    useRouter: () => ({ replace }),
+    useRoute: () => route,
+  };
+});
 
 // mocking i18n (test isolated from translations, performance, ...)
 vi.mock('vue-i18n', () => {
