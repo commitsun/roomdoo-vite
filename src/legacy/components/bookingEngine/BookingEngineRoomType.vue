@@ -354,6 +354,7 @@ export default defineComponent({
         position: relative;
         .icon {
           margin-right: 0.5rem;
+          margin-left: 0.25rem;
         }
         .icon-expanded {
           rotate: 90deg;
@@ -456,7 +457,13 @@ export default defineComponent({
         rgb(171, 222, 254) 8px
       ) !important;
       .title-section-content {
-        background-color: $primary;
+        background-color: rgba(255, 255, 255, 0.75);
+        color: $primary !important;
+        .left {
+          .icon {
+            background-color: $primary !important;
+          }
+        }
       }
     }
     &.not-editable {
@@ -516,7 +523,6 @@ export default defineComponent({
           color: $primary;
         }
         .icon {
-          border: 1px solid red;
           &.icon-expanded {
             rotate: 90deg;
           }

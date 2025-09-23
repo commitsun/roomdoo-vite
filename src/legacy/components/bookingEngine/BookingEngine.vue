@@ -1982,6 +1982,9 @@ export default defineComponent({
       reservationId: number;
       boardServiceId: number;
     }) => {
+      if (selectedReservationType.value === 'out') {
+        return;
+      }
       // reservation
       const reservation = reservationsByRoomTypeToCreate.value
         .find((el) => el.roomTypeId === value.roomTypeId)

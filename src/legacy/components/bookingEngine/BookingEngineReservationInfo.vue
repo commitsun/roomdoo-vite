@@ -179,7 +179,7 @@
       </div>
       <hr />
 
-      <div class="adults-children">
+      <div class="adults-children" v-if="selectedReservationType !== 'out'">
         <div class="adults">
           <div
             class="adults-label"

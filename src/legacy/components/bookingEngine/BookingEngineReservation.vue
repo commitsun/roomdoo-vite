@@ -112,7 +112,14 @@
               }}
               €
             </div>
-            <div class="price" v-else-if="reservation.roomPrice">
+            <div
+              class="price"
+              v-else-if="
+                reservation.roomPrice &&
+                selectedReservationType !== 'staff' &&
+                selectedReservationType !== 'out'
+              "
+            >
               {{ reservation.roomPrice.toFixed(2) }} €
             </div>
           </div>
@@ -338,6 +345,7 @@ export default defineComponent({
     color: $primary !important;
     .top-bar-content {
       background-color: rgba(white, 0.75);
+      margin-right: 0.5rem;
     }
   }
   .out-grey {
