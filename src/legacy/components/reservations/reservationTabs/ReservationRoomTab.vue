@@ -12,8 +12,8 @@
         <img src="/app-images/icon-room-preferences-white.svg" />
         <span> Confirmar asignación </span>
       </div>
-      <div class="right-link" @click="toggleShowRoomsDialog(true)" v-else>
-        <span> Gestionar habitación </span>
+      <div class="right-link" @click="toggleShowRoomsDialog(false)" v-else>
+        <span> Gestionar habitación</span>
       </div>
     </div>
     <div class="data-reservation-row">
@@ -75,7 +75,7 @@
         <img src="/app-images/icon-room-preferences-white.svg" />
         <span> Confirmar asignación </span>
       </div>
-      <div class="right-link" @click="toggleShowRoomsDialog(false)" v-else>
+      <div class="right-link" @click="toggleShowRoomsDialog(true)" v-else>
         <span> Gestionar habitación </span>
       </div>
     </div>
