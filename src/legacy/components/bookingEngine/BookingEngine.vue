@@ -977,7 +977,7 @@
         <AppButton
           color="primary"
           v-if="selectedReservationType !== 'out'"
-          @click="saveFolio(true)"
+          @click="saveFolio(false)"
           label="Guardar como presupuesto"
           class="btn btn-draft"
           size="small"
