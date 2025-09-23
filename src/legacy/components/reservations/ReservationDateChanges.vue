@@ -296,7 +296,11 @@
           </span>
           <div class="separator" v-if="currentReservation?.pricelistId"></div>
           <span class="price" v-if="currentReservation?.pricelistId">
-            {{ newPricePerPricelistOrChangedByUser.toFixed(2) }}€
+            {{
+              currentReservation.reservationType === 'staff'
+                ? (0).toFixed(2)
+                : newPricePerPricelistOrChangedByUser.toFixed(2)
+            }}€
           </span>
         </div>
         <span class="text">
