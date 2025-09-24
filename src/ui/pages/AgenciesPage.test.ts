@@ -49,7 +49,7 @@ vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
 // TODO: remove when legacy stores are removed
 vi.mock('@/_legacy/utils/useLegacyStore', () => ({
   useLegacyStore: () => ({
-    fetchAndSetVuexPartnerAndACtiveProperty: vi.fn().mockResolvedValue(undefined),
+    fetchAndSetVuexPartnerAndActiveProperty: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 
@@ -437,7 +437,7 @@ describe('AgenciesPage', () => {
     expect(last?.[7]).toBe('-country'); // orderBy
 
     // Clear all (header button con label "Clear")
-    const clearAllBtn = screen.getByRole('button', { name: /^clear$/i });
+    const clearAllBtn = screen.getByRole('button', { name: /clear global search/i });
     await userEvent.click(clearAllBtn);
 
     // Todo limpio
