@@ -11,15 +11,25 @@ export function useLegacyStore() {
     store.dispatch('user/reset');
   };
 
-  const fetchAndSetVuexPartnerAndACtiveProperty = async (partnerId: number, propertyId: number) => {
+  const fetchAndSetVuexPartnerAndActiveProperty = async (
+    partnerId: number,
+    pmsPropertyId: number
+  ) => {
     await store.dispatch('properties/fetchProperties');
-    await store.dispatch('properties/setActiveProperty', propertyId);
+    await store.dispatch('properties/setActiveProperty', pmsPropertyId);
     await store.dispatch('partners/fetchCurrentPartner', partnerId);
+  };
+
+  const removeVuexPartner = async (pmsPropertyId: number) => {
+    await store.dispatch('properties/fetchProperties');
+    await store.dispatch('properties/setActiveProperty', pmsPropertyId);
+    await store.dispatch('partners/removePartner');
   };
 
   return {
     doVuexLogin,
     removeVuexAndOldCookiesUser,
-    fetchAndSetVuexPartnerAndACtiveProperty,
+    fetchAndSetVuexPartnerAndActiveProperty,
+    removeVuexPartner,
   };
 }

@@ -186,7 +186,7 @@
           @click="isLinkOptionsOpen = !isLinkOptionsOpen"
         >
           <i class="pi pi-external-link layout__nav-link-icon" />
-          <span>Enlaces</span>
+          <span>{{ t('sidebar.links') }}</span>
           <i
             class="pi pi-sort-down-fill layout__nav-link-caret"
             :class="{ 'layout__nav-link-caret--rotated': isLinkOptionsOpen }"
@@ -378,7 +378,6 @@ const hideUserMenu = () => {
 };
 
 const openLegacyReport = (type: LegacyReportType) => {
-  console.log('Opening legacy report:', type);
   const titles: Record<LegacyReportType, string> = {
     kelly: t('sidebar.housekeeping'),
     arrivals: t('sidebar.arrivals'),
