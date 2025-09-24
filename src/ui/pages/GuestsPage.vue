@@ -1,5 +1,13 @@
 <template>
   <div class="main-content">
+    <Button
+      class="button-add-mobile"
+      icon="pi pi-user-plus"
+      severity="primary"
+      size="large"
+      rounded
+      @click="openNewContact()"
+    />
     <DataTable
       v-model:first="first"
       :value="guests"
@@ -25,26 +33,41 @@
       @rowClick="openContactDetail($event.data)"
     >
       <template #header>
-        <div class="flex gap-3 items-center">
-          <IconField>
-            <InputIcon>
-              <i class="pi pi-search" />
-            </InputIcon>
-            <InputText
-              v-model="globalQuery"
-              :placeholder="t('contacts.globalSearch')"
-              @input="
-                globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
-              "
+        <div class="flex justify-between items-center">
+          <div class="flex gap-3 items-center">
+            <IconField>
+              <InputIcon>
+                <i class="pi pi-search" />
+              </InputIcon>
+              <InputText
+                v-model="globalQuery"
+                :placeholder="t('contacts.globalSearch')"
+                @input="
+                  globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
+                "
+                :aria-label="t('contacts.globalSearch')"
+              />
+            </IconField>
+            <Button
+              v-if="showClearButton"
+              type="button"
+              icon="pi pi-filter-slash"
+              :label="t('contacts.clear')"
+              :aria-label="t('contacts.clear') + ' ' + t('contacts.globalSearch')"
+              variant="outlined"
+              @click="clearAll"
             />
-          </IconField>
+          </div>
           <Button
             type="button"
-            icon="pi pi-filter-slash"
-            label="Clear"
-            variant="outlined"
-            @click="clearAll"
+            icon="pi pi-user-plus"
+            :label="t('contacts.new')"
+            @click="openNewContact()"
+            class="button-add"
           />
+        </div>
+        <div class="mt-6 font-semibold">
+          {{ t('contacts.guests') }}
         </div>
       </template>
 
@@ -291,6 +314,15 @@ export default defineComponent({
           code: c.code,
         })) ?? []
     );
+    const showClearButton = computed(
+      () =>
+        globalQuery.value.length ||
+        sortField.value ||
+        filters.value.name.value ||
+        filters.value.documents.value ||
+        (filters.value.country.value && filters.value.country.value.length) ||
+        filters.value.inHouse.value === true
+    );
 
     const guests = computed(() => contactsStore.guests);
     const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
@@ -366,18 +398,45 @@ export default defineComponent({
     };
 
     const openContactDetail = async (contact: Contact) => {
-      await useLegacyStore().fetchAndSetVuexPartnerAndACtiveProperty(
-        contact.id,
-        currentPmsPropertyId.value!
-      );
-      open(PartnerForm, {
-        props: { header: contact.name || 'Contact Detail' },
-        onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-          if (data?.refresh || data?.action === 'saved') {
-            fetchNow();
-          }
-        },
-      });
+      uiStore.startLoading();
+      try {
+        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(
+          contact.id,
+          currentPmsPropertyId.value!
+        );
+        open(PartnerForm, {
+          props: { header: contact.name || t('contacts.detail') },
+          onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+            if (data?.refresh || data?.action === 'saved') {
+              fetchNow();
+            }
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
+    };
+
+    const openNewContact = async () => {
+      uiStore.startLoading();
+      try {
+        await useLegacyStore().removeVuexPartner(currentPmsPropertyId.value!);
+        open(PartnerForm, {
+          props: { header: t('contacts.new') },
+          data: { props: { contact: null } },
+          onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+            if (data?.refresh || data?.action === 'saved') {
+              fetchNow();
+            }
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
     };
 
     onBeforeMount(async () => {
@@ -396,10 +455,12 @@ export default defineComponent({
       globalQuery,
       countryOptions,
       first,
+      showClearButton,
       t,
       clearAll,
       onToggleInhouse,
       openContactDetail,
+      openNewContact,
       handlePageChange,
       handleFilterChange,
       handleSortChange,
@@ -414,6 +475,17 @@ export default defineComponent({
 .main-content {
   height: 100%;
   background-color: #f9f9f9;
+  position: relative;
+  .button-add-mobile {
+    position: absolute;
+    bottom: 5rem;
+    right: 2rem;
+    z-index: 10;
+    opacity: 0.7;
+  }
+  .button-add {
+    display: none;
+  }
 }
 
 .ellipsis-2 {
@@ -423,5 +495,15 @@ export default defineComponent({
   line-clamp: 2;
   overflow: hidden;
   max-width: 100%;
+}
+@media (min-width: 1024px) {
+  .main-content {
+    .button-add-mobile {
+      display: none;
+    }
+    .button-add {
+      display: flex;
+    }
+  }
 }
 </style>

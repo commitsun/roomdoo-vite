@@ -61,9 +61,15 @@
       "guests": "Huéspedes",
       "agencies": "Agencias",
       "suppliers": "Proveedores"
-    }
+    },
+    "links": "Enlaces"
   },
   "contacts": {
+    "allContacts": "Todos los contactos",
+    "customers": "Clientes",
+    "guests": "Huéspedes",
+    "agencies": "Agencias",
+    "suppliers": "Proveedores",
     "apply": "Aplicar",
     "fullName": "Nombre",
     "type": "Tipo",
@@ -92,7 +98,8 @@
     "searchByVat": "Buscar por NIF/CIF",
     "selectCountries": "Seleccionar países",
     "searchByDocument": "Buscar por documento",
-    "phoneFilterMinChars": "Introduce al menos 3 caracteres"
+    "phoneFilterMinChars": "Introduce al menos 3 caracteres",
+    "new": "Nuevo contacto"
   },
   "userSettings": {
     "replaceImage": "Reemplazar foto",
