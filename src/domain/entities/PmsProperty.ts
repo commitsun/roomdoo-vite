@@ -6,3 +6,7 @@ export interface PmsProperty {
   name: string;
   image: ImageUrl;
 }
+
+export interface PmsPropertyInfo {
+  fields?: string[];
+}

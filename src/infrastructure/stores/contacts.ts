@@ -3,7 +3,6 @@ import { readonly, ref, type Ref } from 'vue';
 
 import { ContactsRepositoryImpl } from '@/infrastructure/repositories/ContactsRepositoryImpl';
 import { ContactsService } from '@/application/contacts/ContactsService';
-import type { Contact, Customer, Guest, Agency, Supplier } from '@/domain/entities/Contact';
 import type { Pagination } from '@/domain/repositories/Pagination';
 import type {
   AgencyFilters,
@@ -12,6 +11,16 @@ import type {
   GuestFilters,
   SupplierFilters,
 } from '@/domain/contact/ContactFilters';
+import type {
+  Contact,
+  Customer,
+  Guest,
+  Agency,
+  Supplier,
+  ContactSchema,
+  ContactDetail,
+} from '@/domain/entities/Contact';
+import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 
 const contactsRepository = new ContactsRepositoryImpl();
 
@@ -23,6 +32,7 @@ export const useContactsStore = defineStore('contacts', () => {
   const agencies: Ref<Agency[]> = ref([]);
   const suppliers: Ref<Supplier[]> = ref([]);
   const contactsCount = ref(0);
+  const contactSchema = ref(null as ContactSchema | null);
 
   const fetchContacts = async (
     pagination: Pagination,
@@ -74,6 +84,20 @@ export const useContactsStore = defineStore('contacts', () => {
     contactsCount.value = result.count;
   };
 
+  const fetchContactById = async (id: number): Promise<ContactDetail> => {
+    const result = await contactsService.fetchContactById(id);
+    return result;
+  };
+
+  const fetchContactSchema = async (): Promise<void> => {
+    const result = await contactsService.fetchContactSchema();
+    contactSchema.value = result;
+  };
+
+  const persistContactDocument = async (contactId: number, document: PersonalDocument): Promise<void> => {
+    await contactsService.persistContactDocument(contactId, document);
+  };
+
   return {
     contacts: readonly(contacts),
     customers: readonly(customers),
@@ -81,10 +105,14 @@ export const useContactsStore = defineStore('contacts', () => {
     agencies: readonly(agencies),
     suppliers: readonly(suppliers),
     contactsCount: readonly(contactsCount),
+    contactSchema: readonly(contactSchema),
     fetchContacts,
     fetchCustomers,
     fetchGuests,
     fetchAgencies,
     fetchSuppliers,
+    fetchContactById,
+    fetchContactSchema,
+    persistContactDocument,
   };
 });

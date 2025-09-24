@@ -1,6 +1,15 @@
 import type { EntityListResponse } from './EntityListResponse';
 
 import type {
+  Agency,
+  Contact,
+  Customer,
+  Guest,
+  Supplier,
+  ContactDetail,
+  ContactSchema,
+} from '@/domain/entities/Contact';
+import type {
   AgencyFilters,
   ContactFilters,
   CustomerFilters,
@@ -8,7 +17,7 @@ import type {
   SupplierFilters,
 } from '@/domain/contact/ContactFilters';
 import type { Pagination } from '@/domain/repositories/Pagination';
-import type { Agency, Contact, Customer, Guest, Supplier } from '@/domain/entities/Contact';
+import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 
 export interface ContactsRepository {
   fetchContacts(
@@ -40,4 +49,8 @@ export interface ContactsRepository {
     filters?: SupplierFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Supplier>>;
+  fetchContactById(id: number): Promise<ContactDetail>;
+  fetchContactPersonalDocuments(contactId: number): Promise<PersonalDocument[]>;
+  fetchContactSchema(): Promise<ContactSchema>;
+  persistContactDocument(contactId: number, document: PersonalDocument): Promise<void>;
 }
