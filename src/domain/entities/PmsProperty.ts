@@ -11,3 +11,7 @@ export interface PmsProperty {
     name: string;
   };
 }
+
+export interface PmsPropertyInfo {
+  fields?: string[];
+}
