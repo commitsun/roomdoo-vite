@@ -61,9 +61,15 @@
       "guests": "Guests",
       "agencies": "Agencies",
       "suppliers": "Suppliers"
-    }
+    },
+    "links": "Links"
   },
   "contacts": {
+    "allContacts": "All contacts",
+    "customers": "Customers",
+    "guests": "Guests",
+    "agencies": "Agencies",
+    "suppliers": "Suppliers",
     "apply": "Apply",
     "fullName": "Name",
     "type": "Type",
@@ -92,7 +98,8 @@
     "searchByVat": "Search by VAT",
     "selectCountries": "Select Countries",
     "searchByDocument": "Search by document",
-    "phoneFilterMinChars": "Enter at least 3 characters"
+    "phoneFilterMinChars": "Enter at least 3 characters",
+    "new": "New contact"
   },
   "userSettings": {
     "replaceImage": "Replace image",
