@@ -56,7 +56,7 @@ vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
 // TODO: remove when legacy stores are removed
 vi.mock('@/_legacy/utils/useLegacyStore', () => ({
   useLegacyStore: () => ({
-    fetchAndSetVuexPartnerAndACtiveProperty: vi.fn().mockResolvedValue(undefined),
+    fetchAndSetVuexPartnerAndActiveProperty: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 

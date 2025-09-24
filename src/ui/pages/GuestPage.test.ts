@@ -47,7 +47,7 @@ vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
 }));
 vi.mock('@/_legacy/utils/useLegacyStore', () => ({
   useLegacyStore: () => ({
-    fetchAndSetVuexPartnerAndACtiveProperty: vi.fn().mockResolvedValue(undefined),
+    fetchAndSetVuexPartnerAndActiveProperty: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 vi.mock('@/ui/composables/useAppDialog', () => ({
@@ -385,8 +385,8 @@ describe('GuestsPage', () => {
     expect(last?.[7]).toBe('-country'); // orderBy
 
     // Clear all
-    const clearBtn = screen.getByRole('button', { name: /^clear$/i });
-    await userEvent.click(clearBtn);
+    const clearAllBtn = screen.getByRole('button', { name: /clear global search/i });
+    await userEvent.click(clearAllBtn);
 
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last?.[2]).toBeUndefined();

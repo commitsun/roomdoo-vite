@@ -1,5 +1,13 @@
 <template>
   <div class="main-content">
+    <Button
+      class="button-add-mobile"
+      icon="pi pi-user-plus"
+      severity="primary"
+      size="large"
+      rounded
+      @click="openNewContact()"
+    />
     <DataTable
       v-model:first="first"
       :value="customers"
@@ -25,26 +33,41 @@
       @rowClick="openContactDetail($event.data)"
     >
       <template #header>
-        <div class="flex gap-3 items-center">
-          <IconField>
-            <InputIcon>
-              <i class="pi pi-search" />
-            </InputIcon>
-            <InputText
-              v-model="globalQuery"
-              :placeholder="t('contacts.globalSearch')"
-              @input="
-                globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
-              "
+        <div class="flex justify-between items-center">
+          <div class="flex gap-3 items-center">
+            <IconField>
+              <InputIcon>
+                <i class="pi pi-search" />
+              </InputIcon>
+              <InputText
+                v-model="globalQuery"
+                :placeholder="t('contacts.globalSearch')"
+                @input="
+                  globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
+                "
+                :aria-label="t('contacts.globalSearch')"
+              />
+            </IconField>
+            <Button
+              v-if="showClearButton"
+              type="button"
+              icon="pi pi-filter-slash"
+              :label="t('contacts.clear')"
+              :aria-label="t('contacts.clear') + ' ' + t('contacts.globalSearch')"
+              variant="outlined"
+              @click="clearAll"
             />
-          </IconField>
+          </div>
           <Button
             type="button"
-            icon="pi pi-filter-slash"
-            :label="t('contacts.clear')"
-            variant="outlined"
-            @click="clearAll"
+            icon="pi pi-user-plus"
+            :label="t('contacts.new')"
+            @click="openNewContact()"
+            class="button-add"
           />
+        </div>
+        <div class="mt-6 font-semibold">
+          {{ t('contacts.customers') }}
         </div>
       </template>
 
@@ -240,12 +263,23 @@
         field="totalInvoiced"
         :header="t('contacts.totalInvoiced')"
         style="min-width: 150px"
+        :headerStyle="{ display: 'flex', justifyContent: 'flex-end', height: '57px' }"
+        :bodyStyle="{ textAlign: 'right' }"
         :showFilterMatchModes="false"
         :showFilterOperator="false"
         :showAddButton="false"
         :showFilterApplyButton="false"
         filter
-      />
+      >
+        <template #body="{ data }">
+          {{
+            new Intl.NumberFormat(i18n.global.locale.value, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }).format(Number(data.totalInvoiced ?? 0))
+          }}
+        </template>
+      </Column>
     </DataTable>
   </div>
 </template>
@@ -253,6 +287,7 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { i18n } from '@/infrastructure/plugins/i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
   type DataTableFilterEvent,
@@ -270,7 +305,7 @@ import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
+import { FilterMatchMode } from '@primevue/core/api';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
@@ -341,6 +376,17 @@ export default defineComponent({
       }))
     );
 
+    const showClearButton = computed(
+      () =>
+        globalQuery.value.length ||
+        sortField.value ||
+        filters.value.name.value ||
+        filters.value.vat.value ||
+        filters.value.email.value ||
+        filters.value.phones.value ||
+        (filters.value.country.value && filters.value.country.value.length)
+    );
+
     const customers = computed(() => contactsStore.customers || []);
     const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
 
@@ -409,18 +455,45 @@ export default defineComponent({
     };
 
     const openContactDetail = async (contact: Contact) => {
-      await useLegacyStore().fetchAndSetVuexPartnerAndACtiveProperty(
-        contact.id,
-        currentPmsPropertyId.value!
-      );
-      open(PartnerForm, {
-        props: { header: contact.name || t('contacts.detail') },
-        onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-          if (data?.refresh || data?.action === 'saved') {
-            fetchNow();
-          }
-        },
-      });
+      uiStore.startLoading();
+      try {
+        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(
+          contact.id,
+          currentPmsPropertyId.value!
+        );
+        open(PartnerForm, {
+          props: { header: contact.name || t('contacts.detail') },
+          onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+            if (data?.refresh || data?.action === 'saved') {
+              fetchNow();
+            }
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
+    };
+
+    const openNewContact = async () => {
+      uiStore.startLoading();
+      try {
+        await useLegacyStore().removeVuexPartner(currentPmsPropertyId.value!);
+        open(PartnerForm, {
+          props: { header: t('contacts.new') },
+          data: { props: { contact: null } },
+          onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+            if (data?.refresh || data?.action === 'saved') {
+              fetchNow();
+            }
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
     };
 
     const onClearPhoneFilter = (
@@ -462,9 +535,12 @@ export default defineComponent({
       countryOptions,
       first,
       phoneDraft,
+      showClearButton,
+      i18n,
       t,
       clearAll,
       openContactDetail,
+      openNewContact,
       handlePageChange,
       handleFilterChange,
       handleSortChange,
@@ -481,5 +557,26 @@ export default defineComponent({
 .main-content {
   height: 100%;
   background-color: #f9f9f9;
+  position: relative;
+  .button-add-mobile {
+    position: absolute;
+    bottom: 5rem;
+    right: 2rem;
+    z-index: 10;
+    opacity: 0.7;
+  }
+  .button-add {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .main-content {
+    .button-add-mobile {
+      display: none;
+    }
+    .button-add {
+      display: flex;
+    }
+  }
 }
 </style>
