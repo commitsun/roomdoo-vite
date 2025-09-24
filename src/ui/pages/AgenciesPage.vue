@@ -30,7 +30,7 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
-      @rowClick="openContactDetail($event.data)"
+      @rowClick="openContactDetail($event.data.id)"
     >
       <template #header>
         <div class="flex justify-between items-center">
@@ -257,8 +257,9 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
-import type { Contact } from '@/domain/entities/Contact';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+// TODO: remove when new api is ready
+import { useStore } from 'vuex';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 // helper: explicit non-empty string
@@ -277,6 +278,9 @@ export default defineComponent({
     CountryFlag,
   },
   setup() {
+    // TODO: remove when new api is ready
+    const store = useStore();
+    // ---
     const contactsStore = useContactsStore();
     const uiStore = useUIStore();
     const { t } = useI18n();
@@ -429,16 +433,17 @@ export default defineComponent({
       await fetchNow();
     }
 
-    async function openContactDetail(contact: Contact): Promise<void> {
+    const openContactDetail = async (contactId: number) => {
       uiStore.startLoading();
       try {
-        const propId = currentPmsPropertyId.value;
-        if (!isNonEmptyString(propId)) {
-          return;
-        }
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contact.id, propId);
-        open(PartnerForm, {
+        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(
+          contactId,
+          currentPmsPropertyId.value!
+        );
+        const contact = store.state.partners.currentPartner;
+        open(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
+          data: { props: { contact: contact } },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
@@ -451,17 +456,13 @@ export default defineComponent({
       } finally {
         uiStore.stopLoading();
       }
-    }
+    };
 
     async function openNewContact(): Promise<void> {
       uiStore.startLoading();
       try {
-        const propId = currentPmsPropertyId.value;
-        if (!isNonEmptyString(propId)) {
-          return;
-        }
-        await useLegacyStore().removeVuexPartner(propId);
-        open(PartnerForm, {
+        await useLegacyStore().removeVuexPartner(currentPmsPropertyId.value!);
+        open(ContactDetail, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
