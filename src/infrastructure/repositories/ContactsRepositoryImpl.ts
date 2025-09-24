@@ -12,7 +12,10 @@ import type {
   Guest,
   GuestDTO,
   Supplier,
+  ContactDetail,
+  ContactSchema,
 } from '@/domain/entities/Contact';
+import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import type { Pagination } from '@/domain/repositories/Pagination';
@@ -197,5 +200,29 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     const url = `/suppliers?${params.toString()}`;
     const { data } = await api.get<EntityListResponse<Supplier>>(url);
     return data;
+  }
+  async fetchContactById(id: number): Promise<ContactDetail> {
+    const url = `/contacts/${id}`;
+    const { data } = await api.get<ContactDetail>(url);
+    return data;
+  }
+  async fetchContactPersonalDocuments(contactId: number): Promise<PersonalDocument[]> {
+    const url = `/contacts/${contactId}/id-numbers`;
+    const { data } = await api.get<PersonalDocument[]>(url);
+    return data;
+  }
+  async fetchContactSchema(): Promise<ContactSchema> {
+    const url = '/contacts/extra-features';
+    const { data } = await api.get<string[]>(url);
+    return { fields: data };
+  }
+  async persistContactDocument(contactId: number, document: PersonalDocument): Promise<void> {
+    const payload = {
+      name: document.name,
+      category: document.category.id,
+      country: document.country?.id,
+      supportNumber: document.supportNumber,
+    };
+    await api.post(`contacts/${contactId}/id-numbers`, payload);
   }
 }
