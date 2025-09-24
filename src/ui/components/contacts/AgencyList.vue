@@ -24,7 +24,6 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
-      @rowClick="openContactDetail($event.data)"
       :showHeaders="numTotalRecords > 0"
       :pt="{
         thead: { style: { zIndex: 5, backgroundColor: 'red' } },
@@ -56,6 +55,7 @@
           },
         },
       }"
+      @rowClick="openContactDetail($event.data.id)"
     >
       <!-- header -->
       <template #header v-if="numTotalRecords > 0">
@@ -370,14 +370,15 @@ import Avatar from 'primevue/avatar';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import { FilterMatchMode } from '@primevue/core/api';
+import { useStore } from 'vuex';
 
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
-import type { Contact } from '@/domain/entities/Contact';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+// TODO: remove when new api is ready
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { firstTwoInitials } from '@/ui/utils/strings';
 
@@ -407,6 +408,9 @@ export default defineComponent({
   },
   setup() {
     // stores
+    // TODO: remove when new api is ready
+    const store = useStore();
+    // ---
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
@@ -619,17 +623,19 @@ export default defineComponent({
       applyFilter?.();
     };
 
-    // open contact detail
-    const openContactDetail = async (contact: Contact): Promise<void> => {
+    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         const propId = pmsPropertiesStore.currentPmsPropertyId;
         if (!isNonEmptyString(propId)) {
           return;
         }
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contact.id, propId);
-        openDialog(PartnerForm, {
-          props: { header: contact.name || t('contacts.detail') },
+        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contactId, propId);
+        const contact = store.state.partners.currentPartner;
+
+        openDialog(ContactDetail, {
+          props: { header: contact.name ?? t('contacts.detail') },
+          data: { props: { contact: contact } },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
@@ -644,7 +650,6 @@ export default defineComponent({
       }
     };
 
-    // on mounted fetch data and countries
     onMounted(async () => {
       await Promise.all([fetchNow(), countriesStore.fetchCountries()]);
     });

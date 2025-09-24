@@ -5,7 +5,16 @@ import type {
   GuestFilters,
   SupplierFilters,
 } from '@/domain/contact/ContactFilters';
-import type { Agency, Contact, Customer, Guest, Supplier } from '@/domain/entities/Contact';
+import type {
+  Agency,
+  Contact,
+  ContactDetail,
+  ContactSchema,
+  Customer,
+  Guest,
+  Supplier,
+} from '@/domain/entities/Contact';
+import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import type { Pagination } from '@/domain/repositories/Pagination';
@@ -51,5 +60,18 @@ export class ContactsService {
   ): Promise<EntityListResponse<Supplier>> {
     const response = await this.contactsRepository.fetchSuppliers(pagination, filters, orderBy);
     return response;
+  }
+  async fetchContactById(id: number): Promise<ContactDetail> {
+    const contact = await this.contactsRepository.fetchContactById(id);
+    const documents = await this.contactsRepository.fetchContactPersonalDocuments(id);
+    contact.documents = documents;
+    return contact;
+  }
+  async fetchContactSchema(): Promise<ContactSchema> {
+    const schema = await this.contactsRepository.fetchContactSchema();
+    return schema;
+  }
+  async persistContactDocument(contactId: number, document: PersonalDocument): Promise<void> {
+    await this.contactsRepository.persistContactDocument(contactId, document);
   }
 }
