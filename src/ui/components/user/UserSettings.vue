@@ -74,6 +74,7 @@
         :label="t('userSettings.cancel')"
         class="p-button-text"
         :style="{ width: 'auto', minWidth: '130px' }"
+        @click="handleCancel()"
       />
       <Button
         :label="t('userSettings.save')"
@@ -84,7 +85,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
@@ -95,6 +96,7 @@ import Select from 'primevue/select';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
+const dialogRef = inject<any>('dialogRef');
 
 const userStore = useUserStore();
 const instanceStore = useInstanceStore();
@@ -113,7 +115,9 @@ const save = () => {
   // update primevue locale
   updatePrimevueLocale(selectedLocale.value);
 };
-
+const handleCancel = () => {
+  dialogRef?.value?.close({ action: 'cancel' });
+};
 onMounted(() => {
   firstName.value = user?.firstName || '';
   lastName.value = user?.lastName || '';
@@ -168,7 +172,7 @@ onMounted(() => {
 
 @media (min-width: 1024px) {
   .user__settings {
-    min-width: 75vw;
+    min-width: 50vw;
     height: auto;
     &--row {
       flex-direction: row;
@@ -194,6 +198,12 @@ onMounted(() => {
       justify-content: flex-end;
       width: auto;
     }
+  }
+}
+
+@media (min-width: 1280px) {
+  .user__settings {
+    min-width: 40vw;
   }
 }
 </style>
