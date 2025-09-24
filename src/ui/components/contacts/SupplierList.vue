@@ -24,7 +24,6 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
-      @rowClick="openContactDetail($event.data)"
       :showHeaders="numTotalRecords > 0"
       :pt="{
         thead: { style: { zIndex: 5, backgroundColor: 'red' } },
@@ -56,6 +55,7 @@
           },
         },
       }"
+      @rowClick="openContactDetail($event.data.id)"
     >
       <!-- header -->
       <template #header v-if="numTotalRecords > 0">
@@ -430,11 +430,9 @@ import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
-import type { Contact } from '@/domain/entities/Contact';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { firstTwoInitials } from '@/ui/utils/strings';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -461,7 +459,6 @@ export default defineComponent({
     },
   },
   setup() {
-    // stores
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
@@ -687,16 +684,15 @@ export default defineComponent({
     };
 
     // open contact detail
-    const openContactDetail = async (contact: Contact): Promise<void> => {
+    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
-        const propId = pmsPropertiesStore.currentPmsPropertyId;
-        if (!isNonEmptyString(propId)) {
-          return;
-        }
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contact.id, propId);
-        openDialog(PartnerForm, {
+        await contactsStore.fetchContactSchema();
+        const contact = await contactsStore.fetchContactById(contactId);
+        contact.id = contactId;
+        openDialog(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
+          data: { props: { contact: contact } },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
