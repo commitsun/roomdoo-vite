@@ -8,15 +8,16 @@
 </template>
 
 <script>
-export default {
-  name: 'Spinner',
+import { defineComponent } from 'vue';
+
+export default defineComponent({
   props: {
     show: {
       type: Boolean,
       default: false,
     },
   },
-};
+});
 </script>
 
 <style scoped lang="scss">
