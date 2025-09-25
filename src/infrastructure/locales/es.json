@@ -111,15 +111,17 @@
     "email": "Email",
     "language": "Idioma",
     "cancel": "Cancelar",
-    "save": "Guardar"
-  },
-  "changePassword": {
+    "save": "Guardar",
+    "changePassword": "Cambiar contraseña",
+    "userData": "Datos de usuario",
     "currentPassword": "Contraseña actual",
     "newPassword": "Nueva contraseña",
     "repeatPassword": "Repetir contraseña",
-    "cancel": "Cancelar",
-    "save": "Guardar"
+    "passwordChanged": "La contraseña se ha cambiado correctamente",
+    "invalidPassword": "Contraseña actual incorrecta",
+    "passwordsDoNotMatch": "Las nuevas contraseñas no coinciden"
   },
+
   "error404": {
     "title": "Página no encontrada",
     "message": "Lo sentimos, la página que estás buscando no existe o ha sido movida.",

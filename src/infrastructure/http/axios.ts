@@ -64,13 +64,14 @@ api.interceptors.response.use(
   (res) => res, // Simply return response on success
   async (err: AxiosError) => {
     const originalRequest = err.config as CustomAxiosRequestConfig;
-
+    console.log(originalRequest.url);
     if (
       err.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry &&
       originalRequest.url !== '/login' &&
-      originalRequest.url !== '/refresh-token'
+      originalRequest.url !== '/refresh-token' &&
+      originalRequest.url !== '/user/change-password'
     ) {
       originalRequest._retry = true;
 

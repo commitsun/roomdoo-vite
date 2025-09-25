@@ -27,6 +27,10 @@ export class UserService {
     await this.userRepository.resetPassword(password, token);
   }
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await this.userRepository.changePassword(currentPassword, newPassword);
+  }
+
   async refreshToken(): Promise<void> {
     await this.userRepository.refreshToken();
   }
