@@ -31,6 +31,10 @@ export class UsersRepositoryImpl implements UserRepository {
     await api.patch('/reset-password', { newPassword: password, resetToken: token });
   }
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await api.patch('/user/change-password', { oldPassword: currentPassword, newPassword });
+  }
+
   async refreshToken(): Promise<void> {
     await api.post('/refresh-token');
   }

@@ -107,7 +107,8 @@ import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { resetPasswordSchema } from '@/application/user/UserSchemas';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+import { useUIStore } from '@/infrastructure/stores/ui';
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 import { useTranslatedError } from '../composables/useTranslatedValidationError';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
@@ -126,9 +127,9 @@ export default defineComponent({
   setup() {
     const { t } = useI18n();
     const route = useRoute();
-    const router = useRouter();
     const userStore = useUserStore();
     const notificationStore = useNotificationsStore();
+    const uiStore = useUIStore();
     const { translate } = useTranslatedError();
     const errorMessage = ref('');
 
@@ -161,6 +162,7 @@ export default defineComponent({
     };
 
     const resetPassword = async () => {
+      uiStore.startLoading();
       try {
         await userStore.resetPassword(firstPassword.value, route.query.token as string);
         notificationStore.add(t('resetPassword.passwordChanged'), 'success');
@@ -171,6 +173,8 @@ export default defineComponent({
         } else {
           errorMessage.value = t('error.unknownError');
         }
+      } finally {
+        uiStore.stopLoading();
       }
     };
 
