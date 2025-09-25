@@ -256,7 +256,6 @@ import Menu from 'primevue/menu';
 import UserSettings from '@/ui/components/user/UserSettings.vue';
 import { useI18n } from 'vue-i18n';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import UserChangePassword from '../user/UserChangePassword.vue';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import LegacyReport from '@/_legacy/components/reports/ReportComponent.vue';
 
@@ -294,15 +293,15 @@ const items = computed(() => [
         command: () => {
           open(UserSettings, {
             props: { header: userSettingsHeader },
-          });
-        },
-      },
-      {
-        label: t('sidebar.changePassword'),
-        icon: 'pi pi-lock',
-        command: () => {
-          open(UserChangePassword, {
-            props: { header: userChangePasswordHeader },
+            onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
+              if (data?.refresh) {
+                router.replace({
+                  name: route.name as string,
+                  params: route.params,
+                  query: route.query,
+                });
+              }
+            },
           });
         },
       },
