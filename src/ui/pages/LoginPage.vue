@@ -1,59 +1,63 @@
 <template>
   <div class="login-container">
-    <div class="login-form-header">
-      <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
-    </div>
-    <div class="login-form-container">
-      <div class="instance-name">{{ instanceName }}</div>
-      <div class="first-input">
-        <label class="label" for="username">
-          {{ t('login.username') }}
-        </label>
-        <IconField>
-          <InputIcon class="pi pi-user" />
-          <InputText
-            id="username"
-            v-model="username"
-            :placeholder="t('login.email')"
-            :style="{ width: '100%' }"
-            :inputStyle="{ width: '100%' }"
+    <form>
+      <div class="login-form-header">
+        <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+      </div>
+      <div class="login-form-container">
+        <div class="instance-name">{{ instanceName }}</div>
+        <div class="first-input">
+          <label class="label" for="username">
+            {{ t('login.username') }}
+          </label>
+          <IconField>
+            <InputIcon class="pi pi-user" />
+            <InputText
+              id="username"
+              v-model="username"
+              :placeholder="t('login.email')"
+              :style="{ width: '100%' }"
+              :inputStyle="{ width: '100%' }"
+              autocomplete="username"
+            />
+          </IconField>
+        </div>
+        <div class="second-input">
+          <label class="label" for="password-input">
+            {{ t('login.password') }}
+          </label>
+          <IconField>
+            <InputIcon class="pi pi-lock" />
+            <Password
+              id="password-input"
+              inputId="password-input"
+              v-model="password"
+              :placeholder="t('login.password')"
+              :feedback="false"
+              :style="{ width: '100%' }"
+              :inputStyle="{ width: '100%' }"
+              toggleMask
+              :inputProps="{ autocomplete: 'current-password' }"
+            />
+          </IconField>
+          <Message v-if="errorMessage" severity="error" style="margin-top: 8px">
+            {{ errorMessage }}
+          </Message>
+        </div>
+        <div class="button">
+          <Button
+            :label="t('login.loginButton')"
+            :disabled="!username || !password"
+            @click="doLogin()"
           />
-        </IconField>
+        </div>
+        <div class="link">
+          <a href="/request-reset-password">
+            {{ t('login.forgotPassword') }}
+          </a>
+        </div>
       </div>
-      <div class="second-input">
-        <label class="label" for="password-input">
-          {{ t('login.password') }}
-        </label>
-        <IconField>
-          <InputIcon class="pi pi-lock" />
-          <Password
-            id="password-input"
-            inputId="password-input"
-            v-model="password"
-            :placeholder="t('login.password')"
-            :feedback="false"
-            :style="{ width: '100%' }"
-            :inputStyle="{ width: '100%' }"
-            toggleMask
-          />
-        </IconField>
-        <Message v-if="errorMessage" severity="error" style="margin-top: 8px">
-          {{ errorMessage }}
-        </Message>
-      </div>
-      <div class="button">
-        <Button
-          :label="t('login.loginButton')"
-          :disabled="!username || !password"
-          @click="doLogin()"
-        />
-      </div>
-      <div class="link">
-        <a href="/request-reset-password">
-          {{ t('login.forgotPassword') }}
-        </a>
-      </div>
-    </div>
+    </form>
   </div>
 </template>
 <script lang="ts">
