@@ -40,7 +40,7 @@ export default defineConfig({
   ],
   define: {
     'import.meta.env.VITE_COMMIT_HASH': JSON.stringify(commitHash),
-    // __VUE_OPTIONS_API__: false, // aparently some libraries still need this
+    __VUE_OPTIONS_API__: true, //  some libraries still need this
     __VUE_PROD_DEVTOOLS__: false,
   },
 
