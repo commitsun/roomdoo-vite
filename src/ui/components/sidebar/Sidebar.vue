@@ -229,7 +229,7 @@
           </div>
           <div class="property__user" @click.stop="toggleMenu">
             <div class="avatar-wrapper">
-              <Avatar :image="user?.avatar" class="1mr-2" size="large" shape="circle" />
+              <Avatar :image="user?.avatar" class="mr-2" size="large" shape="circle" />
             </div>
             <div class="property__user-details">
               <div class="property__user-name">{{ user?.firstName }} {{ user?.lastName }}</div>
