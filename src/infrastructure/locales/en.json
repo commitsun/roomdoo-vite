@@ -111,14 +111,15 @@
     "email": "Email",
     "language": "Language",
     "cancel": "Cancel",
-    "save": "Save"
-  },
-  "changePassword": {
+    "save": "Save",
+    "changePassword": "Change password",
+    "userData": "User data",
     "currentPassword": "Current password",
     "newPassword": "New password",
     "repeatPassword": "Repeat password",
-    "cancel": "Cancel",
-    "save": "Save"
+    "passwordChanged": "The password has been changed successfully",
+    "invalidPassword": "The current password is incorrect",
+    "passwordsDoNotMatch": "The new passwords do not match"
   },
   "error404": {
     "title": "Page not found",
