@@ -273,7 +273,7 @@ const router = useRouter();
 const { t } = useI18n();
 const { open } = useAppDialog();
 
-const hash = import.meta.env.VITE_COMMIT_HASH || 'dev';
+const hash = import.meta.env.ROOMDOO_COMMIT_HASH || 'dev';
 
 const isUserMenuOpen = ref(false);
 const isReportOptionsOpen = ref(false);
