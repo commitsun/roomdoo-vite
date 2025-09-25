@@ -6,6 +6,7 @@ export interface UserRepository {
   fetchAvailabilityRuleFields(): Promise<string[]>;
   requestChangePassword(email: string): Promise<void>;
   resetPassword(password: string, token: string): Promise<void>;
+  changePassword(currentPassword: string, newPassword: string): Promise<void>;
   refreshToken(): Promise<void>;
   updateUser(user: Partial<User>): Promise<void>;
   logout(): void;

@@ -61,7 +61,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, computed, type Ref, onMounted, ref, watch } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 // several imports
 import InputText from 'primevue/inputtext';
@@ -76,6 +76,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useRoute, useRouter } from 'vue-router';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
+import { useUIStore } from '@/infrastructure/stores/ui';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 
 export default defineComponent({
@@ -92,6 +93,7 @@ export default defineComponent({
     const instanceStore = useInstanceStore();
     const userStore = useUserStore();
     const pmsPropertiesStore = usePmsPropertiesStore();
+    const uiStore = useUIStore();
     const router = useRouter();
     const route = useRoute();
 
@@ -101,6 +103,7 @@ export default defineComponent({
     const instanceName = computed(() => instanceStore.instance?.name ?? '');
     const doLogin = async () => {
       let redirect = '/';
+      uiStore.startLoading();
       try {
         await userStore.login(username.value, password.value);
         await useLegacyStore().doVuexLogin(username.value, password.value);
@@ -121,6 +124,8 @@ export default defineComponent({
         } else {
           errorMessage.value = t('error.unknownError');
         }
+      } finally {
+        uiStore.stopLoading();
       }
     };
 
