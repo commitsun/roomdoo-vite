@@ -43,6 +43,10 @@ export const useUserStore = defineStore('user', () => {
     await userService.resetPassword(password, token);
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    await userService.changePassword(currentPassword, newPassword);
+  };
+
   const refreshToken = async () => {
     await userService.refreshToken();
   };
@@ -66,6 +70,7 @@ export const useUserStore = defineStore('user', () => {
     login,
     requestChangePassword,
     resetPassword,
+    changePassword,
     hydrateFromCookies,
     updateUser,
     logout,
