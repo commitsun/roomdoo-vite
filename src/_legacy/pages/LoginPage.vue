@@ -49,11 +49,11 @@
 <script lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 import InputText from '@/_legacy/components/roomdooComponents/InputText.vue';
-import { ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 
 import { useStore } from '@/_legacy/store';
 
-export default {
+export default defineComponent({
   components: { InputText },
 
   setup() {
@@ -153,7 +153,7 @@ export default {
       changeToForgotPassword,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
