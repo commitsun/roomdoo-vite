@@ -1,106 +1,226 @@
 <template>
   <div class="user__settings">
-    <div class="user__settings--row">
-      <div class="user__settings--avatar">
-        <Avatar :image="user?.avatar" size="xlarge" shape="circle" />
-      </div>
-      <div class="user__settings--buttons">
-        <div class="user__settings--button">
-          <Button
-            :label="t('userSettings.replaceImage')"
-            :style="{ width: '100%', minWidth: '130px' }"
-          />
-        </div>
-        <div class="user__settings--button">
-          <Button
-            :label="t('userSettings.removeImage')"
-            :style="{ width: '100%', minWidth: '130px' }"
-          />
-        </div>
-      </div>
-    </div>
-    <div class="user__settings--row">
-      <div class="user__settings--field">
-        <label class="user__settings--label">
-          {{ t('userSettings.firstName') }}
-        </label>
-        <InputText v-model="firstName" />
-      </div>
+    <Tabs value="0">
+      <TabList>
+        <Tab value="0" as="div" class="flex items-center gap-2">
+          <i class="pi pi-user-edit" />
+          <span> {{ t('userSettings.userData') }} </span>
+        </Tab>
+        <Tab value="1" as="div" class="flex items-center gap-2">
+          <i class="pi pi-lock" />
+          <span> {{ t('userSettings.changePassword') }} </span>
+        </Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel value="0">
+          <div class="user__settings--row">
+            <div class="user__settings--avatar">
+              <Avatar :image="user?.avatar" size="xlarge" shape="circle" />
+            </div>
+            <div class="user__settings--buttons">
+              <div class="user__settings--button">
+                <Button
+                  :label="t('userSettings.replaceImage')"
+                  :style="{ width: '100%', minWidth: '130px' }"
+                />
+              </div>
+              <div class="user__settings--button">
+                <Button
+                  :label="t('userSettings.removeImage')"
+                  :style="{ width: '100%', minWidth: '130px' }"
+                />
+              </div>
+            </div>
+          </div>
 
-      <div class="user__settings--field">
-        <label class="user__settings--label">
-          {{ t('userSettings.lastName') }}
-        </label>
-        <InputText v-model="lastName" />
-      </div>
+          <div class="user__settings--row">
+            <div class="user__settings--field">
+              <label class="user__settings--label">
+                {{ t('userSettings.firstName') }}
+              </label>
+              <InputText v-model="firstName" :style="{ minWidth: '260px' }" />
+            </div>
 
-      <div class="user__settings--field">
-        <label class="user__settings--label">
-          {{ t('userSettings.secondLastName') }}
-        </label>
-        <InputText v-model="secondLastName" />
-      </div>
-    </div>
-    <div class="user__settings--row">
-      <div class="user__settings--field">
-        <label class="user__settings--label">
-          {{ t('userSettings.phone') }}
-        </label>
-        <InputText v-model="phone" />
-      </div>
+            <div class="user__settings--field">
+              <label class="user__settings--label">
+                {{ t('userSettings.lastName') }}
+              </label>
+              <InputText v-model="lastName" :style="{ minWidth: '260px' }" />
+            </div>
 
-      <div class="user__settings--field">
-        <label class="user__settings--label">
-          {{ t('userSettings.email') }}
-        </label>
-        <InputText v-model="email" />
-      </div>
+            <div class="user__settings--field">
+              <label class="user__settings--label">
+                {{ t('userSettings.secondLastName') }}
+              </label>
+              <InputText v-model="secondLastName" :style="{ minWidth: '260px' }" />
+            </div>
+          </div>
 
-      <div class="user__settings--field" v-if="availableLocales && availableLocales.length > 1">
-        <label class="user__settings--label">
-          {{ t('userSettings.language') }}
-        </label>
-        <Select
-          class="select-language"
-          v-model="selectedLocale"
-          optionLabel="name"
-          optionValue="code"
-          :options="availableLocales as any[]"
-        />
-      </div>
-    </div>
-    <div class="user__settings--footer-buttons">
-      <Button
-        :label="t('userSettings.cancel')"
-        class="p-button-text"
-        :style="{ width: 'auto', minWidth: '130px' }"
-        @click="handleCancel()"
-      />
-      <Button
-        :label="t('userSettings.save')"
-        :style="{ width: 'auto', minWidth: '130px' }"
-        @click="save()"
-      />
-    </div>
+          <div class="user__settings--row">
+            <div class="user__settings--field">
+              <label class="user__settings--label">
+                {{ t('userSettings.phone') }}
+              </label>
+              <InputText v-model="phone" :style="{ minWidth: '260px' }" />
+            </div>
+
+            <div class="user__settings--field">
+              <label class="user__settings--label">
+                {{ t('userSettings.email') }}
+              </label>
+              <InputText v-model="email" :style="{ minWidth: '260px' }" />
+            </div>
+
+            <div
+              class="user__settings--field"
+              v-if="availableLocales && availableLocales.length > 1"
+            >
+              <label class="user__settings--label">
+                {{ t('userSettings.language') }}
+              </label>
+              <Select
+                class="select-language"
+                v-model="selectedLocale"
+                optionLabel="name"
+                optionValue="code"
+                :options="availableLocales as any[]"
+                :style="{ minWidth: '260px' }"
+              />
+            </div>
+          </div>
+
+          <div class="user__settings--footer-buttons">
+            <Button
+              :label="t('userSettings.cancel')"
+              class="p-button-text"
+              :style="{ width: 'auto', minWidth: '130px' }"
+              @click="handleCancel()"
+            />
+            <Button
+              :label="t('userSettings.save')"
+              :style="{ width: 'auto', minWidth: '130px' }"
+              @click="save()"
+            />
+          </div>
+        </TabPanel>
+
+        <TabPanel value="1">
+          <div class="change__password--row">
+            <form>
+              <InputText v-model="firstName" autocomplete="username" style="display: none" />
+              <div class="change__password--field">
+                <label class="change__password--label">
+                  {{ t('userSettings.currentPassword') }}
+                </label>
+                <IconField>
+                  <InputIcon class="pi pi-lock" />
+                  <Password
+                    v-model="currentPassword"
+                    :feedback="false"
+                    toggleMask
+                    :style="{ width: '100%' }"
+                    :inputProps="{ autocomplete: 'current-password' }"
+                    :invalid="errorMessage === t('userSettings.invalidPassword')"
+                  />
+                </IconField>
+              </div>
+              <div class="change__password--field">
+                <label class="change__password--label">
+                  {{ t('userSettings.newPassword') }}
+                </label>
+                <IconField>
+                  <InputIcon class="pi pi-lock" />
+                  <Password
+                    v-model="newPassword"
+                    :feedback="false"
+                    toggleMask
+                    :style="{ width: '100%' }"
+                    :inputProps="{ autocomplete: 'new-password' }"
+                    :invalid="errorMessage === t('userSettings.passwordsDoNotMatch')"
+                  />
+                </IconField>
+              </div>
+              <div class="change__password--field">
+                <label class="change__password--label">
+                  {{ t('userSettings.repeatPassword') }}
+                </label>
+                <IconField>
+                  <InputIcon class="pi pi-lock" />
+                  <Password
+                    v-model="repeatPassword"
+                    :feedback="false"
+                    toggleMask
+                    :style="{ width: '100%' }"
+                    :inputProps="{ autocomplete: 'repeat-password' }"
+                    :invalid="errorMessage === t('userSettings.passwordsDoNotMatch')"
+                  />
+                </IconField>
+              </div>
+              <div class="change__password--footer">
+                <Message
+                  severity="error"
+                  :style="{ visibility: errorMessage !== '' ? 'visible' : 'hidden' }"
+                >
+                  {{ errorMessage }}
+                </Message>
+                <div class="change__password--footer-buttons">
+                  <Button
+                    :label="t('userSettings.cancel')"
+                    class="p-button-text"
+                    :style="{ width: 'auto', minWidth: '130px' }"
+                    @click="handleCancel()"
+                  />
+                  <Button
+                    :label="t('userSettings.save')"
+                    :style="{ width: 'auto', minWidth: '130px' }"
+                    @click="handleChangePassword()"
+                    :disabled="!currentPassword || !newPassword || !repeatPassword"
+                  />
+                </div>
+              </div>
+            </form>
+          </div>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   </div>
 </template>
+
 <script lang="ts" setup>
 import { ref, onMounted, computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useNotificationsStore } from '@/infrastructure/stores/notifications';
+
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import Password from 'primevue/password';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+import Message from 'primevue/message';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
+import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
+
 const dialogRef = inject<any>('dialogRef');
 
 const userStore = useUserStore();
 const instanceStore = useInstanceStore();
+const uiStore = useUIStore();
+const notificationStore = useNotificationsStore();
+
 const { t } = useI18n({ useScope: 'global' });
+
 const user = userStore.user;
 const firstName = ref('');
 const lastName = ref('');
@@ -109,15 +229,46 @@ const phone = ref('');
 const email = ref('');
 const selectedLocale = ref('');
 const availableLocales = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
+
+const currentPassword = ref('');
+const newPassword = ref('');
+const repeatPassword = ref('');
+const errorMessage = ref('');
+
 const save = () => {
   // update i18n locale
   i18n.global.locale.value = selectedLocale.value;
   // update primevue locale
   updatePrimevueLocale(selectedLocale.value);
+  dialogRef?.value?.close({ action: 'saved', refresh: true });
 };
+
 const handleCancel = () => {
   dialogRef?.value?.close({ action: 'cancel' });
 };
+
+const handleChangePassword = async () => {
+  if (newPassword.value !== repeatPassword.value) {
+    errorMessage.value = t('userSettings.passwordsDoNotMatch');
+    return;
+  }
+
+  uiStore.startLoading();
+  try {
+    await userStore.changePassword(currentPassword.value, newPassword.value);
+    notificationStore.add(t('userSettings.passwordChanged'), 'success');
+    dialogRef?.value?.close({ action: 'passwordChanged' });
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      errorMessage.value = t('userSettings.invalidPassword');
+    } else {
+      errorMessage.value = t('error.unknownError');
+    }
+  } finally {
+    uiStore.stopLoading();
+  }
+};
+
 onMounted(() => {
   firstName.value = user?.firstName || '';
   lastName.value = user?.lastName || '';
@@ -162,18 +313,54 @@ onMounted(() => {
     margin-bottom: 0.25rem;
     font-weight: bold;
   }
-  &--footer-buttons {
+  .change__password--row {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    width: 100%;
+    height: calc(90svh - 1.25rem);
+    .change__password--field {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+      .change__password--label {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+    }
   }
+}
+.user__settings--footer-buttons,
+.change__password--footer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+.change__password--footer-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+:deep(.p-tabpanels) {
+  padding: 0;
+  padding-top: 18px;
+}
+
+:deep(.change__password--field .p-icon-field),
+:deep(.change__password--field .p-password) {
+  width: 100%;
+}
+
+:deep(.change__password--field .p-password input.p-inputtext) {
+  width: 100%;
 }
 
 @media (min-width: 1024px) {
   .user__settings {
-    min-width: 50vw;
-    height: auto;
+    height: 370px;
+    width: 830px;
     &--row {
       flex-direction: row;
       align-items: center;
@@ -193,17 +380,31 @@ onMounted(() => {
       width: fit-content;
       justify-content: start;
     }
-    &--footer-buttons {
-      flex-direction: row;
-      justify-content: flex-end;
+    .change__password--row {
       width: auto;
+      height: auto;
+      > .change__password--field:nth-last-child(2) {
+        margin-bottom: 2rem !important;
+      }
     }
   }
-}
-
-@media (min-width: 1280px) {
-  .user__settings {
-    min-width: 40vw;
+  .user__settings--footer-buttons {
+    flex-direction: row;
+    justify-content: flex-end;
+    width: auto;
+    height: 100%;
+  }
+  .change__password--footer {
+    flex-direction: row;
+    justify-content: space-between;
+    width: auto;
+    height: 100%;
+    margin-top: 1.85rem;
+  }
+  .change__password--footer-buttons {
+    flex-direction: row;
+    width: auto;
+    height: 100%;
   }
 }
 </style>
