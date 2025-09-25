@@ -39,7 +39,7 @@ export default defineConfig({
     commitHashPlugin(),
   ],
   define: {
-    'import.meta.env.VITE_COMMIT_HASH': JSON.stringify(commitHash),
+    'import.meta.env.ROOMDOO_COMMIT_HASH': JSON.stringify(commitHash),
     __VUE_OPTIONS_API__: true, //  some libraries still need this
     __VUE_PROD_DEVTOOLS__: false,
   },
