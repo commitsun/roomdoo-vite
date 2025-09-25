@@ -198,7 +198,7 @@ import { dialogService } from '@/_legacy/services/DialogService';
 
 export default defineComponent({
   setup() {
-    const hash = import.meta.env.VITE_COMMIT_HASH || 'dev';
+    const hash = import.meta.env.ROOMDOO_COMMIT_HASH || 'dev';
 
     const router = useRouter();
     const route = useRoute();
