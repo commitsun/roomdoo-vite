@@ -3,7 +3,7 @@
     <Sidebar :menuOpen="isMenuOpen" />
     <div class="overlay" @click="closeLeftDrawer" v-if="leftDrawerExpanded" />
     <div class="main-container" :class="rightDrawerExpanded ? 'main-container-shrinked' : ''">
-      <router-view @openLeftDrawer="openLeftDrawer()" />
+      <router-view :key="viewKey" @openLeftDrawer="openLeftDrawer()" />
     </div>
     <div class="button-open-drawer" @click="openFolioList" v-if="route.name === 'planning'">
       <img src="/app-images/icon-menu.svg" class="arrow-left-img" />
@@ -86,6 +86,7 @@ const UserSettingsModal = defineAsyncComponent(
 import LeftDrawerSlide from '@/_legacy/components/leftDrawer/LeftDrawerSlide.vue';
 import LeftDrawerFixed from '@/_legacy/components/leftDrawer/LeftDrawerFixed.vue';
 import Spinner from '@/_legacy/components/roomdooComponents/SpinnerComponent.vue';
+import { useUIStore } from '@/infrastructure/stores/ui';
 
 export default defineComponent({
   components: {
@@ -106,6 +107,8 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const uiStore = useUIStore();
+
     const pmsPropertiesStore = usePmsPropertiesStore();
     const showUserSettingsModal = ref(false);
     const peformShowUserSettingsModal = () => {
@@ -135,6 +138,7 @@ export default defineComponent({
     const currentReservations = computed(() => store.state.reservations.reservations);
     const pricelistPlanningExpanded = computed(() => store.state.layout.pricelistPlanningExpanded);
     const showSpinner = computed(() => store.state.layout.showSpinner);
+    const viewKey = computed(() => `${route.fullPath}::${uiStore.reloadTick}`);
 
     const sortedProperties = computed(() => {
       const result = store.state.properties.properties.filter(
@@ -320,6 +324,7 @@ export default defineComponent({
       showSpinner,
       isMenuOpen,
       openLeftDrawer,
+      viewKey,
     };
   },
 });

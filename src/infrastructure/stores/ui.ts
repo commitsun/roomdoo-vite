@@ -4,6 +4,7 @@ import { defineStore } from 'pinia';
 export const useUIStore = defineStore('ui', {
   state: () => ({
     isLoading: false,
+    reloadTick: 0,
   }),
   actions: {
     startLoading() {
@@ -12,6 +13,8 @@ export const useUIStore = defineStore('ui', {
     stopLoading() {
       this.isLoading = false;
     },
-
+    refreshView() {
+      this.reloadTick++;
+    },
   },
 });
