@@ -18,7 +18,7 @@
 
     <!-- Main -->
     <main class="layout__main">
-      <router-view />
+      <router-view :key="viewKey" />
     </main>
 
     <!-- Right drawer -->
@@ -29,21 +29,25 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Drawer from 'primevue/drawer';
 import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
+import { useUIStore } from '@/infrastructure/stores/ui';
 
 const route = useRoute();
 const pmsPropertiesStore = usePmsPropertiesStore();
 const instanceStore = useInstanceStore();
 const userStore = useUserStore();
+const uiStore = useUIStore();
 
 const isMenuVisible = ref(false);
 const rightDrawerVisible = ref(false);
+
+const viewKey = computed(() => `${route.fullPath}::${uiStore.reloadTick}`);
 
 watch(
   () => route.name,
