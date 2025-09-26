@@ -584,7 +584,11 @@ export default defineComponent({
     }
     .button-add {
       display: flex;
+      margin-right: 1rem;
     }
+  }
+  :deep(.p-datatable-scrollable .p-datatable-frozen-column) {
+    background: none;
   }
 }
 </style>
