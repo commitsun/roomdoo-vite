@@ -258,6 +258,7 @@ import { useI18n } from 'vue-i18n';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import LegacyReport from '@/_legacy/components/reports/ReportComponent.vue';
+import { useUIStore } from '@/infrastructure/stores/ui';
 
 defineProps<{
   menuOpen: boolean;
@@ -268,6 +269,7 @@ type LegacyReportType = 'kelly' | 'arrivals' | 'departures' | 'transactions' | '
 const route = useRoute();
 const userStore = useUserStore();
 const pmsPropertiesStore = usePmsPropertiesStore();
+const uiStore = useUIStore();
 const router = useRouter();
 const { t } = useI18n();
 const { open } = useAppDialog();
@@ -281,7 +283,6 @@ const isContactsOptionsOpen = ref(false);
 
 const nav = ref<HTMLElement | null>(null);
 const userSettingsHeader = computed(() => t('sidebar.userSettings'));
-const userChangePasswordHeader = computed(() => t('sidebar.changePassword'));
 
 const items = computed(() => [
   {
@@ -295,11 +296,7 @@ const items = computed(() => [
             props: { header: userSettingsHeader },
             onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
               if (data?.refresh) {
-                router.replace({
-                  name: route.name as string,
-                  params: route.params,
-                  query: route.query,
-                });
+                uiStore.refreshView();
               }
             },
           });
