@@ -16,9 +16,14 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-const endPoint = import.meta.env.DEV
-  ? '/pmsApi'
-  : `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi`;
+let endPoint;
+if (import.meta.env.DEV) {
+  endPoint = '/pmsApi';
+} else if (import.meta.env.MODE === 'staging') {
+  endPoint = import.meta.env.ROOMDOO_API_URL + '/pmsApi';
+} else {
+  endPoint = `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi`;
+}
 
 const api: AxiosInstance = axios.create({
   baseURL: endPoint,
