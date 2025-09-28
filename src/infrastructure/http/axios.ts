@@ -11,6 +11,8 @@ import { useTextMessagesStore } from '../stores/textMessages';
 import { useDynamicDialogsStore } from '../stores/dynamicDialogs';
 import { t, i18n } from '@/infrastructure/plugins/i18n';
 import router from '@/infrastructure/plugins/router';
+import { InternalServerError } from '@/application/shared/InternalServerError';
+import { UnknownError } from '@/application/shared/UnknownError';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -30,19 +32,11 @@ const api: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  let locale = i18n.global.locale.value;
-  locale = locale.replace('-', '_');
-
-  if (config.headers instanceof AxiosHeaders) {
-    config.headers.set('Accept-Language', locale);
-  } else if (config.headers) {
-    (config.headers as any)['Accept-Language'] = locale;
-    config.headers = new AxiosHeaders(config.headers);
-  } else {
-    config.headers = new AxiosHeaders({ 'Accept-Language': locale });
-  }
-
+api.interceptors.request.use((config) => {
+  const locale = i18n.global.locale.value.replace('-', '_');
+  const headers = new AxiosHeaders(config.headers);
+  headers.set('Accept-Language', locale);
+  config.headers = headers;
   return config;
 });
 
@@ -127,12 +121,13 @@ api.interceptors.response.use(
           t('error.somethingWentWrong'),
           t('error.internalError')
         );
-        break;
+        throw new InternalServerError();
       default:
         useTextMessagesStore().addTextMessage(
           t('error.somethingWentWrong'),
           t('error.unknownError')
         );
+        throw new UnknownError();
     }
   }
 );
