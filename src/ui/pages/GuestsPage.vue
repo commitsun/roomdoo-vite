@@ -471,7 +471,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .main-content {
   height: 100%;
   background-color: #f9f9f9;
