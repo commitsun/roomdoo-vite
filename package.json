@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "build:staging": "vue-tsc -b && vite build --mode staging",
     "preview": "vite preview",
     "build:staging": "vue-tsc -b && vite build --mode staging",
     "test:unit": "vitest",
