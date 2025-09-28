@@ -10,6 +10,17 @@ export default defineConfig({
       include: path.resolve(__dirname, './src/**/locales/**'),
     }),
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+        additionalData: `
+          @use "@/ui/assets/variables.scss" as *;
+          @use "@/ui/assets/global.scss" as *;
+        `,
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
