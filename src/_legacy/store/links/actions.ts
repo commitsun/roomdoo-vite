@@ -5,11 +5,16 @@ import { getCookie } from '@/_legacy/utils/cookies';
 
 const actions: ActionTree<LinksStateInterface, StateInterface> = {
   async fetchLink(context, params: { pmsPropertyId: number; linkId: number }) {
-    let endPoint = `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi`;
-    if (window.location.href.includes('vite.roomdoo.com')) {
-      endPoint = 'https://staging.odoo.aldahotels.moduon.net/pmsApi';
-    } else if (import.meta.env.DEV) {
+    let endPoint;
+    if (import.meta.env.DEV) {
       endPoint = '/pmsApi';
+    } else if (import.meta.env.MODE === 'staging') {
+      endPoint = import.meta.env.ROOMDOO_API_URL + '/pmsApi';
+    } else {
+      endPoint = `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi`;
+    }
+    if (import.meta.env.mode === 'staging' || import.meta.env.DEV) {
+      endPoint = import.meta.env.ROOMDOO_API_URL + '/pmsApi';
     }
     const response = await fetch(
       `${endPoint}/pms-properties/${params.pmsPropertyId}/links/${params.linkId}`,
