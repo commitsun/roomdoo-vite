@@ -46,6 +46,13 @@ vi.mock('vue-i18n', () => {
     createI18n: vi.fn(() => ({ install: () => {} })),
   };
 });
+vi.mock('@/infrastructure/plugins/i18n', () => ({
+  i18n: {
+    global: {
+      locale: { value: 'en-ES' },
+    },
+  },
+}));
 
 // Legacy/dialog mocks
 vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
@@ -138,7 +145,7 @@ describe('SuppliersPage', () => {
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent('billing@acme.com'); // email
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(''); // phone (empty)
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent('Spain'); // country
-    expect(within(bodyRows[0]).getAllByRole('cell')[5]).toHaveTextContent('4200'); // totalInvoiced
+    expect(within(bodyRows[0]).getAllByRole('cell')[5]).toHaveTextContent('4.200,00'); // totalInvoiced
 
     // row 2
     expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent('Globex Ltd');
@@ -146,7 +153,7 @@ describe('SuppliersPage', () => {
     expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent('sales@globex.co');
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain('555-123-456'); // phone chip
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent('Portugal');
-    expect(within(bodyRows[1]).getAllByRole('cell')[5]).toHaveTextContent('98765');
+    expect(within(bodyRows[1]).getAllByRole('cell')[5]).toHaveTextContent('98.765,00');
   });
 
   it('applies global search input', async () => {
