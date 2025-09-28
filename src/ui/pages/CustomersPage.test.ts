@@ -44,6 +44,14 @@ vi.mock('vue-i18n', () => {
   };
 });
 
+vi.mock('@/infrastructure/plugins/i18n', () => ({
+  i18n: {
+    global: {
+      locale: { value: 'en-ES' },
+    },
+  },
+}));
+
 // TODO: remove when legacy components are removed
 vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
   default: { name: 'PartnerForm', template: '<div />' },
@@ -151,9 +159,14 @@ describe('CustomersPage', () => {
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
       testCustomers[0].country?.name ?? ''
     );
+
     //total invoiced
     expect(within(bodyRows[0]).getAllByRole('cell')[5]).toHaveTextContent(
-      testCustomers[0].totalInvoiced?.toString()
+      testCustomers[0].totalInvoiced.toLocaleString('es-ES', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        useGrouping: true,
+      })
     );
     // check 2nd row content
     // name
