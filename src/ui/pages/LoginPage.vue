@@ -49,6 +49,7 @@
             :label="t('login.loginButton')"
             :disabled="!username || !password"
             @click="doLogin()"
+            type="button"
           />
         </div>
         <div class="link">
