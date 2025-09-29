@@ -130,18 +130,17 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     if (orderBy) params.set('orderBy', orderBy);
 
     const url = `/guests?${params.toString()}`;
-    const { data } = await api.get<EntityListResponse<any>>(url);
+    const { data } = await api.get<EntityListResponse<Guest>>(url);
 
-    const guests: Guest[] = data.items.map((raw: any) => ({
+    const guests: Guest[] = data.items.map((raw) => ({
       id: raw.id,
       name: raw.name,
-      types: raw.types ?? [],
       country: raw.country,
-      documents: raw.identificationDocuments ?? [],
+      identificationDocuments: raw.identificationDocuments,
       inHouse: raw.inHouse,
       internalNotes: raw.internalNotes,
-      lastReservationId: raw.lastReservation?.id,
-      lastReservationName: raw.lastReservation?.name,
+      lastReservation: raw.lastReservation,
+      phones: raw.phones,
     }));
 
     return { ...data, items: guests };
