@@ -13,9 +13,7 @@ const actions: ActionTree<LinksStateInterface, StateInterface> = {
     } else {
       endPoint = `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi`;
     }
-    if (import.meta.env.mode === 'staging' || import.meta.env.DEV) {
-      endPoint = import.meta.env.ROOMDOO_API_URL + '/pmsApi';
-    }
+
     const response = await fetch(
       `${endPoint}/pms-properties/${params.pmsPropertyId}/links/${params.linkId}`,
       {
