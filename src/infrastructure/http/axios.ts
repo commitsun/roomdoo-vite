@@ -63,7 +63,6 @@ api.interceptors.response.use(
   (res) => res, // Simply return response on success
   async (err: AxiosError) => {
     const originalRequest = err.config as CustomAxiosRequestConfig;
-    console.log(originalRequest.url);
     if (
       err.response?.status === 401 &&
       originalRequest &&
