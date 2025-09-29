@@ -6,12 +6,10 @@ import { api } from '@/infrastructure/http/axios';
 
 export class InstanceRepositoryImpl implements InstanceRepository {
   async fetchInstance(): Promise<Instance> {
-    const response = await api.get<Instance>('/instance');
-    return response.data;
+    return api.get('/instance').then((response) => response.data);
   }
 
   async fetchLanguages(): Promise<Language[]> {
-    const response = await api.get<Language[]>('/languages');
-    return response.data;
+    return api.get('/languages').then((response) => response.data);
   }
 }
