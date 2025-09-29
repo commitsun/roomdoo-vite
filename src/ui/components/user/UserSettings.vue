@@ -83,7 +83,7 @@
                 v-model="selectedLocale"
                 optionLabel="name"
                 optionValue="code"
-                :options="availableLocales as any[]"
+                :options="availableLocales as Language[]"
                 :style="{ minWidth: '260px' }"
               />
             </div>
@@ -211,6 +211,7 @@ import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
+import type { Language } from '@/domain/entities/Language';
 
 const dialogRef = inject<any>('dialogRef');
 
