@@ -10,7 +10,7 @@ export interface Contact {
   types: ContactType[];
   email?: string;
   country?: Country;
-  phones?: Phone[];
+  phones: Phone[];
 }
 
 export interface Agency extends Omit<Contact, 'types'> {}
@@ -23,7 +23,7 @@ export interface Customer extends Omit<Contact, 'types'> {
   totalInvoiced: number;
 }
 
-export interface Guest extends Omit<Contact, 'types'> {
+export interface Guest extends Omit<Contact, 'types' | 'phones'> {
   identificationDocuments: PersonalDocument[];
   lastReservation: {
     id: Id;
