@@ -1,4 +1,4 @@
 export interface PersonalDocument {
-  documentType: string;
-  documentNumber: string;
+  type: string;
+  number: string;
 }
