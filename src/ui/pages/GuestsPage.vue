@@ -97,7 +97,7 @@
 
       <!-- Main Document -->
       <Column
-        field="documents"
+        field="identificationDocuments"
         :header="t('contacts.document')"
         style="min-width: 200px"
         filter
@@ -106,14 +106,15 @@
         :showAddButton="false"
       >
         <template #body="{ data }">
-          <span v-if="data.documents?.length">
-            {{ data.documents[0]?.type }} {{ data.documents[0]?.number }}
+          <span v-if="data.identificationDocuments?.length">
+            {{ data.identificationDocuments[0]?.type }}
+            {{ data.identificationDocuments[0]?.number }}
             <span
-              v-if="data.documents.length > 1"
-              :title="data.documents.map((d: any) => ((d?.type ?? 'Doc') + ' ' + (d?.number ?? ''))).join('\n')"
+              v-if="data.identificationDocuments.length > 1"
+              :title="data.identificationDocuments.map((d: any) => ((d?.type ?? 'Doc') + ' ' + (d?.number ?? ''))).join('\n')"
               style="cursor: help; opacity: 0.8"
             >
-              (+{{ data.documents.length - 1 }})
+              (+{{ data.identificationDocuments.length - 1 }})
             </span>
           </span>
         </template>
@@ -300,7 +301,10 @@ export default defineComponent({
     const filters = ref({
       name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
       country: { value: null as string[] | string | null, matchMode: FilterMatchMode.IN },
-      documents: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      identificationDocuments: {
+        value: null as string | null,
+        matchMode: FilterMatchMode.CONTAINS,
+      },
       inHouse: { value: null as boolean | null, matchMode: FilterMatchMode.EQUALS },
     });
 
@@ -319,7 +323,7 @@ export default defineComponent({
         globalQuery.value.length ||
         sortField.value ||
         filters.value.name.value ||
-        filters.value.documents.value ||
+        filters.value.identificationDocuments.value ||
         (filters.value.country.value && filters.value.country.value.length) ||
         filters.value.inHouse.value === true
     );
@@ -335,7 +339,7 @@ export default defineComponent({
         rows.value,
         globalQuery.value || undefined,
         filters.value.name.value || undefined,
-        filters.value.documents.value || undefined,
+        filters.value.identificationDocuments.value || undefined,
         (filters.value.country.value as string[] | null) || undefined,
         inhouseOnly,
         orderBy.value
@@ -362,7 +366,7 @@ export default defineComponent({
     };
     const handleSortChange = async (e: DataTableSortEvent) => {
       if (e.sortField !== undefined) {
-        sortField.value = (e.sortField as typeof sortField.value) || null; // TODO: check type
+        sortField.value = (e.sortField as typeof sortField.value) || null;
         sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
         page.value = 1;
         return await fetchNow();
@@ -378,7 +382,10 @@ export default defineComponent({
       filters.value = {
         name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
         country: { value: null as string[] | string | null, matchMode: FilterMatchMode.IN },
-        documents: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+        identificationDocuments: {
+          value: null as string | null,
+          matchMode: FilterMatchMode.CONTAINS,
+        },
         inHouse: { value: null as boolean | null, matchMode: FilterMatchMode.EQUALS },
       };
       fetchNow();
