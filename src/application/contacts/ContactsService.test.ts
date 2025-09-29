@@ -176,8 +176,18 @@ describe('ContactsService.fetchGuests', () => {
     const response: EntityListResponse<Guest> = {
       count: 2,
       items: [
-        { id: 10, name: 'John', documents: [] },
-        { id: 11, name: 'Jane', documents: [] },
+        {
+          id: 10,
+          name: 'John',
+          identificationDocuments: [],
+          lastReservation: { id: 1, name: 'Res 1' },
+        },
+        {
+          id: 11,
+          name: 'Jane',
+          identificationDocuments: [],
+          lastReservation: { id: 2, name: 'Res 2' },
+        },
       ],
     };
     contactsRepoMock.fetchGuests.mockResolvedValue(response);

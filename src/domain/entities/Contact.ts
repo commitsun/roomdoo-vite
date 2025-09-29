@@ -24,9 +24,11 @@ export interface Customer extends Omit<Contact, 'types'> {
 }
 
 export interface Guest extends Omit<Contact, 'types'> {
-  documents: PersonalDocument[];
-  lastReservationId?: Id;
-  lastReservationName?: string;
+  identificationDocuments: PersonalDocument[];
+  lastReservation: {
+    id: Id;
+    name: string;
+  };
   internalNotes?: string;
   inHouse?: boolean;
 }
