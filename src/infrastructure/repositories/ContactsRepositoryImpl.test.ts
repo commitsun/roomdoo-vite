@@ -209,10 +209,38 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     expect(url.searchParams.get('orderBy')).toBe('name');
   });
 
-  it('propagates axios errors', async () => {
+  it('propagates axios errors when fetch CONTACTS', async () => {
     const err = new Error('axios fail');
     vi.mocked(api.get).mockRejectedValue(err);
 
     await expect(repo.fetchContacts(1, 10)).rejects.toThrow(err);
+  });
+
+  it('propagates axios errors when fetch AGENCIES', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(repo.fetchAgencies(1, 10)).rejects.toThrow(err);
+  });
+
+  it('propagates axios errors when fetch CUSTOMERS', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(repo.fetchCustomers(1, 10)).rejects.toThrow(err);
+  });
+
+  it('propagates axios errors when fetch GUESTS', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(repo.fetchGuests(1, 10)).rejects.toThrow(err);
+  });
+
+  it('propagates axios errors when fetch SUPPLIERS', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(repo.fetchSuppliers(1, 10)).rejects.toThrow(err);
   });
 });
