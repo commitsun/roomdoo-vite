@@ -111,7 +111,7 @@
             {{ data.identificationDocuments[0]?.number }}
             <span
               v-if="data.identificationDocuments.length > 1"
-              :title="data.identificationDocuments.map((d: any) => ((d?.type ?? 'Doc') + ' ' + (d?.number ?? ''))).join('\n')"
+              :title="data.identificationDocuments.map((d: PersonalDocument) => ((d.type ) + ' ' + (d.number ))).join('\n')"
               style="cursor: help; opacity: 0.8"
             >
               (+{{ data.identificationDocuments.length - 1 }})
@@ -260,6 +260,7 @@ import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
 import type { Contact } from '@/domain/entities/Contact';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useUIStore } from '@/infrastructure/stores/ui';
+import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 
 export default defineComponent({
   components: {
