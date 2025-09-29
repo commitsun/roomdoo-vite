@@ -68,10 +68,14 @@ const testGuests: Guest[] = [
     name: 'Alice Walker',
     email: 'alice@example.com',
     country: { code: 'ES', name: 'Spain', id: 1 },
-    documents: [
+    identificationDocuments: [
       { type: 'Passport', number: 'X1234567' } as any,
       { type: 'ID', number: '12345678Z' } as any,
     ],
+    lastReservation: {
+      id: 101,
+      name: 'Reservation 101',
+    },
     inHouse: true,
     internalNotes: 'VIP guest. Allergic to peanuts.',
   },
@@ -80,7 +84,11 @@ const testGuests: Guest[] = [
     name: 'Bob Martin',
     email: 'bob@example.com',
     country: { code: 'PT', name: 'Portugal', id: 2 },
-    documents: [{ type: 'Passport', number: 'P7654321' } as any],
+    identificationDocuments: [{ type: 'Passport', number: 'P7654321' } as any],
+    lastReservation: {
+      id: 102,
+      name: 'Reservation 102',
+    },
     inHouse: false,
     internalNotes: 'Prefers late checkout.',
   },
