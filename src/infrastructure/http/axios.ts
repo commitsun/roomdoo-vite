@@ -40,25 +40,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Internal flag to track if the refresh token request is in progress
 let isRefreshing = false;
-
-// Queue to hold failed requests while token is being refreshed
 let failedQueue: any[] = [];
-
-// Process all requests in the queue after token refresh finishes
 const processQueue = (error: AxiosError | null) => {
   failedQueue.forEach((prom) => {
     if (error) {
-      prom.reject(error); // Reject the queued requests if refresh failed
+      prom.reject(error);
     } else {
-      prom.resolve(); // Resolve and retry the requests if refresh succeeded
+      prom.resolve();
     }
   });
   failedQueue = [];
 };
 
-// Axios response interceptor to handle errors
 api.interceptors.response.use(
   (res) => res, // Simply return response on success
   async (err: AxiosError) => {
@@ -72,7 +66,6 @@ api.interceptors.response.use(
       originalRequest.url !== '/user/change-password'
     ) {
       originalRequest._retry = true;
-
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
@@ -98,8 +91,6 @@ api.interceptors.response.use(
           t('error.sessionExpiredContent')
         );
         useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
-
-        // const { default: router } = await import('@/infrastructure/plugins/router');
         const current = router.currentRoute.value;
         const redirect = current?.fullPath || '/';
         if (current?.name !== 'login') {
@@ -111,7 +102,6 @@ api.interceptors.response.use(
         isRefreshing = false;
       }
     }
-
     switch (err.response?.status) {
       case 401:
         throw new UnauthorizedError();
