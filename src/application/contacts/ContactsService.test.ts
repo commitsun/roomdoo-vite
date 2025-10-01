@@ -37,8 +37,18 @@ describe('ContactsService.fetchContacts', () => {
     const response: EntityListResponse<Contact> = {
       count: 2,
       items: [
-        { id: 1, name: 'A', types: [] },
-        { id: 2, name: 'B', types: [] },
+        {
+          id: 1,
+          name: 'A',
+          types: [],
+          phones: [],
+        },
+        {
+          id: 2,
+          name: 'B',
+          types: [],
+          phones: [],
+        },
       ],
     };
     contactsRepoMock.fetchContacts.mockResolvedValue(response);
@@ -107,7 +117,15 @@ describe('ContactsService.fetchCustomers', () => {
   it('passes all filters and returns response', async () => {
     const response: EntityListResponse<Customer> = {
       count: 1,
-      items: [{ id: 1, name: 'ACME', vat: 'VAT123', totalInvoiced: 0 }],
+      items: [
+        {
+          id: 1,
+          name: 'ACME',
+          vat: 'VAT123',
+          totalInvoiced: 0,
+          phones: [],
+        },
+      ],
     };
     contactsRepoMock.fetchCustomers.mockResolvedValue(response);
 
@@ -254,7 +272,13 @@ describe('ContactsService.fetchAgencies', () => {
   it('passes all filters and returns response', async () => {
     const response: EntityListResponse<Agency> = {
       count: 1,
-      items: [{ id: 100, name: 'Roomdoo Travel' }],
+      items: [
+        {
+          id: 100,
+          name: 'Roomdoo Travel',
+          phones: [],
+        },
+      ],
     };
     contactsRepoMock.fetchAgencies.mockResolvedValue(response);
 
@@ -315,7 +339,15 @@ describe('ContactsService.fetchSuppliers', () => {
   it('passes all filters and returns response', async () => {
     const response: EntityListResponse<Supplier> = {
       count: 3,
-      items: [{ id: 200, name: 'Paper Inc', vat: 'VAT123', totalInvoiced: 0 }],
+      items: [
+        {
+          id: 200,
+          name: 'Paper Inc',
+          vat: 'VAT123',
+          totalInvoiced: 0,
+          phones: [],
+        },
+      ],
     };
     contactsRepoMock.fetchSuppliers.mockResolvedValue(response);
 
