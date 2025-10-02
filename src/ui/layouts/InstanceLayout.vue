@@ -107,7 +107,9 @@ onMounted(async () => {
       display: flex;
       width: 33.3%;
       height: 100%;
-      background: linear-gradient(to bottom left, #2a0a58, #081b2b, #0e96c8);
+      // background: linear-gradient(to bottom left, #2a0a58, #081b2b, #0e96c8);
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%) lightgray -154332.494px -794.574px /
+        44097.695% 9952.168% no-repeat;
       background-repeat: no-repeat;
       background-position: center center;
       background-size: cover;

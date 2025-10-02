@@ -13,8 +13,14 @@ export const useCountryStatesStore = defineStore('countryStates', () => {
   const fetchCountryStates = async () => {
     countryStates.value = await countryStatesService.fetchCountryStates();
   };
+
+  const fetchCountryStatesByCountryId = async (countryId: number) => {
+    countryStates.value = await countryStatesService.fetchCountryStatesByCountryId(countryId);
+  };
+
   return {
     countryStates: readonly(countryStates),
     fetchCountryStates,
+    fetchCountryStatesByCountryId,
   };
 });

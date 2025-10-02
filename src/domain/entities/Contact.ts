@@ -15,7 +15,7 @@ export interface Contact {
   types: ContactType[];
   email?: string;
   country?: Country;
-  phones: Phone[];
+  phones?: Phone[];
 }
 
 export interface Agency extends Omit<Contact, 'types'> {}
@@ -29,7 +29,7 @@ export interface Customer extends Omit<Contact, 'types'> {
 }
 
 export interface Guest extends Omit<Contact, 'types' | 'phones'> {
-  identificationDocuments: PersonalDocument[];
+  identificationDocuments: { type: string; number: string }[];
   lastReservation: {
     id: Id;
     name: string;
@@ -43,10 +43,11 @@ export interface ContactDetail extends Omit<Contact, 'types'> {
   reference?: string;
   firstname?: string;
   lastname?: string;
+  lastname2?: string;
   lang?: string;
   nationality?: Country;
   gender?: string;
-  birthdate?: Date;
+  birthdate?: Date | null;
   street?: string;
   street2?: string;
   zipCode?: string;
@@ -59,8 +60,29 @@ export interface ContactDetail extends Omit<Contact, 'types'> {
   documents?: PersonalDocument[];
   fiscalIdNumber?: string;
   fiscalIdNumberType?: DocumentType;
-  lastname2?: string;
   tags?: Tag[];
+  legalName?: string;
+}
+
+export interface ContactDetailPayload
+  extends Omit<
+    ContactDetail,
+    | 'country'
+    | 'nationality'
+    | 'state'
+    | 'paymentTerm'
+    | 'pricelist'
+    | 'documents'
+    | 'tags'
+    | 'fiscalIdNumberType'
+  > {
+  country?: number;
+  nationality?: number;
+  state?: number;
+  paymentTerm?: number;
+  pricelist?: number;
+  tags?: number[];
+  fiscalIdNumberType?: number;
 }
 
 export interface ContactSchema {
