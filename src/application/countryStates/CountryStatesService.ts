@@ -7,4 +7,8 @@ export class CountryStatesService {
     const response = await this.countryStatesRepository.fetchCountryStates();
     return response;
   }
+  async fetchCountryStatesByCountryId(countryId: number): Promise<CountryState[]> {
+    const response = await this.countryStatesRepository.fetchCountryStatesByCountryId(countryId);
+    return response;
+  }
 }

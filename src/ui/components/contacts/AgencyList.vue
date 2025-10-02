@@ -376,9 +376,11 @@ import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+<<<<<<< HEAD:src/ui/components/contacts/AgencyList.vue
 // TODO: remove when new api is ready
+=======
+>>>>>>> 8fe76b5 ([IMP] pms-pwa: Fix internal reference typo in Spanish locale and refactor contact handling in multiple components):src/ui/pages/AgenciesPage.vue
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { firstTwoInitials } from '@/ui/utils/strings';
 
@@ -408,9 +410,6 @@ export default defineComponent({
   },
   setup() {
     // stores
-    // TODO: remove when new api is ready
-    const store = useStore();
-    // ---
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
@@ -623,19 +622,19 @@ export default defineComponent({
       applyFilter?.();
     };
 
-    const openContactDetail = async (contactId: number): Promise<void> => {
+const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
-        const propId = pmsPropertiesStore.currentPmsPropertyId;
-        if (!isNonEmptyString(propId)) {
+        await contactsStore.fetchContactSchema();
+        const contact = await contactsStore.fetchContactById(contactId);
+        if (!contact) {
+          uiStore.stopLoading();
           return;
         }
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contactId, propId);
-        const contact = store.state.partners.currentPartner;
-
+        contact.id = contactId;
         openDialog(ContactDetail, {
-          props: { header: contact.name ?? t('contacts.detail') },
-          data: { props: { contact: contact } },
+          props: { header: contact.name || t('contacts.detail') },
+          data: { contact: contact },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
