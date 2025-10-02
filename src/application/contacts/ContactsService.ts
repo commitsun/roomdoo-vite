@@ -74,4 +74,14 @@ export class ContactsService {
   async persistContactDocument(contactId: number, document: PersonalDocument): Promise<void> {
     await this.contactsRepository.persistContactDocument(contactId, document);
   }
+  async createContact(contact: Partial<ContactDetail>): Promise<void> {
+    await this.contactsRepository.createContact(contact);
+  }
+  async updateContactFields(
+    contactId: number,
+    original: Partial<ContactDetail>,
+    updated: Partial<ContactDetail>
+  ): Promise<void> {
+    await this.contactsRepository.updateContactFields(contactId, original, updated);
+  }
 }

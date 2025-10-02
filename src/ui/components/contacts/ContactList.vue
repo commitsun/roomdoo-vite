@@ -707,7 +707,7 @@ export default defineComponent({
         contact.id = contactId;
         openDialog(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { props: { contact: contact } },
+          data: { contact: contact || null },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
