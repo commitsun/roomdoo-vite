@@ -504,7 +504,7 @@ export default defineComponent({
         contact.id = contactId;
         open(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { props: { contact: contact } },
+          data: { contact: contact || null },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
@@ -522,6 +522,7 @@ export default defineComponent({
     async function openNewContact(): Promise<void> {
       uiStore.startLoading();
       try {
+        await contactsStore.fetchContactSchema();
         open(ContactDetail, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },

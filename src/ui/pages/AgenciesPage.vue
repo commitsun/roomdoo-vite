@@ -256,10 +256,7 @@ import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
-// TODO: remove when new api is ready
-import { useStore } from 'vuex';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 // helper: explicit non-empty string
@@ -278,9 +275,6 @@ export default defineComponent({
     CountryFlag,
   },
   setup() {
-    // TODO: remove when new api is ready
-    const store = useStore();
-    // ---
     const contactsStore = useContactsStore();
     const uiStore = useUIStore();
     const { t } = useI18n();
@@ -436,14 +430,12 @@ export default defineComponent({
     const openContactDetail = async (contactId: number) => {
       uiStore.startLoading();
       try {
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(
-          contactId,
-          currentPmsPropertyId.value!
-        );
-        const contact = store.state.partners.currentPartner;
+        await contactsStore.fetchContactSchema();
+        const contact = await contactsStore.fetchContactById(contactId);
+        contact.id = contactId;
         open(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { props: { contact: contact } },
+          data: { contact: contact || null },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
@@ -461,7 +453,6 @@ export default defineComponent({
     async function openNewContact(): Promise<void> {
       uiStore.startLoading();
       try {
-        await useLegacyStore().removeVuexPartner(currentPmsPropertyId.value!);
         open(ContactDetail, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },
