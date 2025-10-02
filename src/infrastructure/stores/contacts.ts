@@ -105,6 +105,18 @@ export const useContactsStore = defineStore('contacts', () => {
     await contactsService.persistContactDocument(contactId, document);
   };
 
+  const createContact = async (contact: Partial<ContactDetail>) => {
+    await contactsService.createContact(contact);
+  };
+
+  const updateContactFields = async (
+    contactId: number,
+    original: Partial<ContactDetail>,
+    updated: Partial<ContactDetail>
+  ) => {
+    await contactsService.updateContactFields(contactId, original, updated);
+  };
+
   return {
     contacts: readonly(contacts),
     customers: readonly(customers),
@@ -125,5 +137,7 @@ export const useContactsStore = defineStore('contacts', () => {
     fetchContactById,
     fetchContactSchema,
     persistContactDocument,
+    createContact,
+    updateContactFields,
   };
 });

@@ -166,7 +166,6 @@ onMounted(async () => {
       display: flex;
       width: 50%;
       height: 100%;
-
       overflow: hidden;
       box-sizing: border-box;
       border-top-right-radius: 10px;
@@ -175,7 +174,6 @@ onMounted(async () => {
         linear-gradient(100deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.65) 82%),
         radial-gradient(circle at 0% 105%, #1990d8 0%, #0a304a 38%, rgba(5, 18, 32, 0) 70%),
         linear-gradient(180deg, #1f55dd 0%, #16386e 42%, #071521 100%);
-
       background-repeat: no-repeat;
       background-size: cover;
     }
@@ -205,13 +203,23 @@ onMounted(async () => {
 @media (min-width: 1024px) {
   .login-layout-container {
     .image-container {
-      width: 40%;
-    }
-    .main-form {
-      .form-and-language {
-        .select-language {
-          margin-right: 1rem;
-        }
+      position: relative;
+      display: flex;
+      width: 33.3%;
+      height: 100%;
+      // background: linear-gradient(to bottom left, #2a0a58, #081b2b, #0e96c8);
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%)
+        lightgray -154332.494px -794.574px / 44097.695% 9952.168% no-repeat;
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1;
+        pointer-events: none;
       }
     }
   }

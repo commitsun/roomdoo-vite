@@ -689,10 +689,14 @@ export default defineComponent({
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
+        if (contact === null) {
+          uiStore.stopLoading();
+          return;
+        }
         contact.id = contactId;
         openDialog(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { props: { contact: contact } },
+          data: { contact: contact },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
