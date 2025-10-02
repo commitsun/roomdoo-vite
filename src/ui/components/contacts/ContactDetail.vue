@@ -1,445 +1,353 @@
 <template>
-  <SelectButton
-    class="mb-3"
-    v-model="contactType"
-    :options="contactTypeOptions"
-    :allowEmpty="false"
-    optionLabel="label"
-    optionValue="value"
-  >
-    <template #option="slotProps">
-      <div class="flex items-center gap-2">
-        <i
-          :class="{
-            'pi pi-user': slotProps.option.value === 'person',
-            'pi pi-building': slotProps.option.value === 'company',
-            'pi pi-briefcase': slotProps.option.value === 'agency',
-          }"
-        />
-        <span>{{ slotProps.option.label }}</span>
-      </div>
-    </template>
-  </SelectButton>
-  <Tabs v-model:value="activeTab">
-    <TabList>
-      <Tab value="0" as="div" class="flex items-center gap-2">
-        <i class="pi pi-user-edit" />
-        <span> {{ t('contacts.contact') }} </span>
-      </Tab>
-      <Tab value="1" as="div" class="flex items-center gap-2" v-if="contactType === 'person'">
-        <i class="pi pi-id-card" />
-        <span> {{ t('contacts.documents') }} </span>
-      </Tab>
-      <Tab value="2" as="div" class="flex items-center gap-2">
-        <i class="pi pi-money-bill" />
-        <span> {{ t('contacts.invoicing') }} </span>
-      </Tab>
-      <Tab value="3" as="div" class="flex items-center gap-2">
-        <i class="pi pi-cog" />
-        <span> {{ t('contacts.settings') }} </span>
-      </Tab>
-      <Tab value="4" as="div" class="flex items-center gap-2">
-        <i class="pi pi-pen-to-square" />
-        <span> {{ t('contacts.internalnotes') }} </span>
-      </Tab>
-    </TabList>
-    <TabPanels>
-      <!-- FIRST TAB -->
-      <TabPanel value="0">
-        <section class="contact-form">
-          <div class="contact-form__grid">
-            <!-- First Name  -->
-            <div class="contact-form__field contact-form__field--full">
-              <IftaLabel>
-                <InputText
-                  id="firstName"
-                  v-model="contactForm.firstName"
-                  class="contact-form__control"
-                />
-                <label for="firstName">{{ t('contacts.firstName') }}</label>
-              </IftaLabel>
-            </div>
-
-            <!-- Last Names -->
+  <div class="contact-detail">
+    <div class="contact-type">
+      <SelectButton
+        v-model="contactType"
+        :options="contactTypeOptions"
+        :allowEmpty="false"
+        optionLabel="label"
+        optionValue="value"
+      >
+        <template #option="slotProps">
+          <User
+            v-if="slotProps.option.value === 'person'"
+            :size="14"
+            :color="contactType === slotProps.option.value ? '#1D4ED8' : 'currentColor'"
+          />
+          <Building
+            v-else-if="slotProps.option.value === 'company'"
+            :size="14"
+            :color="contactType === slotProps.option.value ? '#1D4ED8' : 'currentColor'"
+          />
+          <Store
+            v-else
+            :size="14"
+            :color="contactType === slotProps.option.value ? '#1D4ED8' : 'currentColor'"
+          />
+          <span :style="contactType === slotProps.option.value ? 'color: #1D4ED8' : ''">
+            {{ slotProps.option.label }}
+          </span>
+        </template>
+      </SelectButton>
+    </div>
+    <Tabs v-model:value="activeTab">
+      <TabList class="contact-detail__tablist">
+        <Tab value="0" as="div" class="flex items-center gap-2">
+          <FileText :size="14" :color="activeTab === '0' ? '#1D4ED8' : 'currentColor'" />
+          <span> {{ t('contacts.generalInformation') }} </span>
+        </Tab>
+        <Tab value="1" as="div" class="flex items-center gap-2" v-if="contactType === 'person'">
+          <IdCard :size="14" :color="activeTab === '1' ? '#1D4ED8' : 'currentColor'" />
+          <span> {{ t('contacts.documents') }} </span>
+        </Tab>
+        <Tab value="2" as="div" class="flex items-center gap-2">
+          <Banknote :size="14" :color="activeTab === '2' ? '#1D4ED8' : 'currentColor'" />
+          <span> {{ t('contacts.invoicing') }} </span>
+        </Tab>
+        <Tab value="3" as="div" class="flex items-center gap-2">
+          <NotebookPen :size="14" :color="activeTab === '3' ? '#1D4ED8' : 'currentColor'" />
+          <span> {{ t('contacts.internalnotes') }} </span>
+        </Tab>
+        <Tab value="4" as="div" class="flex items-center gap-2">
+          <BookUser :size="14" :color="activeTab === '4' ? '#1D4ED8' : 'currentColor'" />
+          <span> {{ t('contacts.addressBook') }} </span>
+        </Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel value="0">
+          <ContactPersonalDataTab
+            :contactType="contactType"
+            :contact="contact"
+            @updatePersonalData="onUpdateContact"
+          />
+        </TabPanel>
+        <TabPanel value="1">
+          <section class="documents-form">
             <div
-              class="contact-form__field"
-              :class="{ 'contact-form__field--full': !showLastName2 }"
-              v-if="contactType === 'person'"
+              v-for="(doc, idx) in contactForm.documents"
+              :key="doc.id ?? idx"
+              class="documents-form__group"
             >
-              <IftaLabel>
-                <InputText
-                  id="lastName1"
-                  v-model="contactForm.lastName1"
-                  class="contact-form__control"
-                />
-                <label for="lastName1">{{ t('contacts.lastName') }}</label>
-              </IftaLabel>
+              <div class="documents-form__group-grid">
+                <!-- Document Issuing Country -->
+                <div class="documents-form__field">
+                  <IftaLabel>
+                    <Select
+                      :id="`doc-country`"
+                      v-model="(doc.country ?? { id: 0 }).id"
+                      :options="[...countries]"
+                      optionLabel="name"
+                      optionValue="id"
+                      class="documents-form__control"
+                    />
+                    <label :for="`doc-country-${idx}`">{{ t('contacts.issueCountry') }}</label>
+                  </IftaLabel>
+                </div>
+                <!-- Document Type -->
+                <div class="documents-form__field">
+                  <IftaLabel>
+                    <Select
+                      :id="`doc-type-${idx}`"
+                      v-model="(doc.category ?? { id: 0 }).id"
+                      :options="[...documentTypes]"
+                      optionLabel="name"
+                      optionValue="id"
+                      class="documents-form__control"
+                    />
+                    <label :for="`doc-type-${idx}`">{{ t('contacts.documentType') }}</label>
+                  </IftaLabel>
+                </div>
+                <!-- Document Number -->
+                <div class="documents-form__field">
+                  <IftaLabel>
+                    <InputText
+                      :id="`doc-number-${idx}`"
+                      v-model="doc.name"
+                      class="documents-form__control"
+                      autocomplete="off"
+                    />
+                    <label :for="`doc-number-${idx}`">{{ t('contacts.documentNumber') }}</label>
+                  </IftaLabel>
+                </div>
+                <!-- Document Support Number -->
+                <div class="documents-form__field">
+                  <IftaLabel>
+                    <InputText
+                      :id="`doc-support-${idx}`"
+                      v-model="doc.supportNumber"
+                      class="documents-form__control"
+                      autocomplete="off"
+                    />
+                    <label :for="`doc-support-${idx}`">{{ t('contacts.supportNumber') }}</label>
+                  </IftaLabel>
+                </div>
+              </div>
             </div>
-            <div class="contact-form__field" v-if="showLastName2">
-              <IftaLabel>
-                <InputText
-                  id="lastName2"
-                  v-model="contactForm.lastName2"
-                  class="contact-form__control"
-                />
-                <label for="lastName2">{{ t('contacts.secondLastName') }}</label>
-              </IftaLabel>
-            </div>
-            <!-- Birthdate -->
-            <div class="contact-form__field" v-if="contactType === 'person'">
-              <IftaLabel>
-                <DatePicker
-                  id="birthdate"
-                  v-model="contactForm.birthdate"
-                  showIcon
-                  dateFormat="dd/mm/yy"
-                  :maxDate="new Date()"
-                  class="contact-form__control"
-                  inputClass="contact-form__control-input"
-                />
-                <label for="birthdate">{{ birthdateLabel }}</label>
-              </IftaLabel>
-            </div>
-            <!-- Nationality -->
-            <div class="contact-form__field" v-if="contactType === 'person'">
-              <IftaLabel>
-                <Select
-                  id="nationality"
-                  v-model="(contactForm.nationality ?? { id: 0 }).id"
-                  :options="[...countries]"
-                  optionLabel="name"
-                  optionValue="id"
-                  class="contact-form__control"
-                />
-                <label for="nationality">{{ t('contacts.nationality') }}</label>
-              </IftaLabel>
-            </div>
-            <!-- Language -->
-            <div class="contact-form__field">
-              <IftaLabel>
-                <Select
-                  id="lang"
-                  :modelValue="(contactForm.lang ?? '').replaceAll('_', '-')"
-                  :options="[...languages]"
-                  optionLabel="name"
-                  optionValue="code"
-                  class="contact-form__control"
-                />
-                <label for="language">{{ t('contacts.language') }}</label>
-              </IftaLabel>
-            </div>
-            <!-- Gender -->
-            <div class="contact-form__field" v-if="contactType === 'person'">
-              <IftaLabel>
-                <Select
-                  id="gender"
-                  v-model="contactForm.gender"
-                  :options="genders"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="contact-form__control"
-                />
-                <label for="gender">{{ t('contacts.gender.title') }}</label>
-              </IftaLabel>
-            </div>
-            <!-- Phone -->
-            <div class="contact-form__field">
-              <IftaLabel>
-                <InputText id="phone" v-model="contactForm.phone" class="contact-form__control" />
-                <label for="phone">{{ t('contacts.phone') }}</label>
-              </IftaLabel>
-            </div>
-            <!-- Email -->
-            <div class="contact-form__field">
-              <IftaLabel>
-                <InputText id="email" v-model="contactForm.email" class="contact-form__control" />
-                <label for="email">{{ t('contacts.email') }}</label>
-              </IftaLabel>
-            </div>
-          </div>
-        </section>
-      </TabPanel>
-      <TabPanel value="1">
-        <section class="documents-form">
-          <div
-            v-for="(doc, idx) in contactForm.documents"
-            :key="doc.id ?? idx"
-            class="documents-form__group"
-          >
-            <div class="documents-form__group-grid">
-              <!-- Document Issuing Country -->
-              <div class="documents-form__field">
-                <IftaLabel>
-                  <Select
-                    :id="`doc-country`"
-                    v-model="(doc.country ?? { id: 0 }).id"
-                    :options="[...countries]"
-                    optionLabel="name"
-                    optionValue="id"
-                    class="documents-form__control"
+            <!-- Document Actions -->
+            <div class="documents-form__actions">
+              <div class="documents-form__actions-left">
+                <div v-if="!hasDraftDoc">
+                  <Button
+                    :label="t('contacts.addDocument')"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    @click="startAddDocument"
                   />
-                  <label :for="`doc-country-${idx}`">{{ t('contacts.issueCountry') }}</label>
+                </div>
+                <div v-else class="flex gap-2">
+                  <Button
+                    :label="t('contacts.cancel')"
+                    icon="pi pi-times"
+                    text
+                    @click="cancelAddDocument"
+                  />
+                  <!-- <Button
+                    :label="t('contacts.saveDocument')"
+                    icon="pi pi-check"
+                    severity="secondary"
+                    @click="saveDraftDocument"
+                  /> -->
+                </div>
+              </div>
+              <div class="documents-form__actions-right" v-if="hasDraftDoc"></div>
+            </div>
+          </section>
+        </TabPanel>
+        <TabPanel value="2">
+          <section class="billing-form">
+            <div class="billing-form__grid">
+              <!-- Legal First Name -->
+              <div class="billing-form__field billing-form__field--full">
+                <IftaLabel>
+                  <InputText
+                    id="legalName"
+                    v-model="contactForm.legalName"
+                    class="billing-form__control"
+                  />
+                  <label for="legalName">{{ t('contacts.legalName') }}</label>
                 </IftaLabel>
               </div>
-              <!-- Document Type -->
-              <div class="documents-form__field">
+              <!-- Fiscal Document -->
+              <div class="billing-form__field">
                 <IftaLabel>
                   <Select
-                    :id="`doc-type-${idx}`"
-                    v-model="(doc.category ?? { id: 0 }).id"
+                    id="fiscalIdNumberType"
                     :options="[...documentTypes]"
                     optionLabel="name"
                     optionValue="id"
-                    class="documents-form__control"
+                    class="billing-form__control"
                   />
-                  <label :for="`doc-type-${idx}`">{{ t('contacts.documentType') }}</label>
+                  <label for="fiscalIdNumberType">{{ t('contacts.taxDocumentType') }}</label>
                 </IftaLabel>
               </div>
-              <!-- Document Number -->
-              <div class="documents-form__field">
+              <div class="billing-form__field">
                 <IftaLabel>
                   <InputText
-                    :id="`doc-number-${idx}`"
-                    v-model="doc.name"
-                    class="documents-form__control"
-                    autocomplete="off"
+                    id="fiscalIdNumber"
+                    v-model="contactForm.fiscalIdNumber"
+                    class="billing-form__control"
                   />
-                  <label :for="`doc-number-${idx}`">{{ t('contacts.documentNumber') }}</label>
+                  <label for="fiscalIdNumber">{{ t('contacts.taxDocumentNumber') }}</label>
                 </IftaLabel>
               </div>
-              <!-- Document Support Number -->
-              <div class="documents-form__field">
+              <!-- Fiscal address -->
+              <div class="billing-form__field billing-form__field--full">
                 <IftaLabel>
                   <InputText
-                    :id="`doc-support-${idx}`"
-                    v-model="doc.supportNumber"
-                    class="documents-form__control"
-                    autocomplete="off"
+                    id="address"
+                    v-model="contactForm.street"
+                    class="billing-form__control"
                   />
-                  <label :for="`doc-support-${idx}`">{{ t('contacts.supportNumber') }}</label>
+                  <label for="address">{{ t('contacts.address') }}</label>
+                </IftaLabel>
+              </div>
+              <div class="billing-form__field">
+                <IftaLabel>
+                  <InputText
+                    id="zipCode"
+                    v-model="contactForm.zipCode"
+                    class="billing-form__control"
+                  />
+                  <label for="zipCode">{{ t('contacts.postalCode') }}</label>
+                </IftaLabel>
+              </div>
+              <div class="billing-form__field">
+                <IftaLabel>
+                  <InputText id="city" v-model="contactForm.city" class="billing-form__control" />
+                  <label for="city">{{ t('contacts.city') }}</label>
+                </IftaLabel>
+              </div>
+              <div class="billing-form__field">
+                <IftaLabel>
+                  <Select
+                    id="country"
+                    v-model="contactForm.countryId"
+                    :options="[...countries]"
+                    optionLabel="name"
+                    optionValue="id"
+                    class="billing-form__control"
+                  />
+                  <label for="country">{{ t('contacts.country') }}</label>
+                </IftaLabel>
+              </div>
+              <div class="billing-form__field">
+                <IftaLabel>
+                  <Select
+                    id="state"
+                    v-model="contactForm.stateId"
+                    :options="countryStates"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="billing-form__control"
+                  />
+                  <label for="state">{{ t('contacts.state') }}</label>
                 </IftaLabel>
               </div>
             </div>
-          </div>
-          <!-- Document Actions -->
-          <div class="documents-form__actions">
-            <div class="documents-form__actions-left">
-              <div v-if="!hasDraftDoc">
-                <Button
-                  :label="t('contacts.addDocument')"
-                  icon="pi pi-plus"
-                  severity="secondary"
-                  @click="startAddDocument"
-                />
+          </section>
+        </TabPanel>
+        <TabPanel value="3">
+          <section class="settings-form">
+            <div class="settings-form__grid">
+              <div class="settings-form__field">
+                <IftaLabel>
+                  <Select
+                    id="paymentTerm"
+                    v-model="contactForm.paymentTermId"
+                    :options="[...paymentTerms]"
+                    optionLabel="name"
+                    optionValue="id"
+                    class="settings-form__control"
+                  />
+                  <label for="paymentTerm">{{ t('contacts.paymentTerm') }}</label>
+                </IftaLabel>
               </div>
-              <div v-else class="flex gap-2">
-                <Button
-                  :label="t('contacts.cancel')"
-                  icon="pi pi-times"
-                  text
-                  @click="cancelAddDocument"
-                />
-                <Button
-                  :label="t('contacts.saveDocument')"
-                  icon="pi pi-check"
-                  severity="secondary"
-                  @click="saveDraftDocument"
-                />
+              <div class="settings-form__field">
+                <IftaLabel>
+                  <Select
+                    id="pricelist"
+                    v-model="contactForm.pricelistId"
+                    :options="[...pricelists]"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="settings-form__control"
+                  />
+                  <label for="rate">{{ t('contacts.pricelistAssociated') }}</label>
+                </IftaLabel>
               </div>
-            </div>
-            <div class="documents-form__actions-right" v-if="hasDraftDoc"></div>
-          </div>
-        </section>
-      </TabPanel>
-      <TabPanel value="2">
-        <section class="billing-form">
-          <div class="billing-form__grid">
-            <!-- Legal First Name -->
-            <div class="billing-form__field billing-form__field--full">
-              <IftaLabel>
-                <InputText
-                  id="legalName"
-                  v-model="contactForm.legalName"
-                  class="billing-form__control"
-                />
-                <label for="legalName">{{ t('contacts.legalName') }}</label>
-              </IftaLabel>
-            </div>
-            <!-- Fiscal Document -->
-            <div class="billing-form__field">
-              <IftaLabel>
-                <Select
-                  id="fiscalIdNumberType"
-                  v-model="contactForm.fiscalIdNumberType"
-                  :options="[...documentTypes]"
-                  optionLabel="name"
-                  optionValue="id"
-                  class="billing-form__control"
-                />
-                <label for="fiscalIdNumberType">{{ t('contacts.taxDocumentType') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="billing-form__field">
-              <IftaLabel>
-                <InputText
-                  id="fiscalIdNumber"
-                  v-model="contactForm.fiscalIdNumber"
-                  class="billing-form__control"
-                />
-                <label for="fiscalIdNumber">{{ t('contacts.taxDocumentNumber') }}</label>
-              </IftaLabel>
-            </div>
-            <!-- Fiscal address -->
-            <div class="billing-form__field billing-form__field--full">
-              <IftaLabel>
-                <InputText
-                  id="address"
-                  v-model="contactForm.street"
-                  class="billing-form__control"
-                />
-                <label for="address">{{ t('contacts.address') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="billing-form__field">
-              <IftaLabel>
-                <InputText id="zip" v-model="contactForm.zip" class="billing-form__control" />
-                <label for="zip">{{ t('contacts.postalCode') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="billing-form__field">
-              <IftaLabel>
-                <InputText id="city" v-model="contactForm.city" class="billing-form__control" />
-                <label for="city">{{ t('contacts.city') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="billing-form__field">
-              <IftaLabel>
-                <Select
-                  id="country"
-                  v-model="(contactForm.country ?? { id: 0 }).id"
-                  :options="[...countries]"
-                  optionLabel="name"
-                  optionValue="id"
-                  class="billing-form__control"
-                />
-                <label for="country">{{ t('contacts.country') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="billing-form__field">
-              <IftaLabel>
-                <Select
-                  id="state"
-                  v-model="(contactForm.state ?? { id: 0 }).id"
-                  :options="countryStates"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="billing-form__control"
-                />
-                <label for="state">{{ t('contacts.state') }}</label>
-              </IftaLabel>
-            </div>
-          </div>
-        </section>
-      </TabPanel>
-      <TabPanel value="3">
-        <section class="settings-form">
-          <div class="settings-form__grid">
-            <div class="settings-form__field">
-              <IftaLabel>
-                <Select
-                  id="paymentTerm"
-                  v-model="(contactForm.paymentTerm ?? { id: 0 }).id"
-                  :options="[...paymentTerms]"
-                  optionLabel="name"
-                  optionValue="id"
-                  class="settings-form__control"
-                />
-                <label for="paymentTerm">{{ t('contacts.paymentTerm') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="settings-form__field">
-              <IftaLabel>
-                <Select
-                  id="pricelist"
-                  v-model="(contactForm.pricelist ?? { id: 0 }).id"
-                  :options="[...pricelists]"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="settings-form__control"
-                />
-                <label for="rate">{{ t('contacts.pricelistAssociated') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="settings-form__field">
-              <IftaLabel>
-                <Select
-                  id="invoicingPolicy"
-                  v-model="contactForm.invoicingPolicy"
-                  :options="invoicingPolicies"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="settings-form__control"
-                />
-                <label for="invoicingPolicy">{{ t('contacts.invoicingPolicy') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="settings-form__field">
-              <IftaLabel>
-                <InputText
-                  id="ref"
-                  v-model="contactForm.reference"
-                  class="settings-form__control"
-                />
-                <label for="ref">{{ t('contacts.internalReference') }}</label>
-              </IftaLabel>
-            </div>
-            <div class="settings-form__field settings-form__field--full">
-              <label class="settings-form__label" for="tagsInput">{{ t('contacts.tags') }}</label>
-              <div class="tags-field">
-                <Chip
-                  v-for="tag in contactForm.tags"
-                  :key="tag.id"
-                  :label="tag.name"
-                  removable
-                  @remove="removeTag(tag.id)"
-                />
-                <Select
-                  :key="selectResetKey"
-                  id="tagsInput"
-                  v-model="tagDraftId"
-                  :options="[...tags.filter((t) => !contactForm.tags.some((ct) => ct.id === t.id))]"
-                  optionLabel="name"
-                  optionValue="id"
-                  class="tags-field__input"
-                  :placeholder="$options.length ? ` ${t('contacts.selectTag')} ` : ''"
-                  @update:modelValue="onTagSelected"
-                />
+              <div class="settings-form__field">
+                <IftaLabel>
+                  <Select
+                    id="invoicingPolicy"
+                    v-model="contactForm.invoicingPolicy"
+                    :options="invoicingPolicies"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="settings-form__control"
+                  />
+                  <label for="invoicingPolicy">{{ t('contacts.invoicingPolicy') }}</label>
+                </IftaLabel>
+              </div>
+              <div class="settings-form__field">
+                <IftaLabel>
+                  <InputText
+                    id="ref"
+                    v-model="contactForm.reference"
+                    class="settings-form__control"
+                  />
+                  <label for="ref">{{ t('contacts.internalReference') }}</label>
+                </IftaLabel>
+              </div>
+              <div class="settings-form__field settings-form__field--full">
+                <label class="settings-form__label" for="tagsInput">{{ t('contacts.tags') }}</label>
+                <div class="tags-field">
+                  <Chip
+                    v-for="tag in contactForm.tags"
+                    :key="tag.id"
+                    :label="tag.name"
+                    removable
+                    @remove="removeTag(tag.id)"
+                  />
+                  <Select
+                    :key="selectResetKey"
+                    id="tagsInput"
+                    v-model="tagDraftId"
+                    :options="[
+                      ...tags.filter((t) => !contactForm.tags.some((ct) => ct.id === t.id)),
+                    ]"
+                    optionLabel="name"
+                    optionValue="id"
+                    class="tags-field__input"
+                    :placeholder="$options.length ? ` ${t('contacts.selectTag')} ` : ''"
+                    @update:modelValue="onTagSelected"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-      </TabPanel>
-      <TabPanel value="4">
-        <section class="internal-notes">
-          <Textarea v-model="contactForm.internalNotes" rows="5" readonly />
-        </section>
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
-  <div class="flex justify-end">
-    <Button
-      :label="t('contacts.cancel')"
-      icon="pi pi-times"
-      class="mt-4 mr-2"
-      text
-      @click="handleCancel"
-    />
-    <Button :label="t('contacts.save')" icon="pi pi-check" class="mt-4" />
+          </section>
+        </TabPanel>
+        <TabPanel value="4">
+          <section class="internal-notes">
+            <Textarea v-model="contactForm.internalNotes" rows="5" />
+          </section>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+    <!-- <div class="flex justify-end">
+      <Button
+        :label="t('contacts.cancel')"
+        icon="pi pi-times"
+        class="mt-4 mr-2"
+        text
+        @click="handleCancel()"
+      />
+      <Button @click="handleSave()" :label="t('contacts.save')" icon="pi pi-check" class="mt-4" />
+    </div> -->
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed, onMounted, watch, inject } from 'vue';
+import { defineComponent, ref, reactive, computed, watch, inject } from 'vue';
 import SelectButton from 'primevue/selectbutton';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -449,13 +357,26 @@ import TabPanel from 'primevue/tabpanel';
 import Chip from 'primevue/chip';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
-
 import DatePicker from 'primevue/datepicker';
-import type { ContactDetail } from '@/domain/entities/Contact';
+import IftaLabel from 'primevue/iftalabel';
+import Textarea from 'primevue/textarea';
+import Button from 'primevue/button';
+import { useI18n } from 'vue-i18n';
+import {
+  User,
+  Building,
+  Store,
+  FileText,
+  IdCard,
+  Banknote,
+  NotebookPen,
+  BookUser,
+} from 'lucide-vue-next';
+
+import ContactPersonalDataTab from './ContactPersonalDataTab.vue';
+
+import type { ContactDetail, ContactDetailPayload } from '@/domain/entities/Contact';
 import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
-import type { CountryState } from '@/domain/entities/CountryState';
-import type { Country } from '@/domain/entities/Country';
-import type { Pricelist } from '@/domain/entities/Pricelist';
 import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
 import { usePaymentTermsStore } from '@/infrastructure/stores/paymentTerms';
 import { usePricelistStore } from '@/infrastructure/stores/pricelist';
@@ -465,20 +386,15 @@ import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 import { useTagsStore } from '@/infrastructure/stores/tags';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
-import IftaLabel from 'primevue/iftalabel';
-import Textarea from 'primevue/textarea';
-import Button from 'primevue/button';
-
-import type { PaymentTerm } from '@/domain/entities/PaymentTerm';
 import type { Tag } from '@/domain/entities/Tag';
+import type { Phone } from '@/domain/entities/Phone';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
-
-import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
     SelectButton,
     Tabs,
+    ContactPersonalDataTab,
     TabList,
     Tab,
     TabPanels,
@@ -490,15 +406,17 @@ export default defineComponent({
     Chip,
     Textarea,
     Button,
-  },
-  props: {
-    contact: {
-      type: Object as () => ContactDetail | null,
-      required: false,
-    },
+    User,
+    Building,
+    Store,
+    FileText,
+    IdCard,
+    Banknote,
+    NotebookPen,
+    BookUser,
   },
 
-  setup(props) {
+  setup() {
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
     const countryStatesStore = useCountryStatesStore();
@@ -522,32 +440,34 @@ export default defineComponent({
     const activeTab = ref('0');
     const tagsInputRef = ref<HTMLInputElement | null>(null);
     const hasDraftDoc = ref(false);
+    const contact = ref<ContactDetail | null>(null);
 
     const contactForm = reactive({
       firstName: '',
-      lastName1: '',
+      lastName: '',
       lastName2: '',
       birthdate: null as Date | null,
-      nationality: null as Country | null,
+      nationalityId: 0 as number | null,
       lang: '',
       gender: '',
-      phone: '',
+      phoneNumber: '',
       email: '',
       documents: [] as PersonalDocument[],
       legalName: '',
-      fiscalIdNumberType: null as DocumentType | null,
+      // fiscalIdNumberType: null as DocumentType | null,
       fiscalIdNumber: '',
       street: '',
-      zip: '',
+      zipCode: '',
       city: '',
-      state: null as CountryState | null,
-      country: null as Country | null,
-      paymentTerm: null as PaymentTerm | null,
-      pricelist: null as Pricelist | null,
+      stateId: 0 as number | null,
+      countryId: 0 as number | null,
+      paymentTermId: 0 as number | null,
+      pricelistId: 0 as number | null,
       invoicingPolicy: '',
       reference: '',
       tags: [] as Tag[],
       internalNotes: '',
+      contactType: 'person',
     });
 
     const countries = computed(() => countriesStore.countries);
@@ -676,11 +596,31 @@ export default defineComponent({
     };
 
     const saveDraftDocument = () => {
-      console.log('Saving draft document...', draftDoc.value);
       if (draftDoc.value) {
-        contactsStore.persistContactDocument(props.contact?.id ?? 0, draftDoc.value);
+        contactsStore.persistContactDocument(contact.value?.id ?? 0, draftDoc.value);
       }
     };
+
+    const onUpdateContact = (data: Partial<ContactDetailPayload>) => {
+      Object.assign(contactForm, data);
+    };
+
+    const handleSave = async () => {
+      uiStore.startLoading();
+      try {
+        if (contact.value) {
+          contactForm.contactType = contactType.value;
+          await contactsStore.updateContactFields(contact.value.id, contact.value, contactForm);
+        } else {
+          await contactsStore.createContact(contactForm);
+        }
+      } catch (error) {
+        console.error('Error saving contact:', error);
+      } finally {
+        uiStore.stopLoading();
+      }
+    };
+
     const handleCancel = () => {
       dialogRef?.value?.close({ action: 'cancel' });
     };
@@ -689,8 +629,33 @@ export default defineComponent({
       activeTab.value = '0';
     });
 
-    onMounted(async () => {
+    watch(
+      () => contactForm.countryId,
+      async () => {
+        uiStore.startLoading();
+        try {
+          if (contactForm.countryId) {
+            await countryStatesStore.fetchCountryStatesByCountryId(contactForm.countryId);
+            const countryStateToSelect = countryStatesStore.countryStates?.find(
+              (s) => s.id === contactForm.stateId,
+            );
+            if (countryStateToSelect) {
+              contactForm.stateId = countryStateToSelect.id;
+            } else {
+              contactForm.stateId = null;
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching country states:', error);
+        } finally {
+          uiStore.stopLoading();
+        }
+      },
+    );
+
+    onBeforeMount(async () => {
       uiStore.startLoading();
+      contact.value = dialogRef.value.data.contact;
       try {
         await documentTypesStore.fetchDocumentTypes();
         await countriesStore.fetchCountries();
@@ -698,43 +663,52 @@ export default defineComponent({
         await paymentTermsStore.fetchPaymentTerms();
         await pricelistStore.fetchPricelists();
         await tagsStore.fetchTags();
-        if (props.contact) {
+        if (contact.value) {
+          console.log(contact.value.birthdate);
+          if (contact.value.birthdate) {
+            (contact.value as ContactDetail).birthdate =
+              new Date(contact.value.birthdate || '') ?? null;
+          }
           contactType.value =
-            props.contact.contactType === 'agency'
+            contact.value.contactType === 'agency'
               ? 'agency'
-              : props.contact.contactType === 'company'
+              : contact.value.contactType === 'company'
                 ? 'company'
                 : 'person';
 
-          contactForm.firstName = props.contact.firstname || '';
-          contactForm.lastName1 = props.contact.lastname || '';
-          contactForm.lastName2 = props.contact.lastname2 || '';
-          contactForm.birthdate = props.contact.birthdate
-            ? new Date(props.contact.birthdate)
+          contactForm.firstName = contact.value.firstname || '';
+          contactForm.lastName = contact.value.lastname || '';
+          contactForm.lastName2 = contact.value.lastname2 || '';
+          contactForm.birthdate = contact.value.birthdate
+            ? new Date(contact.value.birthdate)
             : null;
-          contactForm.nationality = props.contact.nationality || null;
-          contactForm.lang = props.contact.lang || '';
-          contactForm.gender = props.contact.gender || '';
-          contactForm.phone = props.contact.phones ? props.contact.phones[0].number || '' : '';
-          contactForm.email = props.contact.email || '';
-          contactForm.documents = props.contact.documents || [];
-          contactForm.legalName = props.contact.name || '';
-          contactForm.fiscalIdNumberType = props.contact.fiscalIdNumberType || null;
-          contactForm.fiscalIdNumber = props.contact.fiscalIdNumber || '';
-          contactForm.street = props.contact.street || props.contact.street2 || '';
-          contactForm.zip = props.contact.zipCode || '';
-          contactForm.city = props.contact.city || '';
-          contactForm.state = props.contact.state || null;
-          contactForm.country = props.contact.country || null;
-          contactForm.paymentTerm = props.contact.paymentTerm || null;
-          contactForm.tags = props.contact.tags || [];
-          contactForm.pricelist = props.contact.pricelist || null;
-          contactForm.internalNotes = props.contact.internalNotes || '';
-          contactForm.invoicingPolicy = props.contact.invoicingPolicy || '';
-          contactForm.reference = props.contact.reference || '';
-          if (!contactForm.firstName && (contactForm.lastName1 || contactForm.lastName2)) {
-            contactForm.firstName = contactForm.lastName1 ?? contactForm.lastName2 ?? '';
-            contactForm.lastName1 = contactForm.lastName2 = '';
+          contactForm.nationalityId = contact.value?.nationality?.id ?? null;
+          contactForm.lang = contact.value.lang || '';
+          contactForm.gender = contact.value.gender || '';
+          contactForm.phoneNumber =
+            (contact.value.phones && contact.value.phones.length > 0
+              ? (contact.value.phones[0] as Phone).number
+              : '') || '';
+
+          contactForm.email = contact.value.email || '';
+          contactForm.documents = contact.value.documents || [];
+          // contactForm.legalName = contact.value.name || '';
+          // contactForm.fiscalIdNumberType = contact.value.fiscalIdNumberType?.name || null;
+          contactForm.fiscalIdNumber = contact.value.fiscalIdNumber || '';
+          contactForm.street = contact.value.street || contact.value.street2 || '';
+          contactForm.zipCode = contact.value.zipCode || '';
+          contactForm.city = contact.value.city || '';
+          contactForm.countryId = contact.value.country?.id ?? null;
+          contactForm.stateId = contact.value.state?.id ?? null;
+          contactForm.paymentTermId = contact.value.paymentTerm?.id ?? null;
+          contactForm.tags = contact.value.tags || [];
+          contactForm.pricelistId = contact.value.pricelist?.id ?? null;
+          contactForm.internalNotes = contact.value.internalNotes || '';
+          contactForm.invoicingPolicy = contact.value.invoicingPolicy || '';
+          contactForm.reference = contact.value.reference || '';
+          if (!contactForm.firstName && (contactForm.lastName || contactForm.lastName2)) {
+            contactForm.firstName = contactForm.lastName ?? contactForm.lastName2 ?? '';
+            contactForm.lastName = contactForm.lastName2 = '';
           }
         }
       } catch (error) {
@@ -748,6 +722,7 @@ export default defineComponent({
       contactType,
       contactTypeOptions,
       contactForm,
+      contact,
       genders,
       age,
       birthdateLabel,
@@ -772,8 +747,9 @@ export default defineComponent({
       onTagSelected,
       startAddDocument,
       cancelAddDocument,
-      saveDraftDocument,
       handleCancel,
+      handleSave,
+      onUpdateContact,
     };
   },
 });
@@ -782,55 +758,97 @@ export default defineComponent({
 <style scoped lang="scss">
 $bp-desktop: 640px;
 
-.contact-form {
-  margin-inline: auto;
-
-  &__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  &__field {
-    :deep(.p-iftalabel) {
-      display: block;
-      width: 100%;
-    }
-
-    .contact-form__control {
-      width: 100%;
-    }
-
-    :deep(.p-inputtext),
-    :deep(.p-select),
-    :deep(.p-dropdown),
-    :deep(.p-datepicker),
-    :deep(.p-inputwrapper) {
-      width: 100%;
-    }
-
-    :deep(.p-datepicker .p-inputwrapper) {
-      display: grid;
-      grid-template-columns: 1fr auto; // input | icono
-      align-items: stretch;
-    }
-    :deep(.contact-form__control-input),
-    :deep(.p-datepicker .p-inputtext) {
-      width: 100%;
-    }
-  }
-
-  &__field--full {
-    grid-column: 1 / -1;
-  }
-
-  &__hint {
-    display: block;
-    margin-top: 4px;
-    font-size: 12px;
-    color: var(--text-color-secondary, #6b7280);
-  }
+:root {
+  --bleed-x: 24px;
 }
+
+.contact-detail {
+  height: auto;
+}
+
+.contact-type {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #f1f5f9;
+  min-height: 56px; /* <— la altura de esta barra */
+  display: flex;
+  align-items: center;
+  box-shadow: 0 0 0 var(--bleed-x) #f1f5f9; /* truco para cubrir el padding lateral del modal */
+}
+
+/* TabList fijo justo debajo de la barra anterior */
+.contact-detail__tablist {
+  position: sticky;
+  top: 56px; /* <— igual a la altura de .contact-type */
+  z-index: 19;
+  background: #fff;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.06),
+    0 0 0 var(--bleed-x) #fff;
+}
+
+.contact-type::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -16px;
+  right: -16px;
+  background: #f1f5f9;
+  z-index: -1;
+  pointer-events: none;
+}
+
+// .contact-detail {
+//   margin-inline: auto;
+
+//   &__grid {
+//     display: grid;
+//     grid-template-columns: 1fr;
+//     gap: 12px;
+//   }
+
+//   &__field {
+//     :deep(.p-iftalabel) {
+//       display: block;
+//       width: 100%;
+//     }
+
+//     .contact-detail__control {
+//       width: 100%;
+//     }
+
+//     :deep(.p-inputtext),
+//     :deep(.p-select),
+//     :deep(.p-dropdown),
+//     :deep(.p-datepicker),
+//     :deep(.p-inputwrapper) {
+//       width: 100%;
+//     }
+
+//     :deep(.p-datepicker .p-inputwrapper) {
+//       display: grid;
+//       grid-template-columns: 1fr auto; // input | icono
+//       align-items: stretch;
+//     }
+//     :deep(.contact-detail__control-input),
+//     :deep(.p-datepicker .p-inputtext) {
+//       width: 100%;
+//     }
+//   }
+
+//   &__field--full {
+//     grid-column: 1 / -1;
+//   }
+
+//   &__hint {
+//     display: block;
+//     margin-top: 4px;
+//     font-size: 12px;
+//     color: var(--text-color-secondary, #6b7280);
+//   }
+// }
 .billing-form {
   margin-inline: auto;
 
@@ -988,19 +1006,19 @@ $bp-desktop: 640px;
 }
 
 @media (min-width: $bp-desktop) {
-  .contact-form {
-    max-width: none;
-    height: 310px;
-    &__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 16px;
-      row-gap: 12px;
-    }
+  // .contact-detail {
+  //   max-width: none;
+  //   height: 310px;
+  //   &__grid {
+  //     grid-template-columns: repeat(2, minmax(0, 1fr));
+  //     column-gap: 16px;
+  //     row-gap: 12px;
+  //   }
 
-    &__field--full {
-      grid-column: 1 / -1;
-    }
-  }
+  //   &__field--full {
+  //     grid-column: 1 / -1;
+  //   }
+  // }
   .billing-form {
     max-width: none;
     height: 310px;
@@ -1044,12 +1062,12 @@ $bp-desktop: 640px;
 }
 
 @media (min-width: 1024px) {
-  .contact-form,
+  .contact-detail,
   .billing-form,
   .settings-form,
   .internal-notes,
   .documents-form {
-    width: 680px !important;
+    width: 900px;
   }
 }
 </style>

@@ -39,10 +39,8 @@ export function useAppDialog() {
         store.unRegisterDynamicDialog(id);
       },
     });
-
     store.registerDynamicDialog(id, instance);
     return instance;
   };
-
   return { openDialog };
 }

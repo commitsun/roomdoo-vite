@@ -113,11 +113,7 @@
             {{ data.identificationDocuments[0]?.number }}
             <span
               v-if="data.identificationDocuments.length > 1"
-              :title="
-                data.identificationDocuments
-                  .map((d: { type: any; number: any }) => d.type + ' ' + d.number)
-                  .join('\n')
-              "
+              :title="data.identificationDocuments.map((d: { type: string; number: string }) => ((d.type ) + ' ' + (d.number ))).join('\n')"
               style="cursor: help; opacity: 0.8"
             >
               (+{{ data.identificationDocuments.length - 1 }})
@@ -256,9 +252,9 @@ import { FilterMatchMode } from '@primevue/core/api';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useUIStore } from '@/infrastructure/stores/ui';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -276,9 +272,6 @@ export default defineComponent({
     CountryFlag,
   },
   setup() {
-    // TODO: remove when new api is ready
-    const store = useStore();
-    // ---
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
     const { open } = useAppDialog();
@@ -441,14 +434,12 @@ export default defineComponent({
     const openContactDetail = async (contactId: number) => {
       uiStore.startLoading();
       try {
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(
-          contactId,
-          currentPmsPropertyId.value!
-        );
-        const contact = store.state.partners.currentPartner;
+        await contactsStore.fetchContactSchema();
+        const contact = await contactsStore.fetchContactById(contactId);
+        contact.id = contactId;
         open(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { props: { contact: contact } },
+          data: { contact: contact || null },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
@@ -466,7 +457,6 @@ export default defineComponent({
     async function openNewContact(): Promise<void> {
       uiStore.startLoading();
       try {
-        await useLegacyStore().removeVuexPartner(currentPmsPropertyId.value!);
         open(ContactDetail, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },
