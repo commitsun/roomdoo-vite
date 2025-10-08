@@ -215,6 +215,7 @@ import { useStore } from '@/legacy/store';
 import { dialogService } from '@/legacy/services/DialogService';
 import ReservationRoomChanges from '@/legacy/components/reservations/ReservationRoomChanges.vue';
 import ReservationSegmentation from '@/legacy/components/reservations/ReservationSegmentation.vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   components: {
@@ -225,6 +226,7 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
     const { doAllCheckins } = useCheckinPartner();
+    const router = useRouter();
 
     const changeDatesModal = ref(false);
     const changeRoomsModal = ref(false);
@@ -484,12 +486,14 @@ export default defineComponent({
               },
               onAccept: async () => {
                 await doAllCheckins(currentReservation.value?.id ?? 0);
-                await store.dispatch('planning/fetchPlanning', {
-                  dateStart: store.state.planning.dateStart,
-                  dateEnd: store.state.planning.dateEnd,
-                  propertyId: store.state.properties.activeProperty?.id,
-                  availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-                });
+                if (router.currentRoute.value.name === 'planning') {
+                  await store.dispatch('planning/fetchPlanning', {
+                    dateStart: store.state.planning.dateStart,
+                    dateEnd: store.state.planning.dateEnd,
+                    propertyId: store.state.properties.activeProperty?.id,
+                    availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+                  });
+                }
                 context.emit('setTabValue', 'guests');
               },
             });
@@ -579,15 +583,15 @@ export default defineComponent({
               reservationId: currentReservation.value?.id,
               toCheckout: true,
             });
-            await Promise.all([
-              store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
-              store.dispatch('planning/fetchPlanning', {
+            await store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
+            if (router.currentRoute.value.name === 'planning') {
+              await store.dispatch('planning/fetchPlanning', {
                 dateStart: store.state.planning.dateStart,
                 dateEnd: store.state.planning.dateEnd,
                 propertyId: store.state.properties.activeProperty?.id,
                 availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              }),
-            ]);
+              });
+            }
           } catch {
             dialogService.open({
               header: 'Error',
@@ -671,9 +675,15 @@ export default defineComponent({
           'reservations/fetchReservationWizardState',
           store.state.reservations.currentReservation?.id
         );
-        await store.dispatch('reservations/fetchReservation', store.state.reservations.currentReservation?.id);
+        await store.dispatch(
+          'reservations/fetchReservation',
+          store.state.reservations.currentReservation?.id
+        );
         await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
-        await store.dispatch('services/fetchServices', store.state.reservations.currentReservation?.id);
+        await store.dispatch(
+          'services/fetchServices',
+          store.state.reservations.currentReservation?.id
+        );
         showDeleteCancelPenalty.value = false;
       }
     };

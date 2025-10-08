@@ -671,13 +671,13 @@ export default defineComponent({
         editingCheckinPartner.value.documentType &&
         editingCheckinPartner.value.documentSupportNumber &&
         editingCheckinPartner.value.documentSupportNumber.length > 0 &&
-        (
-          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI ||
-          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE
-        )
+        (editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI ||
+          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE)
       ) {
-        rdo = validateSupportNumber(editingCheckinPartner.value?.documentSupportNumber,
-          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE ? 'N' : 'D');
+        rdo = validateSupportNumber(
+          editingCheckinPartner.value?.documentSupportNumber,
+          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE ? 'N' : 'D'
+        );
       }
       return rdo;
     };
@@ -1113,7 +1113,7 @@ export default defineComponent({
         if (countries.value.length === 0) {
           await store.dispatch('countries/fetchCountries');
         }
-        if (props.checkinPartner.countryState) {
+        if (props.checkinPartner.countryId && props.checkinPartner.countryState) {
           await store.dispatch('countryStates/fetchCountryStates', props.checkinPartner.countryId);
         }
       } catch {

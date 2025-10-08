@@ -209,6 +209,7 @@ import { type ReservationInterface } from '@/legacy/interfaces/ReservationInterf
 import { type ServiceInterface } from '@/legacy/interfaces/ServiceInterface';
 
 import { useStore } from '@/legacy/store';
+import { useRouter } from 'vue-router';
 import { usePartner } from '@/legacy/utils/usePartner';
 import { dialogService } from '@/legacy/services/DialogService';
 
@@ -264,6 +265,7 @@ export default defineComponent({
     const store = useStore();
     const { fetchPartners } = usePartner();
     const today = new Date();
+    const router = useRouter();
 
     const requestedInvoice = ref(false);
     const partnerName: Ref<string | null> = ref('');
@@ -423,12 +425,14 @@ export default defineComponent({
             await store.dispatch('folios/fetchFolioTransactions', folio.value?.id);
             await store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
             await store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
-            await store.dispatch('planning/fetchPlanning', {
-              dateStart: store.state.planning.dateStart,
-              dateEnd: store.state.planning.dateEnd,
-              propertyId: store.state.properties.activeProperty?.id,
-              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            });
+            if (router.currentRoute.value.name === 'planning') {
+              await store.dispatch('planning/fetchPlanning', {
+                dateStart: store.state.planning.dateStart,
+                dateEnd: store.state.planning.dateEnd,
+                propertyId: store.state.properties.activeProperty?.id,
+                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+              });
+            }
           }
         } else {
           if (reference.value !== '') {
@@ -439,12 +443,14 @@ export default defineComponent({
         await store.dispatch('folios/fetchFolio', folio.value?.id);
         await store.dispatch('folios/fetchFolioTransactions', folio.value?.id);
         await store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
-        await store.dispatch('planning/fetchPlanning', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-        });
+        if (router.currentRoute.value.name === 'planning') {
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+        }
       } catch {
         dialogService.open({
           header: 'Error',

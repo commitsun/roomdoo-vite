@@ -283,6 +283,7 @@ import { type PayloadCreateAvailPlanRuleInterface } from '@/legacy/interfaces/Pa
 import { type PayloadCreatePricelistItemInterface } from '@/legacy/interfaces/PayloadCreatePricelistItemInterface';
 import { defineComponent, ref, computed } from 'vue';
 import useVuelidate from '@vuelidate/core';
+import { useRouter } from 'vue-router';
 import { integer, required, decimal, minValue } from '@vuelidate/validators';
 
 import { type PricelistItemInterface } from '@/legacy/interfaces/PricelistItemInterface';
@@ -342,6 +343,7 @@ export default defineComponent({
   setup(props) {
     // globals
     const store = useStore();
+    const router = useRouter();
     const activeProperty = computed(() => store.state.properties.activeProperty);
     const activePricelist = computed(() => store.state.pricelists.activePricelist);
     const activeAvailabilityPlan = computed(
@@ -443,20 +445,21 @@ export default defineComponent({
           availabilityPlanId: activeAvailabilityPlan.value?.id,
           availabilityPlanRules,
         });
-
-        await store.dispatch('planning/fetchPlanning', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-        });
-        await store.dispatch('planning/fetchPlanningPricesRules', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          pricelistId: store.state.pricelists.activePricelist?.id,
-        });
+        if (router.currentRoute.value.name === 'planning') {
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+          await store.dispatch('planning/fetchPlanningPricesRules', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+            pricelistId: store.state.pricelists.activePricelist?.id,
+          });
+        }
         closePopup();
       } catch {
         dialogService.open({
