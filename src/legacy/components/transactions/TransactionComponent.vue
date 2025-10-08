@@ -263,6 +263,9 @@ export default defineComponent({
         } else {
           await store.dispatch('transactions/createTransaction', payload);
         }
+        await store.dispatch('folios/fetchFolio', props.folioId);
+        await store.dispatch('folios/fetchFolioTransactions', props.folioId);
+        await store.dispatch('folios/fetchFolioSaleLines', props.folioId);
         if (router.currentRoute.value.name === 'planning') {
           await store.dispatch('planning/fetchPlanning', {
             dateStart: store.state.planning.dateStart,
@@ -270,17 +273,7 @@ export default defineComponent({
             propertyId: store.state.properties.activeProperty?.id,
             availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
           });
-          await store.dispatch('folios/fetchFolio', props.folioId);
-          await store.dispatch('folios/fetchFolioTransactions', props.folioId);
-          await store.dispatch('folios/fetchFolioSaleLines', props.folioId);
-          await store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
         }
-
         dialogService.open({
           header: props.transaction ? 'Pago modificado' : 'Pago realizado',
           content: props.transaction ? 'Pago modificado con éxito' : 'Pago realizado con éxito',

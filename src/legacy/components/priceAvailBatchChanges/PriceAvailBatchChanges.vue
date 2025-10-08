@@ -555,6 +555,7 @@ import { dialogService } from '@/legacy/services/DialogService';
 import type { AvailabilityPlanInterface } from '@/legacy/interfaces/AvailabilityPlanInterface';
 import type { PricelistInterface } from '@/legacy/interfaces/PricelistInterface';
 import type { RoomTypeInterface } from '@/legacy/interfaces/RoomTypeInterfaces';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   components: {
@@ -567,6 +568,7 @@ export default defineComponent({
     AppButton: Button,
   },
   setup() {
+    const router = useRouter();
     // date from and to inputs
     const dateFrom: Ref<Date | null> = ref(null);
     const dateTo: Ref<Date | null> = ref(null);
@@ -808,21 +810,23 @@ export default defineComponent({
             availabilityPlanRules,
           });
           resetValues();
-          await Promise.all([
-            store.dispatch('planning/fetchPlanningPricesRules', {
-              dateStart: store.state.planning.dateStart,
-              dateEnd: store.state.planning.dateEnd,
-              propertyId: store.state.properties.activeProperty?.id,
-              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              pricelistId: store.state.pricelists.activePricelist?.id,
-            }),
-            store.dispatch('planning/fetchPlanning', {
-              dateStart: store.state.planning.dateStart,
-              dateEnd: store.state.planning.dateEnd,
-              propertyId: store.state.properties.activeProperty?.id,
-              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            }),
-          ]);
+          if (router.currentRoute.value.name === 'planning') {
+            await Promise.all([
+              store.dispatch('planning/fetchPlanningPricesRules', {
+                dateStart: store.state.planning.dateStart,
+                dateEnd: store.state.planning.dateEnd,
+                propertyId: store.state.properties.activeProperty?.id,
+                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+                pricelistId: store.state.pricelists.activePricelist?.id,
+              }),
+              store.dispatch('planning/fetchPlanning', {
+                dateStart: store.state.planning.dateStart,
+                dateEnd: store.state.planning.dateEnd,
+                propertyId: store.state.properties.activeProperty?.id,
+                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+              }),
+            ]);
+          }
         } catch {
           dialogService.open({
             header: 'Error',
@@ -858,13 +862,15 @@ export default defineComponent({
         try {
           await store.dispatch('pricelists/batchChangesPricelistItems', { pricelistItems });
           resetValues();
-          await store.dispatch('planning/fetchPlanningPricesRules', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-            pricelistId: store.state.pricelists.activePricelist?.id,
-          });
+          if (router.currentRoute.value.name === 'planning') {
+            await store.dispatch('planning/fetchPlanningPricesRules', {
+              dateStart: store.state.planning.dateStart,
+              dateEnd: store.state.planning.dateEnd,
+              propertyId: store.state.properties.activeProperty?.id,
+              availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+              pricelistId: store.state.pricelists.activePricelist?.id,
+            });
+          }
         } catch {
           dialogService.open({
             header: 'Error',

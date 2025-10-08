@@ -694,114 +694,111 @@ export default defineComponent({
 
     const refreshPropertyDependantData = async () => {
       await Promise.all([
-        await store.dispatch('roomTypeClasses/fetchRoomTypeClasses', activeProperty.value?.id),
-        void store.dispatch('roomTypes/fetchRoomTypes', activeProperty.value?.id),
-        void store.dispatch('rooms/fetchRooms', store.state.properties.activeProperty?.id),
-        void store.dispatch('products/fetchProducts', store.state.properties.activeProperty?.id),
-        void store.dispatch(
+        store.dispatch('roomTypeClasses/fetchRoomTypeClasses', activeProperty.value?.id),
+        store.dispatch('roomTypes/fetchRoomTypes', activeProperty.value?.id),
+        store.dispatch('rooms/fetchRooms', store.state.properties.activeProperty?.id),
+        store.dispatch('products/fetchProducts', store.state.properties.activeProperty?.id),
+        store.dispatch(
           'notifications/fetchNotificationsReservationsToAssign',
           activeProperty.value?.id
         ),
-        void store.dispatch(
+        store.dispatch(
           'boardServices/fetchBoardServices',
           store.state.properties.activeProperty?.id
         ),
-        void store.dispatch('accountJournals/fetchAccountJournals', {
+        store.dispatch('accountJournals/fetchAccountJournals', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
         }),
-        void store.dispatch('pricelists/fetchPricelists', {
+        store.dispatch('pricelists/fetchPricelists', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           daily: true,
         }),
-        void store.dispatch('pricelists/fetchDailyPricelists', {
+        store.dispatch('pricelists/fetchDailyPricelists', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
         }),
-        void store.dispatch(
+        store.dispatch(
           'availabilityPlans/fetchAvailabilityPlans',
           store.state.properties.activeProperty?.id
         ),
-        void store.dispatch('amenities/fetchAmenities', store.state.properties.activeProperty?.id),
-        void store.dispatch(
-          'saleChannels/fetchSaleChannels',
-          store.state.properties.activeProperty?.id
-        ),
-        void store.dispatch('agencies/fetchAgencies', store.state.properties.activeProperty?.id),
-        void store.dispatch('roomClosureReasons/fetchRoomClosureReasons'),
-        void store.dispatch('dashboard/fetchLastReceivedFolios', {
+        store.dispatch('amenities/fetchAmenities', store.state.properties.activeProperty?.id),
+        store.dispatch('saleChannels/fetchSaleChannels', store.state.properties.activeProperty?.id),
+        store.dispatch('agencies/fetchAgencies', store.state.properties.activeProperty?.id),
+        store.dispatch('roomClosureReasons/fetchRoomClosureReasons'),
+        store.dispatch('dashboard/fetchLastReceivedFolios', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           offset: 0,
           limit: 7,
         }),
-        void store.dispatch(
+        store.dispatch(
           'dashboard/fetchNumLastReceivedFolios',
           store.state.properties.activeProperty?.id
         ),
-        void store.dispatch('dashboard/fetchPendingReservations', {
+        store.dispatch('dashboard/fetchPendingReservations', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: yesterday,
           dateTo: tomorrow,
         }),
-        void store.dispatch('dashboard/fetchStateRooms', {
+        store.dispatch('dashboard/fetchStateRooms', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: yesterday,
           dateTo: tomorrow,
         }),
-        void store.dispatch('dashboard/fetchOccupiedRooms', {
+        store.dispatch('dashboard/fetchOccupiedRooms', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: thirtyDaysAgo,
           dateTo: today,
         }),
-        void store.dispatch('dashboard/fetchOccupiedRoomsComparative', {
+        store.dispatch('dashboard/fetchOccupiedRoomsComparative', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: thirtyDaysAgoLastYear,
           dateTo: todayLastYear,
         }),
-        void store.dispatch('dashboard/fetchDailyBillings', {
+        store.dispatch('dashboard/fetchDailyBillings', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: thirtyDaysAgo,
           dateTo: today,
         }),
-        void store.dispatch('dashboard/fetchDailyBillingsComparative', {
+        store.dispatch('dashboard/fetchDailyBillingsComparative', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: thirtyDaysAgoLastYear,
           dateTo: todayLastYear,
         }),
-        void store.dispatch('dashboard/fetchReservationsBySaleChannel', {
+        store.dispatch('dashboard/fetchReservationsBySaleChannel', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: aWeekAgo,
           dateTo: today,
         }),
-        void store.dispatch('dashboard/fetchOccupancy', {
+        store.dispatch('dashboard/fetchOccupancy', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           date: today,
         }),
-        void store.dispatch('dashboard/fetchBilling', {
+        store.dispatch('dashboard/fetchBilling', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           date: today,
         }),
-        void store.dispatch('dashboard/fetchAdr', {
+        store.dispatch('dashboard/fetchAdr', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: today,
           dateTo: today,
         }),
-        void store.dispatch('dashboard/fetchRevpar', {
+        store.dispatch('dashboard/fetchRevpar', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: today,
           dateTo: today,
         }),
-        void store.dispatch('dashboard/fetchNewFolios', {
+        store.dispatch('dashboard/fetchNewFolios', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           date: today,
         }),
-        void store.dispatch('dashboard/fetchOvernights', {
+        store.dispatch('dashboard/fetchOvernights', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           date: today,
         }),
-        void store.dispatch('dashboard/fetchCancelledOvernights', {
+        store.dispatch('dashboard/fetchCancelledOvernights', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           date: today,
         }),
-        void store.dispatch('dashboard/fetchOverbookings', {
+        store.dispatch('dashboard/fetchOverbookings', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           date: today,
         }),

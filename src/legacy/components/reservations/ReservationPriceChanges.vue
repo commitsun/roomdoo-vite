@@ -718,6 +718,7 @@ import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import { useStore } from '@/legacy/store';
 import utilsDates, { localeSpain } from '@/legacy/utils/dates';
 import { dialogService } from '@/legacy/services/DialogService';
+import { useRouter } from 'vue-router';
 
 interface CalendarChangeDatesInterface {
   date: Date;
@@ -762,6 +763,7 @@ export default defineComponent({
   },
   setup(props, context) {
     const store = useStore();
+    const router = useRouter();
     const selectedPricelistId = ref(-1);
     const selectedRoomTypeId = ref(-1);
     const isPricelistApplied = ref(false);
@@ -1313,23 +1315,24 @@ export default defineComponent({
               });
             })
         );
-
-        void store.dispatch('planning/fetchAlertsPerDay', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-        });
-        void store.dispatch('planning/fetchDailyBillings', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-        });
-        void store.dispatch('planning/fetchPlanning', {
-          dateStart: store.state.planning.dateStart,
-          dateEnd: store.state.planning.dateEnd,
-          propertyId: store.state.properties.activeProperty?.id,
-          availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-        });
+        if (router.currentRoute.value.name === 'planning') {
+          void store.dispatch('planning/fetchAlertsPerDay', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+          });
+          void store.dispatch('planning/fetchDailyBillings', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+          });
+          void store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+        }
         await store.dispatch(
           'reservationLines/fetchReservationLines',
           currentReservation.value?.id

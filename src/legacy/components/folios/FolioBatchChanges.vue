@@ -536,7 +536,7 @@ import { integer, decimal, minValue, maxValue } from '@vuelidate/validators';
 import { usePlanning } from '@/legacy/utils/usePlanning';
 
 import { useStore } from '@/legacy/store';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import type { BatchChangesInterface } from '@/legacy/interfaces/BatchChangesInterface';
@@ -584,6 +584,8 @@ export default defineComponent({
 
   setup(props, context) {
     const route = useRoute();
+    const router = useRouter();
+
     const store = useStore();
     const { refreshPlanning } = usePlanning();
 
@@ -1729,13 +1731,14 @@ export default defineComponent({
                 reservations: folio.reservations,
               });
               await refreshPlanning();
-
-              void store.dispatch('planning/fetchPlanning', {
-                dateStart: store.state.planning.dateStart,
-                dateEnd: store.state.planning.dateEnd,
-                propertyId: store.state.properties.activeProperty?.id,
-                availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-              });
+              if (router.currentRoute.value.name === 'planning') {
+                void store.dispatch('planning/fetchPlanning', {
+                  dateStart: store.state.planning.dateStart,
+                  dateEnd: store.state.planning.dateEnd,
+                  propertyId: store.state.properties.activeProperty?.id,
+                  availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+                });
+              }
               if (props.folio.id) {
                 void store.dispatch('folios/fetchFolio', props.folio.id);
                 void store.dispatch('reservations/fetchReservations', props.folio.id);
