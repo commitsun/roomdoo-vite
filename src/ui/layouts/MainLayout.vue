@@ -37,6 +37,8 @@ import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useUIStore } from '@/infrastructure/stores/ui';
+import { i18n } from '@/infrastructure/plugins/i18n';
+import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 
 const route = useRoute();
 const pmsPropertiesStore = usePmsPropertiesStore();
@@ -59,13 +61,17 @@ watch(
 
 onBeforeMount(async () => {
   await instanceStore.fetchInstance();
-
   await pmsPropertiesStore.fetchPmsProperties();
   const pmsPropertyId = (route.params.pmsPropertyId as string) || '';
   if (pmsPropertyId) {
     pmsPropertiesStore.setCurrentPmsPropertyId(parseInt(pmsPropertyId));
   } else if (userStore.user?.defaultPmsProperty) {
     pmsPropertiesStore.setCurrentPmsPropertyId(userStore.user.defaultPmsProperty.id);
+  }
+  if (userStore.user?.lang) {
+    const userLanguage = userStore.user.lang.replace('_', '-');
+    i18n.global.locale.value = userLanguage;
+    updatePrimevueLocale(userLanguage);
   }
 });
 </script>
