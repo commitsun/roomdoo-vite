@@ -2,6 +2,8 @@ import type { User } from '@/domain/entities/User';
 import type { UserRepository } from '@/domain/repositories/UserRepository';
 import { api } from '@/infrastructure/http/axios';
 import { CookieService } from '../cookies/CookieService';
+import { i18n } from '@/infrastructure/plugins/i18n';
+import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 
 export class UsersRepositoryImpl implements UserRepository {
   async login(email: string, password: string): Promise<void> {
@@ -11,10 +13,10 @@ export class UsersRepositoryImpl implements UserRepository {
   async fetchUser(): Promise<User> {
     const response = await api.get('/user');
     const user = response.data;
+    user.firstName = user.firstname;
+    user.lastName = user.lastname;
+    user.lastName2 = user.lastname2;
     user.avatar = user.image;
-    delete user.image;
-    // TODO: request to back end team language when fetch user
-    user.languageId = 1;
     return user;
   }
 
@@ -39,8 +41,35 @@ export class UsersRepositoryImpl implements UserRepository {
     await api.post('/refresh-token');
   }
   async updateUser(user: Partial<User>): Promise<void> {
-    // TODO: await api.patch('/user', user);
-    CookieService.setUserCookies(user as User);
+    const payload: {
+      firstname?: string;
+      lastname?: string;
+      lastname2?: string;
+      phone?: string;
+      email?: string;
+      lang?: string;
+    } = {};
+    if (user.firstName !== undefined) {
+      payload.firstname = user.firstName;
+    }
+    if (user.lastName !== undefined) {
+      payload.lastname = user.lastName;
+    }
+    if (user.lastName2 !== undefined) {
+      payload.lastname2 = user.lastName2;
+    }
+    if (user.phone !== undefined) {
+      payload.phone = user.phone;
+    }
+    if (user.email !== undefined) {
+      payload.email = user.email;
+    }
+    if (user.lang !== undefined) {
+      payload.lang = user.lang.replace('-', '_');
+      i18n.global.locale.value = user.lang.substring(0, 2);
+      updatePrimevueLocale(user.lang);
+    }
+    await api.patch('/user', payload);
   }
   logout(): void {
     CookieService.clearUserCookies();
