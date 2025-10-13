@@ -26,7 +26,7 @@ export const useUserStore = defineStore('user', () => {
         firstName: user.value.firstName,
         defaultPmsProperty: user.value.defaultPmsProperty,
         lastName: user.value.lastName,
-        languageId: user.value.languageId,
+        lang: user.value.lang,
         lastName2: user.value.lastName2,
         phone: user.value.phone,
         avatar: user.value.avatar,
