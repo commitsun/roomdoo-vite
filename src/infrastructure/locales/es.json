@@ -119,7 +119,8 @@
     "repeatPassword": "Repetir contraseña",
     "passwordChanged": "La contraseña se ha cambiado correctamente",
     "invalidPassword": "Contraseña actual incorrecta",
-    "passwordsDoNotMatch": "Las nuevas contraseñas no coinciden"
+    "passwordsDoNotMatch": "Las nuevas contraseñas no coinciden",
+    "userUpdated": "Los datos del usuario se han actualizado correctamente"
   },
 
   "error404": {

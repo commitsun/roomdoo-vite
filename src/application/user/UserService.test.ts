@@ -31,6 +31,7 @@ describe('UserService - loginAndGetUser', () => {
       phone: '+1 555-555-5555',
       image: 'http://localhost:8016/web/image/18?access_token=...',
       defaultPmsProperty: { id: 1, name: 'My Property' },
+      lang: 'en_US',
     };
     const ruleFields = [{ name: 'Field 1' }, { name: 'Field 2' }];
     userRepoMock.fetchUser.mockResolvedValue(userData);

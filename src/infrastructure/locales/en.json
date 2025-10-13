@@ -119,7 +119,8 @@
     "repeatPassword": "Repeat password",
     "passwordChanged": "The password has been changed successfully",
     "invalidPassword": "The current password is incorrect",
-    "passwordsDoNotMatch": "The new passwords do not match"
+    "passwordsDoNotMatch": "The new passwords do not match",
+    "userUpdated": "User data has been updated successfully"
   },
   "error404": {
     "title": "Page not found",
