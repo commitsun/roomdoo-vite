@@ -62,6 +62,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from '@/_legacy/store';
 import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
+import { useUserStore } from '@/infrastructure/stores/user';
+import { i18n } from '@/infrastructure/plugins/i18n';
+import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
+import { useInstanceStore } from '@/infrastructure/stores/instance';
 
 const BookingEngine = defineAsyncComponent(
   () => import('@/_legacy/components/bookingEngine/BookingEngine.vue')
@@ -108,6 +112,8 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const uiStore = useUIStore();
+    const userStore = useUserStore();
+    const instanceStore = useInstanceStore();
 
     const pmsPropertiesStore = usePmsPropertiesStore();
     const showUserSettingsModal = ref(false);
@@ -277,6 +283,13 @@ export default defineComponent({
       await pmsPropertiesStore.fetchPmsProperties();
       const pmsPropertyId = route.params.pmsPropertyId as string;
       if (pmsPropertyId) pmsPropertiesStore.setCurrentPmsPropertyId(parseInt(pmsPropertyId));
+      await instanceStore.fetchInstance();
+      if (userStore.user?.lang) {
+        const userLanguage = userStore.user.lang.replace('_', '-');
+        i18n.global.locale.value = userLanguage;
+        updatePrimevueLocale(userLanguage);
+      }
+      void store.dispatch('layout/showSpinner', false);
     });
 
     onMounted(() => {

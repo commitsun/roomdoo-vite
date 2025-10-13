@@ -35,47 +35,51 @@
 
           <div class="user__settings--row">
             <div class="user__settings--field">
-              <label class="user__settings--label">
+              <label for="firstName" class="user__settings--label">
                 {{ t('userSettings.firstName') }}
               </label>
-              <InputText v-model="firstName" :style="{ minWidth: '260px' }" />
+              <InputText id="firstName" v-model="firstName" :style="{ minWidth: '260px' }" />
             </div>
 
             <div class="user__settings--field">
-              <label class="user__settings--label">
+              <label for="lastName" class="user__settings--label">
                 {{ t('userSettings.lastName') }}
               </label>
-              <InputText v-model="lastName" :style="{ minWidth: '260px' }" />
+              <InputText id="lastName" v-model="lastName" :style="{ minWidth: '260px' }" />
             </div>
 
             <div class="user__settings--field">
-              <label class="user__settings--label">
+              <label for="secondLastName" class="user__settings--label">
                 {{ t('userSettings.secondLastName') }}
               </label>
-              <InputText v-model="secondLastName" :style="{ minWidth: '260px' }" />
+              <InputText
+                id="secondLastName"
+                v-model="secondLastName"
+                :style="{ minWidth: '260px' }"
+              />
             </div>
           </div>
 
           <div class="user__settings--row">
             <div class="user__settings--field">
-              <label class="user__settings--label">
+              <label for="phone" class="user__settings--label">
                 {{ t('userSettings.phone') }}
               </label>
-              <InputText v-model="phone" :style="{ minWidth: '260px' }" />
+              <InputText id="phone" v-model="phone" :style="{ minWidth: '260px' }" />
             </div>
 
             <div class="user__settings--field">
-              <label class="user__settings--label">
+              <label for="email" class="user__settings--label">
                 {{ t('userSettings.email') }}
               </label>
-              <InputText v-model="email" :style="{ minWidth: '260px' }" />
+              <InputText id="email" v-model="email" :style="{ minWidth: '260px' }" />
             </div>
 
             <div
               class="user__settings--field"
               v-if="availableLocales && availableLocales.length > 1"
             >
-              <label class="user__settings--label">
+              <label for="language" class="user__settings--label">
                 {{ t('userSettings.language') }}
               </label>
               <Select
@@ -85,6 +89,7 @@
                 optionValue="code"
                 :options="availableLocales as Language[]"
                 :style="{ minWidth: '260px' }"
+                aria-label="language"
               />
             </div>
           </div>
@@ -99,7 +104,7 @@
             <Button
               :label="t('userSettings.save')"
               :style="{ width: 'auto', minWidth: '130px' }"
-              @click="save()"
+              @click="handleUpdateUser()"
             />
           </div>
         </TabPanel>
@@ -109,13 +114,14 @@
             <form>
               <InputText v-model="firstName" autocomplete="username" style="display: none" />
               <div class="change__password--field">
-                <label class="change__password--label">
+                <label for="currentPassword" class="change__password--label">
                   {{ t('userSettings.currentPassword') }}
                 </label>
                 <IconField>
                   <InputIcon class="pi pi-lock" />
                   <Password
                     v-model="currentPassword"
+                    inputId="currentPassword"
                     :feedback="false"
                     toggleMask
                     :style="{ width: '100%' }"
@@ -125,13 +131,14 @@
                 </IconField>
               </div>
               <div class="change__password--field">
-                <label class="change__password--label">
+                <label for="newPassword" class="change__password--label">
                   {{ t('userSettings.newPassword') }}
                 </label>
                 <IconField>
                   <InputIcon class="pi pi-lock" />
                   <Password
                     v-model="newPassword"
+                    inputId="newPassword"
                     :feedback="false"
                     toggleMask
                     :style="{ width: '100%' }"
@@ -141,13 +148,14 @@
                 </IconField>
               </div>
               <div class="change__password--field">
-                <label class="change__password--label">
+                <label for="repeatPassword" class="change__password--label">
                   {{ t('userSettings.repeatPassword') }}
                 </label>
                 <IconField>
                   <InputIcon class="pi pi-lock" />
                   <Password
                     v-model="repeatPassword"
+                    inputId="repeatPassword"
                     :feedback="false"
                     toggleMask
                     :style="{ width: '100%' }"
@@ -207,7 +215,6 @@ import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Message from 'primevue/message';
-import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
@@ -236,12 +243,24 @@ const newPassword = ref('');
 const repeatPassword = ref('');
 const errorMessage = ref('');
 
-const save = () => {
-  // update i18n locale
-  i18n.global.locale.value = selectedLocale.value;
-  // update primevue locale
-  updatePrimevueLocale(selectedLocale.value);
-  dialogRef?.value?.close({ action: 'saved', refresh: true });
+const handleUpdateUser = async () => {
+  uiStore.startLoading();
+  try {
+    await userStore.updateUser({
+      firstName: firstName.value,
+      lastName: lastName.value,
+      lastName2: secondLastName.value,
+      phone: phone.value,
+      email: email.value,
+      lang: selectedLocale.value,
+    });
+    notificationStore.add(t('userSettings.userUpdated'), 'success');
+    dialogRef?.value?.close({ action: 'userUpdated' });
+  } catch {
+    notificationStore.add(t('error.unknownError'), 'error');
+  } finally {
+    uiStore.stopLoading();
+  }
 };
 
 const handleCancel = () => {
@@ -253,7 +272,6 @@ const handleChangePassword = async () => {
     errorMessage.value = t('userSettings.passwordsDoNotMatch');
     return;
   }
-
   uiStore.startLoading();
   try {
     await userStore.changePassword(currentPassword.value, newPassword.value);
@@ -276,6 +294,11 @@ onMounted(() => {
   secondLastName.value = user?.lastName2 || '';
   phone.value = user?.phone || '';
   email.value = user?.email || '';
+  if (user?.lang) {
+    selectedLocale.value = user.lang.replace('_', '-');
+  } else {
+    selectedLocale.value = i18n.global.locale.value;
+  }
 });
 </script>
 <style scoped lang="scss">
