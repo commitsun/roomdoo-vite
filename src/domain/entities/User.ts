@@ -7,7 +7,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  languageId: Id;
+  lang: string;
   lastName2?: string;
   defaultPmsProperty: PmsProperty;
   phone?: string;
