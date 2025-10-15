@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { UsersRepositoryImpl } from './UserRepositoryImpl';
 
 // Mock axios api instance

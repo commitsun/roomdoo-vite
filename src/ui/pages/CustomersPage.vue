@@ -24,7 +24,7 @@
       filterDisplay="menu"
       sortMode="single"
       selectionMode="single"
-      :sortField="sortField || undefined"
+      :sortField="safeSortField"
       :sortOrder="sortOrder"
       :globalFilterFields="['name', 'vat', 'email', 'phone']"
       @page="handlePageChange"
@@ -42,9 +42,7 @@
               <InputText
                 v-model="globalQuery"
                 :placeholder="t('contacts.globalSearch')"
-                @input="
-                  globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
-                "
+                @input="onGlobalQueryInput"
                 :aria-label="t('contacts.globalSearch')"
               />
             </IconField>
@@ -189,7 +187,7 @@
               />
               <Button
                 :label="t('contacts.apply')"
-                :disabled="!phoneDraft || phoneDraft.length < 3"
+                :disabled="phoneDraft.length < 3"
                 class="p-button p-component p-button-sm p-datatable-filter-apply-button"
                 @click="onApplyPhoneFilter(filterModel, filterCallback, applyFilter)"
               />
@@ -214,11 +212,7 @@
         <template #body="{ data }">
           <div class="flex items-center gap-2 h-full">
             <div v-if="data.country">
-              <CountryFlag
-                :country="data.country.code ? data.country.code : ''"
-                size="normal"
-                shadow
-              />
+              <CountryFlag :country="data.country?.code ?? ''" size="normal" shadow />
             </div>
             <div v-if="data.country">{{ data.country.name }}</div>
           </div>
@@ -240,7 +234,7 @@
             :panelStyle="{ width: '100%' }"
             :selectedItemsLabel="
               t('contacts.n_countries_selected', {
-                count: filterModel.value ? filterModel.value.length : 0,
+                count: Array.isArray(filterModel.value) ? filterModel.value.length : 0,
               })
             "
           >
@@ -258,6 +252,7 @@
           </MultiSelect>
         </template>
       </Column>
+
       <!-- Total Invoiced -->
       <Column
         field="totalInvoiced"
@@ -287,7 +282,6 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { i18n } from '@/infrastructure/plugins/i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
   type DataTableFilterEvent,
@@ -295,17 +289,16 @@ import DataTable, {
   type DataTableSortEvent,
 } from 'primevue/datatable';
 import Column from 'primevue/column';
-import Tag from 'primevue/tag';
 import Chip from 'primevue/chip';
 import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
 import MultiSelect from 'primevue/multiselect';
 import CountryFlag from 'vue-country-flag-next';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-
 import { FilterMatchMode } from '@primevue/core/api';
+
+import { i18n } from '@/infrastructure/plugins/i18n';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
@@ -315,14 +308,15 @@ import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
+// helper: explicit non-empty string
+const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
+
 export default defineComponent({
   components: {
     DataTable,
     Column,
-    Tag,
     Chip,
     InputText,
-    Select,
     MultiSelect,
     Button,
     IconField,
@@ -351,12 +345,18 @@ export default defineComponent({
       country: 'country',
       email: 'email',
     };
-    const orderBy = computed(() =>
-      sortField.value
-        ? `${sortOrder.value === -1 ? '-' : ''}${
-            SORT_FIELD_MAP[sortField.value] ?? sortField.value
-          }`
-        : undefined
+
+    const orderBy = computed<string | undefined>(() => {
+      if (sortField.value !== null && sortField.value !== '') {
+        const key = SORT_FIELD_MAP[sortField.value] ?? sortField.value;
+        const prefix = sortOrder.value === -1 ? '-' : '';
+        return `${prefix}${key}`;
+      }
+      return undefined;
+    });
+
+    const safeSortField = computed<string | undefined>(() =>
+      sortField.value === null || sortField.value === '' ? undefined : sortField.value
     );
 
     const filters = ref({
@@ -370,73 +370,87 @@ export default defineComponent({
     const globalQuery = ref<string>('');
 
     const countryOptions = computed(() =>
-      countriesStore.countries?.map((country) => ({
+      (countriesStore.countries ?? []).map((country) => ({
         label: country.name,
         value: country.code,
       }))
     );
 
-    const showClearButton = computed(
-      () =>
-        globalQuery.value.length ||
-        sortField.value ||
-        filters.value.name.value ||
-        filters.value.vat.value ||
-        filters.value.email.value ||
-        filters.value.phones.value ||
-        (filters.value.country.value && filters.value.country.value.length)
-    );
+    const showClearButton = computed<boolean>(() => {
+      const f = filters.value;
 
-    const customers = computed(() => contactsStore.customers || []);
+      const anyString =
+        isNonEmptyString(globalQuery.value) ||
+        isNonEmptyString(f.name.value) ||
+        isNonEmptyString(f.vat.value) ||
+        isNonEmptyString(f.email.value) ||
+        isNonEmptyString(f.phones.value) ||
+        isNonEmptyString(sortField.value);
+
+      const anyCountry =
+        (Array.isArray(f.country.value) && f.country.value.length > 0) ||
+        (typeof f.country.value === 'string' && f.country.value.trim().length > 0);
+
+      return anyString || anyCountry;
+    });
+
+    const customers = computed(() =>
+      Array.isArray(contactsStore.customers) ? contactsStore.customers : []
+    );
     const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
 
-    const setCountFromStore = () => (numTotalRecords.value = contactsStore.contactsCount);
+    const setCountFromStore = (): void => {
+      numTotalRecords.value = contactsStore.contactsCount;
+    };
 
-    const fetchNow = async () => {
+    async function fetchNow(): Promise<void> {
       uiStore.startLoading();
       try {
         await contactsStore.fetchCustomers(
           page.value,
           rows.value,
-          globalQuery.value || undefined,
-          filters.value.name.value || undefined,
-          filters.value.email.value || undefined,
-          (filters.value.vat.value as string | null) || undefined,
-          (filters.value.country.value as string[] | null) || undefined,
-          filters.value.phones.value || undefined,
+          isNonEmptyString(globalQuery.value) ? globalQuery.value : undefined,
+          isNonEmptyString(filters.value.name.value) ? filters.value.name.value : undefined,
+          isNonEmptyString(filters.value.email.value) ? filters.value.email.value : undefined,
+          isNonEmptyString(filters.value.vat.value) ? filters.value.vat.value : undefined,
+          Array.isArray(filters.value.country.value) ? filters.value.country.value : undefined,
+          isNonEmptyString(filters.value.phones.value) ? filters.value.phones.value : undefined,
           orderBy.value
         );
         setCountFromStore();
       } finally {
         uiStore.stopLoading();
       }
-    };
-    const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
-    const handlePageChange = async (e: DataTablePageEvent) => {
-      if (e.page !== undefined) {
+    }
+
+    const debouncedFetchNow = useDebounceFn(async () => fetchNow(), 250, { maxWait: 3000 });
+
+    async function handlePageChange(e: DataTablePageEvent): Promise<void> {
+      if (typeof e.page === 'number') {
         page.value = e.page + 1;
         rows.value = e.rows;
-        return await fetchNow();
+        await fetchNow();
       }
-    };
+    }
 
-    const handleFilterChange = async (e: DataTableFilterEvent) => {
-      if (e.filters) {
-        filters.value = e.filters as typeof filters.value;
+    async function handleFilterChange(e: DataTableFilterEvent): Promise<void> {
+      if (e.filters !== null) {
+        filters.value = e.filters as typeof filters.value; // TODO: refine type
         page.value = 1;
-        return await fetchNow();
+        await fetchNow();
       }
-    };
-    const handleSortChange = async (e: DataTableSortEvent) => {
+    }
+
+    async function handleSortChange(e: DataTableSortEvent): Promise<void> {
       if (e.sortField !== undefined) {
-        sortField.value = (e.sortField as typeof sortField.value) || null; // TODO: check type
+        sortField.value = (e.sortField as string) ?? null;
         sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
         page.value = 1;
-        return await fetchNow();
+        await fetchNow();
       }
-    };
+    }
 
-    const clearAll = async () => {
+    async function clearAll(): Promise<void> {
       globalQuery.value = '';
       sortField.value = null;
       sortOrder.value = 1;
@@ -452,71 +466,87 @@ export default defineComponent({
       };
 
       await fetchNow();
-    };
+    }
 
-    const openContactDetail = async (contact: Contact) => {
+    async function openContactDetail(contact: Contact): Promise<void> {
       uiStore.startLoading();
       try {
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(
-          contact.id,
-          currentPmsPropertyId.value!
-        );
+        const propId = currentPmsPropertyId.value;
+        if (!isNonEmptyString(propId)) {
+          return;
+        }
+        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contact.id, propId);
         open(PartnerForm, {
           props: { header: contact.name || t('contacts.detail') },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-            if (data?.refresh || data?.action === 'saved') {
-              fetchNow();
+            if (data?.refresh === true || data?.action === 'saved') {
+              void fetchNow();
             }
           },
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
       } finally {
         uiStore.stopLoading();
       }
-    };
+    }
 
-    const openNewContact = async () => {
+    async function openNewContact(): Promise<void> {
       uiStore.startLoading();
       try {
-        await useLegacyStore().removeVuexPartner(currentPmsPropertyId.value!);
+        const propId = currentPmsPropertyId.value;
+        if (!isNonEmptyString(propId)) {
+          return;
+        }
+        await useLegacyStore().removeVuexPartner(propId);
         open(PartnerForm, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-            if (data?.refresh || data?.action === 'saved') {
-              fetchNow();
+            if (data?.refresh === true || data?.action === 'saved') {
+              void fetchNow();
             }
           },
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
       } finally {
         uiStore.stopLoading();
       }
-    };
+    }
 
-    const onClearPhoneFilter = (
+    function onClearPhoneFilter(
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
       applyFilter: () => void
-    ) => {
+    ): void {
       phoneDraft.value = '';
       filterModel.value = null;
       filterCallback();
       applyFilter?.();
-    };
+    }
 
-    const onApplyPhoneFilter = (
+    function onApplyPhoneFilter(
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
       applyFilter: () => void
-    ) => {
-      if (!phoneDraft.value || phoneDraft.value.length < 3) return;
+    ): void {
+      if (phoneDraft.value.length < 3) {
+        return;
+      }
       filterModel.value = phoneDraft.value;
       filterCallback();
       applyFilter?.();
-    };
+    }
+
+    function onGlobalQueryInput(): void {
+      const len = globalQuery.value.length;
+      if (len >= 3 || len === 0) {
+        void debouncedFetchNow();
+      }
+    }
 
     onBeforeMount(async () => {
       await fetchNow();
@@ -530,6 +560,7 @@ export default defineComponent({
       numTotalRecords,
       sortField,
       sortOrder,
+      safeSortField,
       filters,
       globalQuery,
       countryOptions,
@@ -548,6 +579,7 @@ export default defineComponent({
       debouncedFetchNow,
       onClearPhoneFilter,
       onApplyPhoneFilter,
+      onGlobalQueryInput,
     };
   },
 });

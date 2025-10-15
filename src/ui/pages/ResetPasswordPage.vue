@@ -91,9 +91,8 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, computed, type Ref, onMounted, ref } from 'vue';
+import { defineComponent, computed, type Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
@@ -102,15 +101,15 @@ import Button from 'primevue/button';
 import Select from 'primevue/select';
 import Divider from 'primevue/divider';
 import Message from 'primevue/message';
-
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
+import { useRoute } from 'vue-router';
+
+import { useTranslatedError } from '@/ui/composables/useTranslatedValidationError';
 import { resetPasswordSchema } from '@/application/user/UserSchemas';
 import { useUserStore } from '@/infrastructure/stores/user';
-import { useRoute } from 'vue-router';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
-import { useTranslatedError } from '../composables/useTranslatedValidationError';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 
 export default defineComponent({
@@ -161,7 +160,7 @@ export default defineComponent({
       handleBlur: () => void;
     };
 
-    const resetPassword = async () => {
+    const resetPassword = async (): Promise<void> => {
       uiStore.startLoading();
       try {
         await userStore.resetPassword(firstPassword.value, route.query.token as string);
