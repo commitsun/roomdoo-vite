@@ -4,19 +4,22 @@ import { useI18n } from 'vue-i18n';
  * Translates a validation error message, supporting dynamic values passed like:
  *   "validation.MAX_GUESTS:4" → "No puedes añadir más de 4 huéspedes"
  */
-export function useTranslatedError() {
+export function useTranslatedError(): { translate: (error?: string) => string | undefined } {
   const { t } = useI18n();
 
   function translate(error?: string): string | undefined {
-    if (!error) return;
+    if (error === null) {
+      return undefined;
+    }
 
-    const [fullKey, params] = error.split(':');
+    const [fullKey, params] =
+      error !== undefined && error !== null ? error.split(':') : ['', undefined];
     const key = fullKey?.startsWith('validation.') ? fullKey : `validation.${fullKey}`;
 
     const namedParams: Record<string, string> = {};
 
-    if (params) {
-      namedParams["count"] = params;
+    if (params !== undefined) {
+      namedParams.count = params;
     }
 
     const translated = t(key, namedParams);

@@ -21,11 +21,11 @@
 <script lang="ts" setup>
 import { type Ref, computed, onMounted, ref, watch } from 'vue';
 import Select from 'primevue/select';
-import { i18n } from '@/infrastructure/plugins/i18n';
+import { useRouter } from 'vue-router';
 
+import { i18n } from '@/infrastructure/plugins/i18n';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUIStore } from '@/infrastructure/stores/ui';
-import { useRouter } from 'vue-router';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 
@@ -63,8 +63,8 @@ onMounted(async () => {
     uiStore.startLoading();
     await instanceStore.fetchInstance();
     instanceImage.value = instanceStore.instance?.image;
-  } catch (err) {
-    router.push({ name: 'instance-not-found' });
+  } catch {
+    await router.push({ name: 'instance-not-found' });
   } finally {
     uiStore.stopLoading();
   }

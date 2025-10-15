@@ -1,5 +1,5 @@
+import { api } from '@/infrastructure/http/axios';
 import type { PmsPropertiesRepository } from '@/domain/repositories/PmsPropertiesRepository';
-import { api } from '../http/axios';
 import type { PmsProperty } from '@/domain/entities/PmsProperty';
 import type { MenuLink } from '@/domain/entities/MenuLink';
 

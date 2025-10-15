@@ -10,8 +10,9 @@ const countriesRepository = new CountriesRepositoryImpl();
 export const useCountriesStore = defineStore('countries', () => {
   const countriesService = new CountriesService(countriesRepository);
   const countries: Ref<Country[]> = ref([]);
-  const fetchCountries = async () => {
+  const fetchCountries = async (): Promise<Country[]> => {
     countries.value = await countriesService.fetchCountries();
+    return countries.value;
   };
   return {
     countries: readonly(countries),

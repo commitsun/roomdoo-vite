@@ -1,3 +1,4 @@
+import type { Instance } from '@/domain/entities/Instance';
 import type { InstanceRepository } from '@/domain/repositories/InstanceRepository';
 
 const english: { code: string; name: string } = { code: 'en-US', name: 'English' };
@@ -8,7 +9,7 @@ export const APP_LANGUAGES = [english, spanish, english_GB];
 
 export class InstanceService {
   constructor(private instanceRepository: InstanceRepository) {}
-  async fetchInstance() {
+  async fetchInstance(): Promise<Instance> {
     let [instance, languages] = await Promise.all([
       this.instanceRepository.fetchInstance(),
       this.instanceRepository.fetchLanguages(),
