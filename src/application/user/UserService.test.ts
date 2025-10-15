@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { UserService } from './UserService';
+
+import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import type { UserRepository } from '@/domain/repositories/UserRepository';
-import { UnauthorizedError } from '../shared/UnauthorizedError';
 
 describe('UserService - loginAndGetUser', () => {
   let userService: UserService;

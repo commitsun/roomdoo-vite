@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { CountriesService } from './CountriesService';
+
 import type { CountriesRepository } from '@/domain/repositories/CountriesRepository';
 import type { Country } from '@/domain/entities/Country';
 

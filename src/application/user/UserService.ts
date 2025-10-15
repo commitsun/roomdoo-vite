@@ -4,12 +4,9 @@ import type { UserRepository } from '@/domain/repositories/UserRepository';
 export class UserService {
   constructor(private userRepository: UserRepository) {}
   async loginAndGetUser(email: string, password: string): Promise<User | null> {
-    let user;
-    let availabilityRuleFields;
-
     await this.userRepository.login(email, password);
-    user = await this.userRepository.fetchUser();
-    availabilityRuleFields = await this.userRepository.fetchAvailabilityRuleFields();
+    const user = await this.userRepository.fetchUser();
+    const availabilityRuleFields = await this.userRepository.fetchAvailabilityRuleFields();
 
     const userWithFields = {
       ...user,

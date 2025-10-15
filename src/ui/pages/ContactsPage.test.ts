@@ -3,8 +3,6 @@ import { render, screen, within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
-import primevuePlugin from '@/infrastructure/plugins/primevue';
-
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
@@ -16,8 +14,11 @@ import CountryFlag from 'vue-country-flag-next';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-import type { Contact } from '@/domain/entities/Contact';
+
 import ContactsPage from './ContactsPage.vue';
+
+import type { Contact } from '@/domain/entities/Contact';
+import primevuePlugin from '@/infrastructure/plugins/primevue';
 
 // i18n mock
 vi.mock('vue-i18n', () => {
@@ -42,7 +43,9 @@ vi.mock('vue-i18n', () => {
   return {
     useI18n: () => ({
       t: (k: string, params?: any) =>
-        k === 'contacts.n_countries_selected' && params ? '' : tMap[k] ?? k,
+        k === 'contacts.n_countries_selected' && params !== undefined && params !== null
+          ? ''
+          : tMap[k] ?? k,
     }),
     createI18n: vi.fn(() => ({ global, install: () => {} })),
   };
@@ -160,9 +163,7 @@ describe('ContactsPage', () => {
     );
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testContacts[0].phones && testContacts[0].phones.length > 0
-        ? testContacts[0].phones[0].number
-        : ''
+      testContacts[0].phones.length > 0 ? testContacts[0].phones[0].number : ''
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
@@ -184,14 +185,10 @@ describe('ContactsPage', () => {
     );
     // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testContacts[1].phones && testContacts[1].phones.length > 0
-        ? testContacts[1].phones[0].number
-        : ''
+      testContacts[1].phones.length > 0 ? testContacts[1].phones[0].number : ''
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testContacts[1].phones && testContacts[1].phones.length > 0
-        ? testContacts[1].phones[1].number
-        : ''
+      testContacts[1].phones.length > 0 ? testContacts[1].phones[1].number : ''
     );
     // country
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent(
@@ -391,7 +388,7 @@ describe('ContactsPage', () => {
     await userEvent.click(applyBtn);
 
     // get last call to fetchContacts and check type arg
-    let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
+    const last = mockContactsStore.fetchContacts.mock.calls.at(-1);
 
     expect(last?.[5]).toHaveLength(2);
     expect(last?.[5]).toEqual(expect.arrayContaining(['guest', 'supplier']));
@@ -510,7 +507,7 @@ describe('ContactsPage', () => {
     await userEvent.click(applyBtn);
 
     // get last call to fetchContacts and check country arg
-    let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
+    const last = mockContactsStore.fetchContacts.mock.calls.at(-1);
     // expect(last?.[6]).toEqual(['Spain']);
     expect(last?.[6]).toHaveLength(2);
     expect(last?.[6]).toEqual(expect.arrayContaining(['Spain', 'Portugal']));

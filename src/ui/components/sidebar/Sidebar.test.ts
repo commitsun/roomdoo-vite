@@ -1,11 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import Sidebar from './Sidebar.vue'; // ajusta si tu ruta real es distinta
-import { render, screen, waitFor } from '@testing-library/vue';
+import { render, screen, waitFor, fireEvent } from '@testing-library/vue';
 import { createTestingPinia } from '@pinia/testing';
-import primevuePlugin from '@/infrastructure/plugins/primevue';
 import { createRouter, createMemoryHistory } from 'vue-router';
-import { fireEvent } from '@testing-library/vue';
+
+import Sidebar from './Sidebar.vue'; // ajusta si tu ruta real es distinta
+
+import primevuePlugin from '@/infrastructure/plugins/primevue';
 import { useUserStore } from '@/infrastructure/stores/user';
 
 vi.mock('vue-i18n', () => {

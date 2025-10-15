@@ -1,12 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/vue';
+import { render, screen, waitFor } from '@testing-library/vue';
 import '@testing-library/jest-dom/vitest';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/vue';
-
 import { createTestingPinia } from '@pinia/testing';
-import primevuePlugin from '@/infrastructure/plugins/primevue';
-
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -22,6 +18,8 @@ import TabPanel from 'primevue/tabpanel';
 import Message from 'primevue/message';
 
 import UserSettings from './UserSettings.vue';
+
+import primevuePlugin from '@/infrastructure/plugins/primevue';
 
 vi.mock('vue-i18n', () => {
   const t: Record<string, string> = {

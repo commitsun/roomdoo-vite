@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { ContactsService } from './ContactsService';
+
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import type { Contact, Customer, Guest, Agency, Supplier } from '@/domain/entities/Contact';

@@ -43,6 +43,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
+
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 
@@ -58,7 +59,7 @@ export default defineComponent({
     const userStore = useUserStore();
     const notificationStore = useNotificationsStore();
     const username = ref('');
-    const sendRequestChangePassword = async () => {
+    const sendRequestChangePassword = async (): Promise<void> => {
       await userStore.requestChangePassword(username.value);
       notificationStore.add(t('requestResetPassword.requestSent'), 'success');
     };

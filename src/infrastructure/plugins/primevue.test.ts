@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import type { App } from 'vue';
 
 vi.mock('@primeuix/themes/aura', () => {
@@ -56,7 +56,7 @@ function makeApp(): App {
 
 async function importPlugin() {
   // fresh import each time to get a fresh module scope (primevueApp=null)
-  return await import('@/infrastructure/plugins/primevue'); // <- adjust path to your file
+  return import('@/infrastructure/plugins/primevue'); // <- adjust path to your file
 }
 
 afterEach(() => {
