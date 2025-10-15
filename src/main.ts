@@ -1,5 +1,6 @@
 import '@/ui/assets/style.css';
 import 'primeicons/primeicons.css';
+
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { createHead } from '@vueuse/head';
