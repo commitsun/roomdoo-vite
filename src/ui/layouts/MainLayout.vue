@@ -32,6 +32,7 @@
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Drawer from 'primevue/drawer';
+
 import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
@@ -54,7 +55,9 @@ const viewKey = computed(() => `${route.fullPath}::${uiStore.reloadTick}`);
 watch(
   () => route.name,
   (name) => {
-    if (typeof name === 'string') rightDrawerVisible.value = name.includes('detail');
+    if (typeof name === 'string') {
+      rightDrawerVisible.value = name.includes('detail');
+    }
   },
   { immediate: true }
 );
@@ -64,11 +67,11 @@ onBeforeMount(async () => {
   await pmsPropertiesStore.fetchPmsProperties();
   const pmsPropertyId = (route.params.pmsPropertyId as string) || '';
   if (pmsPropertyId) {
-    pmsPropertiesStore.setCurrentPmsPropertyId(parseInt(pmsPropertyId));
+    await pmsPropertiesStore.setCurrentPmsPropertyId(parseInt(pmsPropertyId));
   } else if (userStore.user?.defaultPmsProperty) {
-    pmsPropertiesStore.setCurrentPmsPropertyId(userStore.user.defaultPmsProperty.id);
+    await pmsPropertiesStore.setCurrentPmsPropertyId(userStore.user.defaultPmsProperty.id);
   }
-  if (userStore.user?.lang) {
+  if (userStore.user && userStore.user.lang) {
     const userLanguage = userStore.user.lang.replace('_', '-');
     i18n.global.locale.value = userLanguage;
     updatePrimevueLocale(userLanguage);

@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { InstanceService } from './InstanceService';
+
+import { InternalServerError } from '@/application/shared/InternalServerError';
 import type { InstanceRepository } from '@/domain/repositories/InstanceRepository';
-import { InternalServerError } from '../shared/InternalServerError';
 
 describe('InstanceService - fetchInstance', () => {
   let instanceService: InstanceService;
