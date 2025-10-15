@@ -50,7 +50,7 @@ describe('router global beforeEach (with createTestingPinia)', () => {
     vi.spyOn(useUserStore(), 'user', 'get').mockReturnValue({
       id: 1,
       email: 'a@b.c',
-      languageId: 1,
+      lang: 'en',
       defaultPmsProperty: { id: 2, name: 'prop', image: '' },
       firstName: '',
       lastName: '',
@@ -70,7 +70,7 @@ describe('router global beforeEach (with createTestingPinia)', () => {
     vi.spyOn(useUserStore(), 'user', 'get').mockReturnValue({
       id: 1,
       email: 'a@b.c',
-      languageId: 1,
+      lang: 'en',
       defaultPmsProperty: { id: 2, name: 'prop', image: '' },
       firstName: '',
       lastName: '',
