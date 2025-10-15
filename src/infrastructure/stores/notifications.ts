@@ -9,11 +9,11 @@ export interface Notification {
 
 export const useNotificationsStore = defineStore('notifications', () => {
   const messages = ref<Notification[]>([]);
-  function add(text: string, severity: 'success' | 'error' | 'info' | 'warn' = 'success') {
+  function add(text: string, severity: 'success' | 'error' | 'info' | 'warn' = 'success'): void {
     messages.value.push({ id: Date.now(), text, severity });
   }
 
-  function remove() {
+  function remove(): void {
     messages.value.shift();
   }
 

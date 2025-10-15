@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/vue';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
+import { reactive } from 'vue';
+
+import Login from './LoginPage.vue';
+
 import { useUserStore } from '@/infrastructure/stores/user';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
-import { reactive } from 'vue';
-import Login from './LoginPage.vue';
 
 // here the route is reactive because in some tests we change its query or params
 const route = reactive({
@@ -19,6 +21,7 @@ const route = reactive({
 const replace = vi.fn();
 
 vi.mock('vue-router', async (importOriginal) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const actual = await importOriginal<typeof import('vue-router')>();
   return {
     ...actual,

@@ -250,11 +250,12 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Avatar from 'primevue/avatar';
+import Menu from 'primevue/menu';
+import { useI18n } from 'vue-i18n';
+
 import { useUserStore } from '@/infrastructure/stores/user';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
-import Menu from 'primevue/menu';
 import UserSettings from '@/ui/components/user/UserSettings.vue';
-import { useI18n } from 'vue-i18n';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import LegacyReport from '@/_legacy/components/reports/ReportComponent.vue';
@@ -274,7 +275,7 @@ const router = useRouter();
 const { t } = useI18n();
 const { open } = useAppDialog();
 
-const hash = import.meta.env.ROOMDOO_COMMIT_HASH || 'dev';
+const hash = import.meta.env.ROOMDOO_COMMIT_HASH ?? 'dev';
 
 const isUserMenuOpen = ref(false);
 const isReportOptionsOpen = ref(false);
@@ -291,11 +292,11 @@ const items = computed(() => [
       {
         label: t('sidebar.settings'),
         icon: 'pi pi-cog',
-        command: () => {
+        command: (): void => {
           open(UserSettings, {
             props: { header: userSettingsHeader },
             onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
-              if (data?.refresh) {
+              if (data?.refresh ?? false) {
                 uiStore.refreshView();
               }
             },
@@ -305,11 +306,11 @@ const items = computed(() => [
       {
         label: t('sidebar.logout'),
         icon: 'pi pi-sign-out',
-        command: () => {
+        command: (): void => {
           userStore.logout();
           //TODO: remove with legacy
           useLegacyStore().removeVuexAndOldCookiesUser();
-          router.push({ name: 'login' });
+          void router.push({ name: 'login' });
         },
       },
     ],
@@ -327,7 +328,7 @@ const pmsPropertiesLinks = computed(() =>
   pmsPropertiesStore.pmsPropertyLinks.filter((link) => !link.isSupportLink)
 );
 
-const isActive = (path: string) => route.path === path;
+const isActive = (path: string): boolean => route.path === path;
 
 const isContactsSectionActive = computed(() =>
   ['/contacts', '/customers', '/guests', '/suppliers', '/agencies'].some((p) =>
@@ -335,15 +336,17 @@ const isContactsSectionActive = computed(() =>
   )
 );
 
-const collapseSidebar = () => {
+const collapseSidebar = (): void => {
   isReportOptionsOpen.value = false;
   isLinkOptionsOpen.value = false;
   isContactsOptionsOpen.value = false;
   isUserMenuOpen.value = false;
-  if (nav.value) nav.value.scrollTop = 0;
+  if (nav.value) {
+    nav.value.scrollTop = 0;
+  }
 };
 
-const checkPathAndExpandContacts = () => {
+const checkPathAndExpandContacts = (): void => {
   if (
     route.path.startsWith('/contacts') ||
     route.path.startsWith('/customers') ||
@@ -353,27 +356,33 @@ const checkPathAndExpandContacts = () => {
   ) {
     isContactsOptionsOpen.value = true;
   }
-  if (nav.value) nav.value.scrollTop = 0;
+  if (nav.value) {
+    nav.value.scrollTop = 0;
+  }
 };
 
-const openLink = async (linkId: number) => {
+const openLink = async (linkId: number): Promise<void> => {
   const currentPmsPropertyId = pmsPropertiesStore.currentPmsPropertyId;
-  if (currentPmsPropertyId) {
+  if (
+    typeof currentPmsPropertyId === 'number' &&
+    !isNaN(currentPmsPropertyId) &&
+    currentPmsPropertyId !== 0
+  ) {
     const foundLink = await pmsPropertiesStore.fetchPmsPropertyLink(currentPmsPropertyId, linkId);
     window.open(foundLink, '_blank');
   }
 };
 
-const toggleMenu = () => {
+const toggleMenu = (): void => {
   isUserMenuOpen.value = !isUserMenuOpen.value;
 };
-const hideUserMenu = () => {
+const hideUserMenu = (): void => {
   if (isUserMenuOpen.value) {
     isUserMenuOpen.value = false;
   }
 };
 
-const openLegacyReport = (type: LegacyReportType) => {
+const openLegacyReport = (type: LegacyReportType): void => {
   const titles: Record<LegacyReportType, string> = {
     kelly: t('sidebar.housekeeping'),
     arrivals: t('sidebar.arrivals'),

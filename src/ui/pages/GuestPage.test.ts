@@ -3,8 +3,6 @@ import { render, screen, within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
-import primevuePlugin from '@/infrastructure/plugins/primevue';
-
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
@@ -15,8 +13,10 @@ import InputIcon from 'primevue/inputicon';
 import ToggleSwitch from 'primevue/toggleswitch';
 import CountryFlag from 'vue-country-flag-next';
 
-import type { Guest } from '@/domain/entities/Contact';
 import GuestsPage from './GuestsPage.vue';
+
+import type { Guest } from '@/domain/entities/Contact';
+import primevuePlugin from '@/infrastructure/plugins/primevue';
 
 // i18n mock (todas las keys que usa tu template)
 vi.mock('vue-i18n', () => {
@@ -35,7 +35,9 @@ vi.mock('vue-i18n', () => {
   return {
     useI18n: () => ({
       t: (k: string, params?: any) =>
-        k === 'contacts.n_countries_selected' && params ? '' : tMap[k] ?? k,
+        k === 'contacts.n_countries_selected' && params !== undefined && params !== null
+          ? ''
+          : tMap[k] ?? k,
     }),
     createI18n: vi.fn(() => ({ install: () => {} })),
   };

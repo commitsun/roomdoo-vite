@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { readonly, ref, type Ref } from 'vue';
+
+import { PmsPropertiesRepositoryImpl } from '@/infrastructure/repositories/PmsPropertiesRepositoryImpl';
 import type { PmsProperty } from '@/domain/entities/PmsProperty';
-import { PmsPropertiesRepositoryImpl } from '../repositories/PmsPropertiesRepositoryImpl';
 import { PmsPropertiesService } from '@/application/pmsProperties/PmsPropertiesService';
 import type { MenuLink } from '@/domain/entities/MenuLink';
 
@@ -13,17 +14,17 @@ export const usePmsPropertiesStore = defineStore('pmsProperties', () => {
   const pmsProperties: Ref<PmsProperty[]> = ref([]);
   const pmsPropertyLinks = ref<MenuLink[]>([]);
 
-  const fetchPmsProperties = async () => {
+  const fetchPmsProperties = async (): Promise<void> => {
     pmsProperties.value = await pmsPropertiesService.fetchPmsProperties();
   };
 
-  const setCurrentPmsPropertyId = async (pmsPropertyId: number) => {
+  const setCurrentPmsPropertyId = async (pmsPropertyId: number): Promise<void> => {
     currentPmsPropertyId.value = pmsPropertyId;
     pmsPropertyLinks.value = await pmsPropertiesService.fetchMenuLinks(pmsPropertyId);
   };
 
-  const fetchPmsPropertyLink = async (pmsPropertyId: number, linkId: number) => {
-    return await pmsPropertiesService.fetchPmsPropertyLink(pmsPropertyId, linkId);
+  const fetchPmsPropertyLink = async (pmsPropertyId: number, linkId: number): Promise<string> => {
+    return pmsPropertiesService.fetchPmsPropertyLink(pmsPropertyId, linkId);
   };
 
   return {

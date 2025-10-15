@@ -1,5 +1,5 @@
-import type { MenuLink } from '../entities/MenuLink';
-import type { PmsProperty } from '../entities/PmsProperty';
+import type { PmsProperty } from '@/domain/entities/PmsProperty';
+import type { MenuLink } from '@/domain/entities/MenuLink';
 
 export interface PmsPropertiesRepository {
   fetchPmsProperties(): Promise<PmsProperty[]>;

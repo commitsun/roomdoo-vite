@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { readonly, ref, type Ref } from 'vue';
 
+import { ContactsRepositoryImpl } from '@/infrastructure/repositories/ContactsRepositoryImpl';
 import { ContactsService } from '@/application/contacts/ContactsService';
-import { ContactsRepositoryImpl } from '../repositories/ContactsRepositoryImpl';
 import type { Contact, Customer, Guest, Agency, Supplier } from '@/domain/entities/Contact';
 
 const contactsRepository = new ContactsRepositoryImpl();
@@ -26,7 +26,7 @@ export const useContactsStore = defineStore('contacts', () => {
     countryIn?: string[],
     phonesContains?: string,
     orderBy?: string
-  ) => {
+  ): Promise<void> => {
     const result = await contactsService.fetchContacts(
       page,
       pageSize,
@@ -52,7 +52,7 @@ export const useContactsStore = defineStore('contacts', () => {
     countryIn?: string[],
     phonesContains?: string,
     orderBy?: string
-  ) => {
+  ): Promise<void> => {
     const result = await contactsService.fetchCustomers(
       page,
       pageSize,
@@ -77,7 +77,7 @@ export const useContactsStore = defineStore('contacts', () => {
     countryIn?: string[],
     inhouseOnly?: boolean,
     orderBy?: string
-  ) => {
+  ): Promise<void> => {
     const result = await contactsService.fetchGuests(
       page,
       pageSize,
@@ -101,7 +101,7 @@ export const useContactsStore = defineStore('contacts', () => {
     countryIn?: string[],
     phonesContains?: string,
     orderBy?: string
-  ) => {
+  ): Promise<void> => {
     const result = await contactsService.fetchAgencies(
       page,
       pageSize,
@@ -126,7 +126,7 @@ export const useContactsStore = defineStore('contacts', () => {
     countryIn?: string[],
     phonesContains?: string,
     orderBy?: string
-  ) => {
+  ): Promise<void> => {
     const result = await contactsService.fetchSuppliers(
       page,
       pageSize,
