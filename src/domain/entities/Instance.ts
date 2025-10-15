@@ -1,5 +1,6 @@
-import type { ImageUrl } from '../types/ImageUrl';
 import type { Language } from './Language';
+
+import type { ImageUrl } from '@/domain/types/ImageUrl';
 
 export interface Instance {
   name: string;

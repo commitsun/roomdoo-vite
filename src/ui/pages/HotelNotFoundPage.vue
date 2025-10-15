@@ -37,7 +37,7 @@ export default defineComponent({
       .split(':')[0];
     const { t } = useI18n();
 
-    const openRoomdoo = () => {
+    const openRoomdoo = (): void => {
       window.open('https://roomdoo.com', '_blank');
     };
     return {

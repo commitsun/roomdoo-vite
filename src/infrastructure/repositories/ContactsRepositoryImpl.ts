@@ -3,6 +3,8 @@ import type { ContactsRepository } from '@/domain/repositories/ContactsRepositor
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import { api } from '@/infrastructure/http/axios';
 
+const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
+
 function buildQueryParamsFromFilters(opts: {
   globalSearch?: string;
   nameContains?: string;
@@ -13,38 +15,46 @@ function buildQueryParamsFromFilters(opts: {
   phonesContains?: string;
   vatContains?: string;
   inhouseOnly?: boolean;
-}) {
+}): URLSearchParams {
   const params = new URLSearchParams();
-  if (opts.globalSearch) {
-    params.set('globalSearch', opts.globalSearch);
+
+  // Scalars — only set when non-empty string
+  if (isNonEmptyString(opts.globalSearch)) {
+    params.set('globalSearch', opts.globalSearch.trim());
   }
-  if (opts.nameContains) {
-    params.set('name', opts.nameContains);
+  if (isNonEmptyString(opts.nameContains)) {
+    params.set('name', opts.nameContains.trim());
   }
-  if (opts.emailContains) {
-    params.set('email', opts.emailContains);
+  if (isNonEmptyString(opts.emailContains)) {
+    params.set('email', opts.emailContains.trim());
   }
-  if (opts.documentContains) {
-    params.set('vat', opts.documentContains);
+  if (isNonEmptyString(opts.documentContains)) {
+    params.set('vat', opts.documentContains.trim());
   }
-  if (opts.typeIn?.length) {
-    for (const c of opts.typeIn) {
-      if (c) params.append('types', c);
+
+  // Arrays — check length explicitly and filter empty items
+  if (Array.isArray(opts.typeIn) && opts.typeIn.length > 0) {
+    for (const t of opts.typeIn) {
+      params.append('types', t);
     }
   }
-  if (opts.phonesContains) {
-    params.set('phone', opts.phonesContains);
+  if (isNonEmptyString(opts.phonesContains)) {
+    params.set('phone', opts.phonesContains.trim());
   }
-  if (opts.countryIn?.length) {
+  if (Array.isArray(opts.countryIn) && opts.countryIn.length > 0) {
     for (const c of opts.countryIn) {
-      if (c) params.append('countries', c);
+      params.append('countries', c.trim());
     }
   }
-  if (opts.vatContains) {
-    params.set('vat', opts.vatContains);
+
+  // Override VAT if specific vatContains provided
+  if (isNonEmptyString(opts.vatContains)) {
+    params.set('vat', opts.vatContains.trim());
   }
-  if (opts.inhouseOnly !== undefined) {
-    params.set('inHouse', String(opts.inhouseOnly));
+
+  // Boolean — include only if property is present (even if false)
+  if ('inhouseOnly' in opts) {
+    params.set('inHouse', String(Boolean(opts.inhouseOnly)));
   }
   return params;
 }
@@ -72,8 +82,8 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     params.set('page', String(page));
     params.set('page_size', String(pageSize));
 
-    if (orderBy) {
-      params.set('orderBy', orderBy);
+    if (isNonEmptyString(orderBy)) {
+      params.set('orderBy', orderBy.trim());
     }
 
     const url = `/contacts?${params.toString()}`;
@@ -102,12 +112,16 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     });
     params.set('page', String(page));
     params.set('page_size', String(pageSize));
-    if (orderBy) params.set('orderBy', orderBy);
+
+    if (isNonEmptyString(orderBy)) {
+      params.set('orderBy', orderBy.trim());
+    }
 
     const url = `/customers?${params.toString()}`;
     const { data } = await api.get<EntityListResponse<Customer>>(url);
     return data;
   }
+
   async fetchGuests(
     page: number,
     pageSize: number,
@@ -127,7 +141,10 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     });
     params.set('page', String(page));
     params.set('page_size', String(pageSize));
-    if (orderBy) params.set('orderBy', orderBy);
+
+    if (isNonEmptyString(orderBy)) {
+      params.set('orderBy', orderBy.trim());
+    }
 
     const url = `/guests?${params.toString()}`;
     const { data } = await api.get<EntityListResponse<Guest>>(url);
@@ -140,7 +157,6 @@ export class ContactsRepositoryImpl implements ContactsRepository {
       inHouse: raw.inHouse,
       internalNotes: raw.internalNotes,
       lastReservation: raw.lastReservation,
-      phones: raw.phones,
     }));
 
     return { ...data, items: guests };
@@ -165,7 +181,10 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     });
     params.set('page', String(page));
     params.set('page_size', String(pageSize));
-    if (orderBy) params.set('orderBy', orderBy);
+
+    if (isNonEmptyString(orderBy)) {
+      params.set('orderBy', orderBy.trim());
+    }
 
     const url = `/agencies?${params.toString()}`;
     const { data } = await api.get<EntityListResponse<Agency>>(url);
@@ -193,7 +212,10 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     });
     params.set('page', String(page));
     params.set('page_size', String(pageSize));
-    if (orderBy) params.set('orderBy', orderBy);
+
+    if (isNonEmptyString(orderBy)) {
+      params.set('orderBy', orderBy.trim());
+    }
 
     const url = `/suppliers?${params.toString()}`;
     const { data } = await api.get<EntityListResponse<Supplier>>(url);

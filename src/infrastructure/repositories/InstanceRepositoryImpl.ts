@@ -1,6 +1,5 @@
 import type { Instance } from '@/domain/entities/Instance';
 import type { InstanceRepository } from '@/domain/repositories/InstanceRepository';
-
 import type { Language } from '@/domain/entities/Language';
 import { api } from '@/infrastructure/http/axios';
 

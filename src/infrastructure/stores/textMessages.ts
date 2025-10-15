@@ -9,11 +9,11 @@ export interface TextMessage {
 
 export const useTextMessagesStore = defineStore('textMessages', () => {
   const messages = ref<TextMessage[]>([]);
-  const addTextMessage = (title: string, text: string) => {
+  const addTextMessage = (title: string, text: string): void => {
     messages.value.push({ id: Date.now(), title, text });
   };
 
-  const removeTextMessage = () => {
+  const removeTextMessage = (): void => {
     messages.value.shift();
   };
 

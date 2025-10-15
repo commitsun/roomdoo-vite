@@ -1,8 +1,9 @@
-import type { Id } from '../types/Id';
-import type { ContactType } from '../types/ContactType';
 import type { Country } from './Country';
 import type { PersonalDocument } from './PersonalDocument';
 import type { Phone } from './Phone';
+
+import type { ContactType } from '@/domain/types/ContactType';
+import type { Id } from '@/domain/types/Id';
 
 export interface Contact {
   id: Id;
