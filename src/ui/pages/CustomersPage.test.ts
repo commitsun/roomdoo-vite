@@ -3,8 +3,6 @@ import { render, screen, within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
-import primevuePlugin from '@/infrastructure/plugins/primevue';
-
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
@@ -16,8 +14,11 @@ import CountryFlag from 'vue-country-flag-next';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-import type { Customer } from '@/domain/entities/Contact';
+
 import CustomersPage from './CustomersPage.vue';
+
+import type { Customer } from '@/domain/entities/Contact';
+import primevuePlugin from '@/infrastructure/plugins/primevue';
 
 // i18n mock
 vi.mock('vue-i18n', () => {
@@ -151,9 +152,7 @@ describe('CustomersPage', () => {
     );
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testCustomers[0].phones && testCustomers[0].phones.length > 0
-        ? testCustomers[0].phones[0].number
-        : ''
+      testCustomers[0].phones.length > 0 ? testCustomers[0].phones[0].number : ''
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
@@ -180,9 +179,7 @@ describe('CustomersPage', () => {
 
     // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testCustomers[1].phones && testCustomers[1].phones.length > 0
-        ? testCustomers[1].phones[0].number
-        : ''
+      testCustomers[1].phones.length > 0 ? testCustomers[1].phones[0].number : ''
     );
     // country
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent(

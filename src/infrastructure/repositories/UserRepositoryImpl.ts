@@ -1,7 +1,7 @@
+import { CookieService } from '@/infrastructure/cookies/CookieService';
 import type { User } from '@/domain/entities/User';
 import type { UserRepository } from '@/domain/repositories/UserRepository';
 import { api } from '@/infrastructure/http/axios';
-import { CookieService } from '../cookies/CookieService';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 

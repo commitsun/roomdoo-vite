@@ -197,11 +197,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/infrastructure/stores/user';
-import { useInstanceStore } from '@/infrastructure/stores/instance';
-import { useUIStore } from '@/infrastructure/stores/ui';
-import { useNotificationsStore } from '@/infrastructure/stores/notifications';
-
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -215,12 +210,18 @@ import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Message from 'primevue/message';
+import type { Ref } from 'vue';
+
+import { useNotificationsStore } from '@/infrastructure/stores/notifications';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useUserStore } from '@/infrastructure/stores/user';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import type { Language } from '@/domain/entities/Language';
 
-const dialogRef = inject<any>('dialogRef');
+const dialogRef = inject<Ref<{ close: (payload?: unknown) => void } | undefined>>('dialogRef');
 
 const userStore = useUserStore();
 const instanceStore = useInstanceStore();
@@ -243,7 +244,7 @@ const newPassword = ref('');
 const repeatPassword = ref('');
 const errorMessage = ref('');
 
-const handleUpdateUser = async () => {
+const handleUpdateUser = async (): Promise<void> => {
   uiStore.startLoading();
   try {
     await userStore.updateUser({
@@ -263,11 +264,11 @@ const handleUpdateUser = async () => {
   }
 };
 
-const handleCancel = () => {
+const handleCancel = (): void => {
   dialogRef?.value?.close({ action: 'cancel' });
 };
 
-const handleChangePassword = async () => {
+const handleChangePassword = async (): Promise<void> => {
   if (newPassword.value !== repeatPassword.value) {
     errorMessage.value = t('userSettings.passwordsDoNotMatch');
     return;
@@ -288,17 +289,26 @@ const handleChangePassword = async () => {
   }
 };
 
-onMounted(() => {
-  firstName.value = user?.firstName || '';
-  lastName.value = user?.lastName || '';
-  secondLastName.value = user?.lastName2 || '';
-  phone.value = user?.phone || '';
-  email.value = user?.email || '';
-  if (user?.lang) {
+function getSafeString(val: unknown): string {
+  return typeof val === 'string' && val.trim() !== '' ? val : '';
+}
+
+function initializeUserFields(): void {
+  firstName.value = getSafeString(user?.firstName);
+  lastName.value = getSafeString(user?.lastName);
+  secondLastName.value = getSafeString(user?.lastName2);
+  phone.value = getSafeString(user?.phone);
+  email.value = getSafeString(user?.email);
+
+  if (typeof user?.lang === 'string' && user.lang.trim() !== '') {
     selectedLocale.value = user.lang.replace('_', '-');
   } else {
     selectedLocale.value = i18n.global.locale.value;
   }
+}
+
+onMounted(() => {
+  initializeUserFields();
 });
 </script>
 <style scoped lang="scss">

@@ -1,13 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/vue';
+import { cleanup, render, screen } from '@testing-library/vue';
 import '@testing-library/jest-dom/vitest';
-import InstanceLayout from '@/ui/layouts/InstanceLayout.vue';
 import { createTestingPinia, type TestingPinia } from '@pinia/testing';
+
+import InstanceLayout from '@/ui/layouts/InstanceLayout.vue';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 
 const push = vi.fn();
 
 vi.mock('vue-router', async (importOriginal) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const actual = await importOriginal<typeof import('vue-router')>();
   return { ...actual, useRouter: () => ({ push }) };
 });
