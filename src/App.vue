@@ -27,16 +27,17 @@
 
 <script lang="ts">
 import { defineComponent, computed, watch, ref } from 'vue';
-import DialogContainer from '@/_legacy/components/dialogs/DialogContainer.vue';
 import Toast from 'primevue/toast';
-import { useUIStore } from '@/infrastructure/stores/ui';
 import ProgressSpinner from 'primevue/progressspinner';
-import { useNotificationsStore } from '@/infrastructure/stores/notifications';
-import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import DynamicDialog from 'primevue/dynamicdialog';
 import Dialog from 'primevue/dialog';
+
+import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
+import { useNotificationsStore } from '@/infrastructure/stores/notifications';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import DialogContainer from '@/_legacy/components/dialogs/DialogContainer.vue';
 
 export default defineComponent({
   name: 'App',
@@ -51,18 +52,13 @@ export default defineComponent({
   setup() {
     const visible = ref(true);
     const toast = useToast();
+    const { remove: consumeNotification } = useNotificationsStore();
+    const { removeTextMessage: closeTextMessage } = useTextMessagesStore();
     const notificationStore = useNotificationsStore();
     const textMessageStore = useTextMessagesStore();
     const uiStore = useUIStore();
     const notifications = computed(() => notificationStore.messages);
     const textMessages = computed(() => textMessageStore.messages);
-    const consumeNotification = () => {
-      notificationStore.remove();
-    };
-
-    const closeTextMessage = () => {
-      textMessageStore.removeTextMessage();
-    };
 
     watch(
       () => notifications.value.length,

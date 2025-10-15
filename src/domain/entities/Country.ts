@@ -1,4 +1,4 @@
-import type { Id } from '../types/Id';
+import type { Id } from '@/domain/types/Id';
 
 export interface Country {
   id: Id;

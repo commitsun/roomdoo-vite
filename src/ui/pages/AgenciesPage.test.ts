@@ -3,8 +3,6 @@ import { render, screen, within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
-import primevuePlugin from '@/infrastructure/plugins/primevue';
-
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
@@ -16,8 +14,11 @@ import CountryFlag from 'vue-country-flag-next';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-import type { Agency } from '@/domain/entities/Contact';
+
 import AgenciesPage from './AgenciesPage.vue';
+
+import type { Agency } from '@/domain/entities/Contact';
+import primevuePlugin from '@/infrastructure/plugins/primevue';
 
 // i18n mock
 vi.mock('vue-i18n', () => {
@@ -137,9 +138,7 @@ describe('AgenciesPage', () => {
     );
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(
-      testAgencies[0].phones && testAgencies[0].phones.length > 0
-        ? testAgencies[0].phones[0].number
-        : ''
+      testAgencies[0].phones.length > 0 ? testAgencies[0].phones[0].number : ''
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
@@ -154,14 +153,10 @@ describe('AgenciesPage', () => {
     );
     // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[2].innerHTML).toContain(
-      testAgencies[1].phones && testAgencies[1].phones.length > 0
-        ? testAgencies[1].phones[0].number
-        : ''
+      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[0].number : ''
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[2].innerHTML).toContain(
-      testAgencies[1].phones && testAgencies[1].phones.length > 0
-        ? testAgencies[1].phones[1].number
-        : ''
+      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[1].number : ''
     );
     // country
     expect(within(bodyRows[1]).getAllByRole('cell')[3]).toHaveTextContent(

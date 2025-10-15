@@ -1,13 +1,13 @@
 import { fileURLToPath, URL } from 'node:url';
+import { execSync } from 'child_process';
+import path from 'path';
+
 import autoprefixer from 'autoprefixer';
 import { visualizer } from 'rollup-plugin-visualizer';
-
 import { defineConfig, Plugin, loadEnv } from 'vite';
-import { execSync } from 'child_process';
 import vue from '@vitejs/plugin-vue';
 import vueI18n from '@intlify/unplugin-vue-i18n/vite';
 import tailwindcss from '@tailwindcss/vite';
-import path from 'path';
 
 const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
 
