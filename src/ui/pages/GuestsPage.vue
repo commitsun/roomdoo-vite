@@ -24,7 +24,7 @@
       filterDisplay="menu"
       sortMode="single"
       selectionMode="single"
-      :sortField="sortField || undefined"
+      :sortField="safeSortField"
       :sortOrder="sortOrder"
       :globalFilterFields="['name']"
       @page="handlePageChange"
@@ -42,9 +42,7 @@
               <InputText
                 v-model="globalQuery"
                 :placeholder="t('contacts.globalSearch')"
-                @input="
-                  globalQuery.length >= 3 || globalQuery.length == 0 ? debouncedFetchNow() : null
-                "
+                @input="onGlobalQueryInput"
                 :aria-label="t('contacts.globalSearch')"
               />
             </IconField>
@@ -106,12 +104,16 @@
         :showAddButton="false"
       >
         <template #body="{ data }">
-          <span v-if="data.identificationDocuments?.length">
+          <span
+            v-if="
+              Array.isArray(data.identificationDocuments) && data.identificationDocuments.length > 0
+            "
+          >
             {{ data.identificationDocuments[0]?.type }}
             {{ data.identificationDocuments[0]?.number }}
             <span
               v-if="data.identificationDocuments.length > 1"
-              :title="data.identificationDocuments.map((d: PersonalDocument) => ((d.type ) + ' ' + (d.number ))).join('\n')"
+              :title="data.identificationDocuments.map((d: { type: any; number: any; }) => ((d.type) + ' ' + (d.number))).join('\n')"
               style="cursor: help; opacity: 0.8"
             >
               (+{{ data.identificationDocuments.length - 1 }})
@@ -143,11 +145,7 @@
         <template #body="{ data }">
           <div class="flex items-center gap-2 h-full">
             <div v-if="data.country">
-              <CountryFlag
-                :country="data.country.code ? data.country.code : ''"
-                size="normal"
-                shadow
-              />
+              <CountryFlag :country="data.country?.code ?? ''" size="normal" shadow />
             </div>
             <div v-if="data.country">{{ data.country.name }}</div>
           </div>
@@ -169,7 +167,7 @@
             :panelStyle="{ width: '100%' }"
             :selectedItemsLabel="
               t('contacts.n_countries_selected', {
-                count: filterModel.value ? filterModel.value.length : 0,
+                count: Array.isArray(filterModel.value) ? filterModel.value.length : 0,
               })
             "
           >
@@ -248,10 +246,9 @@ import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import ToggleSwitch from 'primevue/toggleswitch';
-
 import CountryFlag from 'vue-country-flag-next';
+import { FilterMatchMode } from '@primevue/core/api';
 
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
@@ -260,7 +257,9 @@ import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
 import type { Contact } from '@/domain/entities/Contact';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useUIStore } from '@/infrastructure/stores/ui';
-import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
+
+// helper: explicit non-empty string
+const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
 
 export default defineComponent({
   components: {
@@ -291,12 +290,18 @@ export default defineComponent({
     const sortField = ref<string | null>(null);
     const sortOrder = ref<number>(1);
     const SORT_FIELD_MAP: Record<string, string> = { name: 'name', country: 'country' };
-    const orderBy = computed(() =>
-      sortField.value
-        ? `${sortOrder.value === -1 ? '-' : ''}${
-            SORT_FIELD_MAP[sortField.value] ?? sortField.value
-          }`
-        : undefined
+
+    const orderBy = computed<string | undefined>(() => {
+      if (sortField.value !== null && sortField.value !== '') {
+        const key = SORT_FIELD_MAP[sortField.value] ?? sortField.value;
+        const prefix = sortOrder.value === -1 ? '-' : '';
+        return `${prefix}${key}`;
+      }
+      return undefined;
+    });
+
+    const safeSortField = computed<string | undefined>(() =>
+      sortField.value === null || sortField.value === '' ? undefined : sortField.value
     );
 
     const filters = ref({
@@ -311,70 +316,84 @@ export default defineComponent({
 
     const globalQuery = ref<string>('');
 
-    const countryOptions = computed(
-      () =>
-        countriesStore.countries?.map((c) => ({
-          label: c.name,
-          value: c.name,
-          code: c.code,
-        })) ?? []
+    const countryOptions = computed(() =>
+      (countriesStore.countries ?? []).map((c) => ({
+        label: c.name,
+        value: c.name,
+        code: c.code,
+      }))
     );
-    const showClearButton = computed(
-      () =>
-        globalQuery.value.length ||
-        sortField.value ||
-        filters.value.name.value ||
-        filters.value.identificationDocuments.value ||
-        (filters.value.country.value && filters.value.country.value.length) ||
-        filters.value.inHouse.value === true
-    );
+
+    const showClearButton = computed<boolean>(() => {
+      const f = filters.value;
+
+      const anyString =
+        isNonEmptyString(globalQuery.value) ||
+        isNonEmptyString(f.name.value) ||
+        isNonEmptyString(f.identificationDocuments.value) ||
+        isNonEmptyString(sortField.value);
+
+      const anyCountry =
+        (Array.isArray(f.country.value) && f.country.value.length > 0) ||
+        (typeof f.country.value === 'string' && f.country.value.trim().length > 0);
+
+      const inhouseOn = f.inHouse.value === true;
+
+      return anyString || anyCountry || inhouseOn;
+    });
 
     const guests = computed(() => contactsStore.guests);
-    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
 
-    const fetchNow = async () => {
+    async function fetchNow(): Promise<void> {
       const inhouseOnly = filters.value.inHouse?.value === true ? true : undefined;
       uiStore.startLoading();
-      await contactsStore.fetchGuests(
-        page.value,
-        rows.value,
-        globalQuery.value || undefined,
-        filters.value.name.value || undefined,
-        filters.value.identificationDocuments.value || undefined,
-        (filters.value.country.value as string[] | null) || undefined,
-        inhouseOnly,
-        orderBy.value
-      );
-      numTotalRecords.value = contactsStore.contactsCount ?? numTotalRecords.value;
-      uiStore.stopLoading();
-    };
+      try {
+        await contactsStore.fetchGuests(
+          page.value,
+          rows.value,
+          isNonEmptyString(globalQuery.value) ? globalQuery.value : undefined,
+          isNonEmptyString(filters.value.name.value) ? filters.value.name.value : undefined,
+          isNonEmptyString(filters.value.identificationDocuments.value)
+            ? filters.value.identificationDocuments.value
+            : undefined,
+          Array.isArray(filters.value.country.value) ? filters.value.country.value : undefined,
+          inhouseOnly,
+          orderBy.value
+        );
+        numTotalRecords.value = contactsStore.contactsCount ?? numTotalRecords.value;
+      } finally {
+        uiStore.stopLoading();
+      }
+    }
 
-    const debouncedFetchNow = useDebounceFn(async () => await fetchNow(), 250, { maxWait: 3000 });
-    const handlePageChange = async (e: DataTablePageEvent) => {
-      if (e.page !== undefined) {
+    const debouncedFetchNow = useDebounceFn(async () => fetchNow(), 250, { maxWait: 3000 });
+
+    async function handlePageChange(e: DataTablePageEvent): Promise<void> {
+      if (typeof e.page === 'number') {
         page.value = e.page + 1;
         rows.value = e.rows;
-        return await fetchNow();
+        await fetchNow();
       }
-    };
+    }
 
-    const handleFilterChange = async (e: DataTableFilterEvent) => {
-      if (e.filters) {
-        filters.value = e.filters as typeof filters.value;
+    async function handleFilterChange(e: DataTableFilterEvent): Promise<void> {
+      if (e.filters !== null) {
+        filters.value = e.filters as typeof filters.value; // TODO: refine type
         page.value = 1;
-        return await fetchNow();
+        await fetchNow();
       }
-    };
-    const handleSortChange = async (e: DataTableSortEvent) => {
+    }
+
+    async function handleSortChange(e: DataTableSortEvent): Promise<void> {
       if (e.sortField !== undefined) {
-        sortField.value = (e.sortField as typeof sortField.value) || null;
+        sortField.value = (e.sortField as string) ?? null;
         sortOrder.value = typeof e.sortOrder === 'number' ? e.sortOrder : 1;
         page.value = 1;
-        return await fetchNow();
+        await fetchNow();
       }
-    };
+    }
 
-    const clearAll = () => {
+    async function clearAll(): Promise<void> {
       globalQuery.value = '';
       sortField.value = null;
       sortOrder.value = 1;
@@ -389,63 +408,76 @@ export default defineComponent({
         },
         inHouse: { value: null as boolean | null, matchMode: FilterMatchMode.EQUALS },
       };
-      fetchNow();
-    };
+      await fetchNow();
+    }
 
-    const onToggleInhouse = (val: boolean) => {
+    function onToggleInhouse(val: boolean): void {
       const newVal = val ? true : null;
       filters.value = {
         ...filters.value,
-        inHouse: {
-          value: newVal,
-          matchMode: FilterMatchMode.EQUALS,
-        },
+        inHouse: { value: newVal, matchMode: FilterMatchMode.EQUALS },
       };
       page.value = 1;
-      fetchNow();
-    };
+      void fetchNow();
+    }
 
-    const openContactDetail = async (contact: Contact) => {
+    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
+
+    async function openContactDetail(contact: Contact): Promise<void> {
       uiStore.startLoading();
       try {
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(
-          contact.id,
-          currentPmsPropertyId.value!
-        );
+        const propId = currentPmsPropertyId.value;
+        if (!isNonEmptyString(propId)) {
+          return;
+        }
+        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contact.id, propId);
         open(PartnerForm, {
           props: { header: contact.name || t('contacts.detail') },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-            if (data?.refresh || data?.action === 'saved') {
-              fetchNow();
+            if (data?.refresh === true || data?.action === 'saved') {
+              void fetchNow();
             }
           },
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
       } finally {
         uiStore.stopLoading();
       }
-    };
+    }
 
-    const openNewContact = async () => {
+    async function openNewContact(): Promise<void> {
       uiStore.startLoading();
       try {
-        await useLegacyStore().removeVuexPartner(currentPmsPropertyId.value!);
+        const propId = currentPmsPropertyId.value;
+        if (!isNonEmptyString(propId)) {
+          return;
+        }
+        await useLegacyStore().removeVuexPartner(propId);
         open(PartnerForm, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-            if (data?.refresh || data?.action === 'saved') {
-              fetchNow();
+            if (data?.refresh === true || data?.action === 'saved') {
+              void fetchNow();
             }
           },
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
       } finally {
         uiStore.stopLoading();
       }
-    };
+    }
+
+    function onGlobalQueryInput(): void {
+      const len = globalQuery.value.length;
+      if (len >= 3 || len === 0) {
+        void debouncedFetchNow();
+      }
+    }
 
     onBeforeMount(async () => {
       await fetchNow();
@@ -459,6 +491,7 @@ export default defineComponent({
       rowsPerPageOptions,
       sortField,
       sortOrder,
+      safeSortField,
       filters,
       globalQuery,
       countryOptions,
@@ -474,6 +507,7 @@ export default defineComponent({
       handleSortChange,
       fetchNow,
       debouncedFetchNow,
+      onGlobalQueryInput,
     };
   },
 });

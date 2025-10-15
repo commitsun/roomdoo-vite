@@ -1,5 +1,5 @@
-import type { Id } from '../types/Id';
-import type { ImageUrl } from '../types/ImageUrl';
+import type { ImageUrl } from '@/domain/types/ImageUrl';
+import type { Id } from '@/domain/types/Id';
 
 export interface PmsProperty {
   id: Id;
