@@ -3,8 +3,6 @@ import { render, screen, within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
-import primevuePlugin from '@/infrastructure/plugins/primevue';
-
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
@@ -17,8 +15,10 @@ import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 
-import type { Supplier } from '@/domain/entities/Contact';
 import SuppliersPage from './SuppliersPage.vue';
+
+import type { Supplier } from '@/domain/entities/Contact';
+import primevuePlugin from '@/infrastructure/plugins/primevue';
 
 // i18n mock
 vi.mock('vue-i18n', () => {
@@ -41,7 +41,9 @@ vi.mock('vue-i18n', () => {
   return {
     useI18n: () => ({
       t: (k: string, params?: any) =>
-        k === 'contacts.n_countries_selected' && params ? '' : tMap[k] ?? k,
+        k === 'contacts.n_countries_selected' && params !== undefined && params !== null
+          ? ''
+          : tMap[k] ?? k,
     }),
     createI18n: vi.fn(() => ({ install: () => {} })),
   };

@@ -1,5 +1,6 @@
-import type { Agency, Contact, Customer, Guest, Supplier } from '../entities/Contact';
 import type { EntityListResponse } from './EntityListResponse';
+
+import type { Agency, Contact, Customer, Guest, Supplier } from '@/domain/entities/Contact';
 
 export interface ContactsRepository {
   fetchContacts(

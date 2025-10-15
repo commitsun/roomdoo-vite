@@ -71,11 +71,11 @@ import Button from 'primevue/button';
 import Message from 'primevue/message';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
+import { useRoute, useRouter } from 'vue-router';
 
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
-import { useRoute, useRouter } from 'vue-router';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
@@ -102,7 +102,7 @@ export default defineComponent({
     const password = ref('');
     const errorMessage = ref('');
     const instanceName = computed(() => instanceStore.instance?.name ?? '');
-    const doLogin = async () => {
+    const doLogin = async (): Promise<void> => {
       let redirect = '/';
       uiStore.startLoading();
       try {
@@ -111,13 +111,16 @@ export default defineComponent({
         await pmsPropertiesStore.fetchPmsProperties();
 
         if (userStore.user) {
-          if (route.query.redirect) {
+          if (route.query.redirect !== undefined && route.query.redirect !== null) {
             redirect = route.query.redirect as string;
-          } else if (route.params.pmsPropertyId) {
+          } else if (
+            route.params.pmsPropertyId !== undefined &&
+            route.params.pmsPropertyId !== null
+          ) {
             const pmsPropertyId = route.params.pmsPropertyId as string;
             redirect = `/${pmsPropertyId}`;
           }
-          router.replace(redirect);
+          await router.replace(redirect);
         }
       } catch (error) {
         if (error instanceof UnauthorizedError) {
