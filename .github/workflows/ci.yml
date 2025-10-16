@@ -60,6 +60,12 @@ jobs:
         run: |
           npm run coverage || (echo "❌ Tests failed" && exit 1)
 
+      - name: Debug coverage folder
+        if: always()
+        run: |
+          echo "Contents of coverage directory:"
+          ls -R coverage || echo "No coverage directory found"
+
       - name: Create coverage summary (Markdown)
         if: always()
         uses: irongut/CodeCoverageSummary@v1.3.0

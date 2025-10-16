@@ -35,6 +35,7 @@ export default defineConfig({
     setupFiles: ['./src/__tests__/setup.ts'],
     coverage: {
       exclude: ['src/_legacy/**', 'dist/**', '**/*.config.*', 'src/vite-env.d.ts', 'src/App.vue'],
+      reporter: ['text', 'lcov'],
     },
   },
 });
