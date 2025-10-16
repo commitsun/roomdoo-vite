@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
-# Required so the action can post/update a comment on the PR
+# Needed so the action can post/update a sticky comment on PRs
 permissions:
   contents: read
   pull-requests: write
@@ -19,39 +19,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout repository
-      - name: Checkout
+      # 1) Checkout PR branch
+      - name: Checkout (PR)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # ensure base ref is available
 
-      # 2) Set up Node.js and enable npm cache
+      # 2) Set up Node.js with npm cache
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24.8.0'
           cache: 'npm'
 
-      # 3) Match project npm version (per engines)
+      # 3) Match npm version (per engines)
       - name: Use npm 11.6.0 (match engines)
         run: npm i -g npm@11.6.0
 
-      # 4) Install dependencies (includes devDependencies for vitest)
-      - name: Install dependencies
+      # 4) Install dependencies for PR branch
+      - name: Install dependencies (PR)
         run: npm ci --include=dev
 
-      # 5) Run tests with coverage (vitest)
-      - name: Run tests with coverage
+      # 5) Run tests with coverage (PR)
+      - name: Run tests with coverage (PR)
         run: npm run coverage
 
-      # 6) Publish pretty coverage summary as a sticky PR comment + Job Summary
-      - name: Publish coverage report to PR
+      # 6) Checkout base branch into a subfolder to compute baseline coverage
+      - name: Checkout base branch (for diff)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }} # base branch of the PR (e.g., main)
+          path: base # checkout into ./base
+          fetch-depth: 0
+
+      # 7) Install dependencies and run coverage on base branch
+      - name: Install deps + run coverage (base)
+        working-directory: base
+        run: |
+          npm ci --include=dev
+          npm run coverage
+
+      # 8) Publish coverage report to PR with diff vs base
+      - name: Publish coverage report to PR (with diff)
         if: github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           vite-config-path: vitest.config.ts
+          # Use PR coverage as primary input (autodetected from ./coverage)
+          # Provide base coverage to show a trend/diff in the PR comment:
+          json-summary-path: ./coverage/coverage-summary.json
+          json-final-path: ./coverage/coverage-final.json
+          json-summary-compare-path: ./base/coverage/coverage-summary.json
+          # Optional: show coverage for changed files only/all/none
+          file-coverage-mode: changes
 
-      # 7) Upload HTML coverage report as an artifact (optional but handy)
-      - name: Upload HTML coverage report
+      # 9) Upload HTML coverage report as an artifact (PR branch)
+      - name: Upload HTML coverage report (PR)
         if: always()
         uses: actions/upload-artifact@v4
         with:
