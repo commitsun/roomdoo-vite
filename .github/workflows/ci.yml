@@ -3,10 +3,12 @@ name: CI
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-  workflow_dispatch: # permite lanzarlo manualmente
+  workflow_dispatch:
 
+# Required so the action can post/update a comment on the PR
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -17,83 +19,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1) Checkout repository
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2) Set up Node.js and enable npm cache
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.8.0' # clava tu engines.node
+          node-version: '24.8.0'
           cache: 'npm'
 
+      # 3) Match project npm version (per engines)
       - name: Use npm 11.6.0 (match engines)
         run: npm i -g npm@11.6.0
 
-      - name: Print versions
-        run: |
-          echo "Node version: $(node -v)"
-          echo "NPM version:  $(npm -v)"
+      # 4) Install dependencies (includes devDependencies for vitest)
+      - name: Install dependencies
+        run: npm ci --include=dev
 
-      - name: Check vitest in package.json
-        run: |
-          echo "devDependencies.vitest:"
-          npm pkg get "devDependencies.vitest" || true
-          echo "scripts.coverage:"
-          npm pkg get "scripts.coverage" || true
-
-      - name: Install dependencies (include dev)
-        run: |
-          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
-            npm ci --include=dev
-          else
-            npm install --include=dev
-          fi
-
-      - name: Debug npm binaries
-        run: |
-          echo "Listing node_modules/.bin..."
-          ls -la node_modules/.bin || echo "No bin folder"
-          echo "Which vitest?"
-          npx --no vitest --version || echo "vitest not found via npx"
-
+      # 5) Run tests with coverage (vitest)
       - name: Run tests with coverage
-        run: |
-          npm run coverage || (echo "❌ Tests failed" && exit 1)
+        run: npm run coverage
 
-      - name: Debug coverage folder
-        if: always()
-        run: |
-          echo "Contents of coverage directory:"
-          ls -R coverage || echo "No coverage directory found"
-
-      - name: Create coverage summary (Markdown)
-        if: always()
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: coverage/lcov.info
-          badge: true
-          format: markdown
-          output: both # publica en Job Summary y escribe un archivo .md
-          thresholds: '60 80' # opcional: marca Estados (rojo/amarillo/verde)
-
-      - name: Comment coverage on PR
+      # 6) Publish pretty coverage summary as a sticky PR comment + Job Summary
+      - name: Publish coverage report to PR
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: davelosert/vitest-coverage-report-action@v2
         with:
-          script: |
-            const fs = require('fs');
-            const path = 'code-coverage-results.md'; // nombre por defecto que genera la acción
-            const marker = '<!-- coverage-summary -->';
-            const body = marker + '\n' + fs.readFileSync(path, 'utf8');
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vite-config-path: vitest.config.ts
 
-            const {owner, repo} = context.repo;
-            const issue_number = context.payload.pull_request.number;
-
-            // borra/comparte comentario previo del bot para no spamear
-            const {data: comments} = await github.rest.issues.listComments({owner, repo, issue_number});
-            const prev = comments.find(c => c.user.type === 'Bot' && c.body && c.body.includes(marker));
-            if (prev) {
-              await github.rest.issues.updateComment({owner, repo, comment_id: prev.id, body});
-            } else {
-              await github.rest.issues.createComment({owner, repo, issue_number, body});
-            }
+      # 7) Upload HTML coverage report as an artifact (optional but handy)
+      - name: Upload HTML coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: coverage/lcov-report
+          if-no-files-found: ignore

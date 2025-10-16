@@ -34,8 +34,18 @@ export default defineConfig({
     css: true,
     setupFiles: ['./src/__tests__/setup.ts'],
     coverage: {
+      provider: 'v8',
+      reportsDirectory: 'coverage',
+      reporter: [
+        ['text', { summary: true }],
+        ['lcov', { file: 'lcov.info', projectRoot: './' }],
+        ['json', { file: 'coverage-final.json' }],
+        ['json-summary', { file: 'coverage-summary.json' }],
+      ],
+      reportOnFailure: true,
+      all: true,
+      cleanOnRerun: true,
       exclude: ['src/_legacy/**', 'dist/**', '**/*.config.*', 'src/vite-env.d.ts', 'src/App.vue'],
-      reporter: ['text', 'lcov'],
     },
   },
 });
