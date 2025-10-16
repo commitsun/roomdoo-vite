@@ -60,10 +60,34 @@ jobs:
         run: |
           npm run coverage || (echo "❌ Tests failed" && exit 1)
 
-      - name: Upload coverage report
+      - name: Create coverage summary (Markdown)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          name: coverage-report
-          path: coverage
-          if-no-files-found: ignore
+          filename: coverage/lcov.info
+          badge: true
+          format: markdown
+          output: both # publica en Job Summary y escribe un archivo .md
+          thresholds: '60 80' # opcional: marca Estados (rojo/amarillo/verde)
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'code-coverage-results.md'; // nombre por defecto que genera la acción
+            const marker = '<!-- coverage-summary -->';
+            const body = marker + '\n' + fs.readFileSync(path, 'utf8');
+
+            const {owner, repo} = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            // borra/comparte comentario previo del bot para no spamear
+            const {data: comments} = await github.rest.issues.listComments({owner, repo, issue_number});
+            const prev = comments.find(c => c.user.type === 'Bot' && c.body && c.body.includes(marker));
+            if (prev) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: prev.id, body});
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number, body});
+            }
