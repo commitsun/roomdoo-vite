@@ -38,19 +38,27 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
-      # 5) Run tests with coverage (vitest)
+      # 5) Run linter (do not stop the job if it fails)
+      - name: Run linter
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+
+      # 6) Run tests with coverage (always runs, even if lint failed)
       - name: Run tests with coverage
         run: npm run coverage
 
-      # 6) Publish pretty coverage summary as a sticky PR comment + Job Summary
+      # 7) Publish coverage summary as a sticky PR comment + Job Summary
       - name: Publish coverage report to PR
         if: github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           vite-config-path: vitest.config.ts
+          comment-title: '✅ Test Coverage Report'
+          badge-title: 'Coverage'
 
-      # 7) Upload HTML coverage report as an artifact (optional but handy)
+      # 8) Upload HTML coverage report as an artifact (optional)
       - name: Upload HTML coverage report
         if: always()
         uses: actions/upload-artifact@v4
@@ -58,3 +66,10 @@ jobs:
           name: coverage-html-report
           path: coverage/lcov-report
           if-no-files-found: ignore
+
+      # 9) Fail the job at the end if linter failed (so the check does not pass)
+      - name: Fail job if linter failed
+        if: steps.lint.outcome == 'failure'
+        run: |
+          echo "Lint failed earlier; marking job as failed after running tests."
+          exit 1
