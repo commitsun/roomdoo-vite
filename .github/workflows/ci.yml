@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
-# Required so the action can post/update a comment on the PR
+# Allow posting/updates to PR comments (coverage report)
 permissions:
   contents: read
   pull-requests: write
@@ -15,9 +15,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  # -------------------------
+  # LINT JOB  (separate check)
+  # -------------------------
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-
     steps:
       # 1) Checkout repository
       - name: Checkout
@@ -30,25 +33,50 @@ jobs:
           node-version: '24.8.0'
           cache: 'npm'
 
-      # 3) Match project npm version (per engines)
+      # 3) Match npm version (per engines)
       - name: Use npm 11.6.0 (match engines)
         run: npm i -g npm@11.6.0
 
-      # 4) Install dependencies (includes devDependencies for vitest)
+      # 4) Install dependencies
       - name: Install dependencies
         run: npm ci --include=dev
 
-      # 5) Run linter (do not stop the job if it fails)
+      # 5) Run linter (this job fails if lint fails)
       - name: Run linter
-        id: lint
-        continue-on-error: true
         run: npm run lint
 
-      # 6) Run tests with coverage (always runs, even if lint failed)
+  # --------------------------------------
+  # TESTS + COVERAGE  (separate check/job)
+  # --------------------------------------
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    # Do NOT depend on lint → runs even if lint fails
+    steps:
+      # 1) Checkout repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2) Set up Node.js and enable npm cache
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.8.0'
+          cache: 'npm'
+
+      # 3) Match npm version (per engines)
+      - name: Use npm 11.6.0 (match engines)
+        run: npm i -g npm@11.6.0
+
+      # 4) Install dependencies
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      # 5) Run tests with coverage (vitest)
       - name: Run tests with coverage
         run: npm run coverage
 
-      # 7) Publish coverage summary as a sticky PR comment + Job Summary
+      # 6) Publish pretty coverage summary as a sticky PR comment
       - name: Publish coverage report to PR
         if: github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
@@ -58,7 +86,7 @@ jobs:
           comment-title: '✅ Test Coverage Report'
           badge-title: 'Coverage'
 
-      # 8) Upload HTML coverage report as an artifact (optional)
+      # 7) Upload HTML coverage report as an artifact (optional)
       - name: Upload HTML coverage report
         if: always()
         uses: actions/upload-artifact@v4
@@ -66,10 +94,3 @@ jobs:
           name: coverage-html-report
           path: coverage/lcov-report
           if-no-files-found: ignore
-
-      # 9) Fail the job at the end if linter failed (so the check does not pass)
-      - name: Fail job if linter failed
-        if: steps.lint.outcome == 'failure'
-        run: |
-          echo "Lint failed earlier; marking job as failed after running tests."
-          exit 1
