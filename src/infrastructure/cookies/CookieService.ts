@@ -1,5 +1,7 @@
 import type { User } from '@/domain/entities/User';
 
+console.log(888);
+
 export class CookieService {
   private static setCookie(name: string, value: string, days: number = 7): void {
     const expires = new Date();
