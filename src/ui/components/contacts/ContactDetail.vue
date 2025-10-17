@@ -30,336 +30,68 @@
         </template>
       </SelectButton>
     </div>
-    <Tabs v-model:value="activeTab">
-      <TabList class="contact-detail__tablist">
-        <Tab value="0" as="div" class="flex items-center gap-2">
-          <FileText :size="14" :color="activeTab === '0' ? '#1D4ED8' : 'currentColor'" />
-          <span> {{ t('contacts.generalInformation') }} </span>
-        </Tab>
-        <Tab value="1" as="div" class="flex items-center gap-2" v-if="contactType === 'person'">
-          <IdCard :size="14" :color="activeTab === '1' ? '#1D4ED8' : 'currentColor'" />
-          <span> {{ t('contacts.documents') }} </span>
-        </Tab>
-        <Tab value="2" as="div" class="flex items-center gap-2">
-          <Banknote :size="14" :color="activeTab === '2' ? '#1D4ED8' : 'currentColor'" />
-          <span> {{ t('contacts.invoicing') }} </span>
-        </Tab>
-        <Tab value="3" as="div" class="flex items-center gap-2">
-          <NotebookPen :size="14" :color="activeTab === '3' ? '#1D4ED8' : 'currentColor'" />
-          <span> {{ t('contacts.internalnotes') }} </span>
-        </Tab>
-        <Tab value="4" as="div" class="flex items-center gap-2">
-          <BookUser :size="14" :color="activeTab === '4' ? '#1D4ED8' : 'currentColor'" />
-          <span> {{ t('contacts.addressBook') }} </span>
-        </Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel value="0">
-          <ContactPersonalDataTab
-            :contactType="contactType"
-            :contact="contact"
-            @updatePersonalData="onUpdateContact"
-          />
-        </TabPanel>
-        <TabPanel value="1">
-          <section class="documents-form">
-            <div
-              v-for="(doc, idx) in contactForm.documents"
-              :key="doc.id ?? idx"
-              class="documents-form__group"
-            >
-              <div class="documents-form__group-grid">
-                <!-- Document Issuing Country -->
-                <div class="documents-form__field">
-                  <IftaLabel>
-                    <Select
-                      :id="`doc-country`"
-                      v-model="(doc.country ?? { id: 0 }).id"
-                      :options="[...countries]"
-                      optionLabel="name"
-                      optionValue="id"
-                      class="documents-form__control"
-                    />
-                    <label :for="`doc-country-${idx}`">{{ t('contacts.issueCountry') }}</label>
-                  </IftaLabel>
-                </div>
-                <!-- Document Type -->
-                <div class="documents-form__field">
-                  <IftaLabel>
-                    <Select
-                      :id="`doc-type-${idx}`"
-                      v-model="(doc.category ?? { id: 0 }).id"
-                      :options="[...documentTypes]"
-                      optionLabel="name"
-                      optionValue="id"
-                      class="documents-form__control"
-                    />
-                    <label :for="`doc-type-${idx}`">{{ t('contacts.documentType') }}</label>
-                  </IftaLabel>
-                </div>
-                <!-- Document Number -->
-                <div class="documents-form__field">
-                  <IftaLabel>
-                    <InputText
-                      :id="`doc-number-${idx}`"
-                      v-model="doc.name"
-                      class="documents-form__control"
-                      autocomplete="off"
-                    />
-                    <label :for="`doc-number-${idx}`">{{ t('contacts.documentNumber') }}</label>
-                  </IftaLabel>
-                </div>
-                <!-- Document Support Number -->
-                <div class="documents-form__field">
-                  <IftaLabel>
-                    <InputText
-                      :id="`doc-support-${idx}`"
-                      v-model="doc.supportNumber"
-                      class="documents-form__control"
-                      autocomplete="off"
-                    />
-                    <label :for="`doc-support-${idx}`">{{ t('contacts.supportNumber') }}</label>
-                  </IftaLabel>
-                </div>
-              </div>
-            </div>
-            <!-- Document Actions -->
-            <div class="documents-form__actions">
-              <div class="documents-form__actions-left">
-                <div v-if="!hasDraftDoc">
-                  <Button
-                    :label="t('contacts.addDocument')"
-                    icon="pi pi-plus"
-                    severity="secondary"
-                    @click="startAddDocument"
-                  />
-                </div>
-                <div v-else class="flex gap-2">
-                  <Button
-                    :label="t('contacts.cancel')"
-                    icon="pi pi-times"
-                    text
-                    @click="cancelAddDocument"
-                  />
-                  <!-- <Button
-                    :label="t('contacts.saveDocument')"
-                    icon="pi pi-check"
-                    severity="secondary"
-                    @click="saveDraftDocument"
-                  /> -->
-                </div>
-              </div>
-              <div class="documents-form__actions-right" v-if="hasDraftDoc"></div>
-            </div>
-          </section>
-        </TabPanel>
-        <TabPanel value="2">
-          <section class="billing-form">
-            <div class="billing-form__grid">
-              <!-- Legal First Name -->
-              <div class="billing-form__field billing-form__field--full">
-                <IftaLabel>
-                  <InputText
-                    id="legalName"
-                    v-model="contactForm.legalName"
-                    class="billing-form__control"
-                  />
-                  <label for="legalName">{{ t('contacts.legalName') }}</label>
-                </IftaLabel>
-              </div>
-              <!-- Fiscal Document -->
-              <div class="billing-form__field">
-                <IftaLabel>
-                  <Select
-                    id="fiscalIdNumberType"
-                    :options="[...documentTypes]"
-                    optionLabel="name"
-                    optionValue="id"
-                    class="billing-form__control"
-                  />
-                  <label for="fiscalIdNumberType">{{ t('contacts.taxDocumentType') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="billing-form__field">
-                <IftaLabel>
-                  <InputText
-                    id="fiscalIdNumber"
-                    v-model="contactForm.fiscalIdNumber"
-                    class="billing-form__control"
-                  />
-                  <label for="fiscalIdNumber">{{ t('contacts.taxDocumentNumber') }}</label>
-                </IftaLabel>
-              </div>
-              <!-- Fiscal address -->
-              <div class="billing-form__field billing-form__field--full">
-                <IftaLabel>
-                  <InputText
-                    id="address"
-                    v-model="contactForm.street"
-                    class="billing-form__control"
-                  />
-                  <label for="address">{{ t('contacts.address') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="billing-form__field">
-                <IftaLabel>
-                  <InputText
-                    id="zipCode"
-                    v-model="contactForm.zipCode"
-                    class="billing-form__control"
-                  />
-                  <label for="zipCode">{{ t('contacts.postalCode') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="billing-form__field">
-                <IftaLabel>
-                  <InputText id="city" v-model="contactForm.city" class="billing-form__control" />
-                  <label for="city">{{ t('contacts.city') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="billing-form__field">
-                <IftaLabel>
-                  <Select
-                    id="country"
-                    v-model="contactForm.countryId"
-                    :options="[...countries]"
-                    optionLabel="name"
-                    optionValue="id"
-                    class="billing-form__control"
-                  />
-                  <label for="country">{{ t('contacts.country') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="billing-form__field">
-                <IftaLabel>
-                  <Select
-                    id="state"
-                    v-model="contactForm.stateId"
-                    :options="countryStates"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="billing-form__control"
-                  />
-                  <label for="state">{{ t('contacts.state') }}</label>
-                </IftaLabel>
-              </div>
-            </div>
-          </section>
-        </TabPanel>
-        <TabPanel value="3">
-          <section class="settings-form">
-            <div class="settings-form__grid">
-              <div class="settings-form__field">
-                <IftaLabel>
-                  <Select
-                    id="paymentTerm"
-                    v-model="contactForm.paymentTermId"
-                    :options="[...paymentTerms]"
-                    optionLabel="name"
-                    optionValue="id"
-                    class="settings-form__control"
-                  />
-                  <label for="paymentTerm">{{ t('contacts.paymentTerm') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="settings-form__field">
-                <IftaLabel>
-                  <Select
-                    id="pricelist"
-                    v-model="contactForm.pricelistId"
-                    :options="[...pricelists]"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="settings-form__control"
-                  />
-                  <label for="rate">{{ t('contacts.pricelistAssociated') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="settings-form__field">
-                <IftaLabel>
-                  <Select
-                    id="invoicingPolicy"
-                    v-model="contactForm.invoicingPolicy"
-                    :options="invoicingPolicies"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="settings-form__control"
-                  />
-                  <label for="invoicingPolicy">{{ t('contacts.invoicingPolicy') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="settings-form__field">
-                <IftaLabel>
-                  <InputText
-                    id="ref"
-                    v-model="contactForm.reference"
-                    class="settings-form__control"
-                  />
-                  <label for="ref">{{ t('contacts.internalReference') }}</label>
-                </IftaLabel>
-              </div>
-              <div class="settings-form__field settings-form__field--full">
-                <label class="settings-form__label" for="tagsInput">{{ t('contacts.tags') }}</label>
-                <div class="tags-field">
-                  <Chip
-                    v-for="tag in contactForm.tags"
-                    :key="tag.id"
-                    :label="tag.name"
-                    removable
-                    @remove="removeTag(tag.id)"
-                  />
-                  <Select
-                    :key="selectResetKey"
-                    id="tagsInput"
-                    v-model="tagDraftId"
-                    :options="[
-                      ...tags.filter((t) => !contactForm.tags.some((ct) => ct.id === t.id)),
-                    ]"
-                    optionLabel="name"
-                    optionValue="id"
-                    class="tags-field__input"
-                    :placeholder="$options.length ? ` ${t('contacts.selectTag')} ` : ''"
-                    @update:modelValue="onTagSelected"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-        </TabPanel>
-        <TabPanel value="4">
-          <section class="internal-notes">
-            <Textarea v-model="contactForm.internalNotes" rows="5" />
-          </section>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
-    <!-- <div class="flex justify-end">
-      <Button
-        :label="t('contacts.cancel')"
-        icon="pi pi-times"
-        class="mt-4 mr-2"
-        text
-        @click="handleCancel()"
-      />
-      <Button @click="handleSave()" :label="t('contacts.save')" icon="pi pi-check" class="mt-4" />
-    </div> -->
+
+    <Accordion>
+      <AccordionPanel value="0">
+        <AccordionHeader>
+          <div class="flex items-center gap-2">
+            <FileText :size="15" />
+            <span> {{ t('contacts.generalInformation') }} </span>
+          </div>
+        </AccordionHeader>
+        <AccordionContent>
+          <ContactDetailGeneralData :contactType="contactType" v-model="contactForm" />
+        </AccordionContent>
+      </AccordionPanel>
+      <AccordionPanel value="1">
+        <AccordionHeader>
+          <div class="flex items-center gap-2">
+            <IdCard :size="15" />
+            <span> {{ t('contacts.documents') }} </span>
+          </div>
+        </AccordionHeader>
+        <AccordionContent>
+          <ContactDetailDocuments v-model="contactForm" />
+        </AccordionContent>
+      </AccordionPanel>
+      <AccordionPanel value="2">
+        <AccordionHeader>
+          <div class="flex items-center gap-2">
+            <Banknote :size="15" />
+            <span> {{ t('contacts.invoicing') }} </span>
+          </div>
+        </AccordionHeader>
+        <AccordionContent>
+          <ContactDetailBilling v-model="contactForm" />
+        </AccordionContent>
+      </AccordionPanel>
+      <AccordionPanel value="3">
+        <AccordionHeader>
+          <div class="flex items-center gap-2">
+            <NotebookPen :size="15" />
+            <span> {{ t('contacts.internalnotes') }} </span>
+          </div>
+        </AccordionHeader>
+        <AccordionContent>
+          <ContactDetailInternalNotes v-model="contactForm" />
+        </AccordionContent>
+      </AccordionPanel>
+    </Accordion>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed, watch, inject } from 'vue';
+import { defineComponent, ref, reactive, computed, onBeforeMount, watch, inject } from 'vue';
 import SelectButton from 'primevue/selectbutton';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
-import Chip from 'primevue/chip';
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
-import DatePicker from 'primevue/datepicker';
-import IftaLabel from 'primevue/iftalabel';
-import Textarea from 'primevue/textarea';
+import Accordion from 'primevue/accordion';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
+import AccordionPanel from 'primevue/accordionpanel';
 import Button from 'primevue/button';
 import { useI18n } from 'vue-i18n';
 import {
@@ -373,8 +105,15 @@ import {
   BookUser,
 } from 'lucide-vue-next';
 
-import ContactPersonalDataTab from './ContactPersonalDataTab.vue';
+import ContactDetailGeneralData from './ContactDetailGeneralData.vue';
+import ContactDetailDocuments from './ContactDetailDocuments.vue';
+import ContactDetailBilling from './ContactDetailBilling.vue';
+import ContactDetailInternalNotes from './ContactDetailInternalNotes.vue';
 
+import type { Country } from '@/domain/entities/Country';
+import type { CountryState } from '@/domain/entities/CountryState';
+import type { PaymentTerm } from '@/domain/entities/PaymentTerm';
+import type { Pricelist } from '@/domain/entities/Pricelist';
 import type { ContactDetail, ContactDetailPayload } from '@/domain/entities/Contact';
 import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
@@ -394,18 +133,19 @@ export default defineComponent({
   components: {
     SelectButton,
     Tabs,
-    ContactPersonalDataTab,
+    ContactDetailGeneralData,
+    ContactDetailDocuments,
+    ContactDetailBilling,
+    ContactDetailInternalNotes,
     TabList,
     Tab,
     TabPanels,
     TabPanel,
-    InputText,
-    Select,
-    DatePicker,
-    IftaLabel,
-    Chip,
-    Textarea,
     Button,
+    Accordion,
+    AccordionHeader,
+    AccordionContent,
+    AccordionPanel,
     User,
     Building,
     Store,
@@ -435,34 +175,32 @@ export default defineComponent({
       { label: t('contacts.company'), value: 'company' },
       { label: t('contacts.agency'), value: 'agency' },
     ]);
-    const tagDraftId = ref(0);
-    const selectResetKey = ref(0);
     const activeTab = ref('0');
-    const tagsInputRef = ref<HTMLInputElement | null>(null);
-    const hasDraftDoc = ref(false);
+
     const contact = ref<ContactDetail | null>(null);
 
-    const contactForm = reactive({
-      firstName: '',
-      lastName: '',
-      lastName2: '',
+    const contactForm: ContactDetail = reactive({
+      id: 0,
+      name: '',
+      firstname: '',
+      lastname: '',
+      lastname2: '',
       birthdate: null as Date | null,
-      nationalityId: 0 as number | null,
+      nationality: undefined as Country | undefined,
       lang: '',
       gender: '',
-      phoneNumber: '',
+      phones: [] as Phone[],
       email: '',
       documents: [] as PersonalDocument[],
-      legalName: '',
       // fiscalIdNumberType: null as DocumentType | null,
       fiscalIdNumber: '',
       street: '',
       zipCode: '',
       city: '',
-      stateId: 0 as number | null,
-      countryId: 0 as number | null,
-      paymentTermId: 0 as number | null,
-      pricelistId: 0 as number | null,
+      state: undefined as CountryState | undefined,
+      country: undefined as Country | undefined,
+      paymentTerm: undefined as PaymentTerm | undefined,
+      pricelist: undefined as Pricelist | undefined,
       invoicingPolicy: '',
       reference: '',
       tags: [] as Tag[],
@@ -473,9 +211,7 @@ export default defineComponent({
     const countries = computed(() => countriesStore.countries);
     const contactsStoreSchema = computed(() => contactsStore.contactSchema);
     const paymentTerms = computed(() => paymentTermsStore.paymentTerms);
-    const tags = computed(() => tagsStore.tags);
     const documentTypes = computed(() => documentTypesStore.documentTypes);
-    const draftDoc = computed(() => contactForm.documents.find((d: any) => d._isDraft) || null);
     const languages = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
 
     const showLastName2 = computed(
@@ -656,6 +392,7 @@ export default defineComponent({
     onBeforeMount(async () => {
       uiStore.startLoading();
       contact.value = dialogRef.value.data.contact;
+      console.log('Loaded contact:', contact.value);
       try {
         await documentTypesStore.fetchDocumentTypes();
         await countriesStore.fetchCountries();
@@ -664,7 +401,6 @@ export default defineComponent({
         await pricelistStore.fetchPricelists();
         await tagsStore.fetchTags();
         if (contact.value) {
-          console.log(contact.value.birthdate);
           if (contact.value.birthdate) {
             (contact.value as ContactDetail).birthdate =
               new Date(contact.value.birthdate || '') ?? null;
@@ -675,42 +411,39 @@ export default defineComponent({
               : contact.value.contactType === 'company'
                 ? 'company'
                 : 'person';
-
-          contactForm.firstName = contact.value.firstname || '';
-          contactForm.lastName = contact.value.lastname || '';
-          contactForm.lastName2 = contact.value.lastname2 || '';
+          contactForm.id = contact.value.id;
+          contactForm.name = contact.value.name || '';
+          contactForm.firstname = contact.value.firstname || '';
+          contactForm.lastname = contact.value.lastname || '';
+          contactForm.lastname2 = contact.value.lastname2 || '';
           contactForm.birthdate = contact.value.birthdate
             ? new Date(contact.value.birthdate)
             : null;
-          contactForm.nationalityId = contact.value?.nationality?.id ?? null;
+          contactForm.nationality = contact.value?.nationality ?? undefined;
           contactForm.lang = contact.value.lang || '';
           contactForm.gender = contact.value.gender || '';
-          contactForm.phoneNumber =
-            (contact.value.phones && contact.value.phones.length > 0
-              ? (contact.value.phones[0] as Phone).number
-              : '') || '';
-
+          contactForm.phones = (contact.value.phones as Phone[]) || [];
           contactForm.email = contact.value.email || '';
           contactForm.documents = contact.value.documents || [];
-          // contactForm.legalName = contact.value.name || '';
           // contactForm.fiscalIdNumberType = contact.value.fiscalIdNumberType?.name || null;
           contactForm.fiscalIdNumber = contact.value.fiscalIdNumber || '';
           contactForm.street = contact.value.street || contact.value.street2 || '';
           contactForm.zipCode = contact.value.zipCode || '';
           contactForm.city = contact.value.city || '';
-          contactForm.countryId = contact.value.country?.id ?? null;
-          contactForm.stateId = contact.value.state?.id ?? null;
-          contactForm.paymentTermId = contact.value.paymentTerm?.id ?? null;
+          contactForm.country = contact.value.country ?? undefined;
+          contactForm.state = contact.value.state ?? undefined;
+          contactForm.paymentTerm = contact.value.paymentTerm ?? undefined;
           contactForm.tags = contact.value.tags || [];
-          contactForm.pricelistId = contact.value.pricelist?.id ?? null;
+          contactForm.pricelist = contact.value.pricelist ?? undefined;
           contactForm.internalNotes = contact.value.internalNotes || '';
           contactForm.invoicingPolicy = contact.value.invoicingPolicy || '';
           contactForm.reference = contact.value.reference || '';
-          if (!contactForm.firstName && (contactForm.lastName || contactForm.lastName2)) {
-            contactForm.firstName = contactForm.lastName ?? contactForm.lastName2 ?? '';
-            contactForm.lastName = contactForm.lastName2 = '';
+          if (!contactForm.firstname && (contactForm.lastname || contactForm.lastname2)) {
+            contactForm.firstname = contactForm.lastname ?? contactForm.lastname2 ?? '';
+            contactForm.lastname = contactForm.lastname2 = '';
           }
         }
+        console.log('Contact form initialized:', contactForm);
       } catch (error) {
         console.error('Error fetching contact data:', error);
       } finally {
@@ -723,33 +456,19 @@ export default defineComponent({
       contactTypeOptions,
       contactForm,
       contact,
-      genders,
       age,
       birthdateLabel,
       paymentTerms,
       pricelists,
       countries,
       countryStates,
-      tagDraftId,
-      tagsInputRef,
       activeTab,
-      invoicingPolicies,
       contactsStoreSchema,
-      showLastName2,
-      tags,
-      selectResetKey,
       documentTypes,
-      hasDraftDoc,
-      canSaveDraft,
       languages,
       t,
-      removeTag,
-      onTagSelected,
-      startAddDocument,
-      cancelAddDocument,
       handleCancel,
       handleSave,
-      onUpdateContact,
     };
   },
 });
@@ -771,16 +490,16 @@ $bp-desktop: 640px;
   top: 0;
   z-index: 20;
   background: #f1f5f9;
-  min-height: 56px; /* <— la altura de esta barra */
+  min-height: 56px;
   display: flex;
   align-items: center;
-  box-shadow: 0 0 0 var(--bleed-x) #f1f5f9; /* truco para cubrir el padding lateral del modal */
+  justify-content: center;
+  box-shadow: 0 0 0 var(--bleed-x) #f1f5f9;
 }
 
-/* TabList fijo justo debajo de la barra anterior */
 .contact-detail__tablist {
   position: sticky;
-  top: 56px; /* <— igual a la altura de .contact-type */
+  top: 56px;
   z-index: 19;
   background: #fff;
   box-shadow:
@@ -799,56 +518,6 @@ $bp-desktop: 640px;
   z-index: -1;
   pointer-events: none;
 }
-
-// .contact-detail {
-//   margin-inline: auto;
-
-//   &__grid {
-//     display: grid;
-//     grid-template-columns: 1fr;
-//     gap: 12px;
-//   }
-
-//   &__field {
-//     :deep(.p-iftalabel) {
-//       display: block;
-//       width: 100%;
-//     }
-
-//     .contact-detail__control {
-//       width: 100%;
-//     }
-
-//     :deep(.p-inputtext),
-//     :deep(.p-select),
-//     :deep(.p-dropdown),
-//     :deep(.p-datepicker),
-//     :deep(.p-inputwrapper) {
-//       width: 100%;
-//     }
-
-//     :deep(.p-datepicker .p-inputwrapper) {
-//       display: grid;
-//       grid-template-columns: 1fr auto; // input | icono
-//       align-items: stretch;
-//     }
-//     :deep(.contact-detail__control-input),
-//     :deep(.p-datepicker .p-inputtext) {
-//       width: 100%;
-//     }
-//   }
-
-//   &__field--full {
-//     grid-column: 1 / -1;
-//   }
-
-//   &__hint {
-//     display: block;
-//     margin-top: 4px;
-//     font-size: 12px;
-//     color: var(--text-color-secondary, #6b7280);
-//   }
-// }
 .billing-form {
   margin-inline: auto;
 
@@ -1003,62 +672,6 @@ $bp-desktop: 640px;
 :deep(.p-tabpanels) {
   padding: 0;
   padding-top: 18px;
-}
-
-@media (min-width: $bp-desktop) {
-  // .contact-detail {
-  //   max-width: none;
-  //   height: 310px;
-  //   &__grid {
-  //     grid-template-columns: repeat(2, minmax(0, 1fr));
-  //     column-gap: 16px;
-  //     row-gap: 12px;
-  //   }
-
-  //   &__field--full {
-  //     grid-column: 1 / -1;
-  //   }
-  // }
-  .billing-form {
-    max-width: none;
-    height: 310px;
-    &__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 16px;
-      row-gap: 12px;
-    }
-
-    &__field--full {
-      grid-column: 1 / -1;
-    }
-  }
-  .settings-form {
-    max-width: none;
-    height: 310px;
-    &__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 16px;
-      row-gap: 12px;
-    }
-
-    &__field--full {
-      grid-column: 1 / -1;
-    }
-  }
-  .internal-notes {
-    max-width: none;
-    height: 310px;
-  }
-  .documents-form {
-    max-width: none;
-    height: 310px;
-
-    &__group-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 16px;
-      row-gap: 12px;
-    }
-  }
 }
 
 @media (min-width: 1024px) {
