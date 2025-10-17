@@ -65,7 +65,6 @@ export interface ContactDetail extends Omit<Contact, 'types'> {
   fiscalIdNumber?: string;
   fiscalIdNumberType?: DocumentType;
   tags?: Tag[];
-  legalName?: string;
 }
 
 export interface ContactDetailPayload

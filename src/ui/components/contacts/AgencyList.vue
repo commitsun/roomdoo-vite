@@ -370,18 +370,12 @@ import Avatar from 'primevue/avatar';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import { FilterMatchMode } from '@primevue/core/api';
-import { useStore } from 'vuex';
 
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
-<<<<<<< HEAD:src/ui/components/contacts/AgencyList.vue
-// TODO: remove when new api is ready
-=======
->>>>>>> 8fe76b5 ([IMP] pms-pwa: Fix internal reference typo in Spanish locale and refactor contact handling in multiple components):src/ui/pages/AgenciesPage.vue
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { firstTwoInitials } from '@/ui/utils/strings';
 
 // helper: explicit non-empty string
@@ -413,7 +407,6 @@ export default defineComponent({
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
-    const pmsPropertiesStore = usePmsPropertiesStore();
 
     // translation
     const { t } = useI18n();
@@ -622,12 +615,12 @@ export default defineComponent({
       applyFilter?.();
     };
 
-const openContactDetail = async (contactId: number): Promise<void> => {
+    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
-        if (!contact) {
+        if (contact === null) {
           uiStore.stopLoading();
           return;
         }
