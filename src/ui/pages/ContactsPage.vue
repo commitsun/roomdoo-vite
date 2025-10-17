@@ -619,7 +619,7 @@ export default defineComponent({
     bottom: 5rem;
     right: 2rem;
     z-index: 10;
-    opacity: 0.7;
+    opacity: 0.9;
   }
   .button-add {
     display: none;
