@@ -7,7 +7,7 @@
   <DynamicDialog />
   <teleport to="body">
     <div v-if="uiStore.isLoading" class="overlay-spinner">
-      <ProgressSpinner />
+      <ProgressSpinner class="one-color-spinner" />
     </div>
   </teleport>
   <Dialog
@@ -101,5 +101,12 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+:deep(.one-color-spinner .p-progress-spinner-circle),
+:deep(.one-color-spinner .p-progressspinner-circle),
+:deep(.one-color-spinner [data-pc-section='circle']),
+:deep(.one-color-spinner circle) {
+  stroke: #3b82f6 !important;
 }
 </style>
