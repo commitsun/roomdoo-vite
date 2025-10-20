@@ -64,7 +64,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       ['guest'], // typeIn
       ['Argentina', 'Spain'], // countryIn
       '555444333', // phonesContains
-      'name' // orderBy
+      'name', // orderBy
     );
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
     const url = new URL(calledUrl, 'http://localhost');
@@ -97,7 +97,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       '222222', // vatContains
       ['Argentina', 'Spain'], // countryIn
       '555444333', // phonesContains
-      'name' // orderBy
+      'name', // orderBy
     );
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
     const url = new URL(calledUrl, 'http://localhost');
@@ -129,7 +129,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       '222222', // documentContains
       ['Argentina', 'Spain'], // countryIn
       true, // inHouseOnly
-      'name' // orderBy
+      'name', // orderBy
     );
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
     const url = new URL(calledUrl, 'http://localhost');
@@ -160,7 +160,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       'johndoe@test.com', // emailContains
       ['Argentina', 'Spain'], // countryIn
       '222222', // phoneContains
-      'name' // orderBy
+      'name', // orderBy
     );
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
     const url = new URL(calledUrl, 'http://localhost');
@@ -192,7 +192,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       'johndoe@test.com', // emailContains
       ['Argentina', 'Spain'], // countryIn
       '222222', // phoneContains
-      'name' // orderBy
+      'name', // orderBy
     );
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
     const url = new URL(calledUrl, 'http://localhost');

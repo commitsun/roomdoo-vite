@@ -319,21 +319,21 @@ const items = computed(() => [
 
 const user = computed(() => userStore.user);
 const currentPmsProperty = computed(() =>
-  pmsPropertiesStore.pmsProperties.find((p) => p.id === pmsPropertiesStore.currentPmsPropertyId)
+  pmsPropertiesStore.pmsProperties.find((p) => p.id === pmsPropertiesStore.currentPmsPropertyId),
 );
 const pmsPropertySupportLink = computed(() =>
-  pmsPropertiesStore.pmsPropertyLinks.find((link) => link.isSupportLink)
+  pmsPropertiesStore.pmsPropertyLinks.find((link) => link.isSupportLink),
 );
 const pmsPropertiesLinks = computed(() =>
-  pmsPropertiesStore.pmsPropertyLinks.filter((link) => !link.isSupportLink)
+  pmsPropertiesStore.pmsPropertyLinks.filter((link) => !link.isSupportLink),
 );
 
 const isActive = (path: string): boolean => route.path === path;
 
 const isContactsSectionActive = computed(() =>
   ['/contacts', '/customers', '/guests', '/suppliers', '/agencies'].some((p) =>
-    route.path.startsWith(p)
-  )
+    route.path.startsWith(p),
+  ),
 );
 
 const collapseSidebar = (): void => {
@@ -412,7 +412,9 @@ const openLegacyReport = (type: LegacyReportType): void => {
   background-color: white;
   overflow: hidden;
   transform: translateX(-100%);
-  transition: width 0.3s ease, transform 0.3s ease;
+  transition:
+    width 0.3s ease,
+    transform 0.3s ease;
   user-select: none;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 
@@ -497,7 +499,10 @@ const openLegacyReport = (type: LegacyReportType): void => {
   opacity: 0;
   transform: translateY(-4px);
   margin-top: -0.5rem;
-  transition: max-height 200ms ease, opacity 160ms ease, transform 160ms ease;
+  transition:
+    max-height 200ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
 
   &--open {
     max-height: 1000px;
@@ -650,7 +655,10 @@ const openLegacyReport = (type: LegacyReportType): void => {
       visibility: hidden;
       pointer-events: none;
 
-      transition: max-height 0.25s ease, opacity 0.18s ease, transform 0.18s ease,
+      transition:
+        max-height 0.25s ease,
+        opacity 0.18s ease,
+        transform 0.18s ease,
         visibility 0s linear 0.25s;
       &.is-open {
         max-height: 500px; // suficiente para tu menú
@@ -659,7 +667,11 @@ const openLegacyReport = (type: LegacyReportType): void => {
         visibility: visible;
         pointer-events: auto;
 
-        transition: max-height 0.25s ease, opacity 0.18s ease, transform 0.18s ease, visibility 0s;
+        transition:
+          max-height 0.25s ease,
+          opacity 0.18s ease,
+          transform 0.18s ease,
+          visibility 0s;
       }
     }
   }

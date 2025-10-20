@@ -148,15 +148,15 @@ describe('CustomersPage', () => {
     expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent(testCustomers[0].vat);
     // email
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(
-      testCustomers[0].email ?? ''
+      testCustomers[0].email ?? '',
     );
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testCustomers[0].phones.length > 0 ? testCustomers[0].phones[0].number : ''
+      testCustomers[0].phones.length > 0 ? testCustomers[0].phones[0].number : '',
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
-      testCustomers[0].country?.name ?? ''
+      testCustomers[0].country?.name ?? '',
     );
 
     //total invoiced
@@ -165,7 +165,7 @@ describe('CustomersPage', () => {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
         useGrouping: true,
-      })
+      }),
     );
     // check 2nd row content
     // name
@@ -174,16 +174,16 @@ describe('CustomersPage', () => {
     expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent(testCustomers[1].vat);
     // email
     expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent(
-      testCustomers[1].email ?? ''
+      testCustomers[1].email ?? '',
     );
 
     // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testCustomers[1].phones.length > 0 ? testCustomers[1].phones[0].number : ''
+      testCustomers[1].phones.length > 0 ? testCustomers[1].phones[0].number : '',
     );
     // country
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent(
-      testCustomers[1].country?.name ?? ''
+      testCustomers[1].country?.name ?? '',
     );
   });
 
@@ -445,7 +445,7 @@ describe('CustomersPage', () => {
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
     await userEvent.type(
       within(emailOverlay).getByPlaceholderText(/search by email/i),
-      'john.doe@example.com'
+      'john.doe@example.com',
     );
     await userEvent.click(within(emailOverlay).getByRole('button', { name: /apply/i }));
 

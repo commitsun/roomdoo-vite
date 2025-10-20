@@ -59,7 +59,7 @@ watch(
       rightDrawerVisible.value = name.includes('detail');
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 onBeforeMount(async () => {
