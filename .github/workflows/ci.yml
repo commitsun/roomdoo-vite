@@ -5,7 +5,6 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
-# Allow posting/updates to PR comments (coverage report)
 permissions:
   contents: read
   pull-requests: write
@@ -15,68 +14,83 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # --------------------------
+  # PRETTIER (first check/job)
+  # --------------------------
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.8.0'
+          cache: 'npm'
+
+      - name: Use npm 11.6.0 (match engines)
+        run: npm i -g npm@11.6.0
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Check Prettier formatting
+        run: npm run prettier:check
+
   # -------------------------
-  # LINT JOB  (separate check)
+  # LINT (depends on Prettier)
   # -------------------------
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    needs: [prettier] # run only if Prettier passed
     steps:
-      # 1) Checkout repository
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2) Set up Node.js and enable npm cache
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24.8.0'
           cache: 'npm'
 
-      # 3) Match npm version (per engines)
       - name: Use npm 11.6.0 (match engines)
         run: npm i -g npm@11.6.0
 
-      # 4) Install dependencies
       - name: Install dependencies
         run: npm ci --include=dev
 
-      # 5) Run linter (this job fails if lint fails)
       - name: Run linter
         run: npm run lint
 
-  # --------------------------------------
-  # TESTS + COVERAGE  (separate check/job)
-  # --------------------------------------
+  # ---------------------------------------
+  # TESTS + COVERAGE (depends on Lint)
+  # ---------------------------------------
   tests:
     name: Tests
     runs-on: ubuntu-latest
-    # Do NOT depend on lint → runs even if lint fails
+    needs: [lint] # run only if Lint passed
     steps:
-      # 1) Checkout repository
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2) Set up Node.js and enable npm cache
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24.8.0'
           cache: 'npm'
 
-      # 3) Match npm version (per engines)
       - name: Use npm 11.6.0 (match engines)
         run: npm i -g npm@11.6.0
 
-      # 4) Install dependencies
       - name: Install dependencies
         run: npm ci --include=dev
 
-      # 5) Run tests with coverage (vitest)
       - name: Run tests with coverage
         run: npm run coverage
 
-      # 6) Publish pretty coverage summary as a sticky PR comment
       - name: Publish coverage report to PR
         if: github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
@@ -86,7 +100,6 @@ jobs:
           comment-title: '✅ Test Coverage Report'
           badge-title: 'Coverage'
 
-      # 7) Upload HTML coverage report as an artifact (optional)
       - name: Upload HTML coverage report
         if: always()
         uses: actions/upload-artifact@v4
