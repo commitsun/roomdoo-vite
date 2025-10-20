@@ -45,7 +45,7 @@ vi.mock('vue-i18n', () => {
       t: (k: string, params?: any) =>
         k === 'contacts.n_countries_selected' && params !== undefined && params !== null
           ? ''
-          : tMap[k] ?? k,
+          : (tMap[k] ?? k),
     }),
     createI18n: vi.fn(() => ({ global, install: () => {} })),
   };
@@ -155,44 +155,44 @@ describe('ContactsPage', () => {
     expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(testContacts[0].name);
     // types
     expect(within(bodyRows[0]).getAllByRole('cell')[1].innerHTML).toContain(
-      testContacts[0].types[0].charAt(0).toUpperCase() + testContacts[0].types[0].slice(1)
+      testContacts[0].types[0].charAt(0).toUpperCase() + testContacts[0].types[0].slice(1),
     );
     // email
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(
-      testContacts[0].email ?? ''
+      testContacts[0].email ?? '',
     );
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testContacts[0].phones.length > 0 ? testContacts[0].phones[0].number : ''
+      testContacts[0].phones.length > 0 ? testContacts[0].phones[0].number : '',
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
-      testContacts[0].country?.name ?? ''
+      testContacts[0].country?.name ?? '',
     );
     // check 2nd row content
     // name
     expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(testContacts[1].name);
     // types
     expect(within(bodyRows[1]).getAllByRole('cell')[1].innerHTML).toContain(
-      testContacts[1].types[0].charAt(0).toUpperCase() + testContacts[1].types[0].slice(1)
+      testContacts[1].types[0].charAt(0).toUpperCase() + testContacts[1].types[0].slice(1),
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[1].innerHTML).toContain(
-      testContacts[1].types[1].charAt(0).toUpperCase() + testContacts[1].types[1].slice(1)
+      testContacts[1].types[1].charAt(0).toUpperCase() + testContacts[1].types[1].slice(1),
     );
     // email
     expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent(
-      testContacts[1].email ?? ''
+      testContacts[1].email ?? '',
     );
     // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testContacts[1].phones.length > 0 ? testContacts[1].phones[0].number : ''
+      testContacts[1].phones.length > 0 ? testContacts[1].phones[0].number : '',
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testContacts[1].phones.length > 0 ? testContacts[1].phones[1].number : ''
+      testContacts[1].phones.length > 0 ? testContacts[1].phones[1].number : '',
     );
     // country
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent(
-      testContacts[1].country?.name ?? ''
+      testContacts[1].country?.name ?? '',
     );
   });
   it('applies global search input', async () => {
@@ -535,7 +535,7 @@ describe('ContactsPage', () => {
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
     await userEvent.type(
       within(emailOverlay).getByPlaceholderText(/search by email/i),
-      'john@mail.com'
+      'john@mail.com',
     );
     await userEvent.click(within(emailOverlay).getByRole('button', { name: /apply/i }));
 

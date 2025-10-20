@@ -69,7 +69,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     typeIn?: string[],
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Contact>> {
     const params = buildQueryParamsFromFilters({
       globalSearch,
@@ -100,7 +100,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     vatContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Customer>> {
     const params = buildQueryParamsFromFilters({
       globalSearch,
@@ -130,7 +130,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     documentContains?: string,
     countryIn?: string[],
     inhouseOnly?: boolean,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Guest>> {
     const params = buildQueryParamsFromFilters({
       globalSearch,
@@ -170,7 +170,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Agency>> {
     const params = buildQueryParamsFromFilters({
       globalSearch,
@@ -200,7 +200,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Supplier>> {
     const params = buildQueryParamsFromFilters({
       globalSearch,

@@ -30,7 +30,7 @@ describe('ContactsService.fetchContacts', () => {
       undefined,
       undefined,
       undefined,
-      undefined
+      undefined,
     );
     expect(result).toBe(response);
   });
@@ -64,7 +64,7 @@ describe('ContactsService.fetchContacts', () => {
       ['GUEST'],
       ['ES', 'PT'],
       undefined,
-      'name:asc'
+      'name:asc',
     );
 
     expect(contactsRepoMock.fetchContacts).toHaveBeenCalledWith(
@@ -76,7 +76,7 @@ describe('ContactsService.fetchContacts', () => {
       ['GUEST'],
       ['ES', 'PT'],
       undefined,
-      'name:asc'
+      'name:asc',
     );
     expect(result).toBe(response);
   });
@@ -111,7 +111,7 @@ describe('ContactsService.fetchCustomers', () => {
       undefined,
       undefined,
       undefined,
-      undefined
+      undefined,
     );
     expect(result).toBe(response);
   });
@@ -140,7 +140,7 @@ describe('ContactsService.fetchCustomers', () => {
       'mail@acme.com',
       ['ES'],
       '+34',
-      'name:desc'
+      'name:desc',
     );
 
     expect(contactsRepoMock.fetchCustomers).toHaveBeenCalledWith(
@@ -152,7 +152,7 @@ describe('ContactsService.fetchCustomers', () => {
       'mail@acme.com',
       ['ES'],
       '+34',
-      'name:desc'
+      'name:desc',
     );
     expect(result).toBe(response);
   });
@@ -187,7 +187,7 @@ describe('ContactsService.fetchGuests', () => {
       undefined,
       undefined,
       undefined,
-      undefined
+      undefined,
     );
     expect(result).toBe(response);
   });
@@ -220,7 +220,7 @@ describe('ContactsService.fetchGuests', () => {
       'DOC123',
       ['ES', 'PT'],
       true,
-      'name:asc'
+      'name:asc',
     );
 
     expect(contactsRepoMock.fetchGuests).toHaveBeenCalledWith(
@@ -231,7 +231,7 @@ describe('ContactsService.fetchGuests', () => {
       'DOC123',
       ['ES', 'PT'],
       true,
-      'name:asc'
+      'name:asc',
     );
     expect(result).toBe(response);
   });
@@ -266,7 +266,7 @@ describe('ContactsService.fetchAgencies', () => {
       undefined,
       undefined,
       undefined,
-      undefined
+      undefined,
     );
     expect(result).toBe(response);
   });
@@ -292,7 +292,7 @@ describe('ContactsService.fetchAgencies', () => {
       'ops@roomdoo.com',
       ['ES'],
       '+34900111222',
-      'name:desc'
+      'name:desc',
     );
 
     expect(contactsRepoMock.fetchAgencies).toHaveBeenCalledWith(
@@ -303,7 +303,7 @@ describe('ContactsService.fetchAgencies', () => {
       'ops@roomdoo.com',
       ['ES'],
       '+34900111222',
-      'name:desc'
+      'name:desc',
     );
     expect(result).toBe(response);
   });
@@ -333,7 +333,7 @@ describe('ContactsService.fetchSuppliers', () => {
       undefined,
       undefined,
       undefined,
-      undefined
+      undefined,
     );
     expect(result).toBe(response);
   });
@@ -362,7 +362,7 @@ describe('ContactsService.fetchSuppliers', () => {
       'paper@inc.com',
       ['ES', 'FR'],
       '+33',
-      'name:asc'
+      'name:asc',
     );
 
     expect(contactsRepoMock.fetchSuppliers).toHaveBeenCalledWith(
@@ -374,7 +374,7 @@ describe('ContactsService.fetchSuppliers', () => {
       'paper@inc.com',
       ['ES', 'FR'],
       '+33',
-      'name:asc'
+      'name:asc',
     );
     expect(result).toBe(response);
   });
