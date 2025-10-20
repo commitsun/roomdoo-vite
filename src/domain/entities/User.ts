@@ -1,0 +1,17 @@
+import type { PmsProperty } from './PmsProperty';
+
+import { type Id } from '@/domain/types/Id';
+import { type ImageUrl } from '@/domain/types/ImageUrl';
+
+export interface User {
+  id: Id;
+  email: string;
+  firstName: string;
+  lastName: string;
+  lang: string;
+  lastName2?: string;
+  defaultPmsProperty: PmsProperty;
+  phone?: string;
+  avatar?: ImageUrl;
+  availabilityRuleFields?: string[];
+}

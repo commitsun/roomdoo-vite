@@ -1,0 +1,64 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Rethink Sans';
+  src: url('/fonts/rethink/RethinkSans-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Rethink Sans';
+  src: url('/fonts/rethink/RethinkSans-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/Inter-VariableFont_opsz\,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/Inter-Italic-VariableFont_opsz\,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+html {
+  font-size: 14px !important;
+}
+
+body {
+  font-family: 'Inter', 'Rethink Sans', 'Inter', Arial;
+}
+
+hr {
+  border-top: 1px solid lightgray;
+}
+
+.app-dialog__root {
+  width: 100vw;
+  max-height: 100% !important;
+}
+.app-dialog__header {
+  height: 70px;
+  /* border: 1px solid red; */
+}
+.app-dialog__content {
+  height: calc(100svh - 70px);
+}
+
+@media (min-width: 1024px) {
+  .app-dialog__content {
+    height: auto;
+  }
+  .app-dialog__root {
+    width: auto;
+  }
+}

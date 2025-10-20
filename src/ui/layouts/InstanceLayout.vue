@@ -1,0 +1,132 @@
+<template>
+  <div class="login-layout-container">
+    <div
+      class="image-container"
+      :style="instanceImage ? { backgroundImage: `url(${instanceImage})` } : {}"
+    />
+    <div class="form-container">
+      <router-view />
+    </div>
+    <Select
+      v-if="availableLocales.length > 1"
+      class="select-language"
+      v-model="selectedLocale"
+      :options="availableLocales"
+      optionLabel="name"
+      optionValue="code"
+      aria-label="language-select"
+    />
+  </div>
+</template>
+<script lang="ts" setup>
+import { type Ref, computed, onMounted, ref, watch } from 'vue';
+import Select from 'primevue/select';
+import { useRouter } from 'vue-router';
+
+import { i18n } from '@/infrastructure/plugins/i18n';
+import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
+import { APP_LANGUAGES } from '@/application/instance/InstanceService';
+
+const router = useRouter();
+const instanceStore = useInstanceStore();
+const uiStore = useUIStore();
+
+const selectedLocale = ref('');
+const instanceImage: Ref<string | undefined> = ref('');
+
+const availableLocales = computed(() => {
+  return (
+    instanceStore.instance?.languages?.map((lang) => ({
+      name: lang.name,
+      code: lang.code,
+    })) ?? [
+      window.navigator.language === 'en-GB' ? APP_LANGUAGES[2] : APP_LANGUAGES[0],
+      APP_LANGUAGES[1],
+    ]
+  );
+});
+
+watch(selectedLocale, (newLocale) => {
+  if (newLocale) {
+    // update i18n locale
+    i18n.global.locale.value = newLocale;
+    // update primevue locale
+    updatePrimevueLocale(newLocale);
+  }
+});
+
+onMounted(async () => {
+  selectedLocale.value = i18n.global.locale.value;
+  try {
+    uiStore.startLoading();
+    await instanceStore.fetchInstance();
+    instanceImage.value = instanceStore.instance?.image;
+  } catch {
+    await router.push({ name: 'instance-not-found' });
+  } finally {
+    uiStore.stopLoading();
+  }
+});
+</script>
+
+<style lang="scss" scoped>
+.login-layout-container {
+  min-width: 360px;
+  min-height: 667px;
+  height: 100svh;
+  background-color: #eeeeee;
+  display: flex;
+  position: relative;
+  .image-container {
+    display: none;
+  }
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background-color: #f9fafb;
+  }
+  .select-language {
+    position: absolute;
+    bottom: 2.5rem;
+    right: 2rem;
+    width: 200px;
+    z-index: 10;
+    background-color: #f8fafc;
+  }
+}
+@media (min-width: 1024px) {
+  .login-layout-container {
+    .image-container {
+      position: relative;
+      display: flex;
+      width: 33.3%;
+      height: 100%;
+      background: linear-gradient(to bottom left, #2a0a58, #081b2b, #0e96c8);
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1;
+        pointer-events: none;
+      }
+    }
+    .form-container {
+      width: 66.6%;
+    }
+    .select-language {
+      bottom: 2rem;
+      right: 5rem;
+    }
+  }
+}
+</style>
