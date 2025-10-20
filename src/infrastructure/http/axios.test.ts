@@ -76,7 +76,7 @@ function setAdapter(impl: (config: InternalAxiosRequestConfig) => Promise<AxiosR
 function makeAxiosError(
   status: number,
   url: string,
-  config: Partial<InternalAxiosRequestConfig> = {}
+  config: Partial<InternalAxiosRequestConfig> = {},
 ) {
   const cfg = { url, method: 'get', headers: {}, ...config } as InternalAxiosRequestConfig;
   const response = {
@@ -252,7 +252,7 @@ describe('api response interceptor', () => {
     expect(logout).toHaveBeenCalledTimes(1);
     expect(addTextMessage).toHaveBeenCalledWith(
       'error.sessionExpiredTitle',
-      'error.sessionExpiredContent'
+      'error.sessionExpiredContent',
     );
     expect(closeAndUnregisterAllDynamicDialogs).toHaveBeenCalledTimes(1);
     expect(replaceSpy).toHaveBeenCalledWith({
@@ -292,7 +292,7 @@ describe('api response interceptor', () => {
     expect(logout).toHaveBeenCalledTimes(1);
     expect(addTextMessage).toHaveBeenCalledWith(
       'error.sessionExpiredTitle',
-      'error.sessionExpiredContent'
+      'error.sessionExpiredContent',
     );
     expect(closeAndUnregisterAllDynamicDialogs).toHaveBeenCalledTimes(1);
   });
@@ -424,7 +424,7 @@ describe('api response interceptor', () => {
     // UI side-effects happened on refresh failure.
     expect(addTextMessage).toHaveBeenCalledWith(
       'error.sessionExpiredTitle',
-      'error.sessionExpiredContent'
+      'error.sessionExpiredContent',
     );
     expect(closeAndUnregisterAllDynamicDialogs).toHaveBeenCalledTimes(1);
   });

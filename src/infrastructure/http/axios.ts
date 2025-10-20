@@ -88,7 +88,7 @@ api.interceptors.response.use(
         processQueue(refreshError as AxiosError);
         useTextMessagesStore().addTextMessage(
           t('error.sessionExpiredTitle'),
-          t('error.sessionExpiredContent')
+          t('error.sessionExpiredContent'),
         );
         useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
         const current = router.currentRoute.value;
@@ -108,17 +108,17 @@ api.interceptors.response.use(
       case 500:
         useTextMessagesStore().addTextMessage(
           t('error.somethingWentWrong'),
-          t('error.internalError')
+          t('error.internalError'),
         );
         throw new InternalServerError();
       default:
         useTextMessagesStore().addTextMessage(
           t('error.somethingWentWrong'),
-          t('error.unknownError')
+          t('error.unknownError'),
         );
         throw new UnknownError();
     }
-  }
+  },
 );
 
 export { api };

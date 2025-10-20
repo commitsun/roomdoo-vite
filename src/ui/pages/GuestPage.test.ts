@@ -37,7 +37,7 @@ vi.mock('vue-i18n', () => {
       t: (k: string, params?: any) =>
         k === 'contacts.n_countries_selected' && params !== undefined && params !== null
           ? ''
-          : tMap[k] ?? k,
+          : (tMap[k] ?? k),
     }),
     createI18n: vi.fn(() => ({ install: () => {} })),
   };

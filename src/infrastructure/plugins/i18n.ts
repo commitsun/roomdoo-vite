@@ -17,7 +17,7 @@ export const i18n = createI18n({
 export function t(
   key: string,
   params?: NamedValue | unknown[],
-  options?: TranslateOptions<string>
+  options?: TranslateOptions<string>,
 ): string {
   const g = i18n.global;
   if (options !== undefined && params !== undefined) {
