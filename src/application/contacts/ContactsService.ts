@@ -13,7 +13,7 @@ export class ContactsService {
     typeIn?: string[],
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Contact>> {
     const response = await this.contactsRepository.fetchContacts(
       page,
@@ -24,7 +24,7 @@ export class ContactsService {
       typeIn,
       countryIn,
       phonesContains,
-      orderBy
+      orderBy,
     );
     return response;
   }
@@ -37,7 +37,7 @@ export class ContactsService {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Customer>> {
     const response = await this.contactsRepository.fetchCustomers(
       page,
@@ -48,7 +48,7 @@ export class ContactsService {
       emailContains,
       countryIn,
       phonesContains,
-      orderBy
+      orderBy,
     );
     return response;
   }
@@ -60,7 +60,7 @@ export class ContactsService {
     documentContains?: string,
     countryIn?: string[],
     inhouseOnly?: boolean,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Guest>> {
     const response = await this.contactsRepository.fetchGuests(
       page,
@@ -70,7 +70,7 @@ export class ContactsService {
       documentContains,
       countryIn,
       inhouseOnly,
-      orderBy
+      orderBy,
     );
     return response;
   }
@@ -82,7 +82,7 @@ export class ContactsService {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Agency>> {
     const response = await this.contactsRepository.fetchAgencies(
       page,
@@ -92,7 +92,7 @@ export class ContactsService {
       emailContains,
       countryIn,
       phonesContains,
-      orderBy
+      orderBy,
     );
     return response;
   }
@@ -105,7 +105,7 @@ export class ContactsService {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Supplier>> {
     const response = await this.contactsRepository.fetchSuppliers(
       page,
@@ -116,7 +116,7 @@ export class ContactsService {
       emailContains,
       countryIn,
       phonesContains,
-      orderBy
+      orderBy,
     );
     return response;
   }
