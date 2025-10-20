@@ -357,7 +357,7 @@ export default defineComponent({
     const globalQuery = ref<string>('');
 
     const suppliers = computed(() =>
-      Array.isArray(contactsStore.suppliers) ? contactsStore.suppliers : []
+      Array.isArray(contactsStore.suppliers) ? contactsStore.suppliers : [],
     );
     const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
 
@@ -371,14 +371,14 @@ export default defineComponent({
     });
 
     const safeSortField = computed<string | undefined>(() =>
-      sortField.value === null || sortField.value === '' ? undefined : sortField.value
+      sortField.value === null || sortField.value === '' ? undefined : sortField.value,
     );
 
     const countryOptions = computed(() =>
       (countriesStore.countries ?? []).map((country) => ({
         label: country.name,
         value: country.code,
-      }))
+      })),
     );
 
     const showClearButton = computed<boolean>(() => {
@@ -415,7 +415,7 @@ export default defineComponent({
           isNonEmptyString(filters.value.vat.value) ? filters.value.vat.value : undefined,
           Array.isArray(filters.value.country.value) ? filters.value.country.value : undefined,
           isNonEmptyString(filters.value.phones.value) ? filters.value.phones.value : undefined,
-          orderBy.value
+          orderBy.value,
         );
         setCountFromStore();
       } finally {
@@ -519,7 +519,7 @@ export default defineComponent({
     function onClearPhoneFilter(
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
-      applyFilter: () => void
+      applyFilter: () => void,
     ): void {
       phoneDraft.value = '';
       filterModel.value = null;
@@ -530,7 +530,7 @@ export default defineComponent({
     function onApplyPhoneFilter(
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
-      applyFilter: () => void
+      applyFilter: () => void,
     ): void {
       if (phoneDraft.value.length < 3) {
         return;

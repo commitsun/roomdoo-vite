@@ -362,7 +362,7 @@ export default defineComponent({
 
     // safe value for DataTable prop
     const safeSortField = computed<string | undefined>(() =>
-      sortField.value === null || sortField.value === '' ? undefined : sortField.value
+      sortField.value === null || sortField.value === '' ? undefined : sortField.value,
     );
 
     const filters = ref({
@@ -397,7 +397,7 @@ export default defineComponent({
       (countriesStore.countries ?? []).map((country) => ({
         label: country.name,
         value: country.code,
-      }))
+      })),
     );
 
     const contacts = computed(() => contactsStore.contacts);
@@ -418,7 +418,7 @@ export default defineComponent({
           Array.isArray(filters.value.type.value) ? filters.value.type.value : undefined,
           Array.isArray(filters.value.country.value) ? filters.value.country.value : undefined,
           isNonEmptyString(filters.value.phones.value) ? filters.value.phones.value : undefined,
-          orderBy.value
+          orderBy.value,
         );
         setCountFromStore();
       } finally {
@@ -540,7 +540,7 @@ export default defineComponent({
     function onClearPhoneFilter(
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
-      applyFilter: () => void
+      applyFilter: () => void,
     ): void {
       phoneDraft.value = '';
       filterModel.value = null;
@@ -551,7 +551,7 @@ export default defineComponent({
     function onApplyPhoneFilter(
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
-      applyFilter: () => void
+      applyFilter: () => void,
     ): void {
       if (phoneDraft.value.length < 3) {
         return;
