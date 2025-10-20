@@ -70,7 +70,7 @@ export default defineComponent({
             life: 5000,
           });
         }
-      }
+      },
     );
 
     return {

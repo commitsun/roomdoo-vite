@@ -25,7 +25,7 @@ export const useContactsStore = defineStore('contacts', () => {
     typeIn?: string[],
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<void> => {
     const result = await contactsService.fetchContacts(
       page,
@@ -36,7 +36,7 @@ export const useContactsStore = defineStore('contacts', () => {
       typeIn,
       countryIn,
       phonesContains,
-      orderBy
+      orderBy,
     );
     contacts.value = result.items;
     contactsCount.value = result.count;
@@ -51,7 +51,7 @@ export const useContactsStore = defineStore('contacts', () => {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<void> => {
     const result = await contactsService.fetchCustomers(
       page,
@@ -62,7 +62,7 @@ export const useContactsStore = defineStore('contacts', () => {
       emailContains,
       countryIn,
       phonesContains,
-      orderBy
+      orderBy,
     );
     customers.value = result.items;
     contactsCount.value = result.count;
@@ -76,7 +76,7 @@ export const useContactsStore = defineStore('contacts', () => {
     documentContains?: string,
     countryIn?: string[],
     inhouseOnly?: boolean,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<void> => {
     const result = await contactsService.fetchGuests(
       page,
@@ -86,7 +86,7 @@ export const useContactsStore = defineStore('contacts', () => {
       documentContains,
       countryIn,
       inhouseOnly,
-      orderBy
+      orderBy,
     );
     guests.value = result.items;
     contactsCount.value = result.count;
@@ -100,7 +100,7 @@ export const useContactsStore = defineStore('contacts', () => {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<void> => {
     const result = await contactsService.fetchAgencies(
       page,
@@ -110,7 +110,7 @@ export const useContactsStore = defineStore('contacts', () => {
       emailContains,
       countryIn,
       phonesContains,
-      orderBy
+      orderBy,
     );
     agencies.value = result.items;
     contactsCount.value = result.count;
@@ -125,7 +125,7 @@ export const useContactsStore = defineStore('contacts', () => {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<void> => {
     const result = await contactsService.fetchSuppliers(
       page,
@@ -136,7 +136,7 @@ export const useContactsStore = defineStore('contacts', () => {
       emailContains,
       countryIn,
       phonesContains,
-      orderBy
+      orderBy,
     );
     suppliers.value = result.items;
     contactsCount.value = result.count;
