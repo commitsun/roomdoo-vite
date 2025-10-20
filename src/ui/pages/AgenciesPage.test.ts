@@ -134,33 +134,33 @@ describe('AgenciesPage', () => {
     expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(testAgencies[0].name);
     // email
     expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent(
-      testAgencies[0].email ?? ''
+      testAgencies[0].email ?? '',
     );
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(
-      testAgencies[0].phones.length > 0 ? testAgencies[0].phones[0].number : ''
+      testAgencies[0].phones.length > 0 ? testAgencies[0].phones[0].number : '',
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testAgencies[0].country?.name ?? ''
+      testAgencies[0].country?.name ?? '',
     );
     // check 2nd row content
     // name
     expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(testAgencies[1].name);
     // email
     expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent(
-      testAgencies[1].email ?? ''
+      testAgencies[1].email ?? '',
     );
     // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[2].innerHTML).toContain(
-      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[0].number : ''
+      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[0].number : '',
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[2].innerHTML).toContain(
-      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[1].number : ''
+      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[1].number : '',
     );
     // country
     expect(within(bodyRows[1]).getAllByRole('cell')[3]).toHaveTextContent(
-      testAgencies[1].country?.name ?? ''
+      testAgencies[1].country?.name ?? '',
     );
   });
 
@@ -393,7 +393,7 @@ describe('AgenciesPage', () => {
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
     await userEvent.type(
       within(emailOverlay).getByPlaceholderText(/search by email/i),
-      'contact@globex.pt'
+      'contact@globex.pt',
     );
     await userEvent.click(within(emailOverlay).getByRole('button', { name: /apply/i }));
 

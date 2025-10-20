@@ -54,7 +54,7 @@ describe('UserService - loginAndGetUser', () => {
     userRepoMock.login.mockRejectedValue(new UnauthorizedError());
 
     await expect(userService.loginAndGetUser('fail@roomdoo.com', 'failpw')).rejects.toThrowError(
-      UnauthorizedError
+      UnauthorizedError,
     );
     expect(userRepoMock.login).toHaveBeenCalledWith('fail@roomdoo.com', 'failpw');
     expect(userRepoMock.fetchUser).not.toHaveBeenCalled();
@@ -94,7 +94,7 @@ describe('UserService - loginAndGetUser', () => {
   it('propagate errors from resetPassword', async () => {
     userRepoMock.resetPassword.mockRejectedValue(new UnauthorizedError());
     await expect(userService.resetPassword('newpass', 'notValidToken')).rejects.toThrow(
-      UnauthorizedError
+      UnauthorizedError,
     );
   });
 

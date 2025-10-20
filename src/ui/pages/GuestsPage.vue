@@ -113,7 +113,11 @@
             {{ data.identificationDocuments[0]?.number }}
             <span
               v-if="data.identificationDocuments.length > 1"
-              :title="data.identificationDocuments.map((d: { type: any; number: any; }) => ((d.type) + ' ' + (d.number))).join('\n')"
+              :title="
+                data.identificationDocuments
+                  .map((d: { type: any; number: any }) => d.type + ' ' + d.number)
+                  .join('\n')
+              "
               style="cursor: help; opacity: 0.8"
             >
               (+{{ data.identificationDocuments.length - 1 }})
@@ -301,7 +305,7 @@ export default defineComponent({
     });
 
     const safeSortField = computed<string | undefined>(() =>
-      sortField.value === null || sortField.value === '' ? undefined : sortField.value
+      sortField.value === null || sortField.value === '' ? undefined : sortField.value,
     );
 
     const filters = ref({
@@ -321,7 +325,7 @@ export default defineComponent({
         label: c.name,
         value: c.name,
         code: c.code,
-      }))
+      })),
     );
 
     const showClearButton = computed<boolean>(() => {
@@ -358,7 +362,7 @@ export default defineComponent({
             : undefined,
           Array.isArray(filters.value.country.value) ? filters.value.country.value : undefined,
           inhouseOnly,
-          orderBy.value
+          orderBy.value,
         );
         numTotalRecords.value = contactsStore.contactsCount ?? numTotalRecords.value;
       } finally {

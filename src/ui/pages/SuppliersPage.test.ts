@@ -43,7 +43,7 @@ vi.mock('vue-i18n', () => {
       t: (k: string, params?: any) =>
         k === 'contacts.n_countries_selected' && params !== undefined && params !== null
           ? ''
-          : tMap[k] ?? k,
+          : (tMap[k] ?? k),
     }),
     createI18n: vi.fn(() => ({ install: () => {} })),
   };
@@ -274,7 +274,7 @@ describe('SuppliersPage', () => {
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
     await userEvent.type(
       within(overlay).getByPlaceholderText(/search by email/i),
-      'billing@acme.com'
+      'billing@acme.com',
     );
     await userEvent.click(within(overlay).getByRole('button', { name: /apply/i }));
 
@@ -400,7 +400,7 @@ describe('SuppliersPage', () => {
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
     await userEvent.type(
       within(emailOverlay).getByPlaceholderText(/search by email/i),
-      'billing@acme.com'
+      'billing@acme.com',
     );
     await userEvent.click(within(emailOverlay).getByRole('button', { name: /apply/i }));
 

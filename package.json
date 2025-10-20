@@ -12,7 +12,9 @@
     "coverage": "vitest run --coverage",
     "lint": "eslint . --ext .ts,.tsx,.vue --max-warnings=0",
     "lint:fix": "eslint . --ext .ts,.tsx,.vue --fix",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "prettier:check": "prettier --cache --check .",
+    "prettier:write": "prettier --cache --write ."
   },
   "dependencies": {
     "@primeuix/themes": "^1.0.0",
