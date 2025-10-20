@@ -12,7 +12,7 @@ export interface ContactsRepository {
     typeIn?: string[],
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Contact>>;
   fetchCustomers(
     page: number,
@@ -23,7 +23,7 @@ export interface ContactsRepository {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Customer>>;
   fetchGuests(
     page: number,
@@ -33,7 +33,7 @@ export interface ContactsRepository {
     documentContains?: string,
     countryIn?: string[],
     inhouseOnly?: boolean,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Guest>>;
   fetchAgencies(
     page: number,
@@ -43,7 +43,7 @@ export interface ContactsRepository {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Agency>>;
   fetchSuppliers(
     page: number,
@@ -54,6 +54,6 @@ export interface ContactsRepository {
     emailContains?: string,
     countryIn?: string[],
     phonesContains?: string,
-    orderBy?: string
+    orderBy?: string,
   ): Promise<EntityListResponse<Supplier>>;
 }
