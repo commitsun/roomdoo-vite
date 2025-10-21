@@ -195,7 +195,7 @@ describe('CustomersPage', () => {
     vi.advanceTimersByTime(300);
 
     const last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last && last[2]).toBe('John');
+    expect(last && last[1].globalSearch).toBe('John');
 
     vi.useRealTimers();
   });
@@ -235,33 +235,33 @@ describe('CustomersPage', () => {
     const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
     await userEvent.click(nameHeader); // asc
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[8]).toBe('name');
+    expect(last?.[2]).toBe('name');
 
     await userEvent.click(nameHeader); // desc
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[8]).toBe('-name');
+    expect(last?.[2]).toBe('-name');
   });
 
   it('sort by email toggles and maps orderBy', async () => {
     const emailHeader = screen.getByRole('columnheader', { name: /email/i });
     await userEvent.click(emailHeader); // asc
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[8]).toBe('email');
+    expect(last?.[2]).toBe('email');
 
     await userEvent.click(emailHeader); // desc
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[8]).toBe('-email');
+    expect(last?.[2]).toBe('-email');
   });
 
   it('sort by country toggles and maps orderBy', async () => {
     const countryHeader = screen.getByRole('columnheader', { name: /country/i });
     await userEvent.click(countryHeader); // asc
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[8]).toBe('country');
+    expect(last?.[2]).toBe('country');
 
     await userEvent.click(countryHeader); // desc
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[8]).toBe('-country');
+    expect(last?.[2]).toBe('-country');
   });
 
   it('filters by name (column filter + apply) & clear input after click clear button', async () => {
@@ -277,12 +277,12 @@ describe('CustomersPage', () => {
     await userEvent.click(applyBtn);
 
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last && last[3]).toBe('John');
+    expect(last && last[1].nameContains).toBe('John');
 
     const clearBtn = within(overlay).getByRole('button', { name: /clear/i });
     await userEvent.click(clearBtn);
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last && last[3]).toBeUndefined();
+    expect(last && last[1].nameContains).toBeUndefined();
   });
 
   it('filters by vat (column filter + apply) & clear input after click clear button', async () => {
@@ -298,12 +298,12 @@ describe('CustomersPage', () => {
     await userEvent.click(applyBtn);
 
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last && last[5]).toBe('US123456789');
+    expect(last && last[1].vatContains).toBe('US123456789');
 
     const clearBtn = within(overlay).getByRole('button', { name: /clear/i });
     await userEvent.click(clearBtn);
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last && last[5]).toBeUndefined();
+    expect(last && last[1].vatContains).toBeUndefined();
   });
 
   it('filters by email (column filter + apply) & clears with clear button', async () => {
@@ -319,7 +319,7 @@ describe('CustomersPage', () => {
     await userEvent.click(applyBtn);
 
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[4]).toBe('john.doe@example.com');
+    expect(last?.[1].emailContains).toBe('john.doe@example.com');
 
     await userEvent.click(filterBtn);
     const overlay2 =
@@ -328,7 +328,7 @@ describe('CustomersPage', () => {
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[4]).toBeUndefined();
+    expect(last?.[1].emailContains).toBeUndefined();
   });
 
   it('filters by phone (column filter + apply) & clears with clear button', async () => {
@@ -344,7 +344,7 @@ describe('CustomersPage', () => {
     await userEvent.click(applyBtn);
 
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[7]).toBe('555'); // phone index en fetchCustomers
+    expect(last?.[1].phonesContains).toBe('555'); // phone index en fetchCustomers
 
     await userEvent.click(filterBtn);
     const overlay2 =
@@ -353,7 +353,7 @@ describe('CustomersPage', () => {
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[7]).toBeUndefined();
+    expect(last?.[1].phonesContains).toBeUndefined();
   });
 
   it('filters by country & clears country filter', async () => {
@@ -376,7 +376,7 @@ describe('CustomersPage', () => {
     await userEvent.click(applyBtn);
 
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[6]).toEqual(['United States']);
+    expect(last?.[1].countryIn).toEqual(['United States']);
 
     // clear
     await userEvent.click(filterBtn);
@@ -386,7 +386,7 @@ describe('CustomersPage', () => {
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[6]).toBeUndefined();
+    expect(last?.[1].countryIn).toBeUndefined();
   });
 
   it('filters by several countries', async () => {
@@ -411,8 +411,8 @@ describe('CustomersPage', () => {
     await userEvent.click(applyBtn);
 
     const last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[6]).toHaveLength(2);
-    expect(last?.[6]).toEqual(expect.arrayContaining(['United States', 'Canada']));
+    expect(last?.[1].countryIn).toHaveLength(2);
+    expect(last?.[1].countryIn).toEqual(expect.arrayContaining(['United States', 'Canada']));
   });
 
   it('applies all filters + global search and clears everything with "Clear all" button', async () => {
@@ -476,13 +476,13 @@ describe('CustomersPage', () => {
 
     // Verify last call has all filters set (indexes para fetchAgencies)
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[2]).toBe('global'); // global
-    expect(last?.[3]).toBe('John'); // name
-    expect(last?.[4]).toBe('john.doe@example.com'); // email
-    expect(last?.[5]).toBe('US123456789'); // vat
-    expect(last?.[6]).toEqual(['United States']); // countries
-    expect(last?.[7]).toBe('555'); // phone
-    expect(last?.[8]).toBe('-country'); // orderBy
+    expect(last?.[1].globalSearch).toBe('global'); // global
+    expect(last?.[1].nameContains).toBe('John'); // name
+    expect(last?.[1].emailContains).toBe('john.doe@example.com'); // email
+    expect(last?.[1].vatContains).toBe('US123456789'); // vat
+    expect(last?.[1].countryIn).toEqual(['United States']); // countries
+    expect(last?.[1].phonesContains).toBe('555'); // phone
+    expect(last?.[2]).toBe('-country'); // orderBy
 
     // Clear all (header button con label "Clear")
     const clearAllBtn = screen.getByRole('button', { name: /clear global search/i });
@@ -490,13 +490,13 @@ describe('CustomersPage', () => {
 
     // Todo limpio
     last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
-    expect(last?.[2]).toBeUndefined(); // global
-    expect(last?.[3]).toBeUndefined(); // name
-    expect(last?.[4]).toBeUndefined(); // email
-    expect(last?.[5]).toBeUndefined(); // vat
-    expect(last?.[6]).toBeUndefined(); // countries
-    expect(last?.[7]).toBeUndefined(); // phone
-    expect(last?.[8]).toBeUndefined(); // orderBy
+    expect(last?.[1].globalSearch).toBeUndefined(); // global
+    expect(last?.[1].nameContains).toBeUndefined(); // name
+    expect(last?.[1].emailContains).toBeUndefined(); // email
+    expect(last?.[1].vatContains).toBeUndefined(); // vat
+    expect(last?.[1].countryIn).toBeUndefined(); // countries
+    expect(last?.[1].phonesContains).toBeUndefined(); // phone
+    expect(last?.[2]).toBeUndefined(); // orderBy
 
     expect(globalInput).toHaveValue('');
   });
