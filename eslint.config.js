@@ -89,7 +89,7 @@ export default [
       // Complexity limits
       complexity: ['error', { max: 20 }], // TODO: lower to 10
       'max-depth': ['error', 3],
-      'max-params': 'off', //['error', 3],
+      'max-params': ['error', 3],
       'max-lines-per-function': ['error', { max: 11200, skipBlankLines: true, skipComments: true }], // TODO: lower to 100
 
       // Imports / unused cleanup

@@ -26,7 +26,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     const data: EntityListResponse<Contact> = { count: 0, items: [] };
     vi.mocked(api.get).mockResolvedValue({ data });
 
-    const result = await repo.fetchContacts(1, 25);
+    const result = await repo.fetchContacts({ page: 1, pageSize: 25 });
 
     // Inspect called URL
     expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
@@ -51,21 +51,22 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
   it('builds URL with all params for CONTACTS', async () => {
     const data: EntityListResponse<Contact> = {
       count: 1,
-      items: [{ id: 1, name: 'John', types: [] }],
+      items: [{ id: 1, name: 'John', types: [], phones: [] }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
-
     await repo.fetchContacts(
-      3, // page
-      50, // pageSize
-      'john', // globalSearch
-      'doe', // nameContains
-      'email@gmail.com', // emailContains
-      ['guest'], // typeIn
-      ['Argentina', 'Spain'], // countryIn
-      '555444333', // phonesContains
+      { page: 3, pageSize: 50 }, // pagination
+      {
+        globalSearch: 'john',
+        nameContains: 'doe',
+        emailContains: 'email@gmail.com',
+        typeIn: ['guest'],
+        countryIn: ['Argentina', 'Spain'],
+        phonesContains: '555444333',
+      }, // filters
       'name', // orderBy
     );
+
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
     const url = new URL(calledUrl, 'http://localhost');
 
@@ -84,21 +85,23 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
   it('builds URL with all params for CUSTOMERS', async () => {
     const data: EntityListResponse<Contact> = {
       count: 1,
-      items: [{ id: 1, name: 'John', types: [] }],
+      items: [{ id: 1, name: 'John', types: [], phones: [] }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
 
     await repo.fetchCustomers(
-      3, // page
-      50, // pageSize
-      'john', // globalSearch
-      'doe', // nameContains
-      'email@gmail.com', // emailContains
-      '222222', // vatContains
-      ['Argentina', 'Spain'], // countryIn
-      '555444333', // phonesContains
+      { page: 3, pageSize: 50 }, // pagination
+      {
+        globalSearch: 'john',
+        nameContains: 'doe',
+        emailContains: 'email@gmail.com',
+        vatContains: '222222',
+        countryIn: ['Argentina', 'Spain'],
+        phonesContains: '555444333',
+      }, // filters
       'name', // orderBy
     );
+
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
     const url = new URL(calledUrl, 'http://localhost');
 
@@ -117,20 +120,22 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
   it('builds URL with all params for GUESTS', async () => {
     const data: EntityListResponse<Contact> = {
       count: 1,
-      items: [{ id: 1, name: 'John', types: [] }],
+      items: [{ id: 1, name: 'John', types: [], phones: [] }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
 
     await repo.fetchGuests(
-      3, // page
-      50, // pageSize
-      'john', // globalSearch
-      'doe', // nameContains
-      '222222', // documentContains
-      ['Argentina', 'Spain'], // countryIn
-      true, // inHouseOnly
+      { page: 3, pageSize: 50 }, // pagination
+      {
+        globalSearch: 'john',
+        nameContains: 'doe',
+        documentContains: '222222',
+        countryIn: ['Argentina', 'Spain'],
+        inHouseOnly: true,
+      }, // filters
       'name', // orderBy
     );
+
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
     const url = new URL(calledUrl, 'http://localhost');
 
@@ -148,18 +153,19 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
   it('builds URL with all params for AGENCIES', async () => {
     const data: EntityListResponse<Contact> = {
       count: 1,
-      items: [{ id: 1, name: 'John', types: [] }],
+      items: [{ id: 1, name: 'John', types: [], phones: [] }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
 
     await repo.fetchAgencies(
-      3, // page
-      50, // pageSize
-      'john', // globalSearch
-      'doe', // nameContains
-      'johndoe@test.com', // emailContains
-      ['Argentina', 'Spain'], // countryIn
-      '222222', // phoneContains
+      { page: 3, pageSize: 50 }, // pagination
+      {
+        globalSearch: 'john',
+        nameContains: 'doe',
+        emailContains: 'johndoe@test.com',
+        countryIn: ['Argentina', 'Spain'],
+        phonesContains: '222222',
+      }, // filters
       'name', // orderBy
     );
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
@@ -179,19 +185,20 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
   it('builds URL with all params for SUPPLIERS', async () => {
     const data: EntityListResponse<Contact> = {
       count: 1,
-      items: [{ id: 1, name: 'John', types: [] }],
+      items: [{ id: 1, name: 'John', types: [], phones: [] }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
 
     await repo.fetchSuppliers(
-      3, // page
-      50, // pageSize
-      'john', // globalSearch
-      'doe', // nameContains
-      '222222', // vatContains
-      'johndoe@test.com', // emailContains
-      ['Argentina', 'Spain'], // countryIn
-      '222222', // phoneContains
+      { page: 3, pageSize: 50 }, // pagination
+      {
+        globalSearch: 'john',
+        nameContains: 'doe',
+        vatContains: '222222',
+        emailContains: 'johndoe@test.com',
+        countryIn: ['Argentina', 'Spain'],
+        phonesContains: '222222',
+      }, // filters
       'name', // orderBy
     );
     const calledUrl: string = vi.mocked(api.get).mock.calls[0][0];
@@ -213,34 +220,34 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     const err = new Error('axios fail');
     vi.mocked(api.get).mockRejectedValue(err);
 
-    await expect(repo.fetchContacts(1, 10)).rejects.toThrow(err);
+    await expect(repo.fetchContacts({ page: 1, pageSize: 10 })).rejects.toThrow(err);
   });
 
   it('propagates axios errors when fetch AGENCIES', async () => {
     const err = new Error('axios fail');
     vi.mocked(api.get).mockRejectedValue(err);
 
-    await expect(repo.fetchAgencies(1, 10)).rejects.toThrow(err);
+    await expect(repo.fetchAgencies({ page: 1, pageSize: 10 })).rejects.toThrow(err);
   });
 
   it('propagates axios errors when fetch CUSTOMERS', async () => {
     const err = new Error('axios fail');
     vi.mocked(api.get).mockRejectedValue(err);
 
-    await expect(repo.fetchCustomers(1, 10)).rejects.toThrow(err);
+    await expect(repo.fetchCustomers({ page: 1, pageSize: 10 })).rejects.toThrow(err);
   });
 
   it('propagates axios errors when fetch GUESTS', async () => {
     const err = new Error('axios fail');
     vi.mocked(api.get).mockRejectedValue(err);
 
-    await expect(repo.fetchGuests(1, 10)).rejects.toThrow(err);
+    await expect(repo.fetchGuests({ page: 1, pageSize: 10 })).rejects.toThrow(err);
   });
 
   it('propagates axios errors when fetch SUPPLIERS', async () => {
     const err = new Error('axios fail');
     vi.mocked(api.get).mockRejectedValue(err);
 
-    await expect(repo.fetchSuppliers(1, 10)).rejects.toThrow(err);
+    await expect(repo.fetchSuppliers({ page: 1, pageSize: 10 })).rejects.toThrow(err);
   });
 });

@@ -149,7 +149,7 @@ describe('GuestsPage', () => {
     expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent('+1'); // more docs
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent('Spain'); // country
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent('VIP guest.'); // notes
-    expect(within(bodyRows[0]).getAllByRole('cell')[5].innerHTML).toContain('pi pi-home'); // inhouse icon
+    expect(within(bodyRows[0]).getAllByRole('cell')[5].innerHTML).toContain('pi pi-home'); // inHouse icon
 
     // Row 2
     expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent('Bob Martin');
@@ -167,7 +167,7 @@ describe('GuestsPage', () => {
     vi.advanceTimersByTime(300);
 
     const last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last && last[2]).toBe('Alice');
+    expect(last && last[1].globalSearch).toBe('Alice');
 
     vi.useRealTimers();
   });
@@ -206,22 +206,22 @@ describe('GuestsPage', () => {
     const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
     await userEvent.click(nameHeader); // asc
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[7]).toBe('name');
+    expect(last?.[2]).toBe('name');
 
     await userEvent.click(nameHeader); // desc
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[7]).toBe('-name');
+    expect(last?.[2]).toBe('-name');
   });
 
   it('sort by country toggles and maps orderBy', async () => {
     const countryHeader = screen.getByRole('columnheader', { name: /country/i });
     await userEvent.click(countryHeader); // asc
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[7]).toBe('country');
+    expect(last?.[2]).toBe('country');
 
     await userEvent.click(countryHeader); // desc
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[7]).toBe('-country');
+    expect(last?.[2]).toBe('-country');
   });
 
   it('filters by name (column filter + apply) & clears with clear button', async () => {
@@ -237,12 +237,12 @@ describe('GuestsPage', () => {
     await userEvent.click(applyBtn);
 
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last && last[3]).toBe('Alice');
+    expect(last && last[1].nameContains).toBe('Alice');
 
     const clearBtn = within(overlay).getByRole('button', { name: /clear/i });
     await userEvent.click(clearBtn);
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last && last[3]).toBeUndefined();
+    expect(last && last[1].nameContains).toBeUndefined();
   });
 
   it('filters by document (column filter + apply) & clears with clear button', async () => {
@@ -258,7 +258,7 @@ describe('GuestsPage', () => {
     await userEvent.click(applyBtn);
 
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last && last[4]).toBe('X1234567');
+    expect(last && last[1].documentContains).toBe('X1234567');
 
     await userEvent.click(filterBtn);
     const overlay2 =
@@ -267,7 +267,7 @@ describe('GuestsPage', () => {
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last && last[4]).toBeUndefined();
+    expect(last && last[1].documentContains).toBeUndefined();
   });
 
   it('filters by country & clears country filter', async () => {
@@ -290,7 +290,7 @@ describe('GuestsPage', () => {
     await userEvent.click(applyBtn);
 
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[5]).toEqual(['Spain']);
+    expect(last?.[1].countryIn).toEqual(['Spain']);
 
     // clear
     await userEvent.click(filterBtn);
@@ -300,7 +300,7 @@ describe('GuestsPage', () => {
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[5]).toBeUndefined();
+    expect(last?.[1].countryIn).toBeUndefined();
   });
 
   it('filters by several countries', async () => {
@@ -325,8 +325,8 @@ describe('GuestsPage', () => {
     await userEvent.click(applyBtn);
 
     const last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[5]).toHaveLength(2);
-    expect(last?.[5]).toEqual(expect.arrayContaining(['Spain', 'Portugal']));
+    expect(last?.[1].countryIn).toHaveLength(2);
+    expect(last?.[1].countryIn).toEqual(expect.arrayContaining(['Spain', 'Portugal']));
   });
 
   it('toggles Inhouse and maps to fetchGuests arg', async () => {
@@ -334,11 +334,11 @@ describe('GuestsPage', () => {
     await userEvent.click(toggle);
 
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[6]).toBe(true);
+    expect(last?.[1].inHouseOnly).toBe(true);
 
     await userEvent.click(toggle);
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[6]).toBeUndefined();
+    expect(last?.[1].inHouseOnly).toBeUndefined();
   });
 
   it('applies all filters + global search and clears everything with "Clear" button', async () => {
@@ -387,24 +387,24 @@ describe('GuestsPage', () => {
 
     // Check all applied
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[2]).toBe('ali'); // global
-    expect(last?.[3]).toBe('Alice'); // name
-    expect(last?.[4]).toBe('X1234567'); // documents
-    expect(last?.[5]).toEqual(['Spain']); // countries
-    expect(last?.[6]).toBe(true); // inhouseOnly
-    expect(last?.[7]).toBe('-country'); // orderBy
+    expect(last?.[1].globalSearch).toBe('ali'); // global
+    expect(last?.[1].nameContains).toBe('Alice'); // name
+    expect(last?.[1].documentContains).toBe('X1234567'); // documents
+    expect(last?.[1].countryIn).toEqual(['Spain']); // countries
+    expect(last?.[1].inHouseOnly).toBe(true); // inHouseOnly
+    expect(last?.[2]).toBe('-country'); // orderBy
 
     // Clear all
     const clearAllBtn = screen.getByRole('button', { name: /clear global search/i });
     await userEvent.click(clearAllBtn);
 
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
+    expect(last?.[1].globalSearch).toBeUndefined();
+    expect(last?.[1].nameContains).toBeUndefined();
+    expect(last?.[1].documentContains).toBeUndefined();
+    expect(last?.[1].countryIn).toBeUndefined();
+    expect(last?.[1].inHouseOnly).toBeUndefined();
     expect(last?.[2]).toBeUndefined();
-    expect(last?.[3]).toBeUndefined();
-    expect(last?.[4]).toBeUndefined();
-    expect(last?.[5]).toBeUndefined();
-    expect(last?.[6]).toBeUndefined();
-    expect(last?.[7]).toBeUndefined();
 
     expect(globalInput).toHaveValue('');
   });

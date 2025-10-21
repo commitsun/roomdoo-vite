@@ -407,16 +407,31 @@ export default defineComponent({
       uiStore.startLoading();
       try {
         await contactsStore.fetchCustomers(
-          page.value,
-          rows.value,
-          isNonEmptyString(globalQuery.value) ? globalQuery.value : undefined,
-          isNonEmptyString(filters.value.name.value) ? filters.value.name.value : undefined,
-          isNonEmptyString(filters.value.email.value) ? filters.value.email.value : undefined,
-          isNonEmptyString(filters.value.vat.value) ? filters.value.vat.value : undefined,
-          Array.isArray(filters.value.country.value) ? filters.value.country.value : undefined,
-          isNonEmptyString(filters.value.phones.value) ? filters.value.phones.value : undefined,
+          {
+            page: page.value,
+            pageSize: rows.value,
+          },
+          {
+            globalSearch: isNonEmptyString(globalQuery.value) ? globalQuery.value : undefined,
+            nameContains: isNonEmptyString(filters.value.name.value)
+              ? filters.value.name.value
+              : undefined,
+            emailContains: isNonEmptyString(filters.value.email.value)
+              ? filters.value.email.value
+              : undefined,
+            vatContains: isNonEmptyString(filters.value.vat.value)
+              ? filters.value.vat.value
+              : undefined,
+            countryIn: Array.isArray(filters.value.country.value)
+              ? filters.value.country.value
+              : undefined,
+            phonesContains: isNonEmptyString(filters.value.phones.value)
+              ? filters.value.phones.value
+              : undefined,
+          },
           orderBy.value,
         );
+
         setCountFromStore();
       } finally {
         uiStore.stopLoading();
