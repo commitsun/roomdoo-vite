@@ -1,123 +1,55 @@
+import type {
+  AgencyFilters,
+  ContactFilters,
+  CustomerFilters,
+  GuestFilters,
+  SupplierFilters,
+} from '@/domain/contact/ContactFilters';
 import type { Agency, Contact, Customer, Guest, Supplier } from '@/domain/entities/Contact';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
+import type { Pagination } from '@/domain/repositories/Pagination';
 
 export class ContactsService {
   constructor(private contactsRepository: ContactsRepository) {}
   async fetchContacts(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    emailContains?: string,
-    typeIn?: string[],
-    countryIn?: string[],
-    phonesContains?: string,
+    paginattion: Pagination,
+    filters?: ContactFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Contact>> {
-    const response = await this.contactsRepository.fetchContacts(
-      page,
-      pageSize,
-      globalSearch,
-      nameContains,
-      emailContains,
-      typeIn,
-      countryIn,
-      phonesContains,
-      orderBy,
-    );
+    const response = await this.contactsRepository.fetchContacts(paginattion, filters, orderBy);
     return response;
   }
   async fetchCustomers(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    vatContains?: string,
-    emailContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: CustomerFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Customer>> {
-    const response = await this.contactsRepository.fetchCustomers(
-      page,
-      pageSize,
-      globalSearch,
-      nameContains,
-      vatContains,
-      emailContains,
-      countryIn,
-      phonesContains,
-      orderBy,
-    );
+    const response = await this.contactsRepository.fetchCustomers(pagination, filters, orderBy);
     return response;
   }
   async fetchGuests(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    documentContains?: string,
-    countryIn?: string[],
-    inhouseOnly?: boolean,
+    pagination: Pagination,
+    filters?: GuestFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Guest>> {
-    const response = await this.contactsRepository.fetchGuests(
-      page,
-      pageSize,
-      globalSearch,
-      nameContains,
-      documentContains,
-      countryIn,
-      inhouseOnly,
-      orderBy,
-    );
+    const response = await this.contactsRepository.fetchGuests(pagination, filters, orderBy);
     return response;
   }
   async fetchAgencies(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    emailContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: AgencyFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Agency>> {
-    const response = await this.contactsRepository.fetchAgencies(
-      page,
-      pageSize,
-      globalSearch,
-      nameContains,
-      emailContains,
-      countryIn,
-      phonesContains,
-      orderBy,
-    );
+    const response = await this.contactsRepository.fetchAgencies(pagination, filters, orderBy);
     return response;
   }
   async fetchSuppliers(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    vatContains?: string,
-    emailContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: SupplierFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Supplier>> {
-    const response = await this.contactsRepository.fetchSuppliers(
-      page,
-      pageSize,
-      globalSearch,
-      nameContains,
-      vatContains,
-      emailContains,
-      countryIn,
-      phonesContains,
-      orderBy,
-    );
+    const response = await this.contactsRepository.fetchSuppliers(pagination, filters, orderBy);
     return response;
   }
 }

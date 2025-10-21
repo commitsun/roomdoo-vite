@@ -19,16 +19,10 @@ describe('ContactsService.fetchContacts', () => {
     const response: EntityListResponse<Contact> = { count: 0, items: [] };
     contactsRepoMock.fetchContacts.mockResolvedValue(response);
 
-    const result = await contactsService.fetchContacts(1, 20);
+    const result = await contactsService.fetchContacts({ page: 1, pageSize: 20 });
 
     expect(contactsRepoMock.fetchContacts).toHaveBeenCalledWith(
-      1,
-      20,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+      { page: 1, pageSize: 20 },
       undefined,
       undefined,
     );
@@ -56,26 +50,28 @@ describe('ContactsService.fetchContacts', () => {
     contactsRepoMock.fetchContacts.mockResolvedValue(response);
 
     const result = await contactsService.fetchContacts(
-      2,
-      50,
-      'john',
-      'doe',
-      'gmail.com',
-      ['GUEST'],
-      ['ES', 'PT'],
-      undefined,
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'john',
+        nameContains: 'doe',
+        emailContains: 'gmail.com',
+        typeIn: ['GUEST'],
+        countryIn: ['ES', 'PT'],
+        phonesContains: undefined,
+      },
       'name:asc',
     );
 
     expect(contactsRepoMock.fetchContacts).toHaveBeenCalledWith(
-      2,
-      50,
-      'john',
-      'doe',
-      'gmail.com',
-      ['GUEST'],
-      ['ES', 'PT'],
-      undefined,
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'john',
+        nameContains: 'doe',
+        emailContains: 'gmail.com',
+        typeIn: ['GUEST'],
+        countryIn: ['ES', 'PT'],
+        phonesContains: undefined,
+      },
       'name:asc',
     );
     expect(result).toBe(response);
@@ -85,7 +81,7 @@ describe('ContactsService.fetchContacts', () => {
     const err = new Error('boom');
     contactsRepoMock.fetchContacts.mockRejectedValue(err);
 
-    await expect(contactsService.fetchContacts(1, 10)).rejects.toThrow(err);
+    await expect(contactsService.fetchContacts({ page: 1, pageSize: 20 })).rejects.toThrow(err);
   });
 });
 
@@ -101,15 +97,9 @@ describe('ContactsService.fetchCustomers', () => {
   it('passes pagination without filters and returns response as-is', async () => {
     const response: EntityListResponse<Customer> = { count: 0, items: [] };
     contactsRepoMock.fetchCustomers.mockResolvedValue(response);
-    const result = await contactsService.fetchCustomers(1, 25);
+    const result = await contactsService.fetchCustomers({ page: 1, pageSize: 20 });
     expect(contactsRepoMock.fetchCustomers).toHaveBeenCalledWith(
-      1,
-      25,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+      { page: 1, pageSize: 20 },
       undefined,
       undefined,
     );
@@ -132,26 +122,28 @@ describe('ContactsService.fetchCustomers', () => {
     contactsRepoMock.fetchCustomers.mockResolvedValue(response);
 
     const result = await contactsService.fetchCustomers(
-      3,
-      10,
-      'abc',
-      'name',
-      'VAT123',
-      'mail@acme.com',
-      ['ES'],
-      '+34',
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'abc',
+        nameContains: 'name',
+        vatContains: 'VAT123',
+        emailContains: 'mail@acme.com',
+        countryIn: ['ES'],
+        phonesContains: '+34',
+      },
       'name:desc',
     );
 
     expect(contactsRepoMock.fetchCustomers).toHaveBeenCalledWith(
-      3,
-      10,
-      'abc',
-      'name',
-      'VAT123',
-      'mail@acme.com',
-      ['ES'],
-      '+34',
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'abc',
+        nameContains: 'name',
+        vatContains: 'VAT123',
+        emailContains: 'mail@acme.com',
+        countryIn: ['ES'],
+        phonesContains: '+34',
+      },
       'name:desc',
     );
     expect(result).toBe(response);
@@ -160,7 +152,7 @@ describe('ContactsService.fetchCustomers', () => {
   it('propagates repository errors', async () => {
     const err = new Error('boom-customers');
     contactsRepoMock.fetchCustomers.mockRejectedValue(err);
-    await expect(contactsService.fetchCustomers(1, 10)).rejects.toThrow(err);
+    await expect(contactsService.fetchCustomers({ page: 1, pageSize: 10 })).rejects.toThrow(err);
   });
 });
 
@@ -177,15 +169,10 @@ describe('ContactsService.fetchGuests', () => {
     const response: EntityListResponse<Guest> = { count: 0, items: [] };
     contactsRepoMock.fetchGuests.mockResolvedValue(response);
 
-    const result = await contactsService.fetchGuests(1, 15);
+    const result = await contactsService.fetchGuests({ page: 1, pageSize: 20 });
 
     expect(contactsRepoMock.fetchGuests).toHaveBeenCalledWith(
-      1,
-      15,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+      { page: 1, pageSize: 20 },
       undefined,
       undefined,
     );
@@ -213,24 +200,26 @@ describe('ContactsService.fetchGuests', () => {
     contactsRepoMock.fetchGuests.mockResolvedValue(response);
 
     const result = await contactsService.fetchGuests(
-      4,
-      25,
-      'global',
-      'doe',
-      'DOC123',
-      ['ES', 'PT'],
-      true,
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'global',
+        nameContains: 'doe',
+        documentContains: 'DOC123',
+        countryIn: ['ES', 'PT'],
+        inHouseOnly: true,
+      },
       'name:asc',
     );
 
     expect(contactsRepoMock.fetchGuests).toHaveBeenCalledWith(
-      4,
-      25,
-      'global',
-      'doe',
-      'DOC123',
-      ['ES', 'PT'],
-      true,
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'global',
+        nameContains: 'doe',
+        documentContains: 'DOC123',
+        countryIn: ['ES', 'PT'],
+        inHouseOnly: true,
+      },
       'name:asc',
     );
     expect(result).toBe(response);
@@ -239,7 +228,7 @@ describe('ContactsService.fetchGuests', () => {
   it('propagates repository errors', async () => {
     const err = new Error('boom-guests');
     contactsRepoMock.fetchGuests.mockRejectedValue(err);
-    await expect(contactsService.fetchGuests(1, 10)).rejects.toThrow(err);
+    await expect(contactsService.fetchGuests({ page: 1, pageSize: 10 })).rejects.toThrow(err);
   });
 });
 
@@ -256,15 +245,10 @@ describe('ContactsService.fetchAgencies', () => {
     const response: EntityListResponse<Agency> = { count: 0, items: [] };
     contactsRepoMock.fetchAgencies.mockResolvedValue(response);
 
-    const result = await contactsService.fetchAgencies(2, 30);
+    const result = await contactsService.fetchAgencies({ page: 1, pageSize: 20 });
 
     expect(contactsRepoMock.fetchAgencies).toHaveBeenCalledWith(
-      2,
-      30,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+      { page: 1, pageSize: 20 },
       undefined,
       undefined,
     );
@@ -285,24 +269,26 @@ describe('ContactsService.fetchAgencies', () => {
     contactsRepoMock.fetchAgencies.mockResolvedValue(response);
 
     const result = await contactsService.fetchAgencies(
-      5,
-      50,
-      'glob',
-      'rd',
-      'ops@roomdoo.com',
-      ['ES'],
-      '+34900111222',
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'glob',
+        nameContains: 'rd',
+        emailContains: 'ops@roomdoo.com',
+        countryIn: ['ES'],
+        phonesContains: '+34900111222',
+      },
       'name:desc',
     );
 
     expect(contactsRepoMock.fetchAgencies).toHaveBeenCalledWith(
-      5,
-      50,
-      'glob',
-      'rd',
-      'ops@roomdoo.com',
-      ['ES'],
-      '+34900111222',
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'glob',
+        nameContains: 'rd',
+        emailContains: 'ops@roomdoo.com',
+        countryIn: ['ES'],
+        phonesContains: '+34900111222',
+      },
       'name:desc',
     );
     expect(result).toBe(response);
@@ -322,16 +308,10 @@ describe('ContactsService.fetchSuppliers', () => {
     const response: EntityListResponse<Supplier> = { count: 0, items: [] };
     contactsRepoMock.fetchSuppliers.mockResolvedValue(response);
 
-    const result = await contactsService.fetchSuppliers(1, 40);
+    const result = await contactsService.fetchSuppliers({ page: 1, pageSize: 20 });
 
     expect(contactsRepoMock.fetchSuppliers).toHaveBeenCalledWith(
-      1,
-      40,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+      { page: 1, pageSize: 20 },
       undefined,
       undefined,
     );
@@ -354,26 +334,28 @@ describe('ContactsService.fetchSuppliers', () => {
     contactsRepoMock.fetchSuppliers.mockResolvedValue(response);
 
     const result = await contactsService.fetchSuppliers(
-      6,
-      10,
-      'paper',
-      'pap',
-      'B123',
-      'paper@inc.com',
-      ['ES', 'FR'],
-      '+33',
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'paper',
+        nameContains: 'pap',
+        vatContains: 'B123',
+        emailContains: 'paper@inc.com',
+        countryIn: ['ES', 'FR'],
+        phonesContains: '+33',
+      },
       'name:asc',
     );
 
     expect(contactsRepoMock.fetchSuppliers).toHaveBeenCalledWith(
-      6,
-      10,
-      'paper',
-      'pap',
-      'B123',
-      'paper@inc.com',
-      ['ES', 'FR'],
-      '+33',
+      { page: 1, pageSize: 20 },
+      {
+        globalSearch: 'paper',
+        nameContains: 'pap',
+        vatContains: 'B123',
+        emailContains: 'paper@inc.com',
+        countryIn: ['ES', 'FR'],
+        phonesContains: '+33',
+      },
       'name:asc',
     );
     expect(result).toBe(response);
@@ -382,6 +364,6 @@ describe('ContactsService.fetchSuppliers', () => {
   it('propagates repository errors', async () => {
     const err = new Error('boom-suppliers');
     contactsRepoMock.fetchSuppliers.mockRejectedValue(err);
-    await expect(contactsService.fetchSuppliers(1, 10)).rejects.toThrow(err);
+    await expect(contactsService.fetchSuppliers({ page: 1, pageSize: 10 })).rejects.toThrow(err);
   });
 });
