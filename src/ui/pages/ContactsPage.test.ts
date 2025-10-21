@@ -209,7 +209,7 @@ describe('ContactsPage', () => {
 
     // fetchContacts should have been called with 'Doe' as globalSearch arg
     const last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last && last[2]).toBe('Doe');
+    expect(last && last[1].globalSearch).toBe('Doe');
 
     // restore real timers
     vi.useRealTimers();
@@ -265,14 +265,15 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check orderBy arg
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[8]).toBe('name'); // orderBy asc
+
+    expect(last?.[2]).toBe('name'); // orderBy asc
 
     // click again
     await userEvent.click(nameHeader); // desc
 
     // get last call to fetchContacts and check orderBy arg
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[8]).toBe('-name'); // orderBy desc
+    expect(last?.[2]).toBe('-name'); // orderBy desc
   });
   it('sort by email toggles and maps orderby', async () => {
     // get name header & click (sort)
@@ -281,14 +282,14 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check orderBy arg
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[8]).toBe('email'); // orderBy asc
+    expect(last?.[2]).toBe('email'); // orderBy asc
 
     // click again
     await userEvent.click(nameHeader); // desc
 
     // get last call to fetchContacts and check orderBy arg
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[8]).toBe('-email'); // orderBy desc
+    expect(last?.[2]).toBe('-email'); // orderBy desc
   });
   it('sort by country toggles and maps orderby', async () => {
     // get name header & click (sort)
@@ -297,14 +298,14 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check orderBy arg
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[8]).toBe('country'); // orderBy asc
+    expect(last?.[2]).toBe('country'); // orderBy asc
 
     // click again
     await userEvent.click(nameHeader); // desc
 
     // get last call to fetchContacts and check orderBy arg
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[8]).toBe('-country'); // orderBy desc
+    expect(last?.[2]).toBe('-country'); // orderBy desc
   });
   it('filters by name (column filter + apply) & clear input after click clear button', async () => {
     // get column filter button & click
@@ -321,7 +322,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check name arg
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last && last[3]).toBe('Jane'); // [page, rows, global, name, email, type, countries, orderBy]
+    expect(last && last[1].nameContains).toBe('Jane'); // [page, rows, global, name, email, type, countries, orderBy]
 
     // open filter again and click clear button
     const clearBtn = within(filterOverlay).getByRole('button', { name: /clear/i });
@@ -329,7 +330,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check name arg is cleared
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last && last[3]).toBeUndefined();
+    expect(last && last[1].nameContains).toBeUndefined();
   });
   it('filters by type & clears type filter', async () => {
     // get type header filter button & click
@@ -352,7 +353,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check type arg
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[5]).toEqual(['supplier']);
+    expect(last?.[1].typeIn).toEqual(['supplier']);
 
     // open filter again and click clear button
     await userEvent.click(filterBtn);
@@ -363,7 +364,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check type arg is cleared
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[5]).toBeUndefined();
+    expect(last?.[1].typeIn).toBeUndefined();
   });
 
   it('filters by several types', async () => {
@@ -389,9 +390,8 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check type arg
     const last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-
-    expect(last?.[5]).toHaveLength(2);
-    expect(last?.[5]).toEqual(expect.arrayContaining(['guest', 'supplier']));
+    expect(last?.[1].typeIn).toHaveLength(2);
+    expect(last?.[1].typeIn).toEqual(expect.arrayContaining(['guest', 'supplier']));
   });
   it('filters by email (column filter + apply) & clears with clear button', async () => {
     // get email header filter button & click
@@ -409,7 +409,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check email arg
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[4]).toBe('john@mail.com');
+    expect(last?.[1].emailContains).toBe('john@mail.com');
 
     // open filter again and click clear button
     await userEvent.click(filterBtn);
@@ -420,7 +420,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check email arg is cleared
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[4]).toBeUndefined();
+    expect(last?.[1].emailContains).toBeUndefined();
   });
   it('filters by phone (column filter + apply) & clears with clear button', async () => {
     // get phone header filter button & click
@@ -438,7 +438,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check phone arg
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[7]).toBe('555');
+    expect(last?.[1].phonesContains).toBe('555');
 
     // open filter again and click clear button
     await userEvent.click(filterBtn);
@@ -449,7 +449,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check phone arg is cleared
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[7]).toBeUndefined();
+    expect(last?.[1].phonesContains).toBeUndefined();
   });
   it('filters by country & clears country filter', async () => {
     // get country header filter button & click
@@ -472,7 +472,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check country arg
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[6]).toEqual(['Spain']);
+    expect(last?.[1].countryIn).toEqual(['Spain']);
 
     // open filter again and click clear button
     await userEvent.click(filterBtn);
@@ -483,7 +483,7 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check country arg is cleared
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[6]).toBeUndefined();
+    expect(last?.[1].countryIn).toBeUndefined();
   });
   it('filters by several countries', async () => {
     // get country header filter button & click
@@ -508,9 +508,8 @@ describe('ContactsPage', () => {
 
     // get last call to fetchContacts and check country arg
     const last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    // expect(last?.[6]).toEqual(['Spain']);
-    expect(last?.[6]).toHaveLength(2);
-    expect(last?.[6]).toEqual(expect.arrayContaining(['Spain', 'Portugal']));
+    expect(last?.[1].countryIn).toHaveLength(2);
+    expect(last?.[1].countryIn).toEqual(expect.arrayContaining(['Spain', 'Portugal']));
   });
   it('applies all filters + global search and clears everything with "Clear all" button', async () => {
     // clear mock
@@ -579,13 +578,13 @@ describe('ContactsPage', () => {
 
     // --- Verify last call has all filters set ---
     let last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[2]).toBe('Doe'); // global search
-    expect(last?.[3]).toBe('Jane'); // name filter
-    expect(last?.[4]).toBe('john@mail.com'); // email filter
-    expect(last?.[5]).toEqual(['customer']); // type filter
-    expect(last?.[6]).toEqual(['Spain']); // country filter
-    expect(last?.[7]).toBe('555'); // phone filter
-    expect(last?.[8]).toBe('-country'); // orderBy
+    expect(last?.[1].globalSearch).toBe('Doe'); // global search
+    expect(last?.[1].nameContains).toBe('Jane'); // name filter
+    expect(last?.[1].emailContains).toBe('john@mail.com'); // email filter
+    expect(last?.[1].typeIn).toEqual(['customer']); // type filter
+    expect(last?.[1].countryIn).toEqual(['Spain']); // country filter
+    expect(last?.[1].phonesContains).toBe('555'); // phone filter
+    expect(last?.[2]).toBe('-country'); // orderBy
 
     // --- Clear all ---
     const clearAllBtn = screen.getByRole('button', { name: /clear global search/i });
@@ -593,13 +592,13 @@ describe('ContactsPage', () => {
 
     // --- Verify last call after clear has everything undefined ---
     last = mockContactsStore.fetchContacts.mock.calls.at(-1);
-    expect(last?.[2]).toBeUndefined(); // global search cleared
-    expect(last?.[3]).toBeUndefined(); // name filter cleared
-    expect(last?.[4]).toBeUndefined(); // email filter cleared
-    expect(last?.[5]).toBeUndefined(); // type filter cleared
-    expect(last?.[6]).toBeUndefined(); // country filter cleared
-    expect(last?.[7]).toBeUndefined(); // phone filter cleared
-    expect(last?.[8]).toBeUndefined(); // orderBy cleared
+    expect(last?.[1].globalSearch).toBeUndefined(); // global search cleared
+    expect(last?.[1].nameContains).toBeUndefined(); // name filter cleared
+    expect(last?.[1].emailContains).toBeUndefined(); // email filter cleared
+    expect(last?.[1].typeIn).toBeUndefined(); // type filter cleared
+    expect(last?.[1].countryIn).toBeUndefined(); // country filter cleared
+    expect(last?.[1].phonesContains).toBeUndefined(); // phone filter cleared
+    expect(last?.[2]).toBeUndefined(); // orderBy cleared
 
     // --- Global input must be empty ---
     expect(globalInput).toHaveValue('');

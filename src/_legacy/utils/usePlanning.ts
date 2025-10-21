@@ -1,4 +1,4 @@
-import { useStore } from '@/legacy/store';
+import { useStore } from '@/_legacy/store';
 import { useRouter } from 'vue-router';
 export function usePlanning() {
   const store = useStore();
