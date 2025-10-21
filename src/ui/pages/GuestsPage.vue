@@ -341,27 +341,37 @@ export default defineComponent({
         (Array.isArray(f.country.value) && f.country.value.length > 0) ||
         (typeof f.country.value === 'string' && f.country.value.trim().length > 0);
 
-      const inhouseOn = f.inHouse.value === true;
+      const inHouseOn = f.inHouse.value === true;
 
-      return anyString || anyCountry || inhouseOn;
+      return anyString || anyCountry || inHouseOn;
     });
 
     const guests = computed(() => contactsStore.guests);
 
     async function fetchNow(): Promise<void> {
-      const inhouseOnly = filters.value.inHouse?.value === true ? true : undefined;
+      const inHouseOnly = filters.value.inHouse?.value === true ? true : undefined;
       uiStore.startLoading();
       try {
         await contactsStore.fetchGuests(
-          page.value,
-          rows.value,
-          isNonEmptyString(globalQuery.value) ? globalQuery.value : undefined,
-          isNonEmptyString(filters.value.name.value) ? filters.value.name.value : undefined,
-          isNonEmptyString(filters.value.identificationDocuments.value)
-            ? filters.value.identificationDocuments.value
-            : undefined,
-          Array.isArray(filters.value.country.value) ? filters.value.country.value : undefined,
-          inhouseOnly,
+          {
+            page: page.value,
+            pageSize: rows.value,
+          },
+          {
+            globalSearch: isNonEmptyString(globalQuery.value) ? globalQuery.value : undefined,
+            nameContains: isNonEmptyString(filters.value.name.value)
+              ? filters.value.name.value
+              : undefined,
+            documentContains: isNonEmptyString(filters.value.identificationDocuments.value)
+              ? filters.value.identificationDocuments.value
+              : undefined,
+            inHouseOnly: inHouseOnly,
+            countryIn:
+              Array.isArray(filters.value.country.value) && filters.value.country.value.length > 0
+                ? (filters.value.country.value as string[])
+                : undefined,
+          },
+
           orderBy.value,
         );
         numTotalRecords.value = contactsStore.contactsCount ?? numTotalRecords.value;

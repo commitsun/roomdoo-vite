@@ -1,59 +1,43 @@
 import type { EntityListResponse } from './EntityListResponse';
 
+import type {
+  AgencyFilters,
+  ContactFilters,
+  CustomerFilters,
+  GuestFilters,
+  SupplierFilters,
+} from '@/domain/contact/ContactFilters';
+import type { Pagination } from '@/domain/repositories/Pagination';
 import type { Agency, Contact, Customer, Guest, Supplier } from '@/domain/entities/Contact';
 
 export interface ContactsRepository {
   fetchContacts(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    emailContains?: string,
-    typeIn?: string[],
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: ContactFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Contact>>;
+
   fetchCustomers(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    vatContains?: string,
-    emailContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: CustomerFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Customer>>;
+
   fetchGuests(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    documentContains?: string,
-    countryIn?: string[],
-    inhouseOnly?: boolean,
+    pagination: Pagination,
+    filters?: GuestFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Guest>>;
+
   fetchAgencies(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    emailContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: AgencyFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Agency>>;
+
   fetchSuppliers(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    vatContains?: string,
-    emailContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: SupplierFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Supplier>>;
 }

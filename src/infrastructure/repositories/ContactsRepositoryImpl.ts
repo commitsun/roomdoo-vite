@@ -1,6 +1,14 @@
+import type {
+  AgencyFilters,
+  ContactFilters,
+  CustomerFilters,
+  GuestFilters,
+  SupplierFilters,
+} from '@/domain/contact/ContactFilters';
 import type { Agency, Contact, Customer, Guest, Supplier } from '@/domain/entities/Contact';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
+import type { Pagination } from '@/domain/repositories/Pagination';
 import { api } from '@/infrastructure/http/axios';
 
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
@@ -14,7 +22,7 @@ function buildQueryParamsFromFilters(opts: {
   typeIn?: string[];
   phonesContains?: string;
   vatContains?: string;
-  inhouseOnly?: boolean;
+  inHouseOnly?: boolean;
 }): URLSearchParams {
   const params = new URLSearchParams();
 
@@ -53,34 +61,23 @@ function buildQueryParamsFromFilters(opts: {
   }
 
   // Boolean — include only if property is present (even if false)
-  if ('inhouseOnly' in opts) {
-    params.set('inHouse', String(Boolean(opts.inhouseOnly)));
+  if ('inHouseOnly' in opts) {
+    params.set('inHouse', String(Boolean(opts.inHouseOnly)));
   }
   return params;
 }
 
 export class ContactsRepositoryImpl implements ContactsRepository {
   async fetchContacts(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    emailContains?: string,
-    typeIn?: string[],
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: ContactFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Contact>> {
     const params = buildQueryParamsFromFilters({
-      globalSearch,
-      nameContains,
-      emailContains,
-      countryIn,
-      typeIn,
-      phonesContains,
+      ...filters,
     });
-    params.set('page', String(page));
-    params.set('page_size', String(pageSize));
+    params.set('page', String(pagination.page));
+    params.set('page_size', String(pagination.pageSize));
 
     if (isNonEmptyString(orderBy)) {
       params.set('orderBy', orderBy.trim());
@@ -92,26 +89,15 @@ export class ContactsRepositoryImpl implements ContactsRepository {
   }
 
   async fetchCustomers(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    emailContains?: string,
-    vatContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: CustomerFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Customer>> {
     const params = buildQueryParamsFromFilters({
-      globalSearch,
-      nameContains,
-      emailContains,
-      countryIn,
-      vatContains,
-      phonesContains,
+      ...filters,
     });
-    params.set('page', String(page));
-    params.set('page_size', String(pageSize));
+    params.set('page', String(pagination.page));
+    params.set('page_size', String(pagination.pageSize));
 
     if (isNonEmptyString(orderBy)) {
       params.set('orderBy', orderBy.trim());
@@ -123,24 +109,15 @@ export class ContactsRepositoryImpl implements ContactsRepository {
   }
 
   async fetchGuests(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    documentContains?: string,
-    countryIn?: string[],
-    inhouseOnly?: boolean,
+    pagination: Pagination,
+    filters?: GuestFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Guest>> {
     const params = buildQueryParamsFromFilters({
-      globalSearch,
-      nameContains,
-      documentContains,
-      countryIn,
-      inhouseOnly,
+      ...filters,
     });
-    params.set('page', String(page));
-    params.set('page_size', String(pageSize));
+    params.set('page', String(pagination.page));
+    params.set('page_size', String(pagination.pageSize));
 
     if (isNonEmptyString(orderBy)) {
       params.set('orderBy', orderBy.trim());
@@ -163,24 +140,15 @@ export class ContactsRepositoryImpl implements ContactsRepository {
   }
 
   async fetchAgencies(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    emailContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: AgencyFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Agency>> {
     const params = buildQueryParamsFromFilters({
-      globalSearch,
-      nameContains,
-      emailContains,
-      countryIn,
-      phonesContains,
+      ...filters,
     });
-    params.set('page', String(page));
-    params.set('page_size', String(pageSize));
+    params.set('page', String(pagination.page));
+    params.set('page_size', String(pagination.pageSize));
 
     if (isNonEmptyString(orderBy)) {
       params.set('orderBy', orderBy.trim());
@@ -192,26 +160,15 @@ export class ContactsRepositoryImpl implements ContactsRepository {
   }
 
   async fetchSuppliers(
-    page: number,
-    pageSize: number,
-    globalSearch?: string,
-    nameContains?: string,
-    vatContains?: string,
-    emailContains?: string,
-    countryIn?: string[],
-    phonesContains?: string,
+    pagination: Pagination,
+    filters?: SupplierFilters,
     orderBy?: string,
   ): Promise<EntityListResponse<Supplier>> {
     const params = buildQueryParamsFromFilters({
-      globalSearch,
-      nameContains,
-      emailContains,
-      countryIn,
-      phonesContains,
-      vatContains,
+      ...filters,
     });
-    params.set('page', String(page));
-    params.set('page_size', String(pageSize));
+    params.set('page', String(pagination.page));
+    params.set('page_size', String(pagination.pageSize));
 
     if (isNonEmptyString(orderBy)) {
       params.set('orderBy', orderBy.trim());
