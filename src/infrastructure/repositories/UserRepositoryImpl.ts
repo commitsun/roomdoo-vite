@@ -17,6 +17,7 @@ export class UsersRepositoryImpl implements UserRepository {
     user.lastName = user.lastname;
     user.lastName2 = user.lastname2;
     user.avatar = user.image;
+    user.lang = user.lang.replace('_', '-');
     return user;
   }
 
@@ -66,7 +67,7 @@ export class UsersRepositoryImpl implements UserRepository {
     }
     if (user.lang !== undefined) {
       payload.lang = user.lang.replace('-', '_');
-      i18n.global.locale.value = user.lang.substring(0, 2);
+      i18n.global.locale.value = user.lang;
       updatePrimevueLocale(user.lang);
     }
     await api.patch('/user', payload);
