@@ -67,6 +67,7 @@ describe('UsersRepositoryImpl', () => {
           firstname: 'Ada',
           lastname: 'Lovelace',
           lastname2: 'Byron',
+          lang: 'en_US',
           image: 'https://cdn/avatar.png',
           email: 'ada@example.com',
         },
@@ -211,7 +212,7 @@ describe('UsersRepositoryImpl', () => {
 
       expect(api.patch).toHaveBeenCalledWith('/user', { lang: 'es_ES' });
 
-      expect(i18n.global.locale.value).toBe('es');
+      expect(i18n.global.locale.value).toBe('es-ES');
       expect(updatePrimevueLocaleSpy).toHaveBeenCalledWith('es-ES');
     });
     it('propagates axios errors in updateUser', async () => {
