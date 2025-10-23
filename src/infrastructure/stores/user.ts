@@ -60,7 +60,7 @@ export const useUserStore = defineStore('user', () => {
     await userService.updateUser(updatedUser);
     if (user.value) {
       user.value = { ...user.value, ...updatedUser };
-      CookieService.setUserCookies(user.value);
+      CookieService.setUserCookies({ ...user.value });
     }
   };
 
