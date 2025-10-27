@@ -303,7 +303,6 @@ import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 
 // helper: explicit non-empty string
@@ -327,7 +326,6 @@ export default defineComponent({
     const { t } = useI18n();
     const countriesStore = useCountriesStore();
     const { open } = useAppDialog();
-    const pmsPropertiesStore = usePmsPropertiesStore();
 
     const phoneDraft = ref('');
     const first = ref(0);
@@ -357,7 +355,6 @@ export default defineComponent({
     const suppliers = computed(() =>
       Array.isArray(contactsStore.suppliers) ? contactsStore.suppliers : [],
     );
-    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
 
     const orderBy = computed<string | undefined>(() => {
       if (sortField.value !== null && sortField.value !== '') {
@@ -479,7 +476,7 @@ export default defineComponent({
       await fetchNow();
     }
 
-    const openContactDetail = async (contactId: number) => {
+    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
@@ -487,7 +484,7 @@ export default defineComponent({
         contact.id = contactId;
         open(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { contact: contact || null },
+          data: { contact: contact },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();

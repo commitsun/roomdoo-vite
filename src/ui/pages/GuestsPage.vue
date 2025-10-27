@@ -252,7 +252,6 @@ import { FilterMatchMode } from '@primevue/core/api';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 
@@ -275,7 +274,6 @@ export default defineComponent({
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
     const { open } = useAppDialog();
-    const pmsPropertiesStore = usePmsPropertiesStore();
     const uiStore = useUIStore();
     const { t } = useI18n();
 
@@ -429,9 +427,7 @@ export default defineComponent({
       void fetchNow();
     }
 
-    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
-
-    const openContactDetail = async (contactId: number) => {
+    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
@@ -439,7 +435,7 @@ export default defineComponent({
         contact.id = contactId;
         open(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { contact: contact || null },
+          data: { contact: contact },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();

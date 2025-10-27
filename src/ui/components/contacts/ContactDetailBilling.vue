@@ -5,33 +5,34 @@
         <label class="billing-form__label" for="fiscalIdNumberType">{{
           t('contacts.taxDocumentType')
         }}</label>
-
         <Select
           id="fiscalIdNumberType"
-          v-model="billingData.fiscalIdNumberType"
+          v-model="modelValue.fiscalIdNumberType"
           :options="[...documentTypes]"
           optionLabel="name"
           optionValue="id"
           class="billing-form__control"
+          :placeholder="t('contacts.select')"
         />
       </div>
-
       <div class="billing-form__field">
         <label class="billing-form__label" for="fiscalIdNumber">{{
           t('contacts.taxDocumentNumber')
         }}</label>
         <InputText
           id="fiscalIdNumber"
-          v-model="billingData.fiscalIdNumber"
+          v-model="modelValue.fiscalIdNumber"
           class="billing-form__control"
+          :placeholder="t('contacts.fiscalDocumentNumberPlaceholder')"
         />
       </div>
-      <div class="billing-form__address" v-if="residenceAddressText">
+      <div
+        class="billing-form__field--full billing-form__address-choice"
+        v-if="residenceAddressText"
+      >
         <div class="billing-form__address-title">
           {{ t('contacts.fiscalAddress') }}
         </div>
-
-        <!-- Tarjeta: usar residencia -->
         <label
           class="billing-card"
           :class="{ 'billing-card--active': billingAddressMode === 'residence' }"
@@ -48,13 +49,11 @@
           </div>
         </label>
 
-        <!-- Tarjeta: usar otra dirección (WRAPPER, no label) -->
         <div
-          class="billing-card billing-card--clickable"
+          class="billing-card"
           :class="{ 'billing-card--active': billingAddressMode === 'other' }"
           @click="billingAddressMode = 'other'"
         >
-          <!-- Encabezado con radio y título -->
           <label class="billing-card__header" for="addr_other">
             <RadioButton
               name="billingAddressMode"
@@ -67,8 +66,6 @@
               <div class="billing-card__title">{{ t('contacts.useOtherAddress') }}</div>
             </div>
           </label>
-
-          <!-- Campos dentro de la MISMA tarjeta -->
           <div v-show="billingAddressMode === 'other'" class="billing-card__content">
             <div class="billing-form__field billing-form__field--full">
               <label class="billing-form__label" for="bill_street">{{
@@ -78,29 +75,47 @@
                 id="bill_street"
                 v-model="billingData.street"
                 class="billing-form__control"
+                :placeholder="t('contacts.fiscalAddressPlaceholder')"
               />
             </div>
             <div class="billing-form__field">
               <label class="billing-form__label" for="bill_city">{{ t('contacts.city') }}</label>
-              <InputText id="bill_city" v-model="billingData.city" class="billing-form__control" />
+              <InputText
+                id="bill_city"
+                v-model="billingData.city"
+                class="billing-form__control"
+                :placeholder="t('contacts.fiscalCityPlaceholder')"
+              />
             </div>
             <div class="billing-form__field">
               <label class="billing-form__label" for="bill_zip">{{
                 t('contacts.postalCode')
               }}</label>
-              <InputText id="bill_zip" v-model="billingData.zip" class="billing-form__control" />
+              <InputText
+                id="bill_zip"
+                v-model="billingData.zipCode"
+                class="billing-form__control"
+                :placeholder="t('contacts.fiscalZipCodePlaceholder')"
+              />
             </div>
-            <div class="billing-form__field billing-form__field--full">
+            <div class="billing-form__field">
               <label class="billing-form__label" for="bill_country">{{
                 t('contacts.country')
               }}</label>
               <Select
                 id="bill_country"
-                v-model="billingData.country"
+                :modelValue="billingData.country?.id ?? null"
                 :options="[...countries]"
                 optionLabel="name"
                 filter
                 class="billing-form__control"
+                :placeholder="t('contacts.select')"
+                @update:modelValue="
+                  (id) => {
+                    const country = countries.find((c) => c.id === id) || undefined;
+                    $emit('update:modelValue', { ...modelValue, country: country || undefined });
+                  }
+                "
               >
                 <template #value="{ value }">
                   <div v-if="value" class="flex items-center w-full gap-1">
@@ -131,43 +146,57 @@
                 optionLabel="name"
                 filter
                 class="billing-form__control"
+                :placeholder="t('contacts.select')"
               />
             </div>
           </div>
         </div>
       </div>
-      <div v-else class="billing-form__address">
+      <div class="billing-form__address" v-else>
         <div class="billing-form__address-title">
           {{ t('contacts.fiscalAddress') }}
         </div>
-        <Message severity="info">
-          <template #icon>
-            <Info :size="60" class="mr-1" />
-          </template>
+        <Message severity="info" icon="pi pi-info-circle">
           <span>{{ t('contacts.fiscalAddressTextMessage') }}</span>
         </Message>
         <div class="billing-form__field billing-form__field--full">
           <label class="billing-form__label" for="bill_street">{{ t('contacts.address') }}</label>
-          <InputText id="bill_street" v-model="billingData.street" class="billing-form__control" />
+          <InputText
+            id="bill_street"
+            v-model="modelValue.street"
+            class="billing-form__control"
+            :placeholder="t('contacts.fiscalAddressPlaceholder')"
+          />
         </div>
         <div class="billing-form__field">
           <label class="billing-form__label" for="bill_zip">{{ t('contacts.postalCode') }}</label>
-          <InputText id="bill_zip" v-model="billingData.zip" class="billing-form__control" />
+          <InputText
+            id="bill_zip"
+            v-model="modelValue.zipCode"
+            class="billing-form__control"
+            :placeholder="t('contacts.fiscalZipCodePlaceholder')"
+          />
         </div>
         <div class="billing-form__field">
           <label class="billing-form__label" for="bill_city">{{ t('contacts.city') }}</label>
-          <InputText id="bill_city" v-model="billingData.city" class="billing-form__control" />
+          <InputText
+            id="bill_city"
+            v-model="modelValue.city"
+            class="billing-form__control"
+            :placeholder="t('contacts.fiscalCityPlaceholder')"
+          />
         </div>
 
-        <div class="billing-form__field billing-form__field--full">
+        <div class="billing-form__field">
           <label class="billing-form__label" for="bill_country">{{ t('contacts.country') }}</label>
           <Select
             id="bill_country"
-            v-model="billingData.country"
+            v-model="modelValue.country"
             :options="[...countries]"
             optionLabel="name"
             filter
             class="billing-form__control"
+            :placeholder="t('contacts.select')"
           >
             <template #value="{ value }">
               <div v-if="value" class="flex items-center w-full gap-1">
@@ -193,11 +222,12 @@
           <label class="billing-form__label" for="state">{{ t('contacts.state') }}</label>
           <Select
             id="state"
-            v-model="billingData.state"
+            v-model="modelValue.state"
             :options="[...countryStates]"
             optionLabel="name"
             filter
             class="billing-form__control"
+            :placeholder="t('contacts.select')"
           />
         </div>
       </div>
@@ -206,23 +236,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, type PropType, watch, reactive, ref } from 'vue';
+import { defineComponent, computed, type PropType, watch, ref, reactive, onBeforeMount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import RadioButton from 'primevue/radiobutton';
 import Message from 'primevue/message';
-import type { ContactDetail } from '@/domain/entities/Contact';
-import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 import { Info } from 'lucide-vue-next';
 import CountryFlag from 'vue-country-flag-next';
 
+import type { ContactDetail } from '@/domain/entities/Contact';
+import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
 import { useUIStore } from '@/infrastructure/stores/ui';
-
-import type { CountryState } from '@/domain/entities/CountryState';
+import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import type { Country } from '@/domain/entities/Country';
+import type { CountryState } from '@/domain/entities/CountryState';
 
 export default defineComponent({
   components: {
@@ -235,80 +265,141 @@ export default defineComponent({
   },
   props: {
     modelValue: {
-      type: Object as PropType<ContactDetail | null>,
+      type: Object as PropType<ContactDetail>,
       required: true,
     },
   },
   emits: ['update:modelValue'],
 
-  setup(props) {
+  setup(props, context) {
     const { t } = useI18n();
     const countriesStore = useCountriesStore();
     const countryStatesStore = useCountryStatesStore();
     const documentTypesStore = useDocumentTypesStore();
+    const textMessageStore = useTextMessagesStore();
     const uiStore = useUIStore();
-
     const billingData = reactive({
-      fiscalIdNumber: '',
-      fiscalIdNumberType: null as number | null,
       street: '',
       city: '',
-      zip: '',
-      state: undefined as CountryState | undefined,
+      zipCode: '',
       country: undefined as Country | undefined,
+      state: undefined as CountryState | undefined,
     });
 
     const billingAddressMode = ref<'residence' | 'other'>('residence');
 
     const countries = computed(() => countriesStore.countries);
     const countryStates = computed(() => countryStatesStore.countryStates);
-
     const documentTypes = computed(() => documentTypesStore.documentTypes);
 
     const residenceAddressText = computed(() => {
-      if (!props.modelValue) return '';
-      const parts = [];
-      if (props.modelValue.street) parts.push(props.modelValue.street);
-      if (props.modelValue.city) parts.push(props.modelValue.city);
-      if (props.modelValue.zipCode) parts.push(props.modelValue.zipCode);
-      if (props.modelValue.state?.name) parts.push(props.modelValue.state.name);
-      if (props.modelValue.country?.name) parts.push(props.modelValue.country.name);
-      return parts.join(', ');
+      let result = '';
+      if (
+        props.modelValue?.residenceStreet === '' &&
+        props.modelValue?.residenceCity === '' &&
+        props.modelValue?.residenceZip === '' &&
+        props.modelValue?.residenceState === undefined &&
+        props.modelValue?.residenceCountry === undefined
+      ) {
+        result = '';
+      } else {
+        const parts = [];
+        if (props.modelValue.residenceStreet !== null) {
+          parts.push(props.modelValue.residenceStreet);
+        }
+        if (props.modelValue.residenceCity !== null) {
+          parts.push(props.modelValue.residenceCity);
+        }
+        if (props.modelValue.residenceZip !== null) {
+          parts.push(props.modelValue.residenceZip);
+        }
+        if (props.modelValue.residenceState?.name !== null) {
+          parts.push(props.modelValue.residenceState?.name);
+        }
+        if (props.modelValue.residenceCountry?.name !== null) {
+          parts.push(props.modelValue.residenceCountry?.name);
+        }
+        result = parts.join(', ');
+      }
+      return result;
     });
 
-    watch(billingAddressMode, () => {
-      if (billingAddressMode.value === 'residence') {
-        billingData.street = '';
-        billingData.city = '';
-        billingData.zip = '';
-        billingData.country = undefined;
-        billingData.state = undefined;
+    watch(billingAddressMode, (newMode) => {
+      if (newMode === 'residence') {
+        context.emit('update:modelValue', {
+          ...props.modelValue,
+          street: props.modelValue.residenceStreet,
+          city: props.modelValue.residenceCity,
+          zipCode: props.modelValue.residenceZip,
+          country: props.modelValue.residenceCountry,
+          state: props.modelValue.residenceState,
+        });
+      } else {
+        context.emit('update:modelValue', {
+          ...props.modelValue,
+          street: billingData.street,
+          city: billingData.city,
+          zipCode: billingData.zipCode,
+          country: billingData.country,
+          state: billingData.state,
+        });
       }
     });
+
     watch(
-      () => billingData.country,
+      () => props.modelValue.country,
       async () => {
         uiStore.startLoading();
         try {
-          if (billingData.country?.id) {
-            await countryStatesStore.fetchCountryStatesByCountryId(billingData.country.id);
+          if (props.modelValue.country) {
+            await countryStatesStore.fetchCountryStatesByCountryId(props.modelValue.country.id);
             const countryStateToSelect = countryStatesStore.countryStates?.find(
-              (s) => s.id === billingData.state?.id
+              (s) => s.id === props.modelValue.state?.id
             );
-            if (countryStateToSelect && billingData.state) {
-              billingData.state.id = countryStateToSelect.id;
+            if (countryStateToSelect && props.modelValue.state) {
+              context.emit('update:modelValue', {
+                ...props.modelValue,
+                state: countryStateToSelect,
+              });
             } else {
-              billingData.state = undefined;
+              context.emit('update:modelValue', {
+                ...props.modelValue,
+                state: undefined,
+              });
             }
           }
         } catch (error) {
-          console.error('Error fetching country states:', error);
+          textMessageStore.addTextMessage(
+            t('error.somethingWentWrong'),
+            error instanceof Error ? error.message : 'Unknown error'
+          );
         } finally {
           uiStore.stopLoading();
         }
       },
       { immediate: true, deep: true }
     );
+    onBeforeMount(async () => {
+      if (
+        (props.modelValue.street !== props.modelValue.residenceStreet &&
+          props.modelValue.street !== '') ||
+        (props.modelValue.city !== props.modelValue.residenceCity &&
+          props.modelValue.city !== '') ||
+        (props.modelValue.zipCode !== props.modelValue.residenceZip &&
+          props.modelValue.zipCode !== '') ||
+        (props.modelValue.country?.id !== props.modelValue.residenceCountry?.id &&
+          props.modelValue.country !== undefined) ||
+        (props.modelValue.state?.id !== props.modelValue.residenceState?.id &&
+          props.modelValue.state !== undefined)
+      ) {
+        billingData.street = props.modelValue.street ?? '';
+        billingData.city = props.modelValue.city ?? '';
+        billingData.zipCode = props.modelValue.zipCode ?? '';
+        billingData.country = props.modelValue.country;
+        billingData.state = props.modelValue.state;
+        billingAddressMode.value = 'other';
+      }
+    });
     return {
       billingData,
       billingAddressMode,
@@ -338,21 +429,25 @@ export default defineComponent({
   &__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 16px;
   }
 
   &__field {
-    :deep(.p-iftalabel) {
-      display: block;
-      width: 100%;
-    }
     .billing-form__control {
       width: 100%;
     }
     :deep(.p-inputtext),
     :deep(.p-select),
+    :deep(.p-select-label),
     :deep(.p-dropdown),
     :deep(.p-inputwrapper) {
+      width: 100%;
+      font-size: 12px !important;
+      height: 30px;
+    }
+    :deep(.p-select .p-select-label) {
+      display: flex;
+      align-items: center;
       width: 100%;
     }
   }
@@ -363,6 +458,11 @@ export default defineComponent({
     display: block;
     margin-bottom: 0.5rem;
     color: #64748b;
+  }
+  &__address-choice {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 }
 
@@ -382,10 +482,7 @@ export default defineComponent({
   border-radius: 12px;
   background: #f8fafc;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-
-  &--clickable {
-    cursor: pointer;
-  }
+  cursor: pointer;
 
   &__header {
     display: contents;
@@ -425,10 +522,57 @@ export default defineComponent({
   border-radius: 12px;
   background: #ffffff;
 }
-
 @media (min-width: 1024px) {
   .billing-form {
-    width: 680px !important;
+    &::before {
+      inset-inline: 0;
+      background: #fff;
+    }
+    .billing-form__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 16px;
+      row-gap: 12px;
+      align-items: start;
+    }
+
+    &__address {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 16px;
+      .billing-form__address-title,
+      :deep(.p-message) {
+        grid-column: 1 / -1;
+      }
+    }
+    &__field--full {
+      grid-column: 1 / -1;
+    }
+
+    .billing-card__content {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 16px;
+    }
+    .billing-card__content .billing-form__field--full {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.billing-form__field {
+  .billing-form__control {
+    width: 100%;
+  }
+  :deep(.p-inputtext),
+  :deep(.p-select),
+  :deep(.p-select-label),
+  :deep(.p-dropdown),
+  :deep(.p-inputwrapper) {
+    width: 100%;
+    font-size: 14px !important;
+    height: 35px;
   }
 }
 </style>
