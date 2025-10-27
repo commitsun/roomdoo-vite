@@ -88,7 +88,7 @@ export const useContactsStore = defineStore('contacts', () => {
     suppliersCount.value = result.count;
   };
 
-  const fetchContactById = async (id: number): Promise<ContactDetail> => {
+  const fetchContactById = async (id: number): Promise<ContactDetail | null> => {
     const result = await contactsService.fetchContactById(id);
     return result;
   };
@@ -105,15 +105,15 @@ export const useContactsStore = defineStore('contacts', () => {
     await contactsService.persistContactDocument(contactId, document);
   };
 
-  const createContact = async (contact: Partial<ContactDetail>) => {
+  const createContact = async (contact: Partial<ContactDetail>): Promise<void> => {
     await contactsService.createContact(contact);
   };
 
   const updateContactFields = async (
     contactId: number,
     original: Partial<ContactDetail>,
-    updated: Partial<ContactDetail>
-  ) => {
+    updated: Partial<ContactDetail>,
+  ): Promise<void> => {
     await contactsService.updateContactFields(contactId, original, updated);
   };
 

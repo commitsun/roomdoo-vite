@@ -30,53 +30,122 @@
         </template>
       </SelectButton>
     </div>
-
-    <Accordion>
-      <AccordionPanel value="0">
-        <AccordionHeader>
-          <div class="flex items-center gap-2">
-            <FileText :size="15" />
-            <span> {{ t('contacts.generalInformation') }} </span>
-          </div>
-        </AccordionHeader>
-        <AccordionContent>
-          <ContactDetailGeneralData :contactType="contactType" v-model="contactForm" />
-        </AccordionContent>
-      </AccordionPanel>
-      <AccordionPanel value="1">
-        <AccordionHeader>
-          <div class="flex items-center gap-2">
-            <IdCard :size="15" />
-            <span> {{ t('contacts.documents') }} </span>
-          </div>
-        </AccordionHeader>
-        <AccordionContent>
-          <ContactDetailDocuments v-model="contactForm" />
-        </AccordionContent>
-      </AccordionPanel>
-      <AccordionPanel value="2">
-        <AccordionHeader>
-          <div class="flex items-center gap-2">
-            <Banknote :size="15" />
-            <span> {{ t('contacts.invoicing') }} </span>
-          </div>
-        </AccordionHeader>
-        <AccordionContent>
-          <ContactDetailBilling v-model="contactForm" />
-        </AccordionContent>
-      </AccordionPanel>
-      <AccordionPanel value="3">
-        <AccordionHeader>
-          <div class="flex items-center gap-2">
-            <NotebookPen :size="15" />
-            <span> {{ t('contacts.internalnotes') }} </span>
-          </div>
-        </AccordionHeader>
-        <AccordionContent>
-          <ContactDetailInternalNotes v-model="contactForm" />
-        </AccordionContent>
-      </AccordionPanel>
-    </Accordion>
+    <div class="contact-detail-accordion" v-if="!isDesktop">
+      <Accordion v-model:value="activePanel">
+        <AccordionPanel value="0">
+          <AccordionHeader>
+            <div
+              class="flex items-center gap-2"
+              :style="{ color: activePanel === '0' ? '#1D4ED8' : '' }"
+            >
+              <FileText :size="15" />
+              <span>{{ t('contacts.generalInformation') }}</span>
+            </div>
+          </AccordionHeader>
+          <AccordionContent>
+            <ContactDetailGeneralData
+              :contactType="contactType"
+              :modelValue="contactForm"
+              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+            />
+          </AccordionContent>
+        </AccordionPanel>
+        <AccordionPanel value="1">
+          <AccordionHeader>
+            <div
+              class="flex items-center gap-2"
+              :style="{ color: activePanel === '1' ? '#1D4ED8' : '' }"
+            >
+              <IdCard :size="15" />
+              <span>{{ t('contacts.documents') }}</span>
+            </div>
+          </AccordionHeader>
+          <AccordionContent>
+            <ContactDetailDocuments
+              :modelValue="contactForm"
+              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+            />
+          </AccordionContent>
+        </AccordionPanel>
+        <AccordionPanel value="2">
+          <AccordionHeader>
+            <div
+              class="flex items-center gap-2"
+              :style="{ color: activePanel === '2' ? '#1D4ED8' : '' }"
+            >
+              <Banknote :size="15" />
+              <span>{{ t('contacts.invoicing') }}</span>
+            </div>
+          </AccordionHeader>
+          <AccordionContent>
+            <ContactDetailBilling
+              :modelValue="contactForm"
+              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+            />
+          </AccordionContent>
+        </AccordionPanel>
+        <AccordionPanel value="3">
+          <AccordionHeader>
+            <div
+              class="flex items-center gap-2"
+              :style="{ color: activePanel === '3' ? '#1D4ED8' : '' }"
+            >
+              <NotebookPen :size="15" />
+              <span>{{ t('contacts.internalnotes') }}</span>
+            </div>
+          </AccordionHeader>
+          <AccordionContent>
+            <ContactDetailInternalNotes
+              :modelValue="contactForm"
+              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+            />
+          </AccordionContent>
+        </AccordionPanel>
+      </Accordion>
+    </div>
+    <div class="contact-detail-tabs" v-else>
+      <Tabs v-model:value="activeTab" :lazy="true">
+        <TabList>
+          <Tab value="0">{{ t('contacts.generalInformation') }}</Tab>
+          <Tab value="1">{{ t('contacts.documents') }}</Tab>
+          <Tab value="2">{{ t('contacts.invoicing') }}</Tab>
+          <Tab value="3">{{ t('contacts.internalnotes') }}</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="0">
+            <ContactDetailGeneralData
+              :contactType="contactType"
+              :modelValue="contactForm"
+              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+            />
+          </TabPanel>
+          <TabPanel value="1">
+            <ContactDetailDocuments
+              :modelValue="contactForm"
+              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+            />
+          </TabPanel>
+          <TabPanel value="2">
+            <ContactDetailBilling
+              :modelValue="contactForm"
+              @update:modelValue="(v) => Object.assign(contactForm, v)"
+            />
+          </TabPanel>
+          <TabPanel value="3">
+            <ContactDetailInternalNotes
+              :modelValue="contactForm"
+              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+            />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </div>
+    <div class="footer">
+      <div class="buttons">
+        <Button :label="t('contacts.cancel')" severity="secondary" @click="handleCancel" />
+        <Button :label="t('contacts.save')" severity="primary" @click="handleSave" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -105,26 +174,19 @@ import {
   BookUser,
 } from 'lucide-vue-next';
 
-import ContactDetailGeneralData from './ContactDetailGeneralData.vue';
-import ContactDetailDocuments from './ContactDetailDocuments.vue';
-import ContactDetailBilling from './ContactDetailBilling.vue';
-import ContactDetailInternalNotes from './ContactDetailInternalNotes.vue';
-
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useTagsStore } from '@/infrastructure/stores/tags';
+import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
+import { useCountriesStore } from '@/infrastructure/stores/countries';
+import { usePricelistStore } from '@/infrastructure/stores/pricelist';
+import { usePaymentTermsStore } from '@/infrastructure/stores/paymentTerms';
+import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
+import type { ContactDetail } from '@/domain/entities/Contact';
 import type { Country } from '@/domain/entities/Country';
 import type { CountryState } from '@/domain/entities/CountryState';
 import type { PaymentTerm } from '@/domain/entities/PaymentTerm';
 import type { Pricelist } from '@/domain/entities/Pricelist';
-import type { ContactDetail, ContactDetailPayload } from '@/domain/entities/Contact';
-import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
-import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
-import { usePaymentTermsStore } from '@/infrastructure/stores/paymentTerms';
-import { usePricelistStore } from '@/infrastructure/stores/pricelist';
-import { useCountriesStore } from '@/infrastructure/stores/countries';
-import { useContactsStore } from '@/infrastructure/stores/contacts';
-import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
-import { useTagsStore } from '@/infrastructure/stores/tags';
-import { useUIStore } from '@/infrastructure/stores/ui';
-import { useInstanceStore } from '@/infrastructure/stores/instance';
 import type { Tag } from '@/domain/entities/Tag';
 import type { Phone } from '@/domain/entities/Phone';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
@@ -159,14 +221,18 @@ export default defineComponent({
   setup() {
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
-    const countryStatesStore = useCountryStatesStore();
     const paymentTermsStore = usePaymentTermsStore();
     const pricelistStore = usePricelistStore();
     const documentTypesStore = useDocumentTypesStore();
     const tagsStore = useTagsStore();
     const uiStore = useUIStore();
-    const instanceStore = useInstanceStore();
-    const dialogRef = inject<any>('dialogRef');
+    const textMessageStore = useTextMessagesStore();
+    const isDesktop = useMediaQuery('(min-width: 1024px)');
+
+    const dialogRef =
+      inject<
+        Ref<{ close: (payload?: unknown) => void; data: { [key: string]: unknown } } | undefined>
+      >('dialogRef');
     const { t } = useI18n();
 
     const contactType = ref('person');
@@ -175,8 +241,8 @@ export default defineComponent({
       { label: t('contacts.company'), value: 'company' },
       { label: t('contacts.agency'), value: 'agency' },
     ]);
+    const activePanel = ref<string | null>(null);
     const activeTab = ref('0');
-
     const contact = ref<ContactDetail | null>(null);
 
     const contactForm: ContactDetail = reactive({
@@ -194,6 +260,11 @@ export default defineComponent({
       documents: [] as PersonalDocument[],
       // fiscalIdNumberType: null as DocumentType | null,
       fiscalIdNumber: '',
+      residenceStreet: '',
+      residenceZip: '',
+      residenceCity: '',
+      residenceState: undefined as CountryState | undefined,
+      residenceCountry: undefined as Country | undefined,
       street: '',
       zipCode: '',
       city: '',
@@ -208,17 +279,10 @@ export default defineComponent({
       contactType: 'person',
     });
 
-    const countries = computed(() => countriesStore.countries);
     const contactsStoreSchema = computed(() => contactsStore.contactSchema);
     const paymentTerms = computed(() => paymentTermsStore.paymentTerms);
     const documentTypes = computed(() => documentTypesStore.documentTypes);
     const languages = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
-
-    const showLastName2 = computed(
-      () =>
-        contactType.value === 'person' &&
-        (contactsStoreSchema.value?.fields ?? []).includes('lastname2'),
-    );
 
     const countryStates = computed(() =>
       countryStatesStore.countryStates?.map((state) => ({
@@ -253,94 +317,6 @@ export default defineComponent({
       })),
     );
 
-    const genders = [
-      { label: t('contacts.gender.female'), value: 'female' },
-      { label: t('contacts.gender.male'), value: 'male' },
-      { label: t('contacts.gender.other'), value: 'other' },
-    ];
-
-    const invoicingPolicies = [
-      { label: 'Property policy', value: 'property' },
-      { label: 'Manual', value: 'manual' },
-      { label: 'From checkout', value: 'checkout' },
-      { label: 'Month day', value: 'month_day' },
-    ];
-
-    const clearTagSelect = () => {
-      tagDraftId.value = 0;
-      selectResetKey.value++;
-    };
-
-    const onTagSelected = (id: number) => {
-      if (!id) {
-        return;
-      }
-      const selected = tags.value.find((t) => t.id === id);
-      if (!selected) {
-        return;
-      }
-
-      const exists = contactForm.tags.some((t) => t.id === selected.id);
-      if (!exists) {
-        contactForm.tags.push(selected);
-      }
-
-      clearTagSelect();
-    };
-
-    const removeTag = (id: number) => {
-      const idx = contactForm.tags.findIndex((t) => t.id === id);
-      if (idx !== -1) {
-        contactForm.tags.splice(idx, 1);
-      }
-      if (tagDraftId.value === id) {
-        clearTagSelect();
-      }
-    };
-
-    const canSaveDraft = computed(() => {
-      const d: any = draftDoc.value;
-      if (!d) {
-        return false;
-      }
-      const numberOk = Boolean(d.name?.trim());
-      const countryOk = Boolean(d.country?.id);
-      const typeOk = Boolean(d.category?.id);
-      return numberOk && countryOk && typeOk;
-    });
-
-    const startAddDocument = () => {
-      if (hasDraftDoc.value) {
-        return;
-      } // 1 borrador a la vez
-      contactForm.documents.push({
-        name: '',
-        supportNumber: '',
-        country: { id: null }, // <- objetos garantizados para v-model
-        category: { id: null },
-        _isDraft: true,
-      } as any);
-      hasDraftDoc.value = true;
-    };
-
-    const cancelAddDocument = () => {
-      const idx = contactForm.documents.findIndex((d: any) => d._isDraft);
-      if (idx !== -1) {
-        contactForm.documents.splice(idx, 1);
-      }
-      hasDraftDoc.value = false;
-    };
-
-    const saveDraftDocument = () => {
-      if (draftDoc.value) {
-        contactsStore.persistContactDocument(contact.value?.id ?? 0, draftDoc.value);
-      }
-    };
-
-    const onUpdateContact = (data: Partial<ContactDetailPayload>) => {
-      Object.assign(contactForm, data);
-    };
-
     const handleSave = async () => {
       uiStore.startLoading();
       try {
@@ -351,13 +327,16 @@ export default defineComponent({
           await contactsStore.createContact(contactForm);
         }
       } catch (error) {
-        console.error('Error saving contact:', error);
+        textMessageStore.addTextMessage(
+          t('error.somethingWentWrong'),
+          error instanceof Error ? error.message : 'Unknown error',
+        );
       } finally {
         uiStore.stopLoading();
       }
     };
 
-    const handleCancel = () => {
+    const handleCancel = (): void => {
       dialogRef?.value?.close({ action: 'cancel' });
     };
 
@@ -391,19 +370,17 @@ export default defineComponent({
 
     onBeforeMount(async () => {
       uiStore.startLoading();
-      contact.value = dialogRef.value.data.contact;
-      console.log('Loaded contact:', contact.value);
+      contact.value = dialogRef?.value?.data.contact as ContactDetail | null;
       try {
         await documentTypesStore.fetchDocumentTypes();
         await countriesStore.fetchCountries();
-        await countryStatesStore.fetchCountryStates();
         await paymentTermsStore.fetchPaymentTerms();
         await pricelistStore.fetchPricelists();
         await tagsStore.fetchTags();
         if (contact.value) {
+          Object.assign(contactForm, contact.value);
           if (contact.value.birthdate) {
-            (contact.value as ContactDetail).birthdate =
-              new Date(contact.value.birthdate || '') ?? null;
+            contactForm.birthdate = new Date(contact.value.birthdate);
           }
           contactType.value =
             contact.value.contactType === 'agency'
@@ -443,9 +420,11 @@ export default defineComponent({
             contactForm.lastname = contactForm.lastname2 = '';
           }
         }
-        console.log('Contact form initialized:', contactForm);
       } catch (error) {
-        console.error('Error fetching contact data:', error);
+        textMessageStore.addTextMessage(
+          t('error.somethingWentWrong'),
+          error instanceof Error ? error.message : 'Unknown error',
+        );
       } finally {
         uiStore.stopLoading();
       }
@@ -456,16 +435,10 @@ export default defineComponent({
       contactTypeOptions,
       contactForm,
       contact,
-      age,
-      birthdateLabel,
-      paymentTerms,
-      pricelists,
-      countries,
-      countryStates,
+      activePanel,
       activeTab,
       contactsStoreSchema,
-      documentTypes,
-      languages,
+      isDesktop,
       t,
       handleCancel,
       handleSave,
@@ -473,14 +446,7 @@ export default defineComponent({
   },
 });
 </script>
-
 <style scoped lang="scss">
-$bp-desktop: 640px;
-
-:root {
-  --bleed-x: 24px;
-}
-
 .contact-detail {
   height: auto;
 }
@@ -502,185 +468,78 @@ $bp-desktop: 640px;
   top: 56px;
   z-index: 19;
   background: #fff;
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.06),
-    0 0 0 var(--bleed-x) #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 0 0 var(--bleed-x) #fff;
 }
 
-.contact-type::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -16px;
-  right: -16px;
-  background: #f1f5f9;
-  z-index: -1;
-  pointer-events: none;
-}
-.billing-form {
-  margin-inline: auto;
-
-  &__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .contact-type::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -16px;
+    right: -16px;
+    background: #f1f5f9;
+    z-index: -1;
   }
-
-  &__field {
-    :deep(.p-iftalabel) {
-      display: block;
-      width: 100%;
-    }
-
-    .billing-form__control {
-      width: 100%;
-    }
-
-    :deep(.p-inputtext),
-    :deep(.p-select),
-    :deep(.p-dropdown),
-    :deep(.p-inputwrapper) {
-      width: 100%;
-    }
+  .contact-detail-accordion {
+    height: calc(100% - 56px - 65px - 16px);
+    overflow-y: auto;
   }
-
-  &__field--full {
-    grid-column: 1 / -1;
+  .contact-detail-tabs {
+    display: none;
   }
-}
-.settings-form {
-  margin-inline: auto;
-
-  &__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  &__field {
-    :deep(.p-iftalabel) {
-      display: block;
-      width: 100%;
-    }
-
-    .settings-form__control {
-      width: 100%;
-    }
-
-    :deep(.p-inputtext),
-    :deep(.p-select),
-    :deep(.p-dropdown),
-    :deep(.p-inputwrapper) {
-      width: 100%;
-    }
-  }
-
-  &__field--full {
-    grid-column: 1 / -1;
-  }
-
-  &__label {
-    display: block;
-    font-size: 0.875rem;
-    color: var(--text-color-secondary, #6b7280);
-    margin-bottom: 6px;
-  }
-}
-
-.tags-field {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--surface-border, #e5e7eb);
-
-  &__chip {
-    :deep(.p-chip) {
-      line-height: 1.25rem;
-    }
-  }
-
-  &__input {
-    flex: 1 1 140px;
-    min-width: 120px;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    padding: 0;
-    height: 2rem;
-    font: inherit;
-    box-shadow: none;
-  }
-}
-
-.internal-notes {
-  margin-inline: auto;
-  :deep(.p-textarea) {
+  .footer {
+    background: #fff;
     width: 100%;
-    resize: none;
-  }
-}
-
-.documents-form {
-  margin-inline: auto;
-
-  &__group + &__group {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px dashed var(--surface-border, #6b7280);
-  }
-
-  &__group-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  &__field {
-    :deep(.p-iftalabel) {
-      display: block;
-      width: 100%;
-    }
-
-    .documents-form__control {
-      width: 100%;
-    }
-
-    :deep(.p-inputtext),
-    :deep(.p-select),
-    :deep(.p-dropdown),
-    :deep(.p-inputwrapper) {
+    .buttons {
+      padding-top: 1.5rem;
+      padding-right: 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
       width: 100%;
     }
   }
-
-  &__actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  &__actions-left,
-  &__actions-right {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
 }
-:deep(.p-tabpanels) {
-  padding: 0;
-  padding-top: 18px;
-}
-
 @media (min-width: 1024px) {
-  .contact-detail,
-  .billing-form,
-  .settings-form,
-  .internal-notes,
-  .documents-form {
-    width: 900px;
+  .contact-detail {
+    width: 920px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    .contact-type {
+      justify-content: flex-start;
+    }
+    .contact-detail-accordion {
+      display: none;
+    }
+    .contact-detail-tabs {
+      height: calc(100% - 56px - 65px);
+      overflow-y: auto;
+      display: block;
+    }
+  }
+  :deep(.p-tabs) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  :deep(.p-tabpanels) {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  :deep(.p-tabpanel) {
+    height: 100%;
+    display: block;
+  }
+  :deep(.p-tablist) {
+    min-height: 50px;
   }
 }
 </style>
