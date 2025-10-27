@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { readonly, ref } from 'vue';
 
+import { i18n } from '@/infrastructure/plugins/i18n';
 import { UsersRepositoryImpl } from '@/infrastructure/repositories/UserRepositoryImpl';
 import type { User } from '@/domain/entities/User';
 import { UserService } from '@/application/user/UserService';
@@ -19,6 +20,7 @@ export const useUserStore = defineStore('user', () => {
     const data = CookieService.getUserCookies();
     if (data) {
       user.value = data as User;
+      i18n.global.locale.value = user.value.lang;
     }
   };
 
@@ -37,6 +39,8 @@ export const useUserStore = defineStore('user', () => {
         avatar: user.value.avatar,
         availabilityRuleFields: user.value.availabilityRuleFields || [],
       });
+      // change i18n locale
+      i18n.global.locale.value = user.value.lang;
     }
   };
 
