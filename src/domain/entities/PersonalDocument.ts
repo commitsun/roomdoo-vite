@@ -1,6 +1,7 @@
-import type { Id } from '@/domain/types/Id';
 import type { Country } from './Country';
 import type { DocumentType } from './DocumentType';
+
+import type { Id } from '@/domain/types/Id';
 
 export interface PersonalDocument {
   id: Id;

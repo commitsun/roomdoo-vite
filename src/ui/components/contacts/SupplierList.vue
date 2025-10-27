@@ -404,7 +404,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
   type DataTableFilterEvent,
@@ -430,7 +429,6 @@ import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { firstTwoInitials } from '@/ui/utils/strings';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 
@@ -462,7 +460,6 @@ export default defineComponent({
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
-    const pmsPropertiesStore = usePmsPropertiesStore();
     const currency = computed(
       () =>
         pmsPropertiesStore.pmsProperties.find(
@@ -506,6 +503,13 @@ export default defineComponent({
 
     // orderBy: returns undefined when no sort
     const orderBy = computed(() => {
+    const globalQuery = ref<string>('');
+
+    const suppliers = computed(() =>
+      Array.isArray(contactsStore.suppliers) ? contactsStore.suppliers : [],
+    );
+
+    const orderBy = computed<string | undefined>(() => {
       if (sortField.value !== null && sortField.value !== '') {
         const prefix = sortOrder.value === -1 ? '-' : '';
         return `${prefix}${sortField.value}`;
@@ -684,6 +688,24 @@ export default defineComponent({
     };
 
     // open contact detail
+    const openContactDetail = async (contactId: number): Promise<void> => {
+    async function clearAll(): Promise<void> {
+      globalQuery.value = '';
+      sortField.value = null;
+      sortOrder.value = 1;
+      page.value = 1;
+      first.value = 0;
+
+      filters.value = {
+        name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        email: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        vat: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        phones: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        country: { value: null, matchMode: FilterMatchMode.IN },
+      };
+      await fetchNow();
+    }
+
     const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {

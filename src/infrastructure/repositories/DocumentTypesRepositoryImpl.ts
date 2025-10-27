@@ -5,7 +5,7 @@ import { api } from '@/infrastructure/http/axios';
 export class DocumentTypesRepositoryImpl implements DocumentTypesRepository {
   async fetchDocumentTypes(countryId?: number): Promise<DocumentType[]> {
     const response = await api.get<DocumentType[]>('/id-number-categories', {
-      params: countryId ? { country: countryId } : {},
+      params: countryId !== null ? { country: countryId } : {},
     });
     return response.data;
   }
