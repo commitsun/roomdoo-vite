@@ -68,7 +68,7 @@ export class UsersRepositoryImpl implements UserRepository {
     if (user.lang !== undefined) {
       payload.lang = user.lang.replace('-', '_');
       i18n.global.locale.value = user.lang;
-      updatePrimevueLocale(user.lang);
+      updatePrimevueLocale(user.lang.substring(0, 2));
     }
     await api.patch('/user', payload);
   }
