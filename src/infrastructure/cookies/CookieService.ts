@@ -46,7 +46,7 @@ export class CookieService {
       }
     });
     const lastName = this.readCookieField('lastName', (value) => value);
-    const lang = this.readCookieField('lang', (value) => value ?? 'en');
+    const lang = this.readCookieField('lang', (value) => value ?? 'en-US');
     const lastName2 = this.readCookieField('lastName2', (value) => value);
     const phone = this.readCookieField('phone', (value) => (value !== null ? value : undefined));
     const avatar = this.readCookieField('avatar', (value) => (value !== null ? value : undefined));
