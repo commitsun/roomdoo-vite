@@ -10,11 +10,11 @@ const countryStatesRepository = new CountryStatesRepositoryImpl();
 export const useCountryStatesStore = defineStore('countryStates', () => {
   const countryStatesService = new CountryStatesService(countryStatesRepository);
   const countryStates: Ref<CountryState[]> = ref([]);
-  const fetchCountryStates = async () => {
+  const fetchCountryStates = async (): Promise<void> => {
     countryStates.value = await countryStatesService.fetchCountryStates();
   };
 
-  const fetchCountryStatesByCountryId = async (countryId: number) => {
+  const fetchCountryStatesByCountryId = async (countryId: number): Promise<void> => {
     countryStates.value = await countryStatesService.fetchCountryStatesByCountryId(countryId);
   };
 

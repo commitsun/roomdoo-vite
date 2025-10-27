@@ -10,7 +10,7 @@ const tagsRepository = new TagsRepositoryImpl();
 export const useTagsStore = defineStore('tags', () => {
   const tagsService = new TagsService(tagsRepository);
   const tags: Ref<Tag[]> = ref([]);
-  const fetchTags = async () => {
+  const fetchTags = async (): Promise<void> => {
     tags.value = await tagsService.fetchTags();
   };
   return {

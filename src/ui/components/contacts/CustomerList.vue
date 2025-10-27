@@ -404,7 +404,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
   type DataTableFilterEvent,
@@ -430,7 +429,6 @@ import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { firstTwoInitials } from '@/ui/utils/strings';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 
@@ -462,7 +460,6 @@ export default defineComponent({
     const contactsStore = useContactsStore();
     const uiStore = useUIStore();
     const countriesStore = useCountriesStore();
-    const pmsPropertiesStore = usePmsPropertiesStore();
     const currency = computed(
       () =>
         pmsPropertiesStore.pmsProperties.find(
@@ -547,6 +544,33 @@ export default defineComponent({
     const currentRequest = ref(0);
     const fetchNow = async (): Promise<void> => {
       const id = ++currentRequest.value; // identificador de esta petición
+    const showClearButton = computed<boolean>(() => {
+      const f = filters.value;
+
+      const anyString =
+        isNonEmptyString(globalQuery.value) ||
+        isNonEmptyString(f.name.value) ||
+        isNonEmptyString(f.vat.value) ||
+        isNonEmptyString(f.email.value) ||
+        isNonEmptyString(f.phones.value) ||
+        isNonEmptyString(sortField.value);
+
+      const anyCountry =
+        (Array.isArray(f.country.value) && f.country.value.length > 0) ||
+        (typeof f.country.value === 'string' && f.country.value.trim().length > 0);
+
+      return anyString || anyCountry;
+    });
+
+    const customers = computed(() =>
+      Array.isArray(contactsStore.customers) ? contactsStore.customers : [],
+    );
+
+    const setCountFromStore = (): void => {
+      numTotalRecords.value = contactsStore.contactsCount;
+    };
+
+    async function fetchNow(): Promise<void> {
       uiStore.startLoading();
       isLoading.value = true;
       try {
@@ -586,7 +610,7 @@ export default defineComponent({
           uiStore.stopLoading();
         }
       }
-    };
+    }
 
     // global query input
     const onGlobalQueryInput = useDebounceFn(
@@ -692,7 +716,7 @@ export default defineComponent({
         contact.id = contactId;
         openDialog(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { contact: contact || null },
+          data: { contact: contact },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
