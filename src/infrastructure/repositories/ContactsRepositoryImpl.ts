@@ -226,22 +226,40 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     await api.post(`contacts/${contactId}/id-numbers`, payload);
   }
 
-  normalizeContactPayload = (contact: Partial<ContactDetail>) => {
+  normalizeContactPayload = (contact: Partial<ContactDetail>): Partial<ContactDetail> => {
     const birthdate =
       contact.birthdate instanceof Date ? contact.birthdate.toISOString().split('T')[0] : undefined;
 
     return Object.fromEntries(
       Object.entries({ ...contact, birthdate })
         .map(([k, v]) => {
-          if (k === 'firstName') return ['firstname', v] as const;
-          if (k === 'lastName') return ['lastname', v] as const;
-          if (k === 'lastName2') return ['lastname2', v] as const;
-          if (k === 'nationalityId') return ['nationality', v] as const;
-          if (k === 'phoneNumber') return ['phones', [{ number: v, type: 'mobile' }]] as const;
-          if (k === 'stateId') return ['state', v] as const;
-          if (k === 'countryId') return ['country', v] as const;
-          if (k === 'paymentTermId') return ['paymentTerm', v] as const;
-          if (k === 'pricelistId') return ['pricelist', v] as const;
+          if (k === 'firstName') {
+            return ['firstname', v] as const;
+          }
+          if (k === 'lastName') {
+            return ['lastname', v] as const;
+          }
+          if (k === 'lastName2') {
+            return ['lastname2', v] as const;
+          }
+          if (k === 'nationalityId') {
+            return ['nationality', v] as const;
+          }
+          if (k === 'phoneNumber') {
+            return ['phones', [{ number: v, type: 'mobile' }]] as const;
+          }
+          if (k === 'stateId') {
+            return ['state', v] as const;
+          }
+          if (k === 'countryId') {
+            return ['country', v] as const;
+          }
+          if (k === 'paymentTermId') {
+            return ['paymentTerm', v] as const;
+          }
+          if (k === 'pricelistId') {
+            return ['pricelist', v] as const;
+          }
 
           return [k, v] as const;
         })
@@ -270,17 +288,15 @@ export class ContactsRepositoryImpl implements ContactsRepository {
 
     original = this.normalizeContactPayload(original);
     updated = this.normalizeContactPayload(updated);
-    console.log('Original:', original);
-    console.log('Updated:', updated);
     for (const [key, value] of Object.entries(updated)) {
-      const originalValue = (original as any)[key];
+      const typedKey = key as keyof ContactDetail;
+      const originalValue = original[typedKey];
 
-      if (JSON.stringify(value) !== JSON.stringify(originalValue)) {
-        (changed as any)[key] = value;
+      if (JSON.stringify(value) !== JSON.stringify(originalValue) && value !== null) {
+        (changed as Record<string, unknown>)[typedKey] = value;
       }
     }
     const payload = this.normalizeContactPayload(changed);
-    console.log('Payload:', payload);
     await api.patch(`contacts/${contactId}`, payload);
   }
 }

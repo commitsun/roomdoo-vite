@@ -1,39 +1,43 @@
 <template>
   <section class="internal-notes-form">
-    <div class="internal-notes-form__field internal-note-form__field--full">
-      <label class="internal-notes-form__label" for="internalNotes">{{
-        t('contacts.notesAndObservations')
-      }}</label>
-      <Textarea
-        :style="{ background: '#FEFCE8', border: '1px solid #CA8A04' }"
-        v-model="internalNotesData.internalNotes"
-        rows="5"
-      />
-    </div>
-    <div class="internal-notes-form__field internal-notes-form__field--full">
-      <label class="internal-notes-form__label" for="tagsInput">{{ t('contacts.tags') }}</label>
-      <MultiSelect
-        v-model="internalNotesData.tags"
-        display="chip"
-        :options="[...tags]"
-        optionLabel="name"
-        filter
-        placeholder="Select Tags"
-      />
+    <div class="internal-notes-form__grid">
+      <div class="internal-notes-form__field internal-note-form__field--full">
+        <label class="internal-notes-form__label" for="internalNotes">{{
+          t('contacts.notesAndObservations')
+        }}</label>
+        <Textarea
+          :style="{ background: '#FEFCE8', border: '1px solid #CA8A04' }"
+          v-model="modelValue.internalNotes"
+          rows="5"
+          :placeholder="t('contacts.internalNotesPlaceholder')"
+        />
+      </div>
+      <div class="internal-notes-form__field internal-notes-form__field--full">
+        <label class="internal-notes-form__label" for="tagsInput">{{ t('contacts.tags') }}</label>
+        <MultiSelect
+          class="w-full"
+          v-model="modelValue.tags"
+          display="chip"
+          :options="[...tags]"
+          optionLabel="name"
+          filter
+          :placeholder="t('contacts.select')"
+        />
+      </div>
     </div>
   </section>
 </template>
 
 <script lang="ts">
-import { defineComponent, type Ref, ref, onMounted, type PropType, computed, reactive } from 'vue';
+import { defineComponent, type PropType, computed } from 'vue';
 import Textarea from 'primevue/textarea';
-import type { ContactDetail } from '@/domain/entities/Contact';
-import type { Tag } from '@/domain/entities/Tag';
 import Chip from 'primevue/chip';
 import Select from 'primevue/select';
 import MultiSelect from 'primevue/multiselect';
-import { useTagsStore } from '@/infrastructure/stores/tags';
 import { useI18n } from 'vue-i18n';
+
+import { useTagsStore } from '@/infrastructure/stores/tags';
+import type { ContactDetail } from '@/domain/entities/Contact';
 
 export default defineComponent({
   components: {
@@ -48,34 +52,18 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:modelValue'],
-  setup(props) {
+  setup() {
     const { t } = useI18n();
-
     const tagsStore = useTagsStore();
-
-    const internalNotesData = reactive({
-      internalNotes: '',
-      tags: [] as Tag[],
-    });
     const tags = computed(() => tagsStore.tags);
-
-    onMounted(() => {
-      internalNotesData.internalNotes = props.modelValue.internalNotes || '';
-      internalNotesData.tags = props.modelValue.tags ? [...props.modelValue.tags] : [];
-    });
     return {
-      internalNotesData,
       tags,
       t,
     };
   },
 });
 </script>
-
 <style scoped lang="scss">
-$bp-desktop: 640px;
-
 .internal-notes-form {
   position: relative;
   padding-top: 1rem;
@@ -87,6 +75,22 @@ $bp-desktop: 640px;
     height: 1px;
     background: #e2e8f0;
   }
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    min-width: 0;
+  }
+  &__field {
+    min-width: 0;
+
+    :deep(.p-select) {
+      width: 100%;
+    }
+  }
+  &__field--full {
+    grid-column: 1 / -1;
+  }
   &__label {
     display: block;
     margin-bottom: 0.5rem;
@@ -95,6 +99,41 @@ $bp-desktop: 640px;
   :deep(.p-textarea) {
     width: 100%;
     resize: none;
+    font-size: 12px;
+  }
+  :deep(.p-multiselect) {
+    width: 100%;
+  }
+  :deep(.p-multiselect .p-multiselect-label-container) {
+    overflow: visible;
+  }
+  :deep(.p-multiselect .p-multiselect-label) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 12px;
+    min-height: 30px;
+  }
+  :deep(.p-multiselect .p-multiselect-token) {
+    margin: 0;
+  }
+}
+@media (min-width: 1024px) {
+  .internal-notes-form {
+    &::before {
+      inset-inline: 0;
+      background: #ffffff;
+    }
+    :deep(.p-multiselect) {
+      width: 50%;
+    }
+    :deep(.p-multiselect .p-multiselect-label) {
+      font-size: 14px;
+      min-height: 35px;
+    }
+    :deep(.p-textarea) {
+      font-size: 14px;
+    }
   }
 }
 </style>

@@ -10,7 +10,7 @@ const paymentTermsRepository = new PaymentTermRepositoryImpl();
 export const usePaymentTermsStore = defineStore('paymentTerms', () => {
   const paymentTermsService = new PaymentTermService(paymentTermsRepository);
   const paymentTerms: Ref<PaymentTerm[]> = ref([]);
-  const fetchPaymentTerms = async () => {
+  const fetchPaymentTerms = async (): Promise<void> => {
     paymentTerms.value = await paymentTermsService.fetchPaymentTerms();
   };
   return {

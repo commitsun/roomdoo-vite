@@ -351,7 +351,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
   type DataTableFilterEvent,
@@ -427,10 +426,26 @@ export default defineComponent({
     // sorting
     const sortField = ref<string | null>(null);
     const sortOrder = ref<number>(1);
+    const SORT_FIELD_MAP: Record<string, string> = {
+      name: 'name',
+      country: 'country',
+      email: 'email',
+    };
+    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
 
-    // filters
-    const globalQuery = ref<string>('');
-    const phoneFilterDraft = ref('');
+    const orderBy = computed<string | undefined>(() => {
+      if (sortField.value !== null && sortField.value !== '') {
+        const key = SORT_FIELD_MAP[sortField.value] ?? sortField.value;
+        const prefix = sortOrder.value === -1 ? '-' : '';
+        return `${prefix}${key}`;
+      }
+      return undefined;
+    });
+
+    const safeSortField = computed<string | undefined>(() =>
+      sortField.value === null || sortField.value === '' ? undefined : sortField.value,
+    );
+
     const filters = ref({
       name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
       email: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
@@ -620,14 +635,10 @@ export default defineComponent({
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
-        if (contact === null) {
-          uiStore.stopLoading();
-          return;
-        }
         contact.id = contactId;
-        openDialog(ContactDetail, {
+        open(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { contact: contact },
+          data: { contact: contact || null },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();

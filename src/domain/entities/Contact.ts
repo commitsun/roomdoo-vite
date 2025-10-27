@@ -62,30 +62,14 @@ export interface ContactDetail extends Omit<Contact, 'types'> {
   pricelist?: Pricelist;
   internalNotes?: string;
   documents?: PersonalDocument[];
+  residenceStreet?: string;
+  residenceZip?: string;
+  residenceCity?: string;
+  residenceState?: CountryState;
+  residenceCountry?: Country;
   fiscalIdNumber?: string;
   fiscalIdNumberType?: DocumentType;
   tags?: Tag[];
-}
-
-export interface ContactDetailPayload
-  extends Omit<
-    ContactDetail,
-    | 'country'
-    | 'nationality'
-    | 'state'
-    | 'paymentTerm'
-    | 'pricelist'
-    | 'documents'
-    | 'tags'
-    | 'fiscalIdNumberType'
-  > {
-  country?: number;
-  nationality?: number;
-  state?: number;
-  paymentTerm?: number;
-  pricelist?: number;
-  tags?: number[];
-  fiscalIdNumberType?: number;
 }
 
 export interface ContactSchema {
