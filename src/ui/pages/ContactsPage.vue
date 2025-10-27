@@ -396,8 +396,8 @@ export default defineComponent({
       })),
     );
 
-    const contacts = computed(() => contactsStore.contacts || []);
-    const setCountFromStore = () => (numTotalRecords.value = contactsStore.contactsCount);
+    const contacts = computed(() => contactsStore.contacts);
+    const setCountFromStore = (): number => (numTotalRecords.value = contactsStore.contactsCount);
 
     async function fetchNow(): Promise<void> {
       uiStore.startLoading();
@@ -496,21 +496,26 @@ export default defineComponent({
       return 'secondary';
     }
 
-    const openContactDetail = async (contactId: number) => {
+    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
-        contact.id = contactId;
-        open(ContactDetail, {
-          props: { header: contact.name || t('contacts.detail') },
-          data: { contact: contact || null },
-          onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-            if (data?.refresh === true || data?.action === 'saved') {
-              void fetchNow();
-            }
-          },
-        });
+        if (contact) {
+          contact.id = contactId;
+          open(ContactDetail, {
+            props: { header: contact.name || t('contacts.detail') },
+            data: { contact },
+            onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+              if (data?.refresh === true || data?.action === 'saved') {
+                void fetchNow();
+              }
+            },
+          });
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('Contact not found for id:', contactId);
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);

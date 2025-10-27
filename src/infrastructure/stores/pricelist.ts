@@ -10,7 +10,7 @@ const pricelistRepository = new PricelistRepositoryImpl();
 export const usePricelistStore = defineStore('pricelist', () => {
   const pricelistService = new PricelistService(pricelistRepository);
   const pricelists: Ref<Pricelist[]> = ref([]);
-  const fetchPricelists = async () => {
+  const fetchPricelists = async (): Promise<void> => {
     pricelists.value = await pricelistService.fetchPricelists();
   };
   return {

@@ -1,17 +1,23 @@
 <template>
   <section class="documents-form">
-    <div class="documents-form__no-documents" v-if="model.documents.length === 0 && !hasDraftDoc">
-      <IdCard :size="40" color="#64748B" />
-      <span class="documents-form__no-documents-text">{{ t('contacts.noDocuments') }}</span>
-      <Button
-        :label="t('contacts.addDocument')"
-        icon="pi pi-plus"
-        severity="primary"
-        variant="outlined"
-        @click="startAddDocument"
-      />
+    <div
+      class="documents-form__no-documents-container"
+      v-if="(modelValue.documents?.length ?? 0) === 0 && !hasDraftDoc"
+    >
+      <div class="documents-form__no-documents">
+        <IdCard :size="40" color="#64748B" />
+        <span class="documents-form__no-documents-text">{{ t('contacts.noDocuments') }}</span>
+        <Button
+          :label="t('contacts.addDocument')"
+          icon="pi pi-plus"
+          severity="primary"
+          variant="outlined"
+          @click="startAddDocument"
+        />
+      </div>
     </div>
-    <div class="documents-form__title" v-if="model.documents.length > 0">
+
+    <div class="documents-form__title" v-if="(modelValue.documents?.length ?? 0) > 0">
       <div class="documents-form__title-text">{{ t('contacts.allDocuments') }}</div>
       <Button
         :label="t('contacts.addDocument')"
@@ -21,69 +27,105 @@
         @click="startAddDocument"
       />
     </div>
-    <div v-for="(doc, idx) in model.documents" :key="doc.id ?? idx" class="documents-form__group">
+    <div
+      v-for="(doc, idx) in modelValue.documents"
+      :key="doc.id ?? `draft-${idx}`"
+      class="documents-form__group"
+    >
       <div class="documents-form__group-grid">
-        {{ t('contacts.mandatoryFieldsText') }}
+        <div class="documents-form__field--full">
+          {{ t('contacts.mandatoryFieldsText') }}
+        </div>
+
         <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-country-${idx}`"
-            >{{ t('contacts.issueCountry') }} *</label
-          >
+          <label class="documents-form__label" :for="`doc-country-${idx}`">
+            {{ t('contacts.issueCountry') }} *
+          </label>
           <Select
             :id="`doc-country-${idx}`"
-            v-model="(doc.country ?? (doc.country = { id: 0, name: '', code: '' })).id"
+            :modelValue="doc.country?.id ?? null"
             :options="[...countries]"
             optionLabel="name"
             optionValue="id"
             class="documents-form__control"
-          />
+            :placeholder="t('contacts.select')"
+            filter
+            @update:modelValue="(id) => setDocCountry(idx, id as number | null)"
+          >
+            <template #value="{ value }">
+              <div v-if="value" class="flex items-center w-full gap-1">
+                <CountryFlag
+                  :country="countryById.get(value)?.code?.toLowerCase() || ''"
+                  size="small"
+                  shadow
+                />
+                <span class="whitespace-nowrap">{{ countryById.get(value)?.name }}</span>
+              </div>
+            </template>
+            <template #option="{ option }">
+              <div class="flex items-center gap-2">
+                <CountryFlag
+                  :country="option.code?.toLowerCase()"
+                  size="normal"
+                  shadow
+                  style="margin-bottom: 1px"
+                />
+                <div>{{ option.name }}</div>
+              </div>
+            </template>
+          </Select>
         </div>
 
         <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-type-${idx}`"
-            >{{ t('contacts.documentType') }} *</label
-          >
+          <label class="documents-form__label" :for="`doc-type-${idx}`">
+            {{ t('contacts.documentType') }} *
+          </label>
           <Select
             :id="`doc-type-${idx}`"
-            v-model="
-              (doc.category ?? (doc.category = { id: 0, name: '', code: '', countries: [] })).id
-            "
+            :modelValue="doc.category?.id ?? null"
             :options="[...documentTypes]"
             optionLabel="name"
             optionValue="id"
             class="documents-form__control"
+            :placeholder="t('contacts.select')"
+            @update:modelValue="(id) => setDocCategory(idx, id as number | null)"
           />
         </div>
 
+        <!-- Campos simples: mutación profunda directa sobre el mismo objeto -->
         <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-number-${idx}`"
-            >{{ t('contacts.documentNumber') }} *</label
-          >
+          <label class="documents-form__label" :for="`doc-number-${idx}`">
+            {{ t('contacts.documentNumber') }} *
+          </label>
           <InputText
             :id="`doc-number-${idx}`"
             v-model="doc.name"
             class="documents-form__control"
             autocomplete="off"
+            :placeholder="t('contacts.documentNumberPlaceholder')"
           />
         </div>
 
         <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-support-${idx}`">{{
-            t('contacts.supportNumber')
-          }}</label>
+          <label class="documents-form__label" :for="`doc-support-${idx}`">
+            {{ t('contacts.supportNumber') }}
+          </label>
           <InputText
             :id="`doc-support-${idx}`"
             v-model="doc.supportNumber"
             class="documents-form__control"
             autocomplete="off"
+            :placeholder="t('contacts.supportNumberPlaceholder')"
           />
         </div>
+
         <div class="documents-form__cancel">
           <Button
             :label="t('contacts.remove')"
             icon="pi pi-trash"
             text
             severity="secondary"
-            @click="cancelAddDocument"
+            @click="removeDraftsOrDelete(idx)"
           />
         </div>
       </div>
@@ -92,13 +134,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch, type PropType, reactive } from 'vue';
+import { defineComponent, computed, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import { IdCard } from 'lucide-vue-next';
+import CountryFlag from 'vue-country-flag-next';
+
 import type { ContactDetail } from '@/domain/entities/Contact';
-import { IdCard, Trash2 } from 'lucide-vue-next';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 
@@ -108,75 +152,93 @@ export default defineComponent({
     InputText,
     Button,
     IdCard,
-    Trash2,
+    CountryFlag,
   },
   props: {
     modelValue: {
-      type: Object as PropType<ContactDetail | null>,
+      type: Object as PropType<ContactDetail>,
       required: true,
     },
   },
-  emits: ['updateDocuments'],
+  emits: ['update:modelValue'],
   setup(props, { emit }) {
     const { t } = useI18n();
     const countriesStore = useCountriesStore();
     const documentTypesStore = useDocumentTypesStore();
 
-    const model = ref({
-      documents: props.modelValue?.documents ? [...props.modelValue.documents] : [],
-    });
-
-    const documentsData = reactive({
-      documents: [] as Document[],
-    });
-
     const countries = computed(() => countriesStore.countries);
-
     const documentTypes = computed(() => documentTypesStore.documentTypes);
 
-    const hasDraftDoc = computed(() => {
-      return model.value.documents.some((doc) => !doc.id);
+    const countryById = computed(() => {
+      const m = new Map<number, { id: number; name: string; code: string }>();
+      countries.value.forEach((c) => m.set(c.id, c));
+      return m;
     });
 
-    const canSaveDraft = computed(() => {
-      const draftDoc = model.value.documents.find((doc) => !doc.id);
-      if (!draftDoc) return false;
-      return !!(draftDoc.name && draftDoc.category?.id && draftDoc.country?.id);
-    });
+    const hasDraftDoc = computed(() => (props.modelValue.documents ?? []).some((d) => !d.id));
 
-    const startAddDocument = () => {
-      if (hasDraftDoc.value) return;
-      model.value.documents.push({
-        id: 0,
-        name: '',
-        supportNumber: '',
-        category: { id: 0, name: '', code: '', countries: [] },
-        country: { id: 0, name: '', code: '' },
+    const patchDocuments = (
+      updater: (
+        docs: NonNullable<ContactDetail['documents']>
+      ) => NonNullable<ContactDetail['documents']>
+    ): void => {
+      const docs = props.modelValue.documents ?? [];
+      const next = updater(docs);
+      emit('update:modelValue', { ...props.modelValue, documents: next });
+    };
+
+    const startAddDocument = (): void => {
+      if (hasDraftDoc.value) {
+        return;
+      }
+      patchDocuments((docs) => [
+        ...docs,
+        {
+          id: 0,
+          name: '',
+          supportNumber: '',
+          category: { id: 0, name: '', code: '', countries: [] },
+          country: { id: 0, name: '', code: '' },
+        },
+      ]);
+    };
+
+    const removeDraftsOrDelete = (idx: number): void => {
+      patchDocuments((docs) => docs.filter((_, i): boolean => i !== idx || Boolean(docs[i].id)));
+    };
+
+    const setDocCountry = (idx: number, id: number | null): void => {
+      const country = id !== null ? countries.value.find((c) => c.id === id) : undefined;
+      patchDocuments((docs) => {
+        const next = [...docs];
+        const d = { ...next[idx], country: country ?? undefined };
+        next[idx] = d;
+        return next;
       });
     };
 
-    const cancelAddDocument = () => {
-      model.value.documents = model.value.documents.filter((doc) => doc.id);
+    const setDocCategory = (idx: number, id: number | null): void => {
+      const defaultCategory = { id: 0, name: '', code: '', countries: [] };
+      const catRaw = documentTypes.value.find((c) => c.id === id) ?? defaultCategory;
+      const cat = { ...catRaw, countries: [...catRaw.countries] };
+      patchDocuments((docs) => {
+        const next = [...docs];
+        const d = { ...next[idx], category: cat };
+        next[idx] = d;
+        return next;
+      });
     };
 
-    watch(
-      () => props.modelValue,
-      (newContact) => {
-        console.log('ContactDetailDocuments: modelValue changed', newContact);
-        model.value.documents = newContact?.documents ? [...newContact.documents] : [];
-      }
-    );
-
     return {
+      t,
       countries,
       documentTypes,
-      model,
+      countryById,
       hasDraftDoc,
-      canSaveDraft,
-      documentsData,
-      t,
       startAddDocument,
-      cancelAddDocument,
+      removeDraftsOrDelete,
+      setDocCountry,
+      setDocCategory,
     };
   },
 });
@@ -229,22 +291,19 @@ export default defineComponent({
   &__group-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 16px;
     border: 1px solid #cbd5e1;
     border-radius: 12px;
     padding: 16px;
   }
 
   &__field {
-    :deep(.p-iftalabel) {
-      display: block;
-      width: 100%;
-    }
     .documents-form__control {
       width: 100%;
     }
     :deep(.p-inputtext),
     :deep(.p-select),
+    :deep(.p-select-label),
     :deep(.p-dropdown),
     :deep(.p-inputwrapper) {
       width: 100%;
@@ -284,7 +343,57 @@ export default defineComponent({
 }
 @media (min-width: 1024px) {
   .documents-form {
-    width: 680px !important;
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    &::before {
+      inset-inline: 0;
+      background: #ffffff;
+    }
+    &__no-documents-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__no-documents {
+      width: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    &__title {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    &__group {
+      width: 100%;
+    }
+    &__group-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 16px;
+      row-gap: 12px;
+      align-items: start;
+    }
+    &__field {
+      grid-column: auto / span 1;
+      :deep(.p-inputtext),
+      :deep(.p-select),
+      :deep(.p-select-label),
+      :deep(.p-datepicker),
+      :deep(.p-inputwrapper) {
+        font-size: 14px !important;
+        height: 35px;
+      }
+    }
+    &__field--full,
+    &__cancel {
+      grid-column: 1 / -1;
+    }
   }
 }
 </style>

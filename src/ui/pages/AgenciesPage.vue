@@ -257,7 +257,6 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -280,7 +279,6 @@ export default defineComponent({
     const { t } = useI18n();
     const countriesStore = useCountriesStore();
     const { open } = useAppDialog();
-    const pmsPropertiesStore = usePmsPropertiesStore();
 
     const phoneDraft = ref('');
     const first = ref(0);
@@ -296,7 +294,6 @@ export default defineComponent({
       country: 'country',
       email: 'email',
     };
-    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
 
     const orderBy = computed<string | undefined>(() => {
       if (sortField.value !== null && sortField.value !== '') {
@@ -427,21 +424,26 @@ export default defineComponent({
       await fetchNow();
     }
 
-    const openContactDetail = async (contactId: number) => {
+    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
-        contact.id = contactId;
-        open(ContactDetail, {
-          props: { header: contact.name || t('contacts.detail') },
-          data: { contact: contact || null },
-          onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-            if (data?.refresh === true || data?.action === 'saved') {
-              void fetchNow();
-            }
-          },
-        });
+        if (contact) {
+          contact.id = contactId;
+          open(ContactDetail, {
+            props: { header: contact.name || t('contacts.detail') },
+            data: { contact: contact },
+            onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+              if (data?.refresh === true || data?.action === 'saved') {
+                void fetchNow();
+              }
+            },
+          });
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(`Contact with id ${contactId} not found.`);
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
