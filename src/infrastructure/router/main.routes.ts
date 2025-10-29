@@ -49,4 +49,16 @@ export const mainRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/invoices/:pmsPropertyId(\\d+)?',
+    component: () => import('@/_legacy/layouts/MainLayout.vue'),
+    children: [
+      {
+        name: 'bookai',
+        path: '',
+        component: () => import('@/_legacy/pages/BookAIPage.vue'),
+        meta: { requiresAuth: true },
+      },
+    ],
+  },
 ];
