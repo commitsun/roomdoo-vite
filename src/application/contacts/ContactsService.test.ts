@@ -4,7 +4,14 @@ import { ContactsService } from './ContactsService';
 
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
-import type { Contact, Customer, Guest, Agency, Supplier } from '@/domain/entities/Contact';
+import type {
+  Contact,
+  Customer,
+  Guest,
+  Agency,
+  Supplier,
+  ContactDetail,
+} from '@/domain/entities/Contact';
 
 describe('ContactsService.fetchContacts', () => {
   let contactsService: ContactsService;
@@ -322,5 +329,190 @@ describe('ContactsService.fetchSuppliers', () => {
     contactsRepoMock.fetchSuppliers.mockRejectedValue(err);
     // act & assert
     await expect(contactsService.fetchSuppliers(pagination)).rejects.toThrow(err);
+  });
+});
+
+describe('ContactsService.fetchContactById', () => {
+  let contactsService: ContactsService;
+  let contactsRepoMock: Partial<Record<keyof ContactsRepository, any>>;
+
+  beforeEach(() => {
+    contactsRepoMock = { fetchContactById: vi.fn(), fetchContactPersonalDocuments: vi.fn() };
+    contactsService = new ContactsService(contactsRepoMock as ContactsRepository);
+  });
+
+  it('returns contact data on success', async () => {
+    const contact: ContactDetail = {
+      id: 1,
+      name: 'John Doe',
+      firstname: 'John',
+      lastname: 'Doe',
+      email: 'john.doe@example.com',
+      residenceStreet: '123 Main St',
+      residenceCity: 'Anytown',
+      residenceZip: '12345',
+      residenceCountry: { id: 1, name: 'United States', code: 'US' },
+      residenceState: {
+        id: 10,
+        name: 'California',
+        country: { id: 1, name: 'United States', code: 'US' },
+      },
+      phones: [
+        {
+          type: 'MOBILE',
+          number: '+1234567890',
+        },
+      ],
+      contactType: 'person',
+    };
+    const documents = [
+      {
+        id: 100,
+        category: { id: 1, name: 'Passport', code: 'PASSPORT', countries: [] },
+        name: 'A1234567',
+        country: { id: 1, name: 'United States', code: 'US' },
+      },
+    ];
+
+    contactsRepoMock.fetchContactById.mockResolvedValue(contact);
+    contactsRepoMock.fetchContactPersonalDocuments.mockResolvedValue(documents);
+
+    const result = await contactsService.fetchContactById(1);
+
+    expect(contactsRepoMock.fetchContactById).toHaveBeenCalledWith(1);
+    expect(result).toBe(contact);
+  });
+
+  it('propagates repository errors', async () => {
+    const err = new Error('boom-contact-detail');
+    contactsRepoMock.fetchContactById.mockRejectedValue(err);
+    await expect(contactsService.fetchContactById(1)).rejects.toThrow(err);
+  });
+});
+
+describe('ContactsService.fetchContactSchema', () => {
+  let contactsService: ContactsService;
+  let contactsRepoMock: Partial<Record<keyof ContactsRepository, any>>;
+
+  beforeEach(() => {
+    contactsRepoMock = { fetchContactSchema: vi.fn() };
+    contactsService = new ContactsService(contactsRepoMock as ContactsRepository);
+  });
+
+  it('returns contact schema on success', async () => {
+    const schema = {
+      fields: ['lastname2'],
+    };
+    contactsRepoMock.fetchContactSchema.mockResolvedValue(schema);
+
+    const result = await contactsService.fetchContactSchema();
+
+    expect(contactsRepoMock.fetchContactSchema).toHaveBeenCalledTimes(1);
+    expect(result).toBe(schema);
+  });
+
+  it('propagates repository errors', async () => {
+    const err = new Error('boom-contact-schema');
+    contactsRepoMock.fetchContactSchema.mockRejectedValue(err);
+    await expect(contactsService.fetchContactSchema()).rejects.toThrow(err);
+  });
+});
+
+describe('ContactsService.createContact', () => {
+  let contactsService: ContactsService;
+  let contactsRepoMock: Partial<Record<keyof ContactsRepository, any>>;
+
+  beforeEach(() => {
+    contactsRepoMock = { createContact: vi.fn() };
+    contactsService = new ContactsService(contactsRepoMock as ContactsRepository);
+  });
+
+  it('calls repository to create contact', async () => {
+    const newContact: ContactDetail = {
+      id: 0,
+      firstname: 'Jane',
+      lastname: 'Smith',
+      name: 'Jane Smith',
+      email: 'jane.smith@example.com',
+      residenceStreet: '456 Oak St',
+      residenceCity: 'Othertown',
+      residenceZip: '67890',
+      residenceCountry: { id: 2, name: 'Canada', code: 'CA' },
+      residenceState: {
+        id: 20,
+        name: 'Ontario',
+        country: { id: 2, name: 'Canada', code: 'CA' },
+      },
+      phones: [{ type: 'phone', number: '+1987654321' }],
+      contactType: 'person',
+    };
+
+    contactsRepoMock.createContact.mockResolvedValue(undefined);
+
+    await expect(contactsService.createContact(newContact)).resolves.toBeUndefined();
+
+    expect(contactsRepoMock.createContact).toHaveBeenCalledTimes(1);
+    expect(contactsRepoMock.createContact).toHaveBeenCalledWith(newContact);
+  });
+
+  it('propagates repository errors', async () => {
+    const err = new Error('boom-create-contact');
+    contactsRepoMock.createContact.mockRejectedValue(err);
+    await expect(contactsService.createContact({})).rejects.toThrow(err);
+  });
+});
+
+describe('ContactsService.updateContact', () => {
+  let contactsService: ContactsService;
+  let contactsRepoMock: Partial<Record<keyof ContactsRepository, any>>;
+
+  beforeEach(() => {
+    contactsRepoMock = { updateContactFields: vi.fn() };
+    contactsService = new ContactsService(contactsRepoMock as ContactsRepository);
+  });
+
+  it('calls repository to update contact', async () => {
+    const originalContact: ContactDetail = {
+      id: 1,
+      firstname: 'Jane',
+      lastname: 'Doe',
+      name: 'Jane Doe',
+      email: 'jane.doe@example.com',
+      residenceStreet: '789 Pine St',
+      residenceCity: 'Newcity',
+      residenceZip: '54321',
+      residenceCountry: { id: 3, name: 'UK', code: 'GB' },
+      residenceState: {
+        id: 30,
+        name: 'England',
+        country: { id: 3, name: 'UK', code: 'GB' },
+      },
+      phones: [{ type: 'phone', number: '+447700900123' }],
+      contactType: 'person',
+    };
+    const updatedContact: ContactDetail = {
+      ...originalContact,
+      lastname: 'Smith',
+      email: 'jane.smith@example.com',
+    };
+
+    contactsRepoMock.updateContactFields.mockResolvedValue(undefined);
+
+    await expect(
+      contactsService.updateContactFields(1, originalContact, updatedContact),
+    ).resolves.toBeUndefined();
+
+    expect(contactsRepoMock.updateContactFields).toHaveBeenCalledTimes(1);
+    expect(contactsRepoMock.updateContactFields).toHaveBeenCalledWith(
+      1,
+      originalContact,
+      updatedContact,
+    );
+  });
+
+  it('propagates repository errors', async () => {
+    const err = new Error('boom-update-contact');
+    contactsRepoMock.updateContactFields.mockRejectedValue(err);
+    await expect(contactsService.updateContactFields(0, {}, {})).rejects.toThrow(err);
   });
 });
