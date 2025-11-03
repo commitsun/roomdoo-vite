@@ -31,7 +31,7 @@
       </SelectButton>
     </div>
     <div class="contact-detail-accordion" v-if="!isDesktop">
-      <Accordion v-model:value="activePanel">
+      <Accordion v-model:value="activePanel" :lazy="true">
         <AccordionPanel value="0">
           <AccordionHeader>
             <div
@@ -50,7 +50,7 @@
             />
           </AccordionContent>
         </AccordionPanel>
-        <AccordionPanel value="1">
+        <AccordionPanel value="1" v-if="contactType === 'person'">
           <AccordionHeader>
             <div
               class="flex items-center gap-2"
@@ -107,7 +107,7 @@
       <Tabs v-model:value="activeTab" :lazy="true">
         <TabList>
           <Tab value="0">{{ t('contacts.generalInformation') }}</Tab>
-          <Tab value="1">{{ t('contacts.documents') }}</Tab>
+          <Tab v-if="contactType === 'person'" value="1">{{ t('contacts.documents') }}</Tab>
           <Tab value="2">{{ t('contacts.invoicing') }}</Tab>
           <Tab value="3">{{ t('contacts.internalnotes') }}</Tab>
         </TabList>
@@ -128,7 +128,7 @@
           <TabPanel value="2">
             <ContactDetailBilling
               :modelValue="contactForm"
-              @update:modelValue="(v) => Object.assign(contactForm, v)"
+              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
             />
           </TabPanel>
           <TabPanel value="3">
@@ -151,6 +151,17 @@
 
 <script lang="ts">
 import { defineComponent, ref, reactive, computed, onBeforeMount, watch, inject } from 'vue';
+import {
+  defineComponent,
+  ref,
+  reactive,
+  computed,
+  onBeforeMount,
+  watch,
+  inject,
+  type Ref,
+} from 'vue';
+import { useMediaQuery } from '@vueuse/core';
 import SelectButton from 'primevue/selectbutton';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -258,7 +269,7 @@ export default defineComponent({
       phones: [] as Phone[],
       email: '',
       documents: [] as PersonalDocument[],
-      // fiscalIdNumberType: null as DocumentType | null,
+      fiscalIdNumberType: '',
       fiscalIdNumber: '',
       residenceStreet: '',
       residenceZip: '',
@@ -280,6 +291,22 @@ export default defineComponent({
     });
 
     const contactsStoreSchema = computed(() => contactsStore.contactSchema);
+
+    const clearHiddenFields = (): void => {
+      if (contactType.value !== 'person') {
+        contactForm.lastname = '';
+        contactForm.lastname2 = '';
+        contactForm.birthdate = null;
+        contactForm.gender = '';
+        contactForm.documents = [];
+        contactForm.nationality = undefined;
+        contactForm.residenceStreet = '';
+        contactForm.residenceZip = '';
+        contactForm.residenceCity = '';
+        contactForm.residenceState = undefined;
+        contactForm.residenceCountry = undefined;
+      }
+    };
     const paymentTerms = computed(() => paymentTermsStore.paymentTerms);
     const documentTypes = computed(() => documentTypesStore.documentTypes);
     const languages = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
@@ -320,17 +347,20 @@ export default defineComponent({
     const handleSave = async () => {
       uiStore.startLoading();
       try {
+        clearHiddenFields();
         if (contact.value) {
           contactForm.contactType = contactType.value;
           await contactsStore.updateContactFields(contact.value.id, contact.value, contactForm);
         } else {
           await contactsStore.createContact(contactForm);
         }
+        dialogRef?.value?.close({ action: 'saved' });
       } catch (error) {
         textMessageStore.addTextMessage(
           t('error.somethingWentWrong'),
           error instanceof Error ? error.message : 'Unknown error',
         );
+        textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
       } finally {
         uiStore.stopLoading();
       }
@@ -368,11 +398,17 @@ export default defineComponent({
       },
     );
 
+    watch(contactType, () => {
+      activeTab.value = '0';
+      activePanel.value = null;
+    });
+
     onBeforeMount(async () => {
       uiStore.startLoading();
       contact.value = dialogRef?.value?.data.contact as ContactDetail | null;
       try {
         await documentTypesStore.fetchDocumentTypes();
+        await documentTypesStore.fetchFiscalDocumentTypes();
         await countriesStore.fetchCountries();
         await paymentTermsStore.fetchPaymentTerms();
         await pricelistStore.fetchPricelists();
@@ -425,6 +461,7 @@ export default defineComponent({
           t('error.somethingWentWrong'),
           error instanceof Error ? error.message : 'Unknown error',
         );
+        textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
       } finally {
         uiStore.stopLoading();
       }
