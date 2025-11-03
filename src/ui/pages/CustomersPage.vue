@@ -483,16 +483,21 @@ export default defineComponent({
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
-        contact.id = contactId;
-        open(ContactDetail, {
-          props: { header: contact.name || t('contacts.detail') },
-          data: { contact: contact },
-          onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-            if (data?.refresh === true || data?.action === 'saved') {
-              void fetchNow();
-            }
-          },
-        });
+        if (contact) {
+          contact.id = contactId;
+          open(ContactDetail, {
+            props: { header: contact.name || t('contacts.detail') },
+            data: { contact: contact },
+            onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+              if (data?.refresh === true || data?.action === 'saved') {
+                void fetchNow();
+              }
+            },
+          });
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('Contact not found for id:', contactId);
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);

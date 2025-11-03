@@ -120,7 +120,9 @@
         <template #filter="{ filterModel }">
           <MultiSelect
             v-model="filterModel.value"
-            :options="CONTACT_TYPES.map((v) => ({ label: t('contacts.types.' + v), value: v }))"
+            :options="
+              CONTACT_TYPES.map((v: string) => ({ label: t('contacts.types.' + v), value: v }))
+            "
             optionLabel="label"
             optionValue="value"
             :placeholder="t('contacts.searchByType')"

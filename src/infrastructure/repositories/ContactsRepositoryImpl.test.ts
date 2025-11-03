@@ -5,6 +5,8 @@ vi.mock('@/infrastructure/http/axios', () => {
   return {
     api: {
       get: vi.fn(),
+      post: vi.fn(),
+      patch: vi.fn(),
     },
   };
 });
@@ -216,6 +218,48 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     expect(url.searchParams.get('orderBy')).toBe('name');
   });
 
+  it('fetchContactById should call GET /contacts/:id and GET return data', async () => {
+    const contact = {
+      id: 123,
+      fistname: 'John',
+      lastname: 'Doe',
+      email: 'john.doe@example.com',
+      contactType: 'person',
+    };
+    vi.mocked(api.get).mockResolvedValue({ data: contact });
+
+    const result = await repo.fetchContactById(123);
+
+    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/contacts/123');
+    expect(result).toBe(contact);
+  });
+  it('fetchContactPersonalDocuments should call GET /contacts/:id/documents and return data', async () => {
+    const documents = [
+      { id: 1, name: 'Document 1' },
+      { id: 2, name: 'Document 2' },
+    ];
+    vi.mocked(api.get).mockResolvedValue({ data: documents });
+
+    const result = await repo.fetchContactPersonalDocuments(123);
+
+    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/contacts/123/id-numbers');
+    expect(result).toBe(documents);
+  });
+
+  it('fetchContactSchema should call GET /contacts/extra-features and return data', async () => {
+    const apiPayload = ['lastname2'];
+    vi.mocked(api.get).mockResolvedValue({ data: apiPayload });
+
+    const result = await repo.fetchContactSchema();
+
+    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/contacts/extra-features');
+
+    expect(result).toEqual({ fields: apiPayload });
+  });
+
   it('propagates axios errors when fetch CONTACTS', async () => {
     const err = new Error('axios fail');
     vi.mocked(api.get).mockRejectedValue(err);
@@ -249,5 +293,234 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     vi.mocked(api.get).mockRejectedValue(err);
 
     await expect(repo.fetchSuppliers({ page: 1, pageSize: 10 })).rejects.toThrow(err);
+  });
+
+  it('fetchContactById should propagate axios errors', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(repo.fetchContactById(123)).rejects.toThrow(err);
+  });
+
+  it('fetchContactPersonalDocuments should propagate axios errors', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(repo.fetchContactPersonalDocuments(123)).rejects.toThrow(err);
+  });
+
+  it('createContact should POST /contacts with normalized payload and return data', async () => {
+    const contact = {
+      firstname: 'Ada',
+      lastname: 'Lovelace',
+      name: 'Ada Lovelace',
+      email: 'ada@math.com',
+      birthdate: new Date('10/12/1815'),
+      residenceStreet: '123 Main St',
+      residenceCity: 'London',
+      residenceZip: 'E1 6AN',
+      residenceCountry: { id: 33, name: 'UK', code: 'GB' },
+      residenceState: { id: 20, name: 'England', country: { id: 33, name: 'UK', code: 'GB' } },
+      lang: 'en-GB',
+      tags: [{ id: 1, name: 'VIP' }],
+      documents: [
+        {
+          id: 1,
+          name: '123456',
+          category: {
+            id: 5,
+            name: 'Passport',
+            code: 'P',
+            countries: [{ id: 33, name: 'UK', code: 'GB' }],
+          },
+          country: { id: 33, name: 'UK', code: 'GB' },
+        },
+        {
+          id: 2,
+          name: '11111111H',
+          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          country: { id: 33, name: 'UK', code: 'GB' },
+          supportNumber: '111222',
+        },
+      ],
+    };
+
+    const apiResponse = { status: 200, data: { id: 99, ...contact } };
+    vi.mocked((api as any).post).mockResolvedValue(apiResponse);
+
+    const result = await repo.createContact(contact);
+
+    expect((api as any).post).toHaveBeenNthCalledWith(
+      1,
+      'contacts',
+      expect.objectContaining({
+        email: 'ada@math.com',
+        firstname: 'Ada',
+        lang: 'en_GB',
+        lastname: 'Lovelace',
+        name: 'Ada Lovelace',
+        residenceCity: 'London',
+        residenceCountry: 33,
+        residenceState: 20,
+        residenceStreet: '123 Main St',
+        residenceZip: 'E1 6AN',
+        tags: [1],
+      }),
+    );
+    expect(result).toBe(apiResponse.data);
+  });
+
+  it('createContact should POST id-numbers for each document when status=200 and documents exist', async () => {
+    const contact = {
+      firstname: 'Alan',
+      lastname: 'Turing',
+      name: 'Alan Turing',
+      email: 'alan@math.com',
+      residenceCountry: null as unknown as { id: number; name: string; code: string },
+      documents: [
+        {
+          id: 0,
+          name: 'Passport',
+          category: { id: 5, name: 'Passport', code: 'P', countries: [] },
+          country: { id: 33, name: 'UK', code: 'GB' },
+          supportNumber: 'XYZ123',
+        },
+        {
+          id: 0,
+          name: 'DNI',
+          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          supportNumber: '111222',
+        },
+      ],
+    };
+
+    vi.mocked((api as any).post).mockResolvedValueOnce({ status: 200, data: { id: 101 } });
+    vi.mocked((api as any).post).mockResolvedValue({ status: 200, data: {} });
+
+    await repo.createContact(contact);
+
+    expect((api as any).post).toHaveBeenNthCalledWith(1, 'contacts', expect.any(Object));
+    expect((api as any).post).toHaveBeenNthCalledWith(2, 'contacts/101/id-numbers', {
+      name: 'Passport',
+      category: 5,
+      country: 33,
+      supportNumber: 'XYZ123',
+    });
+    expect((api as any).post).toHaveBeenNthCalledWith(3, 'contacts/101/id-numbers', {
+      name: 'DNI',
+      category: 9,
+      country: undefined,
+      supportNumber: '111222',
+    });
+  });
+
+  it('createContact should NOT POST id-numbers when no documents', async () => {
+    vi.mocked((api as any).post).mockResolvedValue({ status: 200, data: { id: 500 } });
+
+    await repo.createContact({
+      firstname: 'Linus',
+      lastname: 'Torvalds',
+    });
+
+    expect((api as any).post).toHaveBeenCalledTimes(1);
+    expect((api as any).post).toHaveBeenCalledWith('contacts', expect.any(Object));
+  });
+
+  it('updateContactFields should PATCH only changed fields', async () => {
+    const contactId = 10;
+    const original = {
+      firstname: 'Marie',
+      lastname: 'Curie',
+      email: 'marie@chemistry.com',
+      tags: [{ id: 2, name: 'Researcher' }],
+    };
+    const updated = {
+      ...original,
+      email: 'marie.curie@chemistry.com',
+      tags: [],
+    };
+
+    await repo.updateContactFields(contactId, original, updated);
+
+    expect((api as any).patch).toHaveBeenCalledWith(
+      `contacts/${contactId}`,
+      expect.objectContaining({ email: 'marie.curie@chemistry.com' }),
+    );
+  });
+
+  it('updateContactFields should POST new documents and PATCH existing ones', async () => {
+    const contactId = 77;
+    const original = {
+      firstname: 'Albert',
+      lastname: 'Einstein',
+      documents: [
+        {
+          id: 1,
+          name: '11111111H',
+          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          country: { id: 33, name: 'UK', code: 'GB' },
+          supportNumber: '111222',
+        },
+      ],
+    };
+    const updated = {
+      ...original,
+      documents: [
+        {
+          id: 0, // nuevo -> POST
+          name: '123456',
+          category: {
+            id: 5,
+            name: 'Passport',
+            code: 'P',
+            countries: [{ id: 33, name: 'UK', code: 'GB' }],
+          },
+          country: { id: 33, name: 'UK', code: 'GB' },
+        },
+        {
+          id: 1, // existente -> PATCH
+          name: '11111111H',
+          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          country: { id: 33, name: 'UK', code: 'GB' },
+          supportNumber: '111333', // <-- NUEVO valor
+        },
+      ],
+    };
+
+    await repo.updateContactFields(contactId, original, updated);
+
+    // 1) PATCH del contacto (posible payload vacío si no hay cambios fuera de documentos)
+    expect((api as any).patch).toHaveBeenNthCalledWith(
+      1,
+      `contacts/${contactId}`,
+      expect.any(Object),
+    );
+
+    // 2) POST del documento nuevo (id=0)
+    expect((api as any).post).toHaveBeenCalledWith(
+      `contacts/${contactId}/id-numbers`,
+      expect.objectContaining({
+        name: '123456',
+        category: 5,
+        country: 33,
+      }),
+    );
+
+    // 3) PATCH del documento existente (id=1) con el NUEVO supportNumber
+    expect((api as any).patch).toHaveBeenCalledWith(
+      `contacts/${contactId}/id-numbers/1`,
+      expect.objectContaining({
+        name: '11111111H',
+        category: 9,
+        country: 33,
+        supportNumber: '111333', // <-- corrige aquí el esperado
+      }),
+    );
+
+    // (Opcional) Asegura que no se hizo PATCH con el valor viejo
+    expect((api as any).patch).not.toHaveBeenCalledWith(
+      `contacts/${contactId}/id-numbers/1`,
+      expect.objectContaining({ supportNumber: '111222' }),
+    );
   });
 });

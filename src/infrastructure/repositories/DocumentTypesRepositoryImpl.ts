@@ -9,4 +9,8 @@ export class DocumentTypesRepositoryImpl implements DocumentTypesRepository {
     });
     return response.data;
   }
+  async fetchFiscalDocumentTypes(): Promise<DocumentType[]> {
+    const response = await api.get<DocumentType[]>('/contact-fiscal-document');
+    return response.data;
+  }
 }
