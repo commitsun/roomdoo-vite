@@ -136,7 +136,6 @@ export const useContactsStore = defineStore('contacts', () => {
     fetchSuppliers,
     fetchContactById,
     fetchContactSchema,
-    persistContactDocument,
     createContact,
     updateContactFields,
   };

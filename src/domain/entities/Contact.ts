@@ -68,7 +68,7 @@ export interface ContactDetail extends Omit<Contact, 'types'> {
   residenceState?: CountryState;
   residenceCountry?: Country;
   fiscalIdNumber?: string;
-  fiscalIdNumberType?: DocumentType;
+  fiscalIdNumberType?: string;
   tags?: Tag[];
 }
 

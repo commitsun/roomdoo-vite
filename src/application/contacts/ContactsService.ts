@@ -14,7 +14,6 @@ import type {
   Guest,
   Supplier,
 } from '@/domain/entities/Contact';
-import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import type { Pagination } from '@/domain/repositories/Pagination';
@@ -71,16 +70,13 @@ export class ContactsService {
     const schema = await this.contactsRepository.fetchContactSchema();
     return schema;
   }
-  async persistContactDocument(contactId: number, document: PersonalDocument): Promise<void> {
-    await this.contactsRepository.persistContactDocument(contactId, document);
-  }
   async createContact(contact: Partial<ContactDetail>): Promise<void> {
     await this.contactsRepository.createContact(contact);
   }
   async updateContactFields(
     contactId: number,
     original: Partial<ContactDetail>,
-    updated: Partial<ContactDetail>
+    updated: Partial<ContactDetail>,
   ): Promise<void> {
     await this.contactsRepository.updateContactFields(contactId, original, updated);
   }

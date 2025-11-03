@@ -113,7 +113,11 @@
             {{ data.identificationDocuments[0]?.number }}
             <span
               v-if="data.identificationDocuments.length > 1"
-              :title="data.identificationDocuments.map((d: { type: string; number: string }) => ((d.type ) + ' ' + (d.number ))).join('\n')"
+              :title="
+                data.identificationDocuments
+                  .map((d: { type: string; number: string }) => d.type + ' ' + d.number)
+                  .join('\n')
+              "
               style="cursor: help; opacity: 0.8"
             >
               (+{{ data.identificationDocuments.length - 1 }})
@@ -432,6 +436,10 @@ export default defineComponent({
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
+        if (!contact) {
+          uiStore.stopLoading();
+          return;
+        }
         contact.id = contactId;
         open(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
