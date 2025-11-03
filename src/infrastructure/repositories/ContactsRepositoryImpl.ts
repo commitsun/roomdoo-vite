@@ -202,87 +202,134 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     const { data } = await api.get<string[]>(url);
     return { fields: data };
   }
-  async persistContactDocument(contactId: number, document: PersonalDocument): Promise<void> {
-    const payload = {
-      name: document.name,
-      category: document.category.id,
-      country: document.country?.id,
-      supportNumber: document.supportNumber,
-    };
-    await api.post(`contacts/${contactId}/id-numbers`, payload);
-  }
 
   normalizeContactPayload = (contact: Partial<ContactDetail>): Partial<ContactDetail> => {
-    const birthdate =
-      contact.birthdate instanceof Date ? contact.birthdate.toISOString().split('T')[0] : undefined;
+    const KEY_MAP: Record<string, string> = {
+      firstName: 'firstname',
+      lastName: 'lastname',
+      lastName2: 'lastname2',
+    };
+
+    const ID_FIELDS = new Set([
+      'nationality',
+      'residenceState',
+      'residenceCountry',
+      'state',
+      'country',
+    ]);
+
+    const toId = (v: unknown): unknown =>
+      v !== null && typeof v === 'object' && 'id' in v ? (v as { id: unknown }).id : v;
+
+    const normalizeLocale = (v: unknown): unknown => {
+      if (typeof v !== 'string' || v.trim() === '') {
+        return '';
+      }
+      const [lang, region] = (v as string).replace('-', '_').split('_');
+      return `${lang.toLowerCase()}_${region.toUpperCase()}`;
+    };
+
+    const normalizeTags = (v: unknown): number[] => {
+      return Array.from(new Set((v as { id: number }[]).map((tag) => tag.id)));
+    };
+
+    const normalizeBirthdate = (v: unknown): string => {
+      if (!(v instanceof Date)) {
+        return '';
+      }
+      return (v as Date).toISOString().slice(0, 10);
+    };
+
+    const FIELD_TRANSFORMS: Record<string, (v: unknown) => unknown> = {
+      tags: normalizeTags,
+      lang: normalizeLocale,
+      birthdate: normalizeBirthdate,
+    };
+
+    const isPresent = (v: unknown): boolean => v !== undefined && v !== null && v !== '' && v !== 0;
 
     return Object.fromEntries(
-      Object.entries({ ...contact, birthdate })
+      Object.entries(contact)
         .map(([k, v]) => {
-          if (k === 'firstName') {
-            return ['firstname', v] as const;
-          }
-          if (k === 'lastName') {
-            return ['lastname', v] as const;
-          }
-          if (k === 'lastName2') {
-            return ['lastname2', v] as const;
-          }
-          if (k === 'nationalityId') {
-            return ['nationality', v] as const;
-          }
-          if (k === 'phoneNumber') {
-            return ['phones', [{ number: v, type: 'mobile' }]] as const;
-          }
-          if (k === 'stateId') {
-            return ['state', v] as const;
-          }
-          if (k === 'countryId') {
-            return ['country', v] as const;
-          }
-          if (k === 'paymentTermId') {
-            return ['paymentTerm', v] as const;
-          }
-          if (k === 'pricelistId') {
-            return ['pricelist', v] as const;
-          }
-
-          return [k, v] as const;
+          const mappedKey = KEY_MAP[k] ?? k;
+          const transformer = FIELD_TRANSFORMS[mappedKey];
+          const mappedVal =
+            typeof transformer === 'function'
+              ? transformer(v)
+              : ID_FIELDS.has(mappedKey)
+                ? toId(v)
+                : v;
+          return [mappedKey, mappedVal] as const;
         })
-        .filter(
-          ([, v]) =>
-            v !== undefined &&
-            v !== '' &&
-            v !== null &&
-            v !== 0 &&
-            (!Array.isArray(v) || v.length > 0)
-        )
+        .filter(([, v]) => isPresent(v)),
     ) as Partial<ContactDetail>;
   };
 
   async createContact(contact: Partial<ContactDetail>): Promise<void> {
     const payload = this.normalizeContactPayload(contact);
-    await api.post('contacts', payload);
+    if (payload.documents) {
+      delete payload.documents;
+    }
+    const response = await api.post('contacts', payload);
+    if (response.status === 200 && contact.documents && contact.documents.length > 0) {
+      const contactId = response.data.id;
+      await Promise.all(
+        contact.documents.map(async (document: PersonalDocument): Promise<void> => {
+          await api.post(`contacts/${contactId}/id-numbers`, {
+            name: document.name,
+            category: document.category.id,
+            country: document.country?.id,
+            supportNumber: document.supportNumber,
+          });
+        }),
+      );
+    }
+    return response.data;
   }
 
   async updateContactFields(
     contactId: number,
     original: Partial<ContactDetail>,
-    updated: Partial<ContactDetail>
+    updated: Partial<ContactDetail>,
   ): Promise<void> {
     const changed: Partial<ContactDetail> = {};
-
-    original = this.normalizeContactPayload(original);
-    updated = this.normalizeContactPayload(updated);
-    for (const [key, value] of Object.entries(updated)) {
+    const payloadOriginal = this.normalizeContactPayload(original);
+    const payloadUpdated = this.normalizeContactPayload(updated);
+    if (payloadOriginal.documents) {
+      delete payloadOriginal.documents;
+    }
+    if (payloadUpdated.documents) {
+      delete payloadUpdated.documents;
+    }
+    for (const [key, value] of Object.entries(payloadUpdated)) {
       const typedKey = key as keyof ContactDetail;
-      const originalValue = original[typedKey];
+      const originalValue = payloadOriginal[typedKey];
 
       if (JSON.stringify(value) !== JSON.stringify(originalValue) && value !== null) {
         (changed as Record<string, unknown>)[typedKey] = value;
       }
     }
-    const payload = this.normalizeContactPayload(changed);
-    await api.patch(`contacts/${contactId}`, payload);
+    await api.patch(`contacts/${contactId}`, changed);
+    if (updated.documents) {
+      await Promise.all(
+        updated.documents.map((document: PersonalDocument) => {
+          if (!document.id) {
+            return api.post(`contacts/${contactId}/id-numbers`, {
+              name: document.name,
+              category: document.category.id,
+              country: document.country?.id,
+              supportNumber: document.supportNumber,
+            });
+          } else {
+            return api.patch(`contacts/${contactId}/id-numbers/${document.id}`, {
+              name: document.name,
+              category: document.category.id,
+              country: document.country?.id,
+              supportNumber: document.supportNumber,
+            });
+          }
+        }),
+      );
+    }
   }
 }

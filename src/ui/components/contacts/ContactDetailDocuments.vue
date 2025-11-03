@@ -50,7 +50,7 @@
             class="documents-form__control"
             :placeholder="t('contacts.select')"
             filter
-            @update:modelValue="(id) => setDocCountry(idx, id as number | null)"
+            @update:modelValue="(id: string | null) => setDocCountry(idx, id ? Number(id) : null)"
           >
             <template #value="{ value }">
               <div v-if="value" class="flex items-center w-full gap-1">
@@ -83,16 +83,20 @@
           <Select
             :id="`doc-type-${idx}`"
             :modelValue="doc.category?.id ?? null"
-            :options="[...documentTypes]"
+            :options="[...docTypesFor(doc)]"
             optionLabel="name"
             optionValue="id"
             class="documents-form__control"
             :placeholder="t('contacts.select')"
-            @update:modelValue="(id) => setDocCategory(idx, id as number | null)"
+            @update:modelValue="(id: number | null) => setDocCategory(idx, id as number | null)"
+            :disabled="!doc.country?.id"
           />
+          <div v-if="!doc.country?.id" class="documents-form__doc-type-info">
+            <Info :size="14" />
+            {{ t('contacts.selectCountryFirst') }}
+          </div>
         </div>
 
-        <!-- Campos simples: mutación profunda directa sobre el mismo objeto -->
         <div class="documents-form__field">
           <label class="documents-form__label" :for="`doc-number-${idx}`">
             {{ t('contacts.documentNumber') }} *
@@ -139,12 +143,13 @@ import { useI18n } from 'vue-i18n';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import { IdCard } from 'lucide-vue-next';
+import { IdCard, Info } from 'lucide-vue-next';
 import CountryFlag from 'vue-country-flag-next';
 
 import type { ContactDetail } from '@/domain/entities/Contact';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
+import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 
 export default defineComponent({
   components: {
@@ -152,6 +157,7 @@ export default defineComponent({
     InputText,
     Button,
     IdCard,
+    Info,
     CountryFlag,
   },
   props: {
@@ -179,8 +185,8 @@ export default defineComponent({
 
     const patchDocuments = (
       updater: (
-        docs: NonNullable<ContactDetail['documents']>
-      ) => NonNullable<ContactDetail['documents']>
+        docs: NonNullable<ContactDetail['documents']>,
+      ) => NonNullable<ContactDetail['documents']>,
     ): void => {
       const docs = props.modelValue.documents ?? [];
       const next = updater(docs);
@@ -229,6 +235,17 @@ export default defineComponent({
       });
     };
 
+    const docTypesFor = (doc: PersonalDocument): typeof documentTypes.value => {
+      if (!doc.country) {
+        return [];
+      }
+      return documentTypes.value.filter(
+        (documentType) =>
+          documentType.countries.some((c) => c.id === doc.country?.id) ||
+          documentType.countries.length === 0,
+      );
+    };
+
     return {
       t,
       countries,
@@ -239,6 +256,7 @@ export default defineComponent({
       removeDraftsOrDelete,
       setDocCountry,
       setDocCategory,
+      docTypesFor,
     };
   },
 });
@@ -315,6 +333,14 @@ export default defineComponent({
       align-items: center;
       width: 100%;
     }
+  }
+  &__doc-type-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    color: #2563eb;
+    font-size: 12px;
   }
 
   &__actions {
@@ -393,6 +419,9 @@ export default defineComponent({
     &__field--full,
     &__cancel {
       grid-column: 1 / -1;
+    }
+    &__doc-type-info {
+      font-size: 14px;
     }
   }
 }

@@ -8,7 +8,7 @@
         <Select
           id="fiscalIdNumberType"
           v-model="modelValue.fiscalIdNumberType"
-          :options="[...documentTypes]"
+          :options="[...fiscalDocumentTypes]"
           optionLabel="name"
           optionValue="id"
           class="billing-form__control"
@@ -48,7 +48,6 @@
             <div class="billing-card__subtitle">{{ residenceAddressText }}</div>
           </div>
         </label>
-
         <div
           class="billing-card"
           :class="{ 'billing-card--active': billingAddressMode === 'other' }"
@@ -73,29 +72,73 @@
               }}</label>
               <InputText
                 id="bill_street"
-                v-model="billingData.street"
+                :modelValue="billingData.street"
                 class="billing-form__control"
                 :placeholder="t('contacts.fiscalAddressPlaceholder')"
-              />
-            </div>
-            <div class="billing-form__field">
-              <label class="billing-form__label" for="bill_city">{{ t('contacts.city') }}</label>
-              <InputText
-                id="bill_city"
-                v-model="billingData.city"
-                class="billing-form__control"
-                :placeholder="t('contacts.fiscalCityPlaceholder')"
+                @update:modelValue="
+                  (val: string | undefined) => {
+                    billingData.street = val ?? '';
+                    $emit('update:modelValue', { ...modelValue, street: val ?? '' });
+                  }
+                "
               />
             </div>
             <div class="billing-form__field">
               <label class="billing-form__label" for="bill_zip">{{
                 t('contacts.postalCode')
               }}</label>
-              <InputText
+              <AutoComplete
                 id="bill_zip"
-                v-model="billingData.zipCode"
+                :modelValue="billingData.zipCode ?? ''"
                 class="billing-form__control"
-                :placeholder="t('contacts.fiscalZipCodePlaceholder')"
+                :suggestions="addressItems"
+                optionLabel="value.zip"
+                :placeholder="t('contacts.zipCodePlaceholder')"
+                @complete="fetchAddressByZip($event)"
+                @update:modelValue="
+                  (val: { value: { zip: string } } | string) => {
+                    const zip =
+                      typeof val === 'object' && val !== null && 'value' in val
+                        ? val.value.zip
+                        : val;
+                    $emit('update:modelValue', { ...modelValue, zipCode: zip });
+                  }
+                "
+                @optionSelect="
+                  (e: { value: { value: Address } }) => {
+                    const address: Address = e?.value?.value;
+                    billingData.zipCode = address.zip;
+                    billingData.city = address.city;
+                    billingData.country = address.country;
+                    billingData.state = address.state;
+                    $emit('update:modelValue', {
+                      ...modelValue,
+                      zipCode: address.zip,
+                      city: address.city,
+                      country: address.country,
+                      state: address.state,
+                    });
+                  }
+                "
+              >
+                <template #option="{ option }">
+                  <div>{{ option.label }}</div>
+                </template>
+              </AutoComplete>
+            </div>
+            <div class="billing-form__field">
+              <label class="billing-form__label" for="bill_city">{{ t('contacts.city') }}</label>
+              <InputText
+                id="bill_city"
+                :modelValue="billingData.city"
+                class="billing-form__control"
+                :placeholder="t('contacts.fiscalCityPlaceholder')"
+                @update:modelValue="
+                  (val: string | undefined) => {
+                    billingData.city = val ?? '';
+                    $emit('update:modelValue', { ...modelValue, city: val ?? '' });
+                  }
+                "
               />
             </div>
             <div class="billing-form__field">
@@ -107,23 +150,39 @@
                 :modelValue="billingData.country?.id ?? null"
                 :options="[...countries]"
                 optionLabel="name"
+                optionValue="id"
                 filter
                 class="billing-form__control"
                 :placeholder="t('contacts.select')"
                 @update:modelValue="
-                  (id) => {
-                    const country = countries.find((c) => c.id === id) || undefined;
-                    $emit('update:modelValue', { ...modelValue, country: country || undefined });
+                  (val: number | null) => {
+                    const n =
+                      typeof val === 'number' ? val : val == null || val === '' ? NaN : Number(val);
+                    const country = Number.isFinite(n)
+                      ? countries.find((c: Country) => c.id === n)
+                      : undefined;
+                    billingData.country = country;
+                    $emit('update:modelValue', {
+                      ...modelValue,
+                      country: country || undefined,
+                    });
                   }
                 "
               >
                 <template #value="{ value }">
-                  <div v-if="value" class="flex items-center w-full gap-1">
-                    <CountryFlag :country="value.code?.toLowerCase() || ''" size="small" shadow />
-                    <span class="whitespace-nowrap">{{ value.name }}</span>
+                  <div v-if="Number.isFinite(value)" class="flex items-center w-full gap-1">
+                    <CountryFlag
+                      :country="
+                        (countries.find((c: Country) => c.id === value)?.code || '').toLowerCase()
+                      "
+                      size="small"
+                      shadow
+                    />
+                    <span class="whitespace-nowrap">{{
+                      countries.find((c: Country) => c.id === value)?.name
+                    }}</span>
                   </div>
                 </template>
-
                 <template #option="{ option }">
                   <div class="flex items-center gap-2">
                     <CountryFlag
@@ -141,12 +200,24 @@
               <label class="billing-form__label" for="state">{{ t('contacts.state') }}</label>
               <Select
                 id="state"
-                v-model="billingData.state"
+                :modelValue="billingData.state?.id ?? null"
                 :options="[...countryStates]"
                 optionLabel="name"
+                optionValue="id"
                 filter
                 class="billing-form__control"
                 :placeholder="t('contacts.select')"
+                @update:modelValue="
+                  (val: number | null) => {
+                    const n =
+                      typeof val === 'number' ? val : val == null || val === '' ? NaN : Number(val);
+                    const s = Number.isFinite(n)
+                      ? countryStates.find((cs: CountryState) => cs.id === n)
+                      : undefined;
+                    billingData.state = s;
+                    $emit('update:modelValue', { ...modelValue, state: s || undefined });
+                  }
+                "
               />
             </div>
           </div>
@@ -170,12 +241,38 @@
         </div>
         <div class="billing-form__field">
           <label class="billing-form__label" for="bill_zip">{{ t('contacts.postalCode') }}</label>
-          <InputText
+          <AutoComplete
             id="bill_zip"
-            v-model="modelValue.zipCode"
+            :modelValue="modelValue.zipCode ?? ''"
             class="billing-form__control"
-            :placeholder="t('contacts.fiscalZipCodePlaceholder')"
-          />
+            :suggestions="addressItems"
+            optionLabel="value.zip"
+            :placeholder="t('contacts.zipCodePlaceholder')"
+            @complete="fetchAddressByZip($event)"
+            @update:modelValue="
+              (val: { value: { zip: string } } | string) => {
+                const zip =
+                  typeof val === 'object' && val !== null && 'value' in val ? val.value.zip : val;
+                $emit('update:modelValue', { ...modelValue, zipCode: zip });
+              }
+            "
+            @optionSelect="
+              (e: { value: { value: Address } }) => {
+                const address: Address = e?.value?.value;
+                $emit('update:modelValue', {
+                  ...modelValue,
+                  zipCode: address.zip,
+                  city: address.city,
+                  country: address.country,
+                  state: address.state,
+                });
+              }
+            "
+          >
+            <template #option="{ option }">
+              <div>{{ option.label }}</div>
+            </template>
+          </AutoComplete>
         </div>
         <div class="billing-form__field">
           <label class="billing-form__label" for="bill_city">{{ t('contacts.city') }}</label>
@@ -186,17 +283,31 @@
             :placeholder="t('contacts.fiscalCityPlaceholder')"
           />
         </div>
-
         <div class="billing-form__field">
           <label class="billing-form__label" for="bill_country">{{ t('contacts.country') }}</label>
           <Select
-            id="bill_country"
+            id="country"
             v-model="modelValue.country"
             :options="[...countries]"
             optionLabel="name"
+            optionValue="id"
             filter
             class="billing-form__control"
             :placeholder="t('contacts.select')"
+            @update:modelValue="
+              (val: number | null) => {
+                const n =
+                  typeof val === 'number' ? val : val == null || val === '' ? NaN : Number(val);
+                const country = Number.isFinite(n)
+                  ? countries.find((c: Country) => c.id === n)
+                  : undefined;
+                billingData.country = country;
+                $emit('update:modelValue', {
+                  ...modelValue,
+                  country: country || undefined,
+                });
+              }
+            "
           >
             <template #value="{ value }">
               <div v-if="value" class="flex items-center w-full gap-1">
@@ -204,7 +315,6 @@
                 <span class="whitespace-nowrap">{{ value.name }}</span>
               </div>
             </template>
-
             <template #option="{ option }">
               <div class="flex items-center gap-2">
                 <CountryFlag
@@ -242,8 +352,10 @@ import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import RadioButton from 'primevue/radiobutton';
 import Message from 'primevue/message';
+import AutoComplete from 'primevue/autocomplete';
 import { Info } from 'lucide-vue-next';
 import CountryFlag from 'vue-country-flag-next';
+import { useDebounceFn } from '@vueuse/core';
 
 import type { ContactDetail } from '@/domain/entities/Contact';
 import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
@@ -251,8 +363,10 @@ import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
+import { useAddressStore } from '@/infrastructure/stores/address';
 import type { Country } from '@/domain/entities/Country';
 import type { CountryState } from '@/domain/entities/CountryState';
+import type { Address } from '@/domain/entities/Address';
 
 export default defineComponent({
   components: {
@@ -260,6 +374,7 @@ export default defineComponent({
     InputText,
     RadioButton,
     Message,
+    AutoComplete,
     CountryFlag,
     Info,
   },
@@ -277,6 +392,7 @@ export default defineComponent({
     const countryStatesStore = useCountryStatesStore();
     const documentTypesStore = useDocumentTypesStore();
     const textMessageStore = useTextMessagesStore();
+    const addressStore = useAddressStore();
     const uiStore = useUIStore();
     const billingData = reactive({
       street: '',
@@ -287,42 +403,76 @@ export default defineComponent({
     });
 
     const billingAddressMode = ref<'residence' | 'other'>('residence');
+    const countryStates = ref<CountryState[]>([]);
+    const addressItems = ref([] as { label: string; value: Address }[]);
 
     const countries = computed(() => countriesStore.countries);
-    const countryStates = computed(() => countryStatesStore.countryStates);
-    const documentTypes = computed(() => documentTypesStore.documentTypes);
+
+    const fiscalDocumentTypes = computed(() =>
+      documentTypesStore.fiscalDocumentTypes.map((dt) => {
+        return {
+          id: dt.name,
+          name: dt.name.charAt(0).toUpperCase() + dt.name.replace('_', ' ').slice(1),
+        };
+      }),
+    );
 
     const residenceAddressText = computed(() => {
-      let result = '';
       if (
-        props.modelValue?.residenceStreet === '' &&
-        props.modelValue?.residenceCity === '' &&
-        props.modelValue?.residenceZip === '' &&
-        props.modelValue?.residenceState === undefined &&
-        props.modelValue?.residenceCountry === undefined
+        props.modelValue.residenceStreet === '' &&
+        props.modelValue.residenceCity === '' &&
+        props.modelValue.residenceZip === '' &&
+        props.modelValue.residenceState === undefined &&
+        props.modelValue.residenceCountry === undefined
       ) {
-        result = '';
-      } else {
-        const parts = [];
-        if (props.modelValue.residenceStreet !== null) {
-          parts.push(props.modelValue.residenceStreet);
-        }
-        if (props.modelValue.residenceCity !== null) {
-          parts.push(props.modelValue.residenceCity);
-        }
-        if (props.modelValue.residenceZip !== null) {
-          parts.push(props.modelValue.residenceZip);
-        }
-        if (props.modelValue.residenceState?.name !== null) {
-          parts.push(props.modelValue.residenceState?.name);
-        }
-        if (props.modelValue.residenceCountry?.name !== null) {
-          parts.push(props.modelValue.residenceCountry?.name);
-        }
-        result = parts.join(', ');
+        return '';
       }
-      return result;
+
+      const parts = [
+        props.modelValue.residenceStreet,
+        props.modelValue.residenceCity,
+        props.modelValue.residenceZip,
+        props.modelValue.residenceState?.name,
+        props.modelValue.residenceCountry?.name,
+      ].filter(Boolean);
+
+      return parts.join(', ');
     });
+
+    const debouncedFetchAddressByZip = useDebounceFn(
+      async (query: string) => {
+        uiStore.startLoading();
+        try {
+          const results = await addressStore.fetchAddressByZip(query);
+          if (results.length > 0) {
+            addressItems.value = results.map((address: Address) => ({
+              label: `${address.zip} - ${address.city}, ${address.state.name}, ${address.country.name}`,
+              value: address,
+            }));
+          } else {
+            addressItems.value = [];
+          }
+        } catch (error) {
+          textMessageStore.addTextMessage(
+            t('error.somethingWentWrong'),
+            error instanceof Error ? error.message : 'Unknown error',
+          );
+        } finally {
+          uiStore.stopLoading();
+        }
+      },
+      150,
+      { maxWait: 3000 },
+    );
+
+    const fetchAddressByZip = async (event: { query: string }): Promise<void> => {
+      const len = event.query.length;
+      if (len >= 3 || len === 0) {
+        await debouncedFetchAddressByZip(event.query);
+      } else {
+        addressItems.value = [];
+      }
+    };
 
     watch(billingAddressMode, (newMode) => {
       if (newMode === 'residence') {
@@ -352,9 +502,11 @@ export default defineComponent({
         uiStore.startLoading();
         try {
           if (props.modelValue.country) {
-            await countryStatesStore.fetchCountryStatesByCountryId(props.modelValue.country.id);
-            const countryStateToSelect = countryStatesStore.countryStates?.find(
-              (s) => s.id === props.modelValue.state?.id
+            countryStates.value = await countryStatesStore.fetchCountryStatesByCountryId(
+              props.modelValue.country.id,
+            );
+            const countryStateToSelect = countryStates.value.find(
+              (s) => s.id === props.modelValue.state?.id,
             );
             if (countryStateToSelect && props.modelValue.state) {
               context.emit('update:modelValue', {
@@ -371,13 +523,13 @@ export default defineComponent({
         } catch (error) {
           textMessageStore.addTextMessage(
             t('error.somethingWentWrong'),
-            error instanceof Error ? error.message : 'Unknown error'
+            error instanceof Error ? error.message : 'Unknown error',
           );
         } finally {
           uiStore.stopLoading();
         }
       },
-      { immediate: true, deep: true }
+      { immediate: true, deep: true },
     );
     onBeforeMount(async () => {
       if (
@@ -397,6 +549,14 @@ export default defineComponent({
         billingData.zipCode = props.modelValue.zipCode ?? '';
         billingData.country = props.modelValue.country;
         billingData.state = props.modelValue.state;
+        context.emit('update:modelValue', {
+          ...props.modelValue,
+          street: billingData.street,
+          city: billingData.city,
+          zipCode: billingData.zipCode,
+          country: billingData.country,
+          state: billingData.state,
+        });
         billingAddressMode.value = 'other';
       }
     });
@@ -405,8 +565,10 @@ export default defineComponent({
       billingAddressMode,
       residenceAddressText,
       countries,
-      documentTypes,
+      fiscalDocumentTypes,
       countryStates,
+      addressItems,
+      fetchAddressByZip,
       t,
     };
   },
@@ -481,7 +643,10 @@ export default defineComponent({
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #f8fafc;
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
   cursor: pointer;
 
   &__header {
