@@ -8,13 +8,27 @@
     </div>
     <div class="personal-data-form__grid">
       <!-- First Name (full width) -->
-      <div class="personal-data-form__field personal-data-form__field--full">
+      <div
+        class="personal-data-form__field"
+        :class="{ 'personal-data-form__field--full': contactType === 'person' }"
+      >
         <label class="personal-data-form__label" for="firstName">
-          {{ t('contacts.firstName') }} *
+          {{ contactType === 'person' ? t('contacts.firstName') : t('contacts.fiscalName') }} *
         </label>
         <InputText
           id="firstName"
           v-model="modelValue.firstname"
+          class="personal-data-form__control"
+          :placeholder="t('contacts.firstNamePlaceholder')"
+        />
+      </div>
+      <!-- Trade Name (Company and agency)  -->
+      <div class="personal-data-form__field" v-if="contactType !== 'person'">
+        <label class="personal-data-form__label" for="tradeName">
+          {{ t('contacts.tradeName') }} *
+        </label>
+        <InputText
+          id="tradeName"
           class="personal-data-form__control"
           :placeholder="t('contacts.firstNamePlaceholder')"
         />
@@ -50,7 +64,11 @@
         <DatePicker
           id="birthdate"
           :modelValue="modelValue.birthdate"
-          @update:modelValue="(value) => (modelValue.birthdate = value as Date | null)"
+          @update:modelValue="
+            (value) => {
+              modelValue.birthdate = value instanceof Date || value === null ? value : null;
+            }
+          "
           showIcon
           dateFormat="dd/mm/yy"
           :maxDate="new Date()"
@@ -89,8 +107,8 @@
           class="personal-data-form__control"
           :placeholder="t('contacts.select')"
           @update:modelValue="
-            (id) => {
-              const c = countries.find((c) => c.id === id);
+            (id: number | null) => {
+              const c = countries.find((c: Country) => c.id === id);
               $emit('update:modelValue', { ...modelValue, nationality: c || undefined });
             }
           "
@@ -150,9 +168,21 @@
         <label class="personal-data-form__label" for="phone">{{ t('contacts.phone') }}</label>
         <InputText
           id="phone"
-          :modelValue="modelValue.phones?.filter((p) => p.type === 'phone')[0]?.number"
+          :modelValue="modelValue.phones?.filter((p: Phone) => p.type === 'phone')[0]?.number"
           class="personal-data-form__control"
           :placeholder="t('contacts.phonePlaceholder')"
+          @update:modelValue="
+            (value: string | undefined) => {
+              const phoneExist = modelValue.phones?.filter((p: Phone) => p.type === 'phone')[0];
+              if (phoneExist) {
+                phoneExist.number = value ?? '';
+              } else {
+                modelValue.phones?.push({ type: 'phone', number: value ?? '' });
+              }
+              modelValue.phones = modelValue.phones?.filter((p: Phone) => p.number !== '');
+              $emit('update:modelValue', { ...modelValue });
+            }
+          "
         />
       </div>
       <!-- Mobile -->
@@ -160,13 +190,28 @@
         <label class="personal-data-form__label" for="mobile">{{ t('contacts.mobile') }}</label>
         <InputText
           id="mobile"
-          :modelValue="modelValue.phones?.filter((p) => p.type === 'mobile')[0]?.number"
+          :modelValue="modelValue.phones?.filter((p: Phone) => p.type === 'mobile')[0]?.number"
           class="personal-data-form__control"
           :placeholder="t('contacts.mobilePlaceholder')"
+          @update:modelValue="
+            (value: string | undefined) => {
+              const mobileExist = modelValue.phones?.filter((p: Phone) => p.type === 'mobile')[0];
+              if (mobileExist) {
+                mobileExist.number = value ?? '';
+              } else {
+                modelValue.phones?.push({ type: 'mobile', number: value ?? '' });
+              }
+              modelValue.phones = modelValue.phones?.filter((p: Phone) => p.number !== '');
+              $emit('update:modelValue', { ...modelValue });
+            }
+          "
         />
       </div>
       <!-- Residence data section  -->
-      <div class="personal-data-form__residence personal-data-form__field--full">
+      <div
+        class="personal-data-form__residence personal-data-form__field--full"
+        v-if="contactType === 'person'"
+      >
         <h1 class="personal-data-form__title">
           {{ t('contacts.residenceData') }}
         </h1>
@@ -175,7 +220,10 @@
         </Message>
       </div>
       <!-- Address -->
-      <div class="personal-data-form__field personal-data-form__field--full">
+      <div
+        class="personal-data-form__field personal-data-form__field--full"
+        v-if="contactType === 'person'"
+      >
         <label class="personal-data-form__label" for="street">{{
           t('contacts.residenceAddress')
         }}</label>
@@ -187,17 +235,43 @@
         />
       </div>
       <!-- Zip -->
-      <div class="personal-data-form__field">
+      <div class="personal-data-form__field" v-if="contactType === 'person'">
         <label class="personal-data-form__label" for="zip">{{ t('contacts.postalCode') }}</label>
-        <InputText
+        <AutoComplete
           id="zip"
-          v-model="modelValue.residenceZip"
+          :modelValue="modelValue.residenceZip ?? ''"
           class="personal-data-form__control"
+          :suggestions="addressItems"
+          optionLabel="value.zip"
           :placeholder="t('contacts.zipCodePlaceholder')"
-        />
+          @complete="fetchAddressByZip($event)"
+          @update:modelValue="
+            (val: { value: { zip: string } } | string) => {
+              const zip =
+                typeof val === 'object' && val !== null && 'value' in val ? val.value.zip : val;
+              $emit('update:modelValue', { ...modelValue, residenceZip: zip });
+            }
+          "
+          @optionSelect="
+            (e: { value: { value: Address } }) => {
+              const address: Address = e?.value?.value;
+              $emit('update:modelValue', {
+                ...modelValue,
+                residenceZip: address.zip,
+                residenceCity: address.city,
+                residenceCountry: address.country,
+                residenceState: address.state,
+              });
+            }
+          "
+        >
+          <template #option="{ option }">
+            <div>{{ option.label }}</div>
+          </template>
+        </AutoComplete>
       </div>
       <!-- City -->
-      <div class="personal-data-form__field">
+      <div class="personal-data-form__field" v-if="contactType === 'person'">
         <label class="personal-data-form__label" for="city">{{ t('contacts.city') }}</label>
         <InputText
           id="city"
@@ -207,7 +281,7 @@
         />
       </div>
       <!-- Country -->
-      <div class="personal-data-form__field">
+      <div class="personal-data-form__field" v-if="contactType === 'person'">
         <label class="personal-data-form__label" for="country">{{ t('contacts.country') }}</label>
         <Select
           id="country"
@@ -219,10 +293,9 @@
           class="personal-data-form__control"
           :placeholder="t('contacts.select')"
           @update:modelValue="
-            (id) => {
-              const c = countries.find((c) => c.id === id);
+            (id: number | null) => {
+              const c = countries.find((c: Country) => c.id === id);
               const residenceCountry = c ? { id: c.id, name: c.name } : undefined;
-              console.log(residenceCountry);
               $emit('update:modelValue', {
                 ...modelValue,
                 residenceCountry: residenceCountry || undefined,
@@ -254,7 +327,7 @@
         </Select>
       </div>
       <!-- State -->
-      <div class="personal-data-form__field">
+      <div class="personal-data-form__field" v-if="contactType === 'person'">
         <label class="personal-data-form__label" for="state">{{ t('contacts.state') }}</label>
         <Select
           id="state"
@@ -266,11 +339,42 @@
           class="personal-data-form__control"
           :placeholder="t('contacts.select')"
           @update:modelValue="
-            (id) => {
-              const s = countryStates.find((s) => s.id === id);
+            (id: number | null) => {
+              const s = countryStates.find((s: CountryState) => s.id === id);
               $emit('update:modelValue', { ...modelValue, residenceState: s || undefined });
             }
           "
+        />
+      </div>
+
+      <!-- Agency data section  -->
+      <div class="personal-data-form__field--full" v-if="contactType === 'agency'">
+        <h1 class="personal-data-form__title">
+          {{ t('contacts.agencyDetails') }}
+        </h1>
+      </div>
+      <div class="personal-data-form__field" v-if="contactType === 'agency'">
+        <label class="personal-data-form__label" for="saleChannel">{{
+          t('contacts.saleChannel')
+        }}</label>
+        <Select
+          id="saleChannel"
+          :options="[]"
+          class="personal-data-form__control"
+          :placeholder="t('contacts.select')"
+        />
+      </div>
+      <div class="personal-data-form__field" v-if="contactType === 'agency'">
+        <label class="personal-data-form__label" for="commission">
+          {{ t('contacts.commission') }}
+        </label>
+        <InputNumber
+          inputId="commission"
+          suffix="%"
+          placeholder="%"
+          showButtons
+          :min="0"
+          :max="100"
         />
       </div>
     </div>
@@ -282,11 +386,14 @@ import { defineComponent, computed, watch, type PropType, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import IftaLabel from 'primevue/iftalabel';
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import DatePicker from 'primevue/datepicker';
 import Message from 'primevue/message';
+import AutoComplete from 'primevue/autocomplete';
 import CountryFlag from 'vue-country-flag-next';
 import { Info } from 'lucide-vue-next';
+import { useDebounceFn } from '@vueuse/core';
 
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
@@ -294,8 +401,15 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useAddressStore } from '@/infrastructure/stores/address';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 import type { ContactDetail } from '@/domain/entities/Contact';
+import type { CountryState } from '@/domain/entities/CountryState';
+// eslint-disable-next-line
+import type { Country } from '@/domain/entities/Country';
+// eslint-disable-next-line
+import type { Phone } from '@/domain/entities/Phone';
+import type { Address } from '@/domain/entities/Address';
 
 export default defineComponent({
   props: {
@@ -311,9 +425,11 @@ export default defineComponent({
   components: {
     IftaLabel,
     InputText,
+    InputNumber,
     Select,
     DatePicker,
     Message,
+    AutoComplete,
     CountryFlag,
     Info,
   },
@@ -324,18 +440,20 @@ export default defineComponent({
     const countryStatesStore = useCountryStatesStore();
     const contactsStore = useContactsStore();
     const instanceStore = useInstanceStore();
+    const addressStore = useAddressStore();
     const uiStore = useUIStore();
     const textMessageStore = useTextMessagesStore();
     const phoneNumber = ref('');
     const mobileNumber = ref('');
+    const countryStates = ref<CountryState[]>([]);
+    const addressItems = ref([] as { label: string; value: Address }[]);
     const countries = computed(() => countriesStore.countries);
     const contactsStoreSchema = computed(() => contactsStore.contactSchema);
     const languages = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
-    const countryStates = computed(() => countryStatesStore.countryStates);
     const showLastName2 = computed(
       () =>
         props.contactType === 'person' &&
-        (contactsStoreSchema.value?.fields ?? []).includes('lastname2')
+        (contactsStoreSchema.value?.fields ?? []).includes('lastname2'),
     );
     const isValidDate = (d: unknown): d is Date =>
       d instanceof Date && Number.isFinite(d.getTime());
@@ -355,7 +473,7 @@ export default defineComponent({
     const birthdateLabel = computed(() =>
       age.value !== null
         ? `${t('contacts.birthDate')} (${age.value} ${t('contacts.yearsOld')})`
-        : t('contacts.birthDate')
+        : t('contacts.birthDate'),
     );
     const countryById = computed(() => {
       const m = new Map<number, { id: number; name: string; code: string }>();
@@ -376,19 +494,85 @@ export default defineComponent({
       { label: t('contacts.gender.male'), value: 'male' },
       { label: t('contacts.gender.other'), value: 'other' },
     ];
+
+    const debouncedFetchAddressByZip = useDebounceFn(
+      async (query: string) => {
+        uiStore.startLoading();
+        try {
+          const results = await addressStore.fetchAddressByZip(query);
+          if (results.length > 0) {
+            addressItems.value = results.map((address: Address) => ({
+              label: `${address.zip} - ${address.city}, ${address.state.name}, ${address.country.name}`,
+              value: address,
+            }));
+          } else {
+            addressItems.value = [];
+          }
+        } catch (error) {
+          textMessageStore.addTextMessage(
+            t('error.somethingWentWrong'),
+            error instanceof Error ? error.message : 'Unknown error',
+          );
+        } finally {
+          uiStore.stopLoading();
+        }
+      },
+      150,
+      { maxWait: 3000 },
+    );
+
+    const fetchAddressByZip = async (event: { query: string }): Promise<void> => {
+      const len = event.query.length;
+      if (len >= 3 || len === 0) {
+        await debouncedFetchAddressByZip(event.query);
+      } else {
+        addressItems.value = [];
+      }
+    };
+
+    watch(
+      () => [
+        props.modelValue.residenceStreet,
+        props.modelValue.residenceCity,
+        props.modelValue.residenceZip,
+        props.modelValue.residenceCountry,
+        props.modelValue.residenceState,
+      ],
+      () => {
+        if (
+          props.modelValue.id === 0 &&
+          (props.modelValue.street === '' ||
+            props.modelValue.city === '' ||
+            props.modelValue.zipCode === '' ||
+            props.modelValue.country === undefined ||
+            props.modelValue.state === undefined)
+        ) {
+          context.emit('update:modelValue', {
+            ...props.modelValue,
+            street: props.modelValue.residenceStreet,
+            city: props.modelValue.residenceCity,
+            zipCode: props.modelValue.residenceZip,
+            country: props.modelValue.residenceCountry,
+            state: props.modelValue.residenceState,
+          });
+        }
+      },
+      { deep: true },
+    );
+
     watch(
       () => props.modelValue.residenceCountry,
       async () => {
         uiStore.startLoading();
         try {
           if (props.modelValue.residenceCountry) {
-            await countryStatesStore.fetchCountryStatesByCountryId(
-              props.modelValue.residenceCountry.id
+            countryStates.value = await countryStatesStore.fetchCountryStatesByCountryId(
+              props.modelValue.residenceCountry.id,
             );
-            const countryStateToSelect = countryStatesStore.countryStates?.find(
-              (s) => s.id === props.modelValue.state?.id
+            const countryStateToSelect = countryStates.value.find(
+              (s) => s.id === props.modelValue.residenceState?.id,
             );
-            if (countryStateToSelect && props.modelValue.state) {
+            if (countryStateToSelect && props.modelValue.residenceState) {
               context.emit('update:modelValue', {
                 ...props.modelValue,
                 residenceState: countryStateToSelect,
@@ -403,13 +587,13 @@ export default defineComponent({
         } catch (error) {
           textMessageStore.addTextMessage(
             t('error.somethingWentWrong'),
-            error instanceof Error ? error.message : 'Unknown error'
+            error instanceof Error ? error.message : 'Unknown error',
           );
         } finally {
           uiStore.stopLoading();
         }
       },
-      { immediate: true, deep: true }
+      { immediate: true, deep: true },
     );
     return {
       countries,
@@ -422,6 +606,8 @@ export default defineComponent({
       phoneNumber,
       mobileNumber,
       sameFiscalAndResidenceAddress,
+      addressItems,
+      fetchAddressByZip,
       t,
     };
   },
