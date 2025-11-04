@@ -316,8 +316,8 @@ export default defineComponent({
       uiStore.startLoading();
       try {
         clearHiddenFields();
+        contactForm.contactType = contactType.value;
         if (contact.value) {
-          contactForm.contactType = contactType.value;
           await contactsStore.updateContactFields(contact.value.id, contact.value, contactForm);
         } else {
           await contactsStore.createContact(contactForm);
@@ -350,6 +350,7 @@ export default defineComponent({
         await pricelistStore.fetchPricelists();
         await tagsStore.fetchTags();
         if (contact.value) {
+          contactType.value = contact.value.contactType ?? 'person';
           Object.assign(contactForm, contact.value);
           if (contact.value.birthdate) {
             contactForm.birthdate = new Date(contact.value.birthdate);
