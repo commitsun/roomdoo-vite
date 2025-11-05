@@ -122,6 +122,7 @@ export default defineComponent({
         await useLegacyStore().doVuexLogin(username.value, password.value);
         await pmsPropertiesStore.fetchPmsProperties();
         if (userStore.user) {
+          await userStore.fetchUserSchemas();
           if (route.query.redirect !== undefined && route.query.redirect !== null) {
             redirect = route.query.redirect as string;
           } else if (

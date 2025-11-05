@@ -36,6 +36,10 @@ export class UserService {
     await this.userRepository.updateUser(user);
   }
 
+  async fetchUserSchemas(): Promise<string[]> {
+    return this.userRepository.fetchUserSchemas();
+  }
+
   logout(): void {
     this.userRepository.logout();
   }
