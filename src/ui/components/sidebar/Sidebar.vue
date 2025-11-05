@@ -296,7 +296,7 @@ const items = computed(() => [
           open(UserSettings, {
             props: { header: userSettingsHeader },
             onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
-              if (data?.refresh ?? false) {
+              if (data?.action === 'userUpdated') {
                 uiStore.refreshView();
               }
             },

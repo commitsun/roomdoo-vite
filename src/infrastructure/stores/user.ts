@@ -35,6 +35,7 @@ export const useUserStore = defineStore('user', () => {
         lastName2: user.value.lastName2,
         phone: user.value.phone,
         avatar: user.value.avatar,
+        login: user.value.login,
         availabilityRuleFields: user.value.availabilityRuleFields || [],
       });
     }
