@@ -13,7 +13,6 @@ export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);
   const userSchemas = ref(null as string[] | null);
 
-
   const hydrateFromCookies = (): void => {
     if (user.value) {
       return;
