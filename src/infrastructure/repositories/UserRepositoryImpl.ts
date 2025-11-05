@@ -87,6 +87,10 @@ export class UsersRepositoryImpl implements UserRepository {
     }
     await api.patch('/user', payload);
   }
+  async fetchUserSchemas(): Promise<string[]> {
+    const response = await api.get('/user/extra-features');
+    return response.data;
+  }
   logout(): void {
     CookieService.clearUserCookies();
   }
