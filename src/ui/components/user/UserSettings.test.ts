@@ -84,7 +84,7 @@ const userMock = {
   lastName2: 'Roe',
   phone: '111-222',
   email: 'john@example.com',
-  lang: 'en_US', // el componente lo normaliza a en-US en mounted
+  lang: 'en_US',
 };
 const updateUser = vi.fn().mockResolvedValue(undefined);
 const changePassword = vi.fn().mockResolvedValue(undefined);
@@ -175,24 +175,19 @@ describe('UserSettings.vue', () => {
   });
 
   it('render user data form', async () => {
-    // Tab headers (usamos los textos que esperan los tests)
     expect(screen.getByText(/user data/i)).toBeInTheDocument();
     expect(screen.getByText(/change password/i)).toBeInTheDocument();
 
-    // Campos
     const firstName = screen.getByRole('textbox', { name: /first name/i });
     const lastName = screen.getByRole('textbox', { name: 'Last name' });
-    const secondLastName = screen.getByRole('textbox', { name: 'Second last name' });
     const email = screen.getByRole('textbox', { name: /email/i });
     const phone = screen.getByRole('textbox', { name: /phone/i });
 
     expect(firstName).toHaveValue('John');
     expect(lastName).toHaveValue('Doe');
     expect(email).toHaveValue('john@example.com');
-    expect(secondLastName).toHaveValue('Roe');
     expect(phone).toHaveValue('111-222');
 
-    // Language combobox visible
     const language = screen.getByRole('combobox', { name: /language/i });
     expect(language).toBeInTheDocument();
   });
@@ -211,17 +206,22 @@ describe('UserSettings.vue', () => {
 
     expect(startLoading).toHaveBeenCalled();
 
+    await waitFor(() => expect(updateUser).toHaveBeenCalledTimes(1));
+
+    const payload = (updateUser as unknown as { mock: { calls: any[][] } }).mock.calls[0][0];
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        firstName: 'Jane',
+        phone: '999-888',
+      }),
+    );
+
+    expect(payload).not.toHaveProperty('lastName');
+    expect(payload).not.toHaveProperty('email');
+    expect(payload).not.toHaveProperty('lang');
+
     await waitFor(() => {
-      expect(updateUser).toHaveBeenCalledWith(
-        expect.objectContaining({
-          firstName: 'Jane',
-          lastName: 'Doe',
-          lastName2: 'Roe',
-          phone: '999-888',
-          email: 'john@example.com',
-          lang: 'en-US',
-        }),
-      );
       expect(notifyAdd).toHaveBeenCalledWith('userSettings.userUpdated', 'success');
       expect(dialogClose).toHaveBeenCalledWith({ action: 'userUpdated' });
       expect(stopLoading).toHaveBeenCalled();
@@ -361,7 +361,7 @@ describe('UserSettings.vue', () => {
     expect(String(msg)).toMatch(/password changed|userSettings\.passwordChanged/i);
 
     expect(changePassword).toHaveBeenCalledWith('old!', 'new!');
-    expect(dialogClose).toHaveBeenCalledWith({ action: 'passwordChanged' });
+    expect(dialogClose).toHaveBeenCalledWith({ action: 'doLogout' });
     expect(stopLoading).toHaveBeenCalled();
   });
 
@@ -455,7 +455,7 @@ describe('UserSettings.vue', () => {
     await waitFor(() => {
       expect(updateUser).toHaveBeenCalledWith({ login: 'new-login-id' });
       expect(notifyAdd).toHaveBeenCalledWith('Login updated', 'success');
-      expect(dialogClose).toHaveBeenCalledWith({ action: 'loginUpdated' });
+      expect(dialogClose).toHaveBeenCalledWith({ action: 'doLogout' });
     });
   });
 

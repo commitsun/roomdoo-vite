@@ -12,6 +12,8 @@ const userService = new UserService(userRepository);
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);
+  const userSchemas = ref(null as string[] | null);
+
 
   const hydrateFromCookies = (): void => {
     if (user.value) {
@@ -69,6 +71,10 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  const fetchUserSchemas = async (): Promise<void> => {
+    userSchemas.value = await userService.fetchUserSchemas();
+  };
+
   const logout = (): void => {
     user.value = null;
     userService.logout();
@@ -76,6 +82,7 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     user: readonly(user),
+    userSchemas: readonly(userSchemas),
     refreshToken,
     login,
     requestChangePassword,
@@ -83,6 +90,7 @@ export const useUserStore = defineStore('user', () => {
     changePassword,
     hydrateFromCookies,
     updateUser,
+    fetchUserSchemas,
     logout,
   };
 });
