@@ -4,8 +4,7 @@ import { CookieService } from './CookieService';
 
 import type { User } from '@/domain/entities/User';
 
-const HTMLDocument: typeof Document =
-  (globalThis as any).HTMLDocument ?? Document;
+const HTMLDocument: typeof Document = (globalThis as any).HTMLDocument ?? Document;
 
 const originalCookieDesc =
   Object.getOwnPropertyDescriptor(Document.prototype, 'cookie') ??
