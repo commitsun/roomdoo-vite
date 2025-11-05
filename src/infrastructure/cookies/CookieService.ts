@@ -27,6 +27,7 @@ export class CookieService {
     this.setCookie('email', user.email);
     this.setCookie('phone', user.phone ?? '');
     this.setCookie('avatar', user.avatar ?? '');
+    this.setCookie('login', user.login);
     this.setCookie('availabilityRuleFields', JSON.stringify(user.availabilityRuleFields || []));
   }
 
@@ -50,6 +51,7 @@ export class CookieService {
     const lastName2 = this.readCookieField('lastName2', (value) => value);
     const phone = this.readCookieField('phone', (value) => (value !== null ? value : undefined));
     const avatar = this.readCookieField('avatar', (value) => (value !== null ? value : undefined));
+    const login = this.readCookieField('login', (value) => (value !== null ? value : undefined));
     const availabilityRuleFields = this.readCookieField('availabilityRuleFields', (value) => {
       try {
         return value !== null ? JSON.parse(value) : [];
@@ -80,6 +82,7 @@ export class CookieService {
       lastName2: lastName2 ?? undefined,
       phone,
       avatar,
+      login: login ?? '',
       availabilityRuleFields,
     };
   }
@@ -95,6 +98,7 @@ export class CookieService {
       'email',
       'phone',
       'avatar',
+      'login',
       'availabilityRuleFields',
     ];
 
