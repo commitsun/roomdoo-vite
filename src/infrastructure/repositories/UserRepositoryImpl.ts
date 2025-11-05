@@ -46,6 +46,7 @@ export class UsersRepositoryImpl implements UserRepository {
       firstname?: string;
       lastname?: string;
       lastname2?: string;
+      login?: string;
       phone?: string;
       email?: string;
       lang?: string;
@@ -69,6 +70,20 @@ export class UsersRepositoryImpl implements UserRepository {
       payload.lang = user.lang.replace('-', '_');
       i18n.global.locale.value = user.lang;
       updatePrimevueLocale(user.lang);
+    }
+    if (user.login !== undefined) {
+      payload.login = user.login;
+    }
+    if (user.avatar !== undefined) {
+      const res = await fetch(user.avatar);
+      const blob = await res.blob();
+      const ext = blob.type?.split('/')[1] ?? 'png';
+      const file = new File([blob], `avatar.${ext}`, { type: blob.type || 'image/png' });
+      const formData = new FormData();
+      formData.append('image', file);
+      await api.put('/user/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
     }
     await api.patch('/user', payload);
   }
