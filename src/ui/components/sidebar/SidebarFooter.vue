@@ -9,6 +9,7 @@
       <span>{{ pmsPropertySupportLink.label }}</span>
     </div>
     <div class="user" :class="{ 'is-open': isOpen }">
+      <Menu :model="userItems" />
       <div class="avatar-container">
         <Avatar
           v-if="user?.avatar"
@@ -38,16 +39,24 @@
 
 <script lang="ts">
 import Avatar from 'primevue/avatar';
+import Menu from 'primevue/menu';
 import { computed, defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
 import { ChevronsUpDown, Headset } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 
+import UserSettings from '@/ui/components/user/UserSettings.vue';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { firstTwoInitials } from '@/ui/utils/strings';
 import type { MenuLink } from '@/domain/entities/MenuLink';
+import { useAppDialog } from '@/ui/composables/useAppDialog';
 
 export default defineComponent({
   name: 'SidebarFooter',
   components: {
+    Menu,
     Avatar,
     ChevronsUpDown,
     Headset,
@@ -65,10 +74,47 @@ export default defineComponent({
     },
   },
   setup() {
+    const { t } = useI18n();
+    const { openDialog } = useAppDialog();
     const userStore = useUserStore();
+    const uiStore = useUIStore();
+    const router = useRouter();
     const user = computed(() => userStore.user);
+
+    const userItems = computed(() => [
+      {
+        label: t('sidebar.options'),
+        items: [
+          {
+            label: t('sidebar.settings'),
+            icon: 'pi pi-cog',
+            command: (): void => {
+              openDialog(UserSettings, {
+                props: { header: t('sidebar.userSettings') },
+                onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
+                  if (data?.action === 'userUpdated') {
+                    uiStore.refreshView();
+                  }
+                },
+              });
+            },
+          },
+          {
+            label: t('sidebar.logout'),
+            icon: 'pi pi-sign-out',
+            command: (): void => {
+              userStore.logout();
+              //TODO: remove with legacy
+              useLegacyStore().removeVuexAndOldCookiesUser();
+              void router.push({ name: 'login' });
+            },
+          },
+        ],
+      },
+    ]);
     return {
       user,
+      userItems,
       firstTwoInitials,
     };
   },

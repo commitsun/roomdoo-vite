@@ -17,6 +17,9 @@ describe('UserService - loginAndGetUser', () => {
       requestChangePassword: vi.fn(),
       resetPassword: vi.fn(),
       refreshToken: vi.fn(),
+      changePassword: vi.fn(),
+      updateUser: vi.fn(),
+      logout: vi.fn(),
     };
     userService = new UserService(userRepoMock as UserRepository);
   });
@@ -61,7 +64,7 @@ describe('UserService - loginAndGetUser', () => {
     expect(userRepoMock.fetchAvailabilityRuleFields).not.toHaveBeenCalled();
   });
 
-  it('call repo methods in order: login, fetchUser, fetchAvailabilityRuleFields', async () => {
+  it('call repo methods in order: login, fetchUser, fetchAvailabilityRuleFields (exact order)', async () => {
     const callOrder: string[] = [];
     userRepoMock.login.mockImplementation(() => {
       callOrder.push('login');
@@ -78,7 +81,34 @@ describe('UserService - loginAndGetUser', () => {
 
     await userService.loginAndGetUser('admin@yourcompany.example.com', 'pw');
 
-    expect(callOrder[0]).toBe('login');
+    expect(callOrder).toEqual(['login', 'fetchUser', 'fetchAvailabilityRuleFields']);
+  });
+
+  it('propagate error if fetchUser fails after login', async () => {
+    userRepoMock.login.mockResolvedValue(undefined);
+    userRepoMock.fetchUser.mockRejectedValue(new Error('boom'));
+    userRepoMock.fetchAvailabilityRuleFields.mockResolvedValue([]);
+
+    await expect(userService.loginAndGetUser('x@roomdoo.com', 'pw')).rejects.toThrow('boom');
+
+    expect(userRepoMock.login).toHaveBeenCalled();
+    expect(userRepoMock.fetchUser).toHaveBeenCalled();
+    // Si falla fetchUser, no debe pedirse availabilityRuleFields
+    expect(userRepoMock.fetchAvailabilityRuleFields).not.toHaveBeenCalled();
+  });
+
+  it('propagate error if fetchAvailabilityRuleFields fails after fetchUser', async () => {
+    userRepoMock.login.mockResolvedValue(undefined);
+    userRepoMock.fetchUser.mockResolvedValue({ id: 1, name: 'User' });
+    userRepoMock.fetchAvailabilityRuleFields.mockRejectedValue(new Error('fields-error'));
+
+    await expect(userService.loginAndGetUser('x@roomdoo.com', 'pw')).rejects.toThrow(
+      'fields-error',
+    );
+
+    expect(userRepoMock.login).toHaveBeenCalled();
+    expect(userRepoMock.fetchUser).toHaveBeenCalled();
+    expect(userRepoMock.fetchAvailabilityRuleFields).toHaveBeenCalled();
   });
 
   it('call requestPassword with email', async () => {
@@ -106,5 +136,39 @@ describe('UserService - loginAndGetUser', () => {
   it('propagate errors from refreshToken', async () => {
     userRepoMock.refreshToken.mockRejectedValue(new UnauthorizedError());
     await expect(userService.refreshToken()).rejects.toThrow(UnauthorizedError);
+  });
+
+  it('changePassword: calls repository with current and new passwords', async () => {
+    userRepoMock.changePassword.mockResolvedValue(undefined);
+
+    await userService.changePassword('old!', 'new!');
+
+    expect(userRepoMock.changePassword).toHaveBeenCalledWith('old!', 'new!');
+  });
+
+  it('changePassword: propagates repository errors', async () => {
+    userRepoMock.changePassword.mockRejectedValue(new UnauthorizedError());
+
+    await expect(userService.changePassword('bad', 'worse')).rejects.toThrow(UnauthorizedError);
+  });
+
+  it('updateUser: calls repository with partial user payload', async () => {
+    userRepoMock.updateUser.mockResolvedValue(undefined);
+    const payload = { firstName: 'Ada', lastName: 'Lovelace' };
+
+    await userService.updateUser(payload);
+
+    expect(userRepoMock.updateUser).toHaveBeenCalledWith(payload);
+  });
+
+  it('updateUser: propagates repository errors', async () => {
+    userRepoMock.updateUser.mockRejectedValue(new Error('update failed'));
+
+    await expect(userService.updateUser({ firstName: 'Alan' })).rejects.toThrow('update failed');
+  });
+
+  it('logout: calls repository.logout synchronously', () => {
+    userService.logout();
+    expect(userRepoMock.logout).toHaveBeenCalled();
   });
 });

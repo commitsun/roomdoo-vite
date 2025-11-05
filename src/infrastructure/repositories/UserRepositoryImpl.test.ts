@@ -31,12 +31,15 @@ vi.mock('../cookies/CookieService', () => {
 
 import { api } from '@/infrastructure/http/axios';
 
+declare const global: any;
 describe('UsersRepositoryImpl', () => {
   let repo: UsersRepositoryImpl;
 
   beforeEach(() => {
     vi.clearAllMocks();
     repo = new UsersRepositoryImpl();
+    (api.put as any) = vi.fn().mockResolvedValue({});
+    global.fetch = vi.fn();
   });
 
   //login
@@ -194,6 +197,7 @@ describe('UsersRepositoryImpl', () => {
         phone: '123-456',
         email: 'john@example.com',
         lang: 'en-US',
+        login: 'johnny',
       });
 
       expect(api.patch).toHaveBeenCalledWith('/user', {
@@ -203,8 +207,36 @@ describe('UsersRepositoryImpl', () => {
         phone: '123-456',
         email: 'john@example.com',
         lang: 'en_US',
+        login: 'johnny',
       });
     });
+
+    it('uploads avatar with proper headers and file extension inferred from blob.type, then patches user', async () => {
+      const fakeBlob = new Blob(['xxx'], { type: 'image/jpeg' });
+      (global.fetch as any).mockResolvedValue({ blob: vi.fn().mockResolvedValue(fakeBlob) });
+
+      await repo.updateUser({ avatar: 'https://cdn/img.jpg', firstName: 'Jane' });
+
+      expect(api.put).toHaveBeenCalledTimes(1);
+      expect(api.put).toHaveBeenCalledWith('/user/image', expect.any(FormData), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      expect(api.patch).toHaveBeenCalledWith('/user', { firstname: 'Jane' });
+    });
+
+    it('falls back to png when blob.type is missing', async () => {
+      const fakeBlob = new Blob(['xxx']); // sin type
+      (global.fetch as any).mockResolvedValue({ blob: vi.fn().mockResolvedValue(fakeBlob) });
+
+      await repo.updateUser({ avatar: '/img' });
+
+      const appendSpy = vi.spyOn(FormData.prototype, 'append');
+      await repo.updateUser({ avatar: '/img2' });
+      const fileArg = appendSpy.mock.calls.at(-1)?.[1] as File;
+      expect(fileArg.name).toBe('avatar.png');
+      expect(fileArg.type).toBe('image/png');
+    });
+
     it('updates i18n locale on user update', async () => {
       (api.patch as any).mockResolvedValue({});
       const { i18n } = await import('@/infrastructure/plugins/i18n');

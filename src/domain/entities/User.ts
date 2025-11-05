@@ -9,6 +9,7 @@ export interface User {
   firstName: string;
   lastName: string;
   lang: string;
+  login: string;
   lastName2?: string;
   defaultPmsProperty: PmsProperty;
   phone?: string;
