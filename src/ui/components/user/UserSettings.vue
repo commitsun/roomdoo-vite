@@ -76,7 +76,7 @@
                 :style="{ minWidth: '260px' }"
               />
             </div>
-            <div class="user__settings--field">
+            <div class="user__settings--field" :class="{'user__settings--field--full': !showLastName2}">
               <label class="user__settings--label" for="lastName">
                 {{ t('userSettings.lastName') }}
               </label>
@@ -87,7 +87,7 @@
                 :style="{ minWidth: '260px' }"
               />
             </div>
-            <div class="user__settings--field">
+            <div class="user__settings--field" v-if="showLastName2">
               <label class="user__settings--label" for="secondLastName">
                 {{ t('userSettings.secondLastName') }}
               </label>
@@ -351,6 +351,7 @@ import { i18n } from '@/infrastructure/plugins/i18n';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import type { Language } from '@/domain/entities/Language';
+import type { User } from '@/domain/entities/User';
 
 const dialogRef = inject<Ref<{ close: (payload?: unknown) => void } | undefined>>('dialogRef');
 
@@ -374,6 +375,7 @@ const selectedLocale = ref('');
 const isChangeLoginVisible = ref(false);
 const isChangePasswordVisible = ref(false);
 const availableLocales = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
+const showLastName2 = computed(() => userStore.userSchemas?.includes('lastname2'));
 
 const currentPassword = ref('');
 const newPassword = ref('');
@@ -383,22 +385,26 @@ const errorMessage = ref('');
 const handleUpdateUser = async (): Promise<void> => {
   uiStore.startLoading();
   try {
-    const payload: {
-      firstName: string;
-      lastName: string;
-      lastName2: string;
-      phone: string;
-      email: string;
-      lang: string;
-      avatar?: string;
-    } = {
-      firstName: firstName.value,
-      lastName: lastName.value,
-      lastName2: secondLastName.value,
-      phone: phone.value,
-      email: email.value,
-      lang: selectedLocale.value,
+    const payload: Partial<User> = {
     };
+    if (firstName.value !== user?.firstName) {
+      payload.firstName = firstName.value;
+    }
+    if (lastName.value !== user?.lastName) {
+      payload.lastName = lastName.value;
+    }
+    if (showLastName2.value !== null && secondLastName.value !== user?.lastName2) {
+      payload.lastName2 = secondLastName.value;
+    }
+    if (phone.value !== user?.phone) {
+      payload.phone = phone.value;
+    }
+    if (email.value !== user?.email) {
+      payload.email = email.value;
+    }
+    if (selectedLocale.value !== user?.lang) {
+      payload.lang = selectedLocale.value;
+    }
     if (imageUrl.value !== user?.avatar) {
       payload.avatar = imageUrl.value;
     }
@@ -415,9 +421,11 @@ const handleUpdateUser = async (): Promise<void> => {
 const updateLogin = async (): Promise<void> => {
   uiStore.startLoading();
   try {
-    await userStore.updateUser({ login: newLogin.value });
-    notificationStore.add(t('userSettings.loginUpdated'), 'success');
-    dialogRef?.value?.close({ action: 'loginUpdated' });
+    if (newLogin.value && newLogin.value !== login.value) {
+      await userStore.updateUser({ login: newLogin.value });
+      notificationStore.add(t('userSettings.loginUpdated'), 'success');
+      dialogRef?.value?.close({ action: 'doLogout' });
+    }
   } catch {
     notificationStore.add(t('error.unknownError'), 'error');
   } finally {
@@ -436,9 +444,11 @@ const handleChangePassword = async (): Promise<void> => {
   }
   uiStore.startLoading();
   try {
-    await userStore.changePassword(currentPassword.value, newPassword.value);
-    notificationStore.add(t('userSettings.passwordChanged'), 'success');
-    dialogRef?.value?.close({ action: 'passwordChanged' });
+    if (currentPassword.value && newPassword.value) {
+      await userStore.changePassword(currentPassword.value, newPassword.value);
+      notificationStore.add(t('userSettings.passwordChanged'), 'success');
+      dialogRef?.value?.close({ action: 'doLogout' });
+    }
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       errorMessage.value = t('userSettings.invalidPassword');

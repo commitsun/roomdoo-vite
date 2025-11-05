@@ -298,6 +298,10 @@ const items = computed(() => [
             onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
               if (data?.action === 'userUpdated') {
                 uiStore.refreshView();
+              } else if(data?.action === 'doLogout') {
+                userStore.logout();
+                useLegacyStore().removeVuexAndOldCookiesUser();
+                void router.push({ name: 'login' });
               }
             },
           });

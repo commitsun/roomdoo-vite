@@ -19,6 +19,7 @@ describe('UserService - loginAndGetUser', () => {
       refreshToken: vi.fn(),
       changePassword: vi.fn(),
       updateUser: vi.fn(),
+      fetchUserSchemas: vi.fn(),
       logout: vi.fn(),
     };
     userService = new UserService(userRepoMock as UserRepository);
@@ -165,6 +166,19 @@ describe('UserService - loginAndGetUser', () => {
     userRepoMock.updateUser.mockRejectedValue(new Error('update failed'));
 
     await expect(userService.updateUser({ firstName: 'Alan' })).rejects.toThrow('update failed');
+  });
+
+  it('fetchUserSchemas: devuelve lo que entrega el repositorio', async () => {
+    userRepoMock.fetchUserSchemas.mockResolvedValue(['public', 'roomdoo']);
+    const res = await userService.fetchUserSchemas();
+    expect(userRepoMock.fetchUserSchemas).toHaveBeenCalledTimes(1);
+    expect(res).toEqual(['public', 'roomdoo']);
+  });
+
+  it('fetchUserSchemas: propaga errores del repositorio', async () => {
+    userRepoMock.fetchUserSchemas.mockRejectedValue(new Error('boom'));
+    await expect(userService.fetchUserSchemas()).rejects.toThrow('boom');
+    expect(userRepoMock.fetchUserSchemas).toHaveBeenCalledTimes(1);
   });
 
   it('logout: calls repository.logout synchronously', () => {
