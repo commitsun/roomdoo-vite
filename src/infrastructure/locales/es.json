@@ -133,7 +133,8 @@
     "passwordChanged": "La contraseña se ha cambiado correctamente",
     "invalidPassword": "Contraseña actual incorrecta",
     "passwordsDoNotMatch": "Las nuevas contraseñas no coinciden",
-    "userUpdated": "Los datos del usuario se han actualizado correctamente"
+    "userUpdated": "Los datos del usuario se han actualizado correctamente",
+    "loginUpdated": "El inicio de sesión se ha actualizado correctamente"
   },
 
   "error404": {
