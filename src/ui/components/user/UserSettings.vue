@@ -76,7 +76,10 @@
                 :style="{ minWidth: '260px' }"
               />
             </div>
-            <div class="user__settings--field" :class="{'user__settings--field--full': !showLastName2}">
+            <div
+              class="user__settings--field"
+              :class="{ 'user__settings--field--full': !showLastName2 }"
+            >
               <label class="user__settings--label" for="lastName">
                 {{ t('userSettings.lastName') }}
               </label>
@@ -385,8 +388,7 @@ const errorMessage = ref('');
 const handleUpdateUser = async (): Promise<void> => {
   uiStore.startLoading();
   try {
-    const payload: Partial<User> = {
-    };
+    const payload: Partial<User> = {};
     if (firstName.value !== user?.firstName) {
       payload.firstName = firstName.value;
     }

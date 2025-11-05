@@ -256,23 +256,23 @@ describe('UsersRepositoryImpl', () => {
     });
   });
   describe('fetchUserSchemas', () => {
-  it('llama al endpoint y devuelve response.data', async () => {
-    (api.get as any).mockResolvedValue({ data: ['public', 'roomdoo'] });
+    it('llama al endpoint y devuelve response.data', async () => {
+      (api.get as any).mockResolvedValue({ data: ['public', 'roomdoo'] });
 
-    const res = await repo.fetchUserSchemas();
+      const res = await repo.fetchUserSchemas();
 
-    expect(api.get).toHaveBeenCalledWith('/user/extra-features');
-    expect(res).toEqual(['public', 'roomdoo']);
+      expect(api.get).toHaveBeenCalledWith('/user/extra-features');
+      expect(res).toEqual(['public', 'roomdoo']);
+    });
+
+    it('propaga errores de axios', async () => {
+      const err = new Error('axios fail');
+      (api.get as any).mockRejectedValue(err);
+
+      await expect(repo.fetchUserSchemas()).rejects.toThrow(err);
+      expect(api.get).toHaveBeenCalledWith('/user/extra-features');
+    });
   });
-
-  it('propaga errores de axios', async () => {
-    const err = new Error('axios fail');
-    (api.get as any).mockRejectedValue(err);
-
-    await expect(repo.fetchUserSchemas()).rejects.toThrow(err);
-    expect(api.get).toHaveBeenCalledWith('/user/extra-features');
-  });
-});
   describe('logout', () => {
     it('logout llama a CookieService.clearUserCookies', () => {
       repo.logout();
