@@ -4,8 +4,12 @@ import { resetPasswordSchema } from './UserSchemas';
 
 const ok = (data: any) => expect(() => resetPasswordSchema.parse(data)).not.toThrow();
 const fail = (data: any) => {
-  try { resetPasswordSchema.parse(data); throw new Error('should fail'); }
-  catch (e: any) { return e; }
+  try {
+    resetPasswordSchema.parse(data);
+    throw new Error('should fail');
+  } catch (e: any) {
+    return e;
+  }
 };
 
 describe('resetPasswordSchema', () => {

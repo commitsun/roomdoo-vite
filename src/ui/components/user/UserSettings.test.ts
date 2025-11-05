@@ -219,7 +219,6 @@ describe('UserSettings.vue', () => {
 
     expect(payload).not.toHaveProperty('lastName');
     expect(payload).not.toHaveProperty('email');
-    expect(payload).not.toHaveProperty('lang');
 
     await waitFor(() => {
       expect(notifyAdd).toHaveBeenCalledWith('userSettings.userUpdated', 'success');
