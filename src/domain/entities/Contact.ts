@@ -5,6 +5,7 @@ import type { PaymentTerm } from './PaymentTerm';
 import type { Phone } from './Phone';
 import type { Pricelist } from './Pricelist';
 import type { Tag } from './Tag';
+import type { SaleChannel } from './SaleChannel';
 
 import type { ContactType } from '@/domain/types/ContactType';
 import type { Id } from '@/domain/types/Id';
@@ -70,6 +71,9 @@ export interface ContactDetail extends Omit<Contact, 'types'> {
   fiscalIdNumber?: string;
   fiscalIdNumberType?: string;
   tags?: Tag[];
+  saleChannel?: SaleChannel;
+  defaultCommission?: number;
+  comercial?: string;
 }
 
 export interface ContactSchema {

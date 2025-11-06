@@ -227,7 +227,11 @@
         <div class="billing-form__address-title">
           {{ t('contacts.fiscalAddress') }}
         </div>
-        <Message severity="info" icon="pi pi-info-circle">
+        <Message
+          severity="info"
+          icon="pi pi-info-circle"
+          v-if="modelValue.contactType === 'person'"
+        >
           <span>{{ t('contacts.fiscalAddressTextMessage') }}</span>
         </Message>
         <div class="billing-form__field billing-form__field--full">
@@ -412,7 +416,7 @@ export default defineComponent({
       documentTypesStore.fiscalDocumentTypes.map((dt) => {
         return {
           id: dt.name,
-          name: dt.name.charAt(0).toUpperCase() + dt.name.replace('_', ' ').slice(1),
+          name: t(`contacts.${dt.name}`),
         };
       }),
     );

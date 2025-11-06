@@ -7,4 +7,5 @@ export interface DocumentType {
   name: string;
   code: string;
   countries: Country[];
+  isValidableDocument: boolean;
 }

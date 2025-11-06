@@ -219,6 +219,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
 
   normalizeContactPayload = (contact: Partial<ContactDetail>): Partial<ContactDetail> => {
     const KEY_MAP: Record<string, string> = {
+      name: 'name',
       firstName: 'firstname',
       lastName: 'lastname',
       lastName2: 'lastname2',
@@ -230,6 +231,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
       'residenceCountry',
       'state',
       'country',
+      'saleChannel',
     ]);
 
     const toId = (v: unknown): unknown =>
@@ -327,7 +329,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     if (updated.documents) {
       await Promise.all(
         updated.documents.map((document: PersonalDocument) => {
-          if (!document.id) {
+          if (!Boolean(document.id)) {
             return api.post(`contacts/${contactId}/id-numbers`, {
               name: document.name,
               category: document.category.id,
@@ -343,6 +345,15 @@ export class ContactsRepositoryImpl implements ContactsRepository {
             });
           }
         }),
+      );
+      const updatedIds = new Set(
+        updated.documents.filter((doc) => Boolean(doc.id)).map((doc) => doc.id) as number[],
+      );
+      const originalDocs = original.documents ?? [];
+      await Promise.all(
+        originalDocs
+          .filter((doc) => Boolean(doc.id) && !updatedIds.has(doc.id as number))
+          .map((doc) => api.delete(`contacts/${contactId}/id-numbers/${doc.id}`)),
       );
     }
   }
