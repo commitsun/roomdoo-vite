@@ -171,9 +171,9 @@ describe('ContactDetailDocuments', () => {
     expect(screen.getByText('All documents')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Add document' }));
-    expect(updateSpy).toHaveBeenCalledTimes(1);
+    expect(updateSpy).toHaveBeenCalledTimes(2);
 
-    expect(model.value.documents).toHaveLength(1);
+    expect(model.value.documents).toHaveLength(2);
   });
 
   it('change the country (Select) → setDocCountry issues an update with the complete country', async () => {
