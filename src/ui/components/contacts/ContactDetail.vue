@@ -40,6 +40,7 @@
             >
               <FileText :size="15" />
               <span>{{ t('contacts.generalInformation') }}</span>
+              <Badge v-if="badges.general" :value="badges.general" severity="danger" size="small" />
             </div>
           </AccordionHeader>
           <AccordionContent>
@@ -58,11 +59,18 @@
             >
               <IdCard :size="15" />
               <span>{{ t('contacts.documents') }}</span>
+              <Badge
+                v-if="badges.documents"
+                :value="badges.documents"
+                severity="danger"
+                size="small"
+              />
             </div>
           </AccordionHeader>
           <AccordionContent>
             <ContactDetailDocuments
               :modelValue="contactForm"
+              :errors="uiErrors.documents"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
             />
           </AccordionContent>
@@ -106,8 +114,19 @@
     <div class="contact-detail-tabs" v-else>
       <Tabs v-model:value="activeTab" :lazy="true">
         <TabList>
-          <Tab value="0">{{ t('contacts.generalInformation') }}</Tab>
-          <Tab v-if="contactType === 'person'" value="1">{{ t('contacts.documents') }}</Tab>
+          <Tab value="0">
+            {{ t('contacts.generalInformation') }}
+            <Badge v-if="badges.general" :value="badges.general" severity="danger" size="small" />
+          </Tab>
+          <Tab v-if="contactType === 'person'" value="1">
+            {{ t('contacts.documents') }}
+            <Badge
+              v-if="badges.documents"
+              :value="badges.documents"
+              severity="danger"
+              size="small"
+            />
+          </Tab>
           <Tab value="2">{{ t('contacts.invoicing') }}</Tab>
           <Tab value="3">{{ t('contacts.internalnotes') }}</Tab>
         </TabList>
@@ -116,12 +135,14 @@
             <ContactDetailGeneralData
               :contactType="contactType"
               :modelValue="contactForm"
+              :errors="uiErrors.general"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
             />
           </TabPanel>
           <TabPanel value="1">
             <ContactDetailDocuments
               :modelValue="contactForm"
+              :errors="uiErrors.documents"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
             />
           </TabPanel>
@@ -140,7 +161,23 @@
         </TabPanels>
       </Tabs>
     </div>
-    <div class="footer">
+    <div
+      class="footer"
+      :class="{
+        'justify-end': !badges.general && !badges.documents,
+        'justify-between': badges.general || badges.documents,
+      }"
+    >
+      <div class="all-errors" v-if="badges.general || badges.documents">
+        <Info :size="isDesktop ? 16 : 14" />
+        <span>
+          {{
+            t('contacts.errors.fieldErrors', {
+              count: badges.general + badges.documents,
+            })
+          }}
+        </span>
+      </div>
       <div class="buttons">
         <Button :label="t('contacts.cancel')" severity="secondary" @click="handleCancel" />
         <Button :label="t('contacts.save')" severity="primary" @click="handleSave" />
@@ -172,6 +209,7 @@ import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
 import AccordionPanel from 'primevue/accordionpanel';
 import Button from 'primevue/button';
+import Badge from 'primevue/badge';
 import { useI18n } from 'vue-i18n';
 import {
   User,
@@ -182,29 +220,27 @@ import {
   Banknote,
   NotebookPen,
   BookUser,
+  Info,
 } from 'lucide-vue-next';
+import { useForm } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
 
 import ContactDetailGeneralData from './ContactDetailGeneralData.vue';
 import ContactDetailDocuments from './ContactDetailDocuments.vue';
 import ContactDetailBilling from './ContactDetailBilling.vue';
 import ContactDetailInternalNotes from './ContactDetailInternalNotes.vue';
 
+import { ContactSchema, type ContactInput } from '@/application/contacts/ContactSchemas';
 import type { ContactDetail } from '@/domain/entities/Contact';
-import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 import { usePaymentTermsStore } from '@/infrastructure/stores/paymentTerms';
 import { usePricelistStore } from '@/infrastructure/stores/pricelist';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
+import { useSaleChannelsStore } from '@/infrastructure/stores/saleChannels';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 import { useTagsStore } from '@/infrastructure/stores/tags';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
-import type { Tag } from '@/domain/entities/Tag';
-import type { Phone } from '@/domain/entities/Phone';
-import type { Country } from '@/domain/entities/Country';
-import type { CountryState } from '@/domain/entities/CountryState';
-import type { PaymentTerm } from '@/domain/entities/PaymentTerm';
-import type { Pricelist } from '@/domain/entities/Pricelist';
 
 export default defineComponent({
   components: {
@@ -223,6 +259,7 @@ export default defineComponent({
     AccordionHeader,
     AccordionContent,
     AccordionPanel,
+    Badge,
     User,
     Building,
     Store,
@@ -231,31 +268,46 @@ export default defineComponent({
     Banknote,
     NotebookPen,
     BookUser,
+    Info,
   },
 
   setup() {
+    type GeneralErrors = { name?: string; saleChannelId?: string };
+    type DocumentRowError = { country?: string; category?: string; number?: string };
+
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
     const paymentTermsStore = usePaymentTermsStore();
     const pricelistStore = usePricelistStore();
     const documentTypesStore = useDocumentTypesStore();
     const tagsStore = useTagsStore();
+    const saleChannelsStore = useSaleChannelsStore();
     const uiStore = useUIStore();
     const textMessageStore = useTextMessagesStore();
     const isDesktop = useMediaQuery('(min-width: 1024px)');
+    const { t } = useI18n();
+
+    const {
+      validate,
+      setValues,
+      errors: vvErrors,
+    } = useForm({
+      validationSchema: toTypedSchema(ContactSchema),
+    });
 
     const dialogRef =
       inject<
         Ref<{ close: (payload?: unknown) => void; data: { [key: string]: unknown } } | undefined>
       >('dialogRef');
-    const { t } = useI18n();
 
-    const contactType = ref('person');
-    const contactTypeOptions = ref([
+    const contactType = ref<'person' | 'company' | 'agency'>('person');
+    const contactTypeOptions = computed(() => [
       { label: t('contacts.person'), value: 'person' },
       { label: t('contacts.company'), value: 'company' },
       { label: t('contacts.agency'), value: 'agency' },
     ]);
+    const isPerson = computed(() => contactType.value === 'person');
+
     const activePanel = ref<string | null>(null);
     const activeTab = ref('0');
     const contact = ref<ContactDetail | null>(null);
@@ -267,56 +319,201 @@ export default defineComponent({
       lastname: '',
       lastname2: '',
       birthdate: null as Date | null,
-      nationality: undefined as Country | undefined,
+      nationality: undefined,
       lang: '',
       gender: '',
-      phones: [] as Phone[],
+      phones: [],
       email: '',
-      documents: [] as PersonalDocument[],
+      documents: [],
       fiscalIdNumberType: '',
       fiscalIdNumber: '',
       residenceStreet: '',
       residenceZip: '',
       residenceCity: '',
-      residenceState: undefined as CountryState | undefined,
-      residenceCountry: undefined as Country | undefined,
+      residenceState: undefined,
+      residenceCountry: undefined,
       street: '',
       zipCode: '',
       city: '',
-      state: undefined as CountryState | undefined,
-      country: undefined as Country | undefined,
-      paymentTerm: undefined as PaymentTerm | undefined,
-      pricelist: undefined as Pricelist | undefined,
+      state: undefined,
+      country: undefined,
+      paymentTerm: undefined,
+      pricelist: undefined,
       invoicingPolicy: '',
       reference: '',
-      tags: [] as Tag[],
+      tags: [],
       internalNotes: '',
+      defaultCommission: 0,
+      saleChannel: undefined,
+      comercial: '',
       contactType: 'person',
     });
 
-    const contactsStoreSchema = computed(() => contactsStore.contactSchema);
+    const uiErrors = reactive<{ general: GeneralErrors; documents: DocumentRowError[] }>({
+      general: {},
+      documents: [],
+    });
+
+    const badges = computed(() => {
+      const general = Object.keys(uiErrors.general).length;
+      const documents = uiErrors.documents.reduce(
+        (acc, r) =>
+          acc +
+          (r.country !== undefined ? 1 : 0) +
+          (r.category !== undefined ? 1 : 0) +
+          (r.number !== undefined ? 1 : 0),
+        0,
+      );
+      return { general, documents, total: general + documents };
+    });
+
+    const mergeIntoForm = (v: ContactDetail): ContactDetail => Object.assign(contactForm, v);
 
     const clearHiddenFields = (): void => {
-      if (contactType.value !== 'person') {
-        contactForm.lastname = '';
-        contactForm.lastname2 = '';
-        contactForm.birthdate = null;
-        contactForm.gender = '';
-        contactForm.documents = [];
-        contactForm.nationality = undefined;
-        contactForm.residenceStreet = '';
-        contactForm.residenceZip = '';
-        contactForm.residenceCity = '';
-        contactForm.residenceState = undefined;
-        contactForm.residenceCountry = undefined;
+      if (!isPerson.value) {
+        Object.assign(contactForm, {
+          lastname: '',
+          lastname2: '',
+          birthdate: null,
+          gender: '',
+          documents: [],
+          nationality: undefined,
+          residenceStreet: '',
+          residenceZip: '',
+          residenceCity: '',
+          residenceState: undefined,
+          residenceCountry: undefined,
+        });
       }
     };
 
+    const normalizeDocType = (codeRaw: unknown): ContactInput['documents'][number]['type'] => {
+      const code = String(codeRaw ?? '')
+        .trim()
+        .toLowerCase();
+      if (code === 'dni' || code === 'nif') {
+        return 'dni';
+      }
+      if (code === 'nie') {
+        return 'nie';
+      }
+      if (code === 'passport') {
+        return 'passport';
+      }
+      return 'other';
+    };
+
+    const docNumberErrorBySchema = (docType: unknown, numberRaw: string): string | undefined => {
+      const code = String(docType ?? '')
+        .trim()
+        .toLowerCase();
+      type DocCode = 'dni' | 'nie' | 'passport';
+      const type: DocCode | 'other' =
+        code === 'nif'
+          ? 'dni'
+          : (['dni', 'nie', 'passport'] as DocCode[]).includes(code as DocCode)
+            ? (code as DocCode)
+            : 'other';
+      const number = numberRaw.toUpperCase().replace(/[\s-]/g, '');
+
+      const res = ContactSchema.safeParse({
+        contactType: 'person',
+        name: '_',
+        saleChannelId: null,
+        documents: [{ type, number }],
+      });
+      if (res.success) {
+        return undefined;
+      }
+
+      const issue = res.error.issues.find(
+        (i) => i.path[0] === 'documents' && i.path[1] === 0 && i.path[2] === 'number',
+      );
+      return issue?.message;
+    };
+
+    const validateDocumentsPresence = (): DocumentRowError[] => {
+      const docs = contactForm.documents ?? [];
+      if (docs.length === 0) {
+        return [];
+      }
+      return docs.map((d) => {
+        const row: DocumentRowError = {};
+        if (d.country?.id === 0 || d.country?.id === undefined) {
+          row.country = 'contacts.errors.countryRequired';
+        }
+        if (!d.category?.id) {
+          row.category = 'contacts.errors.documentTypeRequired';
+        }
+        const raw = String(d?.name ?? '').trim();
+        if (!raw) {
+          row.number = 'contacts.errors.documentNumberRequired';
+        } else if (d.category?.id) {
+          const err = docNumberErrorBySchema(d.category.name, raw);
+          if (err !== null) {
+            row.number = err;
+          }
+        }
+        return row;
+      });
+    };
+
+    const mapVeeValidateErrorsToUI = (): void => {
+      const flat = vvErrors.value as Record<string, string>;
+      for (const [path, msg] of Object.entries(flat)) {
+        if (path === 'name' || path === 'saleChannelId') {
+          (uiErrors.general as GeneralErrors)[path as keyof GeneralErrors] = msg;
+          continue;
+        }
+        const m = path.match(/^documents(?:\.|\[)(\d+)(?:\]|\.)number$/);
+        if (m) {
+          const idx = Number(m[1]);
+          uiErrors.documents[idx] ??= {};
+          uiErrors.documents[idx].number = msg;
+        }
+      }
+    };
+
+    const resetUiErrors = (): void => {
+      uiErrors.general = {};
+      uiErrors.documents = [];
+    };
+
+    const buildPayloadToValidate = (): ContactInput => ({
+      contactType: contactType.value,
+      name: (
+        contactForm.name || `${contactForm.firstname ?? ''} ${contactForm.lastname ?? ''}`
+      ).trim(),
+      saleChannelId: contactForm.saleChannel?.id ?? null,
+      documents: (contactForm.documents ?? []).map((d) => ({
+        type: normalizeDocType(d?.category?.code),
+        number: String(d?.name ?? '').trim(),
+      })),
+    });
+
     const handleSave = async (): Promise<void> => {
+      resetUiErrors();
+      clearHiddenFields();
+      contactForm.contactType = contactType.value;
+
+      uiErrors.documents = validateDocumentsPresence();
+
+      const payload = buildPayloadToValidate();
+      setValues(payload);
+      const { valid } = await validate();
+
+      if (
+        !valid ||
+        uiErrors.documents.some(
+          (r) => r.country !== undefined || r.category !== undefined || r.number !== undefined,
+        )
+      ) {
+        mapVeeValidateErrorsToUI();
+        return;
+      }
+
       uiStore.startLoading();
       try {
-        clearHiddenFields();
-        contactForm.contactType = contactType.value;
         if (contact.value) {
           await contactsStore.updateContactFields(contact.value.id, contact.value, contactForm);
         } else {
@@ -337,26 +534,60 @@ export default defineComponent({
     watch(contactType, () => {
       activeTab.value = '0';
       activePanel.value = null;
+      resetUiErrors();
     });
+
+    watch(
+      () => [contactForm.name, contactForm.firstname],
+      () => {
+        if (uiErrors.general.name !== undefined) {
+          delete uiErrors.general.name;
+        }
+      },
+    );
+
+    watch(
+      () => contactForm.saleChannel,
+      () => {
+        if (uiErrors.general.saleChannelId !== undefined) {
+          delete uiErrors.general.saleChannelId;
+        }
+      },
+    );
+
+    watch(
+      () => contactForm.documents,
+      () => {
+        if (uiErrors.documents.length) {
+          uiErrors.documents = [];
+        }
+      },
+      { deep: true },
+    );
 
     onBeforeMount(async () => {
       uiStore.startLoading();
       contact.value = dialogRef?.value?.data.contact as ContactDetail | null;
       try {
-        await documentTypesStore.fetchDocumentTypes();
-        await documentTypesStore.fetchFiscalDocumentTypes();
-        await countriesStore.fetchCountries();
-        await paymentTermsStore.fetchPaymentTerms();
-        await pricelistStore.fetchPricelists();
-        await tagsStore.fetchTags();
+        await Promise.all([
+          documentTypesStore.fetchDocumentTypes(),
+          documentTypesStore.fetchFiscalDocumentTypes(),
+          countriesStore.fetchCountries(),
+          paymentTermsStore.fetchPaymentTerms(),
+          pricelistStore.fetchPricelists(),
+          saleChannelsStore.fetchSaleChannels(),
+          tagsStore.fetchTags(),
+        ]);
+
         if (contact.value) {
-          contactType.value = contact.value.contactType ?? 'person';
+          contactType.value = (contact.value.contactType ?? 'person') as typeof contactType.value;
           Object.assign(contactForm, contact.value);
+
           if (contact.value.birthdate) {
             contactForm.birthdate = new Date(contact.value.birthdate);
             contact.value.birthdate = new Date(contact.value.birthdate);
           }
-          if (contact.value.lang !== null && contact.value.lang !== undefined) {
+          if (contact.value.lang !== undefined) {
             contactForm.lang = contact.value.lang.replace('_', '-');
           }
         }
@@ -370,15 +601,18 @@ export default defineComponent({
     return {
       contactType,
       contactTypeOptions,
+      isPerson,
       contactForm,
       contact,
       activePanel,
       activeTab,
-      contactsStoreSchema,
       isDesktop,
+      uiErrors,
+      badges,
       t,
       handleCancel,
       handleSave,
+      mergeIntoForm,
     };
   },
 });
@@ -419,13 +653,21 @@ export default defineComponent({
   .footer {
     background: #fff;
     width: 100%;
-    .buttons {
-      padding-top: 1.5rem;
-      padding-right: 1.5rem;
+    display: flex;
+    align-items: center;
+    padding-top: 1.5rem;
+    padding-right: 1.5rem;
+    .all-errors {
       display: flex;
-      justify-content: flex-end;
+      align-items: center;
       gap: 0.5rem;
-      width: 100%;
+      color: #b91c1c;
+      margin-right: auto;
+      font-size: 12px;
+    }
+    .buttons {
+      display: flex;
+      gap: 0.5rem;
     }
   }
 }
@@ -447,6 +689,11 @@ export default defineComponent({
       height: calc(100% - 56px - 65px);
       overflow-y: auto;
       display: block;
+    }
+    .footer {
+      .all-errors {
+        font-size: 14px;
+      }
     }
   }
   :deep(.p-tabs) {
