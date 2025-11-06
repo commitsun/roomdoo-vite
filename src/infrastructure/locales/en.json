@@ -96,6 +96,9 @@
     "searchByEmail": "Search by email",
     "searchByCountry": "Search by country",
     "vat": "VAT",
+    "passport": "Passport",
+    "residence_card": "Residence card",
+    "other": "Other",
     "totalInvoiced": "Total invoiced",
     "searchByVat": "Search by VAT",
     "selectCountries": "Select Countries",
@@ -135,7 +138,7 @@
     "residenceData": "Residence data",
     "agencyDetails": "Agency details",
     "fiscalAddress": "Fiscal address",
-    "saleChannel": "Sales channel",
+    "saleChannel": "Sale channel",
     "commission": "Commission",
     "useResidenceAddress": "Use residence address",
     "useOtherAddress": "Use other address",
@@ -181,7 +184,17 @@
     "documentNumberPlaceholder": "Enter the document number",
     "supportNumberPlaceholder": "Enter the support number",
     "fiscalDocumentNumberPlaceholder": "Enter the tax document number",
-    "internalNotesPlaceholder": "Enter additional information about the contact..."
+    "internalNotesPlaceholder": "Enter additional information about the contact...",
+    "errors": {
+      "nameRequired": "Name is required",
+      "saleChannelRequiredForAgency": "Sale channel is required for agencies",
+      "documentNumberRequired": "Document number is required",
+      "invalidDni": "The DNI is not valid",
+      "invalidNie": "The NIE is not valid",
+      "countryRequired": "The issue country is required",
+      "documentTypeRequired": "The document type is required",
+      "fieldErrors": "{count} field with error | {count} fields with errors"
+    }
   },
   "userSettings": {
     "replaceImage": "Replace image",

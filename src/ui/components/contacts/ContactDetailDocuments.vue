@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <div class="documents-form__title" v-if="(modelValue.documents?.length ?? 0) > 0">
+    <div class="documents-form__title" v-if="modelValue.documents?.length ?? 0">
       <div class="documents-form__title-text">{{ t('contacts.allDocuments') }}</div>
       <Button
         :label="t('contacts.addDocument')"
@@ -28,8 +28,8 @@
       />
     </div>
     <div
-      v-for="(doc, idx) in modelValue.documents"
-      :key="doc.id ?? `draft-${idx}`"
+      v-for="({ doc, origIdx }, i) in docsView"
+      :key="doc.id ?? `draft-${origIdx}`"
       class="documents-form__group"
     >
       <div class="documents-form__group-grid">
@@ -38,11 +38,11 @@
         </div>
 
         <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-country-${idx}`">
+          <label class="documents-form__label" :for="`doc-country-${origIdx}`">
             {{ t('contacts.issueCountry') }} *
           </label>
           <Select
-            :id="`doc-country-${idx}`"
+            :id="`doc-country-${origIdx}`"
             :modelValue="doc.country?.id ?? null"
             :options="[...countries]"
             optionLabel="name"
@@ -50,7 +50,10 @@
             class="documents-form__control"
             :placeholder="t('contacts.select')"
             filter
-            @update:modelValue="(id: string | null) => setDocCountry(idx, id ? Number(id) : null)"
+            :invalid="!!errors[origIdx]?.country"
+            @update:modelValue="
+              (id: string | null) => setDocCountry(origIdx, id ? Number(id) : null)
+            "
           >
             <template #value="{ value }">
               <div v-if="value" class="flex items-center w-full gap-1">
@@ -74,48 +77,82 @@
               </div>
             </template>
           </Select>
+          <Message
+            v-if="errors[origIdx]?.country"
+            size="small"
+            severity="error"
+            variant="simple"
+            class="mt-2"
+          >
+            {{ t(errors[origIdx]?.country) }}
+          </Message>
         </div>
 
         <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-type-${idx}`">
+          <label class="documents-form__label" :for="`doc-type-${origIdx}`">
             {{ t('contacts.documentType') }} *
           </label>
           <Select
-            :id="`doc-type-${idx}`"
+            :id="`doc-type-${origIdx}`"
             :modelValue="doc.category?.id ?? null"
             :options="[...docTypesFor(doc)]"
             optionLabel="name"
             optionValue="id"
             class="documents-form__control"
             :placeholder="t('contacts.select')"
-            @update:modelValue="(id: number | null) => setDocCategory(idx, id as number | null)"
+            @update:modelValue="(id: number | null) => setDocCategory(origIdx, id as number | null)"
             :disabled="!doc.country?.id"
+            :invalid="!!errors[origIdx]?.category"
           />
-          <div v-if="!doc.country?.id" class="documents-form__doc-type-info">
-            <Info :size="14" />
-            {{ t('contacts.selectCountryFirst') }}
+          <div
+            class="flex mt-2 gap-1 items-center"
+            v-if="!doc.country?.id && !errors[origIdx]?.category"
+          >
+            <Info :size="13" color="#2563eb" />
+            <Message size="small" severity="info" variant="simple">
+              {{ t('contacts.selectCountryFirst') }}
+            </Message>
           </div>
+          <Message
+            v-if="errors[origIdx]?.category"
+            size="small"
+            severity="error"
+            variant="simple"
+            class="mt-2"
+          >
+            {{ t(errors[origIdx]?.category) }}
+          </Message>
         </div>
 
         <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-number-${idx}`">
+          <label class="documents-form__label" :for="`doc-number-${origIdx}`">
             {{ t('contacts.documentNumber') }} *
           </label>
           <InputText
-            :id="`doc-number-${idx}`"
+            :id="`doc-number-${origIdx}`"
             v-model="doc.name"
             class="documents-form__control"
             autocomplete="off"
             :placeholder="t('contacts.documentNumberPlaceholder')"
+            :invalid="!!errors[origIdx]?.number"
           />
+          <Message
+            v-if="errors[origIdx]?.number"
+            size="small"
+            severity="error"
+            variant="simple"
+            class="mt-2"
+          >
+            {{ t(errors[origIdx]?.number) }}
+          </Message>
         </div>
 
         <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-support-${idx}`">
+          <label class="documents-form__label" :for="`doc-support-${origIdx}`">
             {{ t('contacts.supportNumber') }}
           </label>
           <InputText
-            :id="`doc-support-${idx}`"
+            :id="`doc-support-${origIdx}`"
             v-model="doc.supportNumber"
             class="documents-form__control"
             autocomplete="off"
@@ -129,7 +166,7 @@
             icon="pi pi-trash"
             text
             severity="secondary"
-            @click="removeDraftsOrDelete(idx)"
+            @click="removeDraftsOrDelete(origIdx)"
           />
         </div>
       </div>
@@ -143,6 +180,7 @@ import { useI18n } from 'vue-i18n';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import Message from 'primevue/message';
 import { IdCard, Info } from 'lucide-vue-next';
 import CountryFlag from 'vue-country-flag-next';
 
@@ -156,6 +194,7 @@ export default defineComponent({
     Select,
     InputText,
     Button,
+    Message,
     IdCard,
     Info,
     CountryFlag,
@@ -165,8 +204,12 @@ export default defineComponent({
       type: Object as PropType<ContactDetail>,
       required: true,
     },
+    errors: {
+      type: Array as PropType<Array<{ country?: string; category?: string; number?: string }>>,
+      default: () => [],
+    },
   },
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'deleteDocumentId'],
   setup(props, { emit }) {
     const { t } = useI18n();
     const countriesStore = useCountriesStore();
@@ -183,6 +226,14 @@ export default defineComponent({
 
     const hasDraftDoc = computed(() => (props.modelValue.documents ?? []).some((d) => !d.id));
 
+    const docsView = computed(() => {
+      const docs = props.modelValue.documents ?? [];
+      return docs
+        .map((doc, origIdx) => ({ doc, origIdx }))
+        .slice()
+        .reverse();
+    });
+
     const patchDocuments = (
       updater: (
         docs: NonNullable<ContactDetail['documents']>,
@@ -194,23 +245,20 @@ export default defineComponent({
     };
 
     const startAddDocument = (): void => {
-      if (hasDraftDoc.value) {
-        return;
-      }
       patchDocuments((docs) => [
         ...docs,
         {
           id: 0,
           name: '',
           supportNumber: '',
-          category: { id: 0, name: '', code: '', countries: [] },
+          category: { id: 0, name: '', code: '', countries: [], isValidableDocument: false },
           country: { id: 0, name: '', code: '' },
         },
       ]);
     };
 
-    const removeDraftsOrDelete = (idx: number): void => {
-      patchDocuments((docs) => docs.filter((_, i): boolean => i !== idx || Boolean(docs[i].id)));
+    const removeDraftsOrDelete = (origIdx: number): void => {
+      patchDocuments((docs) => docs.filter((_, i) => i !== origIdx));
     };
 
     const setDocCountry = (idx: number, id: number | null): void => {
@@ -224,7 +272,13 @@ export default defineComponent({
     };
 
     const setDocCategory = (idx: number, id: number | null): void => {
-      const defaultCategory = { id: 0, name: '', code: '', countries: [] };
+      const defaultCategory = {
+        id: 0,
+        name: '',
+        code: '',
+        countries: [],
+        isValidableDocument: false,
+      };
       const catRaw = documentTypes.value.find((c) => c.id === id) ?? defaultCategory;
       const cat = { ...catRaw, countries: [...catRaw.countries] };
       patchDocuments((docs) => {
@@ -252,6 +306,7 @@ export default defineComponent({
       documentTypes,
       countryById,
       hasDraftDoc,
+      docsView,
       startAddDocument,
       removeDraftsOrDelete,
       setDocCountry,
@@ -334,15 +389,6 @@ export default defineComponent({
       width: 100%;
     }
   }
-  &__doc-type-info {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 4px;
-    color: #2563eb;
-    font-size: 12px;
-  }
-
   &__actions {
     display: flex;
     justify-content: space-between;
@@ -419,9 +465,6 @@ export default defineComponent({
     &__field--full,
     &__cancel {
       grid-column: 1 / -1;
-    }
-    &__doc-type-info {
-      font-size: 14px;
     }
   }
 }

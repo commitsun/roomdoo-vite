@@ -95,6 +95,9 @@
     "searchByEmail": "Buscar por email",
     "searchByCountry": "Buscar por país",
     "vat": "NIF/CIF",
+    "passport": "Pasaporte",
+    "residence_card": "Tarjeta de residencia",
+    "other": "Otro",
     "totalInvoiced": "Total facturado",
     "searchByVat": "Buscar por NIF/CIF",
     "selectCountries": "Seleccionar países",
@@ -181,7 +184,17 @@
     "documentNumberPlaceholder": "Introduce el número de documento",
     "supportNumberPlaceholder": "Introduce el número de soporte",
     "fiscalDocumentNumberPlaceholder": "Introduce el número de documento fiscal",
-    "internalNotesPlaceholder": "Escriba información adicional sobre el contacto"
+    "internalNotesPlaceholder": "Escriba información adicional sobre el contacto",
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "saleChannelRequiredForAgency": "El canal de venta es obligatorio para agencias",
+      "documentNumberRequired": "El número de documento es obligatorio",
+      "invalidDni": "El DNI no es válido",
+      "invalidNie": "El NIE no es válido",
+      "countryRequired": "El país de emisión es obligatorio",
+      "documentTypeRequired": "El tipo de documento es obligatorio",
+      "fieldErrors": "{count} campo con error | {count} campos con errores"
+    }
   },
   "userSettings": {
     "replaceImage": "Reemplazar foto",
