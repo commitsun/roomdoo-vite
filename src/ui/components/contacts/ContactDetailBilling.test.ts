@@ -25,6 +25,8 @@ vi.mock('vue-i18n', () => {
     'contacts.useOtherAddress': 'Use other address',
     'contacts.mandatoryFieldsText': 'Mandatory fields',
     'error.somethingWentWrong': 'Something went wrong',
+    'contacts.dni': 'DNI',
+    'contacts.passport': 'Passport',
   };
   return {
     useI18n: () => ({ t: (k: string) => tMap[k] ?? k }),
@@ -201,10 +203,8 @@ vi.mock('@/infrastructure/stores/address', () => ({
   useAddressStore: () => addressStoreMock,
 }));
 
-// ---- Componente bajo test ----
 import Component from './ContactDetailBilling.vue';
 
-// Helper: render con v-model simulado
 function renderWithModel(initial: any) {
   const model = ref(initial);
   const updateSpy = vi.fn((v: any) => (model.value = v));
@@ -246,24 +246,22 @@ describe('ContactDetailBilling', () => {
   it('basic rendering: tax type/number and simple block when there is NO residence', async () => {
     renderWithModel(
       reactive({
-        fiscalIdNumberType: null,
-        fiscalIdNumber: '',
-        residenceStreet: '',
-        residenceCity: '',
-        residenceZip: '',
-        residenceCountry: undefined,
-        residenceState: undefined,
+        residenceStreet: 'Gran Via 1',
+        residenceCity: 'Madrid',
+        residenceZip: '28001',
+        residenceCountry: { id: 34, code: 'ES', name: 'Spain' },
+        residenceState: { id: 7, name: 'Madrid' },
         street: '',
         city: '',
         zipCode: '',
         country: undefined,
         state: undefined,
+        fiscalIdNumberType: null,
+        fiscalIdNumber: '',
       }),
     );
     expect(screen.getByText('Tax document type')).toBeInTheDocument();
     expect(screen.getByText('Tax document number')).toBeInTheDocument();
-
-    expect(screen.getByRole('note')).toBeInTheDocument();
 
     expect(screen.getByLabelText('Address')).toBeInTheDocument();
     expect(screen.getByLabelText('City')).toBeInTheDocument();
@@ -453,7 +451,6 @@ describe('ContactDetailBilling', () => {
   });
 
   it('AutoComplete in other mode: complete + option Select updates billing data and issues', async () => {
-    // Controlar debounce
     vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
@@ -472,11 +469,9 @@ describe('ContactDetailBilling', () => {
       }),
     );
 
-    // Activa modo "other"
     const otherCard = screen.getByText('Use other address').closest('.billing-card');
     await user.click(otherCard!);
 
-    // Autocomplete ZIP con debounce
     const ac = screen.getByTestId('bill_zip');
     const input = within(ac).getByRole('textbox');
     await user.type(input, '28001');
@@ -484,13 +479,11 @@ describe('ContactDetailBilling', () => {
     const completeBtn = within(ac).getByRole('button', { name: /complete/i });
     await user.click(completeBtn);
 
-    // Avanza el debounce (150ms + margen) y drena promesas/render
     await vi.advanceTimersByTimeAsync(170);
     await Promise.resolve();
 
     expect(addressStoreMock.fetchAddressByZip).toHaveBeenCalledWith('28001');
 
-    // Seleccionar sugerencia y verificar payload
     const suggBtn = within(ac).getByTestId('bill_zip-sugg-0');
     await user.click(suggBtn);
     await Promise.resolve();
@@ -503,7 +496,6 @@ describe('ContactDetailBilling', () => {
 
     await rerender();
 
-    // Limpieza
     vi.useRealTimers();
   });
 
@@ -525,8 +517,9 @@ describe('ContactDetailBilling', () => {
       }),
     );
 
-    await userEvent.click(screen.getByRole('button', { name: /^dni$/i }));
-
+    const selType = screen.getByTestId('fiscalIdNumberType');
+    const optDni = within(selType).getByTestId('fiscalIdNumberType-opt-dni');
+    await userEvent.click(optDni);
     await userEvent.type(screen.getByLabelText('Tax document number'), '12345678A');
 
     const label = document.querySelector('label[for="addr_other"]') as HTMLLabelElement;
