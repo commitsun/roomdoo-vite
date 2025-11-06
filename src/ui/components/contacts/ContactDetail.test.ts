@@ -6,6 +6,7 @@ import { createTestingPinia } from '@pinia/testing';
 // eslint-disable-next-line import/order
 import { ref } from 'vue';
 
+// ---- Mocks i18n ----
 vi.mock('vue-i18n', () => {
   const tMap: Record<string, string> = {
     'contacts.person': 'Person',
@@ -27,12 +28,28 @@ vi.mock('vue-i18n', () => {
   };
 });
 
+// ---- Mock responsive (desktop/mobile) ----
 const desktopFlag = ref<boolean>(true);
 vi.mock('@vueuse/core', () => ({
   useMediaQuery: vi.fn(() => desktopFlag),
   __setDesktop: (v: boolean) => (desktopFlag.value = v),
 }));
 
+// ---- Mock vee-validate para que no bloquee por validación ----
+vi.mock('vee-validate', () => {
+  return {
+    useForm: () => ({
+      validate: vi.fn().mockResolvedValue({ valid: true }),
+      setValues: vi.fn(),
+      errors: { value: {} as Record<string, string> },
+    }),
+  };
+});
+vi.mock('@vee-validate/zod', () => ({
+  toTypedSchema: (s: unknown) => s,
+}));
+
+// ---- Stubs UI ----
 export const SelectButtonStub = {
   name: 'SelectButton',
   props: ['modelValue', 'options', 'allowEmpty', 'optionLabel', 'optionValue'],
@@ -131,6 +148,7 @@ export const ButtonStub = {
   `,
 };
 
+// ---- Stubs hijos (mockeados con emisión de update:modelValue) ----
 export const ContactDetailGeneralDataStub = {
   name: 'ContactDetailGeneralData',
   template: `<div data-testid="general-data"></div>`,
@@ -151,6 +169,7 @@ export const ContactDetailInternalNotesStub = {
   template: `<div data-testid="internal-notes"></div>`,
 };
 
+// ---- Iconos stubs (no funcionales) ----
 export const UserIconStub = { name: 'User', template: `<i class="icon-user"></i>` };
 export const BuildingIconStub = { name: 'Building', template: `<i class="icon-building"></i>` };
 export const StoreIconStub = { name: 'Store', template: `<i class="icon-store"></i>` };
@@ -160,6 +179,7 @@ export const BanknoteIconStub = { name: 'Banknote', template: `<i class="icon-ba
 export const NotebookPenIconStub = { name: 'NotebookPen', template: `<i class="icon-notes"></i>` };
 export const BookUserIconStub = { name: 'BookUser', template: `<i class="icon-bookuser"></i>` };
 
+// ---- Hijos reales mockeados con inputs que emiten cambios ----
 vi.mock('./ContactDetailGeneralData.vue', () => ({
   default: {
     name: 'ContactDetailGeneralData',
@@ -181,41 +201,49 @@ vi.mock('./ContactDetailDocuments.vue', () => ({
     name: 'ContactDetailDocuments',
     data: () => ({
       docName: '',
-      catId: '9',
-      countryId: '34',
+      catId: '9', // 9 = DNI, 5 = Passport (como en tus <option>)
+      countryId: '34', // Spain
       support: '',
     }),
+    methods: {
+      catObj(catId: string): { id: number; name: string; code: string; countries: any[] } {
+        const id = Number(catId);
+        if (id === 5) {
+          // cuando el test selecciona 5 -> PASSPORT
+          return { id, name: 'passport', code: 'passport', countries: [] };
+        }
+        // por defecto -> DNI
+        return { id, name: 'dni', code: 'dni', countries: [] };
+      },
+      emitAll(this: any) {
+        this.$emit('update:modelValue', {
+          documents: [
+            {
+              id: 0,
+              name: this.docName,
+              category: this.catObj(this.catId), // <- usa passport/dni según catId
+              country: { id: Number(this.countryId), name: 'Spain', code: 'ES' },
+              supportNumber: this.support,
+            },
+          ],
+        });
+      },
+    },
     template: `
       <div data-testid="documents">
         <label for="doc-name">Doc name</label>
         <input id="doc-name" aria-label="Document name"
           v-model="docName"
           placeholder="document name"
-          @input="$emit('update:modelValue', {
-            documents: [{
-              id: 0,
-              name: docName,
-              category: { id: Number(catId), name: 'DNI', code: 'D', countries: [] },
-              country: { id: Number(countryId), name: 'Spain', code: 'ES' },
-              supportNumber: support
-            }]
-          })"
+          @input="emitAll"
         />
 
         <label for="doc-cat">Category</label>
         <select id="doc-cat" aria-label="Document category"
           v-model="catId"
           placeholder="document category"
-          @change="$emit('update:modelValue', {
-            documents: [{
-              id: 0,
-              name: docName,
-              category: { id: Number(catId), name: 'DNI', code: 'D', countries: [] },
-              country: { id: Number(countryId), name: 'Spain', code: 'ES' },
-              supportNumber: support
-              }]
-            })"
-          >
+          @change="emitAll"
+        >
           <option value="9">DNI</option>
           <option value="5">Passport</option>
         </select>
@@ -224,16 +252,8 @@ vi.mock('./ContactDetailDocuments.vue', () => ({
         <select id="doc-country" aria-label="Document country"
           v-model="countryId"
           placeholder="document country"
-          @change="$emit('update:modelValue', {
-            documents: [{
-              id: 0,
-              name: docName,
-              category: { id: Number(catId), name: 'DNI', code: 'D', countries: [] },
-              country: { id: Number(countryId), name: 'Spain', code: 'ES' },
-              supportNumber: support
-              }]
-            })"
-          >
+          @change="emitAll"
+        >
           <option value="34">Spain</option>
           <option value="33">UK</option>
         </select>
@@ -242,15 +262,7 @@ vi.mock('./ContactDetailDocuments.vue', () => ({
         <input id="doc-support" aria-label="Support number"
           placeholder="support number"
           v-model="support"
-          @input="$emit('update:modelValue', {
-            documents: [{
-              id: 0,
-              name: docName,
-              category: { id: Number(catId), name: 'DNI', code: 'D', countries: [] },
-              country: { id: Number(countryId), name: 'Spain', code: 'ES' },
-              supportNumber: support
-            }]
-          })"
+          @input="emitAll"
         />
       </div>
     `,
@@ -291,6 +303,7 @@ vi.mock('./ContactDetailInternalNotes.vue', () => ({
   },
 }));
 
+// ---- Stores mocks ----
 const fetches = {
   fetchDocumentTypes: vi.fn().mockResolvedValue(undefined),
   fetchFiscalDocumentTypes: vi.fn().mockResolvedValue(undefined),
@@ -347,6 +360,7 @@ import * as vueuse from '@vueuse/core';
 
 import Component from './ContactDetail.vue';
 
+// ---- Helper render ----
 const renderWith = (opts: { provideDialog?: any } = {}) => {
   const pinia = createTestingPinia();
 
@@ -378,6 +392,7 @@ const renderWith = (opts: { provideDialog?: any } = {}) => {
   });
 };
 
+// ---- Tests ----
 describe('ContactDetailDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -401,7 +416,6 @@ describe('ContactDetailDialog', () => {
     expect(screen.getByText('Documents')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Company' }));
-
     expect(screen.queryByText('Documents')).not.toBeInTheDocument();
   });
 
@@ -412,7 +426,6 @@ describe('ContactDetailDialog', () => {
     expect(screen.getByText('Documents')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Agency' }));
-
     expect(screen.queryByText('Documents')).not.toBeInTheDocument();
   });
 
@@ -440,7 +453,7 @@ describe('ContactDetailDialog', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1));
     expect(contactsStoreMock.updateContactFields).not.toHaveBeenCalled();
     expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved' });
   });
@@ -462,7 +475,7 @@ describe('ContactDetailDialog', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1));
     const args = (contactsStoreMock.updateContactFields as any).mock.calls[0];
     expect(args[0]).toBe(123);
     expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved' });
@@ -552,6 +565,7 @@ describe('ContactDetailDialog', () => {
       );
     });
   });
+
   it('hydrate contactForm from dialogRef: birthdate -> Date and lang with hyphen', async () => {
     const dialogRef = ref<{ close: (p?: unknown) => void; data: any }>({
       close: vi.fn(),
@@ -571,7 +585,7 @@ describe('ContactDetailDialog', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /save/i }));
 
-    expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1));
     const [, , updated] = (contactsStoreMock.updateContactFields as any).mock.calls[0];
 
     expect(updated.birthdate).toBeInstanceOf(Date);
@@ -589,7 +603,7 @@ describe('ContactDetailDialog', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Agency' }));
     await userEvent.click(screen.getByRole('button', { name: /save/i }));
 
-    expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1));
     const args = (contactsStoreMock.updateContactFields as any).mock.calls[0];
     const updated = args[2];
     expect(updated.contactType).toBe('agency');
@@ -697,9 +711,11 @@ describe('ContactDetailDialog', () => {
       }),
     );
   });
+
   it('merging changes from GeneralData, Documents, Billing, InternalNotes and sends them in createContact in mobile', async () => {
     (vueuse as any).__setDesktop(false);
     renderWith();
+
     const firstInput = screen.getByPlaceholderText('first name');
     await userEvent.type(firstInput, 'Bob');
 
@@ -719,28 +735,37 @@ describe('ContactDetailDialog', () => {
     const supportInput = screen.getByPlaceholderText('support number');
     await userEvent.type(supportInput, 'SN-1');
 
-    await userEvent.click(screen.getByRole('button', { name: /save/i }));
-
+    // escribe también las notas antes de guardar
     const notesInput = screen.getByPlaceholderText('internal notes');
     await userEvent.type(notesInput, 'Notes here');
 
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
     await waitFor(() => {
       expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1);
-      const payload = (contactsStoreMock.createContact as any).mock.calls[0][0];
-
-      expect(Array.isArray(payload.documents)).toBe(true);
-      expect(payload.documents).toHaveLength(1);
-      expect(payload.documents[0]).toEqual(
-        expect.objectContaining({
-          id: 0,
-          name: 'ABC123',
-          category: expect.objectContaining({ id: 5 }),
-          country: expect.objectContaining({ id: 34 }),
-          supportNumber: 'SN-1',
-        }),
-      );
     });
+    const payload = (contactsStoreMock.createContact as any).mock.calls[0][0];
+
+    expect(Array.isArray(payload.documents)).toBe(true);
+    expect(payload.documents).toHaveLength(1);
+    expect(payload).toEqual(
+      expect.objectContaining({
+        firstname: 'Bob',
+        fiscalIdNumber: 'Y789',
+        internalNotes: 'Notes here',
+      }),
+    );
+    expect(payload.documents[0]).toEqual(
+      expect.objectContaining({
+        id: 0,
+        name: 'ABC123',
+        category: expect.objectContaining({ id: 5 }),
+        country: expect.objectContaining({ id: 34 }),
+        supportNumber: 'SN-1',
+      }),
+    );
   });
+
   it('v-model Tabs: updates activeTab when child emits update:value', async () => {
     (vueuse as any).__setDesktop(true);
     renderWith();

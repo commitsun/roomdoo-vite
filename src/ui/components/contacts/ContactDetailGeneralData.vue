@@ -7,27 +7,53 @@
       </h1>
     </div>
     <div class="personal-data-form__grid">
-      <!-- First Name (full width) -->
+      <!-- First Name (full width) (only for person) -->
       <div
         class="personal-data-form__field"
         :class="{ 'personal-data-form__field--full': contactType === 'person' }"
+        v-if="contactType === 'person'"
       >
         <label class="personal-data-form__label" for="firstName">
-          {{ contactType === 'person' ? t('contacts.firstName') : t('contacts.fiscalName') }} *
+          {{ t('contacts.firstName') }} *
         </label>
         <InputText
           id="firstName"
           v-model="modelValue.firstname"
           class="personal-data-form__control"
           :placeholder="t('contacts.firstNamePlaceholder')"
+          :invalid="!!errors.name"
         />
+        <Message v-if="errors.name" size="small" severity="error" variant="simple" class="mt-2">
+          {{ t(errors.name) }}
+        </Message>
       </div>
-      <!-- Trade Name (Company and agency)  -->
-      <div class="personal-data-form__field" v-if="contactType !== 'person'">
-        <label class="personal-data-form__label" for="tradeName">
-          {{ t('contacts.tradeName') }} *
+      <!--  Name (full width) (company and agency) -->
+      <div
+        class="personal-data-form__field"
+        :class="{ 'personal-data-form__field--full': !showComercialName }"
+        v-else
+      >
+        <label class="personal-data-form__label" for="name">
+          {{ t('contacts.fiscalName') }} *
         </label>
         <InputText
+          id="name"
+          v-model="modelValue.name"
+          class="personal-data-form__control"
+          :placeholder="t('contacts.firstNamePlaceholder')"
+          :invalid="!!errors.name"
+        />
+        <Message v-if="errors.name" size="small" severity="error" variant="simple" class="mt-2">
+          {{ t(errors.name) }}
+        </Message>
+      </div>
+      <!-- Trade Name (Company and agency)  -->
+      <div class="personal-data-form__field" v-if="showComercialName">
+        <label class="personal-data-form__label" for="tradeName">
+          {{ t('contacts.tradeName') }}
+        </label>
+        <InputText
+          v-model="modelValue.comercial"
           id="tradeName"
           class="personal-data-form__control"
           :placeholder="t('contacts.firstNamePlaceholder')"
@@ -354,21 +380,41 @@
         </h1>
       </div>
       <div class="personal-data-form__field" v-if="contactType === 'agency'">
-        <label class="personal-data-form__label" for="saleChannel">{{
-          t('contacts.saleChannel')
-        }}</label>
+        <label class="personal-data-form__label" for="saleChannel"
+          >{{ t('contacts.saleChannel') }} *</label
+        >
         <Select
+          :modelValue="modelValue.saleChannel?.id ?? null"
           id="saleChannel"
-          :options="[]"
+          :options="[...saleChannels]"
+          optionLabel="name"
+          optionValue="id"
           class="personal-data-form__control"
           :placeholder="t('contacts.select')"
+          :invalid="!!errors.saleChannelId"
+          @update:modelValue="
+            (id: number | null) => {
+              const sc = saleChannels.find((sc) => sc.id === id);
+              $emit('update:modelValue', { ...modelValue, saleChannel: sc || undefined });
+            }
+          "
         />
+        <Message
+          v-if="errors.saleChannelId"
+          size="small"
+          severity="error"
+          variant="simple"
+          class="mt-2"
+        >
+          {{ t(errors.saleChannelId) }}
+        </Message>
       </div>
       <div class="personal-data-form__field" v-if="contactType === 'agency'">
         <label class="personal-data-form__label" for="commission">
           {{ t('contacts.commission') }}
         </label>
         <InputNumber
+          v-model="modelValue.defaultCommission"
           inputId="commission"
           suffix="%"
           placeholder="%"
@@ -397,6 +443,7 @@ import { useDebounceFn } from '@vueuse/core';
 
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
+import { useSaleChannelsStore } from '@/infrastructure/stores/saleChannels';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
@@ -421,6 +468,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    errors: {
+      type: Object as PropType<{ name?: string; saleChannelId?: string }>,
+      default: () => ({}),
+    },
   },
   components: {
     IftaLabel,
@@ -441,6 +492,7 @@ export default defineComponent({
     const contactsStore = useContactsStore();
     const instanceStore = useInstanceStore();
     const addressStore = useAddressStore();
+    const saleChannelsStore = useSaleChannelsStore();
     const uiStore = useUIStore();
     const textMessageStore = useTextMessagesStore();
     const phoneNumber = ref('');
@@ -450,10 +502,18 @@ export default defineComponent({
     const countries = computed(() => countriesStore.countries);
     const contactsStoreSchema = computed(() => contactsStore.contactSchema);
     const languages = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
+    const saleChannels = computed(() =>
+      saleChannelsStore.saleChannels.filter((sc) => sc.type === 'indirect'),
+    );
     const showLastName2 = computed(
       () =>
         props.contactType === 'person' &&
         (contactsStoreSchema.value?.fields ?? []).includes('lastname2'),
+    );
+    const showComercialName = computed(
+      () =>
+        props.contactType !== 'person' &&
+        (contactsStoreSchema.value?.fields ?? []).includes('comercial_name'),
     );
     const isValidDate = (d: unknown): d is Date =>
       d instanceof Date && Number.isFinite(d.getTime());
@@ -603,10 +663,12 @@ export default defineComponent({
       genders,
       countryById,
       countryStates,
+      saleChannels,
       phoneNumber,
       mobileNumber,
       sameFiscalAndResidenceAddress,
       addressItems,
+      showComercialName,
       fetchAddressByZip,
       t,
     };
