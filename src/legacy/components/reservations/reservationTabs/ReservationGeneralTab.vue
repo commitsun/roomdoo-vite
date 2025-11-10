@@ -533,6 +533,7 @@ export default defineComponent({
               closable: true,
               props: {
                 template: bodyMail.value,
+                stateReservation: currentReservation.value?.stateCode,
                 defaultSubject: subject.value,
               },
             });
