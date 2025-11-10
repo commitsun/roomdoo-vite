@@ -1,3 +1,4 @@
+// ContactDetailBilling.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
@@ -117,11 +118,6 @@ const AutoCompleteStub = defineComponent({
     complete() {
       this.$emit('complete', { query: this.q });
     },
-    selectFirst() {
-      if ((this.suggestions ?? []).length > 0) {
-        this.$emit('optionSelect', { value: this.suggestions[0] });
-      }
-    },
   },
   template: `
     <div :data-testid="$attrs.id">
@@ -205,14 +201,34 @@ vi.mock('@/infrastructure/stores/address', () => ({
 
 import Component from './ContactDetailBilling.vue';
 
-function renderWithModel(initial: any) {
-  const model = ref(initial);
-  const updateSpy = vi.fn((v: any) => (model.value = v));
+// ---- Helper :  ----
+function renderWithModels(
+  initialModel: any,
+  initialBilling: any = {
+    street: '',
+    city: '',
+    zipCode: '',
+    country: undefined,
+    state: undefined,
+  },
+  initialMode: 'residence' | 'other' = 'residence',
+) {
+  const model = ref(initialModel);
+  const billing = ref(initialBilling);
+  const mode = ref<'residence' | 'other'>(initialMode);
+
+  const onUpdateModel = vi.fn((v: any) => (model.value = v));
+  const onUpdateBilling = vi.fn((v: any) => (billing.value = v));
+  const onUpdateMode = vi.fn((v: 'residence' | 'other') => (mode.value = v));
 
   const utils = render(Component, {
     props: {
       modelValue: model.value,
-      'onUpdate:modelValue': updateSpy,
+      'onUpdate:modelValue': onUpdateModel,
+      billingAddress: billing.value,
+      'onUpdate:billingAddress': onUpdateBilling,
+      billingAddressMode: mode.value,
+      onUpdateBillingAddressMode: onUpdateMode,
     } as any,
     global: {
       plugins: [createTestingPinia()],
@@ -231,11 +247,24 @@ function renderWithModel(initial: any) {
   const rerender = async () => {
     await utils.rerender({
       modelValue: model.value,
-      'onUpdate:modelValue': updateSpy,
+      'onUpdate:modelValue': onUpdateModel,
+      billingAddress: billing.value,
+      'onUpdate:billingAddress': onUpdateBilling,
+      billingAddressMode: mode.value,
+      onUpdateBillingAddressMode: onUpdateMode,
     } as any);
   };
 
-  return { ...utils, model, updateSpy, rerender };
+  return {
+    ...utils,
+    model,
+    billing,
+    mode,
+    onUpdateModel,
+    onUpdateBilling,
+    onUpdateMode,
+    rerender,
+  };
 }
 
 describe('ContactDetailBilling', () => {
@@ -243,14 +272,14 @@ describe('ContactDetailBilling', () => {
     vi.clearAllMocks();
   });
 
-  it('basic rendering: tax type/number and simple block when there is NO residence', async () => {
-    renderWithModel(
+  it('render simple block (without residence) and basic fields', async () => {
+    renderWithModels(
       reactive({
-        residenceStreet: 'Gran Via 1',
-        residenceCity: 'Madrid',
-        residenceZip: '28001',
-        residenceCountry: { id: 34, code: 'ES', name: 'Spain' },
-        residenceState: { id: 7, name: 'Madrid' },
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
         street: '',
         city: '',
         zipCode: '',
@@ -260,6 +289,7 @@ describe('ContactDetailBilling', () => {
         fiscalIdNumber: '',
       }),
     );
+
     expect(screen.getByText('Tax document type')).toBeInTheDocument();
     expect(screen.getByText('Tax document number')).toBeInTheDocument();
 
@@ -269,12 +299,11 @@ describe('ContactDetailBilling', () => {
     expect(screen.getByText('State')).toBeInTheDocument();
   });
 
-  it('AutoComplete (simple branch): complete calls store and optionSelect outputs zip/city/country/state', async () => {
+  it('AutoComplete (simple): complete + optionSelect fills modelValue', async () => {
     vi.useFakeTimers();
-
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
-    const { updateSpy, rerender, model } = renderWithModel(
+    const { onUpdateModel, rerender, model } = renderWithModels(
       reactive({
         residenceStreet: '',
         residenceCity: '',
@@ -297,7 +326,6 @@ describe('ContactDetailBilling', () => {
     await user.click(completeBtn);
 
     await vi.advanceTimersByTimeAsync(170);
-
     await Promise.resolve();
 
     expect(addressStoreMock.fetchAddressByZip).toHaveBeenCalledWith('28001');
@@ -306,8 +334,7 @@ describe('ContactDetailBilling', () => {
     await user.click(suggBtn);
     await Promise.resolve();
 
-    expect(updateSpy).toHaveBeenCalled();
-    const payload = updateSpy.mock.calls.at(-1)![0];
+    const payload = onUpdateModel.mock.calls.at(-1)![0];
     expect(payload.zipCode).toBe('28001');
     expect(payload.city).toBe('Madrid');
     expect(payload.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
@@ -319,148 +346,110 @@ describe('ContactDetailBilling', () => {
     vi.useRealTimers();
   });
 
-  it('with residence address shows cards and when changing to "other" emits with billingData', async () => {
-    const { updateSpy } = renderWithModel(
+  it('with residence: shows cards and switching to "other" emits updateBillingAddressMode', async () => {
+    const { onUpdateMode, mode, rerender } = renderWithModels(
       reactive({
         residenceStreet: 'Gran Via 1',
         residenceCity: 'Madrid',
         residenceZip: '28001',
         residenceCountry: { id: 34, code: 'ES', name: 'Spain' },
         residenceState: { id: 7, name: 'Madrid' },
+
         street: '',
         city: '',
         zipCode: '',
         country: undefined,
         state: undefined,
       }),
+      { street: '', city: '', zipCode: '', country: undefined, state: undefined },
+      'residence',
     );
 
     expect(screen.getByText('Use residence address')).toBeInTheDocument();
     expect(screen.getByText('Use other address')).toBeInTheDocument();
 
-    const otherCard = screen.getByText('Use other address').closest('.billing-card');
-    await userEvent.click(otherCard!);
+    const otherCard = screen.getByText('Use other address').closest('.billing-card')!;
+    await userEvent.click(otherCard);
+    await rerender();
 
-    const payload = updateSpy.mock.calls.at(-1)![0];
-    expect(payload.street).toBe('');
-    expect(payload.city).toBe('');
-    expect(payload.zipCode).toBe('');
-    expect(payload.country).toBeUndefined();
-    expect(payload.state).toBeUndefined();
+    expect(onUpdateMode).toHaveBeenCalledWith('other');
+    expect(mode.value).toBe('other');
   });
 
-  it('In other mode: edit street/city outputs update:modelValue', async () => {
-    const { updateSpy } = renderWithModel(
+  it('other mode: editing street/city emits update:billingAddress', async () => {
+    const { onUpdateBilling } = renderWithModels(
       reactive({
-        residenceStreet: 'Calle A',
-        residenceCity: 'Sevilla',
-        residenceZip: '41001',
+        residenceStreet: 'R1',
+        residenceCity: 'C1',
+        residenceZip: 'Z1',
         residenceCountry: { id: 34, code: 'ES', name: 'Spain' },
-        residenceState: { id: 8, name: 'Barcelona' },
+        residenceState: { id: 7, name: 'Madrid' },
+
         street: '',
         city: '',
         zipCode: '',
         country: undefined,
         state: undefined,
       }),
+      { street: '', city: '', zipCode: '', country: undefined, state: undefined },
+      'other',
     );
-
-    const otherCard = screen.getByText('Use other address').closest('.billing-card');
-    await userEvent.click(otherCard!);
 
     const street = screen.getByLabelText('Address');
     await userEvent.clear(street);
     await userEvent.type(street, 'Calle Nueva 5');
 
-    let last = updateSpy.mock.calls.at(-1)![0];
+    let last = onUpdateBilling.mock.calls.at(-1)![0];
     expect(last.street).toBe('Calle Nueva 5');
 
     const city = screen.getByLabelText('City');
     await userEvent.clear(city);
     await userEvent.type(city, 'Valencia');
 
-    last = updateSpy.mock.calls.at(-1)![0];
+    last = onUpdateBilling.mock.calls.at(-1)![0];
     expect(last.city).toBe('Valencia');
   });
 
-  it('In other mode: select country emits country and then watch loads states and adjusts state', async () => {
-    const { updateSpy, rerender, model } = renderWithModel(
-      reactive({
-        residenceStreet: 'R1',
-        residenceCity: 'C1',
-        residenceZip: 'Z1',
-        residenceCountry: { id: 33, code: 'GB', name: 'UK' },
-        residenceState: { id: 99, name: 'Any' },
-        street: '',
-        city: '',
-        zipCode: '',
-        country: undefined,
-        state: undefined,
-      }),
-    );
-
-    const otherCard = screen.getByText('Use other address').closest('.billing-card');
-    await userEvent.click(otherCard!);
-
-    const selCountry = screen.getByTestId('bill_country');
-    const btnES = within(selCountry).getByTestId('bill_country-opt-34');
-    await userEvent.click(btnES);
-
-    const payload1 = updateSpy.mock.calls.at(-1)![0];
-    expect(payload1.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
-
-    await rerender();
-
-    expect(uiStoreMock.startLoading).toHaveBeenCalled();
-    expect(countryStatesStoreMock.fetchCountryStatesByCountryId).toHaveBeenCalledWith(34);
-    expect(uiStoreMock.stopLoading).toHaveBeenCalled();
-
-    const lastPayload = updateSpy.mock.calls.at(-1)![0];
-    expect(lastPayload.state).toBeUndefined();
-
-    model.value = { ...model.value, state: { id: 7, name: 'Madrid' } };
-    await rerender();
-
-    const finalPayload = updateSpy.mock.calls.at(-1)![0];
-    expect(finalPayload.state).toEqual({ id: 7, name: 'Madrid' });
-  });
-
-  it('onBeforeMount: if billing differs from residence, copy billing to billingData, emit and switch to other', async () => {
-    const { updateSpy } = renderWithModel(
-      reactive({
-        residenceStreet: 'R St',
-        residenceCity: 'R City',
-        residenceZip: 'R Zip',
-        residenceCountry: { id: 33, code: 'GB', name: 'UK' },
-        residenceState: { id: 99, name: 'Any' },
-        street: 'B St',
-        city: 'B City',
-        zipCode: 'B Zip',
-        country: { id: 34, code: 'ES', name: 'Spain' },
-        state: { id: 7, name: 'Madrid' },
-      }),
-    );
-
-    expect(updateSpy).toHaveBeenCalled();
-    const payload = updateSpy.mock.calls.at(-1)![0];
-    expect(payload.street).toBe('B St');
-    expect(payload.city).toBe('B City');
-    expect(payload.zipCode).toBe('B Zip');
-    expect(payload.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
-    expect(payload.state).toEqual({ id: 7, name: 'Madrid' });
-  });
-
-  it('AutoComplete in other mode: complete + option Select updates billing data and issues', async () => {
-    vi.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-
-    const { updateSpy, rerender } = renderWithModel(
+  it('other mode: selecting country updates billingAddress and does not trigger fetch of states (watch listens to modelValue)', async () => {
+    const { onUpdateBilling, rerender } = renderWithModels(
       reactive({
         residenceStreet: 'R',
         residenceCity: 'R',
         residenceZip: 'R',
         residenceCountry: { id: 33, code: 'GB', name: 'UK' },
         residenceState: { id: 99, name: 'Any' },
+
+        street: '',
+        city: '',
+        zipCode: '',
+        country: undefined,
+        state: undefined,
+      }),
+      { street: '', city: '', zipCode: '', country: undefined, state: undefined },
+      'other',
+    );
+
+    const selCountry = screen.getByTestId('bill_country');
+    const btnES = within(selCountry).getByTestId('bill_country-opt-34');
+    await userEvent.click(btnES);
+
+    const payload1 = onUpdateBilling.mock.calls.at(-1)![0];
+    expect(payload1.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
+
+    await rerender();
+
+    expect(countryStatesStoreMock.fetchCountryStatesByCountryId).not.toHaveBeenCalled();
+  });
+
+  it('simple: selecting country emits country object and triggers loading of states', async () => {
+    const { onUpdateModel, rerender, model } = renderWithModels(
+      reactive({
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
+
         street: '',
         city: '',
         zipCode: '',
@@ -469,8 +458,46 @@ describe('ContactDetailBilling', () => {
       }),
     );
 
-    const otherCard = screen.getByText('Use other address').closest('.billing-card');
-    await user.click(otherCard!);
+    const selCountry = screen.getByTestId('country');
+    const btnES = within(selCountry).getByTestId('country-opt-34');
+    await userEvent.click(btnES);
+
+    const objectPayload = onUpdateModel.mock.calls
+      .map((c) => c[0])
+      .find((arg) => Boolean(arg) && typeof arg.country === 'object');
+
+    expect(objectPayload).toBeTruthy();
+    expect(objectPayload!.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
+
+    model.value = objectPayload!;
+    await rerender();
+
+    expect(uiStoreMock.startLoading).toHaveBeenCalled();
+    expect(countryStatesStoreMock.fetchCountryStatesByCountryId).toHaveBeenCalledWith(34);
+    expect(uiStoreMock.stopLoading).toHaveBeenCalled();
+  });
+
+  it('other mode: AutoComplete complete + optionSelect updates billingAddress', async () => {
+    vi.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    const { onUpdateBilling } = renderWithModels(
+      reactive({
+        residenceStreet: 'R',
+        residenceCity: 'R',
+        residenceZip: 'R',
+        residenceCountry: { id: 33, code: 'GB', name: 'UK' },
+        residenceState: { id: 99, name: 'Any' },
+
+        street: '',
+        city: '',
+        zipCode: '',
+        country: undefined,
+        state: undefined,
+      }),
+      { street: '', city: '', zipCode: '', country: undefined, state: undefined },
+      'other',
+    );
 
     const ac = screen.getByTestId('bill_zip');
     const input = within(ac).getByRole('textbox');
@@ -488,116 +515,12 @@ describe('ContactDetailBilling', () => {
     await user.click(suggBtn);
     await Promise.resolve();
 
-    const payload = updateSpy.mock.calls.at(-1)![0];
+    const payload = onUpdateBilling.mock.calls.at(-1)![0];
     expect(payload.zipCode).toBe('28001');
     expect(payload.city).toBe('Madrid');
     expect(payload.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
     expect(payload.state).toEqual({ id: 7, name: 'Madrid' });
-
-    await rerender();
 
     vi.useRealTimers();
-  });
-
-  it('update all v-model fields emits update:modelValue', async () => {
-    const { updateSpy, rerender } = renderWithModel(
-      reactive({
-        fiscalIdNumberType: null,
-        fiscalIdNumber: '',
-        residenceStreet: '',
-        residenceCity: '',
-        residenceZip: '',
-        residenceCountry: undefined,
-        residenceState: undefined,
-        street: '',
-        city: '',
-        zipCode: '',
-        country: undefined,
-        state: undefined,
-      }),
-    );
-
-    const selType = screen.getByTestId('fiscalIdNumberType');
-    const optDni = within(selType).getByTestId('fiscalIdNumberType-opt-dni');
-    await userEvent.click(optDni);
-    await userEvent.type(screen.getByLabelText('Tax document number'), '12345678A');
-
-    const label = document.querySelector('label[for="addr_other"]') as HTMLLabelElement;
-    await userEvent.click(label);
-
-    await userEvent.type(screen.getByLabelText('Address'), 'Calle Falsa 123');
-    await userEvent.type(screen.getByLabelText('City'), 'Springfield');
-
-    await userEvent.click(screen.getByRole('button', { name: /^spain$/i }));
-
-    await rerender();
-
-    const zipInput = screen.getByTestId('bill_zip').querySelector('input')!;
-    await userEvent.type(zipInput, '28001');
-
-    expect(updateSpy).toHaveBeenCalled();
-
-    const payload = updateSpy.mock.calls.at(-1)![0];
-    expect(payload.fiscalIdNumberType).toBe('dni');
-    expect(payload.fiscalIdNumber).toBe('12345678A');
-    expect(payload.street).toBe('Calle Falsa 123');
-    expect(payload.city).toBe('Springfield');
-    expect(payload.country).toEqual(34);
-    expect(payload.zipCode).toBe('28001');
-  });
-  it('billingAddressMode v-model: toggles residence ⇄ other and emits expected payload', async () => {
-    const { updateSpy, rerender, container } = renderWithModel(
-      reactive({
-        residenceStreet: 'Gran Via 1',
-        residenceCity: 'Madrid',
-        residenceZip: '28001',
-        residenceCountry: { id: 34, code: 'ES', name: 'Spain' },
-        residenceState: { id: 7, name: 'Madrid' },
-
-        street: '',
-        city: '',
-        zipCode: '',
-        country: undefined,
-        state: undefined,
-
-        fiscalIdNumberType: null,
-        fiscalIdNumber: '',
-      }),
-    );
-
-    const cards = container.querySelectorAll('.billing-card');
-    const residenceCard = cards[0] as HTMLElement;
-    const otherCard = cards[1] as HTMLElement;
-
-    expect(residenceCard).toHaveClass('billing-card--active');
-    expect(otherCard).not.toHaveClass('billing-card--active');
-
-    await userEvent.click(otherCard);
-    await rerender();
-
-    expect(otherCard).toHaveClass('billing-card--active');
-    expect(residenceCard).not.toHaveClass('billing-card--active');
-
-    expect(updateSpy).toHaveBeenCalled();
-
-    let payload = updateSpy.mock.calls.at(-1)![0];
-    expect(payload.street).toBe('');
-    expect(payload.city).toBe('');
-    expect(payload.zipCode).toBe('');
-    expect(payload.country).toBeUndefined();
-    expect(payload.state).toBeUndefined();
-
-    await userEvent.click(residenceCard);
-    await rerender();
-
-    expect(residenceCard).toHaveClass('billing-card--active');
-    expect(otherCard).not.toHaveClass('billing-card--active');
-
-    payload = updateSpy.mock.calls.at(-1)![0];
-    expect(payload.street).toBe('Gran Via 1');
-    expect(payload.city).toBe('Madrid');
-    expect(payload.zipCode).toBe('28001');
-    expect(payload.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
-    expect(payload.state).toEqual({ id: 7, name: 'Madrid' });
   });
 });

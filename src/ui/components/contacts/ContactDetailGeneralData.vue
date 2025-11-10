@@ -241,7 +241,7 @@
         <h1 class="personal-data-form__title">
           {{ t('contacts.residenceData') }}
         </h1>
-        <Message severity="info" icon="pi pi-info-circle" v-if="sameFiscalAndResidenceAddress">
+        <Message severity="info" icon="pi pi-info-circle" v-if="billingAddressMode === 'residence'">
           <span>{{ t('contacts.residenceTextMessage') }}</span>
         </Message>
       </div>
@@ -472,6 +472,10 @@ export default defineComponent({
       type: Object as PropType<{ name?: string; saleChannelId?: string }>,
       default: () => ({}),
     },
+    billingAddressMode: {
+      type: String as PropType<'residence' | 'other'>,
+      required: true,
+    },
   },
   components: {
     IftaLabel,
@@ -540,15 +544,6 @@ export default defineComponent({
       countries.value.forEach((c) => m.set(c.id, c));
       return m;
     });
-    const sameFiscalAndResidenceAddress = computed(() => {
-      return (
-        props.modelValue.street === props.modelValue.residenceStreet &&
-        props.modelValue.city === props.modelValue.residenceCity &&
-        props.modelValue.zipCode === props.modelValue.residenceZip &&
-        props.modelValue.country?.id === props.modelValue.residenceCountry?.id &&
-        props.modelValue.state?.id === props.modelValue.residenceState?.id
-      );
-    });
     const genders = [
       { label: t('contacts.gender.female'), value: 'female' },
       { label: t('contacts.gender.male'), value: 'male' },
@@ -589,36 +584,6 @@ export default defineComponent({
         addressItems.value = [];
       }
     };
-
-    watch(
-      () => [
-        props.modelValue.residenceStreet,
-        props.modelValue.residenceCity,
-        props.modelValue.residenceZip,
-        props.modelValue.residenceCountry,
-        props.modelValue.residenceState,
-      ],
-      () => {
-        if (
-          props.modelValue.id === 0 &&
-          (props.modelValue.street === '' ||
-            props.modelValue.city === '' ||
-            props.modelValue.zipCode === '' ||
-            props.modelValue.country === undefined ||
-            props.modelValue.state === undefined)
-        ) {
-          context.emit('update:modelValue', {
-            ...props.modelValue,
-            street: props.modelValue.residenceStreet,
-            city: props.modelValue.residenceCity,
-            zipCode: props.modelValue.residenceZip,
-            country: props.modelValue.residenceCountry,
-            state: props.modelValue.residenceState,
-          });
-        }
-      },
-      { deep: true },
-    );
 
     watch(
       () => props.modelValue.residenceCountry,
@@ -666,7 +631,6 @@ export default defineComponent({
       saleChannels,
       phoneNumber,
       mobileNumber,
-      sameFiscalAndResidenceAddress,
       addressItems,
       showComercialName,
       fetchAddressByZip,

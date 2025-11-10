@@ -260,6 +260,9 @@ export class ContactsRepositoryImpl implements ContactsRepository {
       tags: normalizeTags,
       lang: normalizeLocale,
       birthdate: normalizeBirthdate,
+      id: () => null,
+      pricelist: () => null,
+      idNumbers: () => null,
     };
 
     const isPresent = (v: unknown): boolean => v !== undefined && v !== null && v !== '' && v !== 0;
@@ -325,7 +328,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
         (changed as Record<string, unknown>)[typedKey] = value;
       }
     }
-    await api.patch(`contacts/${contactId}`, changed);
+    await api.patch(`contacts/${contactId}`, payloadUpdated);
     if (updated.documents) {
       await Promise.all(
         updated.documents.map((document: PersonalDocument) => {
