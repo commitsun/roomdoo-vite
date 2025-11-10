@@ -72,13 +72,13 @@
               }}</label>
               <InputText
                 id="bill_street"
-                :modelValue="billingData.street"
+                :modelValue="billingAddress.street"
                 class="billing-form__control"
                 :placeholder="t('contacts.fiscalAddressPlaceholder')"
                 @update:modelValue="
                   (val: string | undefined) => {
-                    billingData.street = val ?? '';
-                    $emit('update:modelValue', { ...modelValue, street: val ?? '' });
+                    billingAddress.street = val ?? '';
+                    $emit('update:billingAddress', { ...billingAddress, street: val ?? '' });
                   }
                 "
               />
@@ -89,7 +89,7 @@
               }}</label>
               <AutoComplete
                 id="bill_zip"
-                :modelValue="billingData.zipCode ?? ''"
+                :modelValue="billingAddress.zipCode ?? ''"
                 class="billing-form__control"
                 :suggestions="addressItems"
                 optionLabel="value.zip"
@@ -101,18 +101,18 @@
                       typeof val === 'object' && val !== null && 'value' in val
                         ? val.value.zip
                         : val;
-                    $emit('update:modelValue', { ...modelValue, zipCode: zip });
+                    $emit('update:billingAddress', { ...billingAddress, zipCode: zip });
                   }
                 "
                 @optionSelect="
                   (e: { value: { value: Address } }) => {
                     const address: Address = e?.value?.value;
-                    billingData.zipCode = address.zip;
-                    billingData.city = address.city;
-                    billingData.country = address.country;
-                    billingData.state = address.state;
-                    $emit('update:modelValue', {
-                      ...modelValue,
+                    billingAddress.zipCode = address.zip;
+                    billingAddress.city = address.city;
+                    billingAddress.country = address.country;
+                    billingAddress.state = address.state;
+                    $emit('update:billingAddress', {
+                      ...billingAddress,
                       zipCode: address.zip,
                       city: address.city,
                       country: address.country,
@@ -130,13 +130,13 @@
               <label class="billing-form__label" for="bill_city">{{ t('contacts.city') }}</label>
               <InputText
                 id="bill_city"
-                :modelValue="billingData.city"
+                :modelValue="billingAddress.city"
                 class="billing-form__control"
                 :placeholder="t('contacts.fiscalCityPlaceholder')"
                 @update:modelValue="
                   (val: string | undefined) => {
-                    billingData.city = val ?? '';
-                    $emit('update:modelValue', { ...modelValue, city: val ?? '' });
+                    billingAddress.city = val ?? '';
+                    $emit('update:billingAddress', { ...billingAddress, city: val ?? '' });
                   }
                 "
               />
@@ -147,7 +147,7 @@
               }}</label>
               <Select
                 id="bill_country"
-                :modelValue="billingData.country?.id ?? null"
+                :modelValue="billingAddress.country?.id ?? null"
                 :options="[...countries]"
                 optionLabel="name"
                 optionValue="id"
@@ -161,9 +161,9 @@
                     const country = Number.isFinite(n)
                       ? countries.find((c: Country) => c.id === n)
                       : undefined;
-                    billingData.country = country;
-                    $emit('update:modelValue', {
-                      ...modelValue,
+                    billingAddress.country = country;
+                    $emit('update:billingAddress', {
+                      ...billingAddress,
                       country: country || undefined,
                     });
                   }
@@ -200,7 +200,7 @@
               <label class="billing-form__label" for="state">{{ t('contacts.state') }}</label>
               <Select
                 id="state"
-                :modelValue="billingData.state?.id ?? null"
+                :modelValue="billingAddress.state?.id ?? null"
                 :options="[...countryStates]"
                 optionLabel="name"
                 optionValue="id"
@@ -214,8 +214,8 @@
                     const s = Number.isFinite(n)
                       ? countryStates.find((cs: CountryState) => cs.id === n)
                       : undefined;
-                    billingData.state = s;
-                    $emit('update:modelValue', { ...modelValue, state: s || undefined });
+                    billingAddress.state = s;
+                    $emit('update:billingAddress', { ...billingAddress, state: s || undefined });
                   }
                 "
               />
@@ -305,7 +305,7 @@
                 const country = Number.isFinite(n)
                   ? countries.find((c: Country) => c.id === n)
                   : undefined;
-                billingData.country = country;
+                billingAddress.country = country;
                 $emit('update:modelValue', {
                   ...modelValue,
                   country: country || undefined,
@@ -387,8 +387,22 @@ export default defineComponent({
       type: Object as PropType<ContactDetail>,
       required: true,
     },
+    billingAddress: {
+      type: Object as PropType<{
+        street: string;
+        city: string;
+        zipCode: string;
+        country: Country | undefined;
+        state: CountryState | undefined;
+      }>,
+      required: true,
+    },
+    billingAddressMode: {
+      type: String as PropType<'residence' | 'other'>,
+      required: true,
+    },
   },
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'update:billingAddress', 'updateBillingAddressMode'],
 
   setup(props, context) {
     const { t } = useI18n();
@@ -398,7 +412,7 @@ export default defineComponent({
     const textMessageStore = useTextMessagesStore();
     const addressStore = useAddressStore();
     const uiStore = useUIStore();
-    const billingData = reactive({
+    const billingAddress = reactive({
       street: '',
       city: '',
       zipCode: '',
@@ -431,7 +445,6 @@ export default defineComponent({
       ) {
         return '';
       }
-
       const parts = [
         props.modelValue.residenceStreet,
         props.modelValue.residenceCity,
@@ -480,23 +493,9 @@ export default defineComponent({
 
     watch(billingAddressMode, (newMode) => {
       if (newMode === 'residence') {
-        context.emit('update:modelValue', {
-          ...props.modelValue,
-          street: props.modelValue.residenceStreet,
-          city: props.modelValue.residenceCity,
-          zipCode: props.modelValue.residenceZip,
-          country: props.modelValue.residenceCountry,
-          state: props.modelValue.residenceState,
-        });
+        context.emit('updateBillingAddressMode', 'residence');
       } else {
-        context.emit('update:modelValue', {
-          ...props.modelValue,
-          street: billingData.street,
-          city: billingData.city,
-          zipCode: billingData.zipCode,
-          country: billingData.country,
-          state: billingData.state,
-        });
+        context.emit('updateBillingAddressMode', 'other');
       }
     });
 
@@ -536,36 +535,19 @@ export default defineComponent({
       { immediate: true, deep: true },
     );
     onBeforeMount(async () => {
-      if (
-        (props.modelValue.street !== props.modelValue.residenceStreet &&
-          props.modelValue.street !== '') ||
-        (props.modelValue.city !== props.modelValue.residenceCity &&
-          props.modelValue.city !== '') ||
-        (props.modelValue.zipCode !== props.modelValue.residenceZip &&
-          props.modelValue.zipCode !== '') ||
-        (props.modelValue.country?.id !== props.modelValue.residenceCountry?.id &&
-          props.modelValue.country !== undefined) ||
-        (props.modelValue.state?.id !== props.modelValue.residenceState?.id &&
-          props.modelValue.state !== undefined)
-      ) {
-        billingData.street = props.modelValue.street ?? '';
-        billingData.city = props.modelValue.city ?? '';
-        billingData.zipCode = props.modelValue.zipCode ?? '';
-        billingData.country = props.modelValue.country;
-        billingData.state = props.modelValue.state;
-        context.emit('update:modelValue', {
-          ...props.modelValue,
-          street: billingData.street,
-          city: billingData.city,
-          zipCode: billingData.zipCode,
-          country: billingData.country,
-          state: billingData.state,
-        });
+      billingAddress.street = props.billingAddress.street;
+      billingAddress.city = props.billingAddress.city;
+      billingAddress.zipCode = props.billingAddress.zipCode;
+      billingAddress.country = props.billingAddress.country;
+      billingAddress.state = props.billingAddress.state;
+      if (props.billingAddressMode === 'residence') {
+        billingAddressMode.value = 'residence';
+      } else if (props.billingAddressMode === 'other') {
         billingAddressMode.value = 'other';
       }
     });
     return {
-      billingData,
+      billingAddress,
       billingAddressMode,
       residenceAddressText,
       countries,
