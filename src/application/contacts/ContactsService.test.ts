@@ -535,6 +535,7 @@ describe('ContactsService.updateContact', () => {
     };
     const updatedContact: ContactDetail = {
       ...originalContact,
+      id: 1,
       lastname: 'Smith',
       email: 'jane.smith@example.com',
     };

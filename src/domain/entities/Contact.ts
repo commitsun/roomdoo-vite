@@ -1,9 +1,7 @@
 import type { Country } from './Country';
 import type { CountryState } from './CountryState';
 import type { PersonalDocument } from './PersonalDocument';
-import type { PaymentTerm } from './PaymentTerm';
 import type { Phone } from './Phone';
-import type { Pricelist } from './Pricelist';
 import type { Tag } from './Tag';
 import type { SaleChannel } from './SaleChannel';
 
@@ -54,9 +52,7 @@ export interface ContactDetail extends Omit<Contact, 'types'> {
   zipCode?: string;
   city?: string;
   state?: CountryState;
-  paymentTerm?: PaymentTerm;
   invoicingPolicy?: string;
-  pricelist?: Pricelist;
   internalNotes?: string;
   documents?: PersonalDocument[];
   residenceStreet?: string;
