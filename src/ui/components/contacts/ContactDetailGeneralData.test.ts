@@ -237,6 +237,7 @@ function renderWithModel(
     props: {
       modelValue: model.value,
       contactType,
+      billingAddressMode: 'residence',
       'onUpdate:modelValue': (v: any) => {
         model.value = v;
       },
@@ -406,34 +407,5 @@ describe('ContactDetailGeneralData', () => {
     await rerender();
 
     expect(model.value.residenceState?.id).toBe(10);
-  });
-
-  it('id=0 and empty fiscal → automatically copy fiscal address from residence', async () => {
-    const { model, rerender } = renderWithModel(
-      {
-        id: 0,
-        street: '',
-        city: '',
-        zipCode: '',
-        country: undefined,
-        state: undefined,
-        residenceStreet: 'Rúa Nova 1',
-        residenceCity: 'A Coruña',
-        residenceZip: '15001',
-        residenceCountry: { id: 1, name: 'Spain', code: 'ES' },
-        residenceState: { id: 10, name: 'A Coruña' },
-      },
-      'person',
-    );
-
-    const streetInput = screen.getByLabelText(/^Residence address$/i);
-    await fireEvent.update(streetInput, 'Rúa Nova 1 (bis)');
-    await rerender();
-
-    expect(model.value.street).toBe('Rúa Nova 1 (bis)');
-    expect(model.value.city).toBe('A Coruña');
-    expect(model.value.zipCode).toBe('15001');
-    expect(model.value.country?.id).toBe(1);
-    expect(model.value.state?.id).toBe(10);
   });
 });

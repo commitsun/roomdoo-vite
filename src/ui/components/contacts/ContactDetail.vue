@@ -47,6 +47,8 @@
             <ContactDetailGeneralData
               :contactType="contactType"
               :modelValue="contactForm"
+              :errors="uiErrors.general"
+              :billingAddressMode="billingAddressMode"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
             />
           </AccordionContent>
@@ -88,7 +90,11 @@
           <AccordionContent>
             <ContactDetailBilling
               :modelValue="contactForm"
+              :billingAddress="billingAddress"
+              :billingAddressMode="billingAddressMode"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+              @update:billingAddress="(v: Address) => Object.assign(billingAddress, v)"
+              @updateBillingAddressMode="billingAddressMode = $event"
             />
           </AccordionContent>
         </AccordionPanel>
@@ -136,6 +142,7 @@
               :contactType="contactType"
               :modelValue="contactForm"
               :errors="uiErrors.general"
+              :billingAddressMode="billingAddressMode"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
             />
           </TabPanel>
@@ -149,7 +156,11 @@
           <TabPanel value="2">
             <ContactDetailBilling
               :modelValue="contactForm"
+              :billingAddress="billingAddress"
+              :billingAddressMode="billingAddressMode"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+              @update:billingAddress="(v: Address) => Object.assign(billingAddress, v)"
+              @updateBillingAddressMode="billingAddressMode = $event"
             />
           </TabPanel>
           <TabPanel value="3">
@@ -244,6 +255,10 @@ import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 import type { Phone } from '@/domain/entities/Phone';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
+import type { Country } from '@/domain/entities/Country';
+import type { CountryState } from '@/domain/entities/CountryState';
+// eslint-disable-next-line
+import type { Address } from '@/domain/entities/Address';
 
 export default defineComponent({
   components: {
@@ -304,6 +319,8 @@ export default defineComponent({
       >('dialogRef');
 
     const contactType = ref<'person' | 'company' | 'agency'>('person');
+    const billingAddressMode = ref<'residence' | 'other'>('residence');
+
     const contactTypeOptions = computed(() => [
       { label: t('contacts.person'), value: 'person' },
       { label: t('contacts.company'), value: 'company' },
@@ -340,9 +357,6 @@ export default defineComponent({
       city: '',
       state: undefined,
       country: undefined,
-      paymentTerm: undefined,
-      pricelist: undefined,
-      invoicingPolicy: '',
       reference: '',
       tags: [],
       internalNotes: '',
@@ -350,6 +364,14 @@ export default defineComponent({
       saleChannel: undefined,
       comercial: '',
       contactType: 'person',
+    });
+
+    const billingAddress = reactive({
+      street: '',
+      city: '',
+      zipCode: '',
+      country: undefined as Country | undefined,
+      state: undefined as CountryState | undefined,
     });
 
     const uiErrors = reactive<{ general: GeneralErrors; documents: DocumentRowError[] }>({
@@ -566,7 +588,26 @@ export default defineComponent({
         mapVeeValidateErrorsToUI();
         return;
       }
-
+      if (
+        billingAddressMode.value === 'residence' &&
+        (contactForm.residenceStreet !== '' ||
+          contactForm.residenceZip !== '' ||
+          contactForm.residenceCity !== '' ||
+          contactForm.residenceCountry !== undefined ||
+          contactForm.residenceState !== undefined)
+      ) {
+        contactForm.street = contactForm.residenceStreet;
+        contactForm.zipCode = contactForm.residenceZip;
+        contactForm.city = contactForm.residenceCity;
+        contactForm.country = contactForm.residenceCountry;
+        contactForm.state = contactForm.residenceState;
+      } else if (billingAddressMode.value === 'other') {
+        contactForm.street = billingAddress.street;
+        contactForm.zipCode = billingAddress.zipCode;
+        contactForm.city = billingAddress.city;
+        contactForm.country = billingAddress.country;
+        contactForm.state = billingAddress.state;
+      }
       uiStore.startLoading();
       try {
         if (contact.value) {
@@ -714,6 +755,24 @@ export default defineComponent({
           if (contact.value.lang !== undefined) {
             contactForm.lang = contact.value.lang.replace('_', '-');
           }
+          if (
+            contact.value.street === contact.value.residenceStreet &&
+            contact.value.zipCode === contact.value.residenceZip &&
+            contact.value.city === contact.value.residenceCity &&
+            contact.value.country?.id === contact.value.residenceCountry?.id &&
+            contact.value.state?.id === contact.value.residenceState?.id
+          ) {
+            billingAddressMode.value = 'residence';
+          } else {
+            billingAddressMode.value = 'other';
+            Object.assign(billingAddress, {
+              street: contact.value.street,
+              zipCode: contact.value.zipCode,
+              city: contact.value.city,
+              country: contact.value.country,
+              state: contact.value.state,
+            });
+          }
         }
       } catch (error) {
         textMessageStore.addTextMessage(
@@ -737,6 +796,8 @@ export default defineComponent({
       isDesktop,
       uiErrors,
       badges,
+      billingAddressMode,
+      billingAddress,
       t,
       handleCancel,
       handleSave,
@@ -832,26 +893,6 @@ export default defineComponent({
         font-size: 14px;
       }
     }
-  }
-  :deep(.p-tabs) {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-  }
-
-  :deep(.p-tabpanels) {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: auto;
-  }
-
-  :deep(.p-tabpanel) {
-    height: 100%;
-    display: block;
-  }
-  :deep(.p-tablist) {
-    min-height: 50px;
   }
 }
 </style>

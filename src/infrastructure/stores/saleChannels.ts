@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { readonly, ref, type Ref } from 'vue';
 
-import { SaleChannelService } from '@/application/saleChannels/saleChannelService';
+import { SaleChannelService } from '@/application/saleChannels/SaleChannelService';
 import { SaleChannelsRepositoryImpl } from '@/infrastructure/repositories/SaleChannelsRepositoryImpl';
 import type { SaleChannel } from '@/domain/entities/SaleChannel';
 
