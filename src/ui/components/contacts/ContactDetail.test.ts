@@ -3,8 +3,9 @@ import { render, screen, waitFor } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
-// eslint-disable-next-line import/order
 import { ref } from 'vue';
+// eslint-disable-next-line import/order
+import type { z } from 'zod';
 
 // ---- Mocks i18n ----
 vi.mock('vue-i18n', () => {
@@ -35,7 +36,6 @@ vi.mock('@vueuse/core', () => ({
   __setDesktop: (v: boolean) => (desktopFlag.value = v),
 }));
 
-// ---- Mock vee-validate para que no bloquee por validación ----
 vi.mock('vee-validate', () => {
   return {
     useForm: () => ({
@@ -48,6 +48,20 @@ vi.mock('vee-validate', () => {
 vi.mock('@vee-validate/zod', () => ({
   toTypedSchema: (s: unknown) => s,
 }));
+
+// --- MOCK stdnum ---
+vi.mock('stdnum', () => {
+  const mk = (fn: (s: string) => boolean) => ({
+    validate: (s: string) => ({ isValid: fn(s), compact: s?.replace(/\s|-/g, '') }),
+  });
+  return {
+    stdnum: {
+      ES: { nif: mk((s) => s === 'NIF-OK') },
+      MX: { rfc: mk((s) => s === 'RFC-OK') },
+      BR: { cpf: mk(() => false) },
+    },
+  };
+});
 
 // ---- Stubs UI ----
 export const SelectButtonStub = {
@@ -168,6 +182,40 @@ export const ContactDetailInternalNotesStub = {
   name: 'ContactDetailInternalNotes',
   template: `<div data-testid="internal-notes"></div>`,
 };
+
+const base: ContactInput = {
+  contactType: 'person',
+  name: 'John Doe',
+  saleChannelId: null,
+  documents: [],
+};
+
+const doc = (over: Partial<ContactInput['documents'][number]> = {}) => ({
+  number: 'X',
+  countryCode: 'ES',
+  documentTypeName: 'nif',
+  isValidable: true,
+  ...over,
+});
+
+function expectError(
+  parsed: ReturnType<typeof ContactSchema.safeParse>,
+  expected: Array<{ path: (string | number)[]; message: string }>,
+) {
+  expect(parsed.success).toBe(false);
+  const issues = (parsed as any).error.issues as z.ZodIssue[];
+  for (const e of expected) {
+    const found = issues.find(
+      (i) => JSON.stringify(i.path) === JSON.stringify(e.path) && i.message === e.message,
+    );
+    expect(
+      found,
+      `No se encontró error para path=${JSON.stringify(e.path)} msg=${e.message}`,
+    ).toBeTruthy();
+  }
+  // También comprobamos que no haya errores "extra" no esperados en estos tests.
+  expect(issues.length).toBe(expected.length);
+}
 
 // ---- Iconos stubs (no funcionales) ----
 export const UserIconStub = { name: 'User', template: `<i class="icon-user"></i>` };
@@ -359,6 +407,8 @@ vi.mock('@/infrastructure/stores/textMessages', () => ({
 import * as vueuse from '@vueuse/core';
 
 import Component from './ContactDetail.vue';
+
+import { ContactSchema, type ContactInput } from '@/application/contacts/ContactSchemas';
 
 // ---- Helper render ----
 const renderWith = (opts: { provideDialog?: any } = {}) => {
@@ -735,7 +785,6 @@ describe('ContactDetailDialog', () => {
     const supportInput = screen.getByPlaceholderText('support number');
     await userEvent.type(supportInput, 'SN-1');
 
-    // escribe también las notas antes de guardar
     const notesInput = screen.getByPlaceholderText('internal notes');
     await userEvent.type(notesInput, 'Notes here');
 
@@ -788,5 +837,67 @@ describe('ContactDetailDialog', () => {
     await userEvent.click(screen.getByTestId('acc-set-1'));
 
     expect(acc.getAttribute('data-model')).toBe('1');
+  });
+
+  it('unvalidatable document: does not execute stdnum, does not block even if the number is "wrong"', () => {
+    const parsed = ContactSchema.safeParse({
+      ...base,
+      documents: [doc({ number: 'CUALQUIERA', isValidable: false })],
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('validable and supported document: valid (ES.nif -> "NIF-OK', () => {
+    const parsed = ContactSchema.safeParse({
+      ...base,
+      documents: [doc({ countryCode: 'es', documentTypeName: 'NIF', number: 'NIF-OK' })],
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('validable and supported document: invalid (BR.cpf always KO in mock)', () => {
+    const parsed = ContactSchema.safeParse({
+      ...base,
+      documents: [doc({ countryCode: 'BR', documentTypeName: 'cpf', number: '123' })],
+    });
+    expectError(parsed, [
+      {
+        path: ['documents', 0, 'number'],
+        message: 'contacts.errors.invalidDocument',
+      },
+    ]);
+  });
+
+  it('validable document but type/country not supported by stdnum: does not block', () => {
+    const parsed = ContactSchema.safeParse({
+      ...base,
+      documents: [doc({ countryCode: 'US', documentTypeName: 'ssn', number: 'ANY' })],
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('several mixed documents (OK, KO, not supported) only propagate the KO error', () => {
+    const parsed = ContactSchema.safeParse({
+      ...base,
+      documents: [
+        doc({ countryCode: 'ES', documentTypeName: 'nif', number: 'NIF-OK' }),
+        doc({ countryCode: 'BR', documentTypeName: 'cpf', number: 'BAD' }),
+        doc({ countryCode: 'US', documentTypeName: 'ssn', number: 'ANY' }),
+      ],
+    });
+    expectError(parsed, [
+      {
+        path: ['documents', 1, 'number'],
+        message: 'contacts.errors.invalidDocument',
+      },
+    ]);
+  });
+
+  it('normalizes countryCode/documentTypeName (trim + case), and triggers validation', () => {
+    const parsed = ContactSchema.safeParse({
+      ...base,
+      documents: [doc({ countryCode: ' es ', documentTypeName: '  Nif ', number: 'NIF-OK' })],
+    });
+    expect(parsed.success).toBe(true);
   });
 });
