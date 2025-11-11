@@ -409,91 +409,38 @@ export default defineComponent({
       }
     };
 
-    const normalizeDocType = (codeRaw: unknown): ContactInput['documents'][number]['type'] => {
-      const code = String(codeRaw ?? '')
-        .trim()
-        .toLowerCase();
-      if (code === 'dni' || code === 'nif') {
-        return 'dni';
-      }
-      if (code === 'nie') {
-        return 'nie';
-      }
-      if (code === 'passport') {
-        return 'passport';
-      }
-      return 'other';
-    };
-
-    const docNumberErrorBySchema = (docType: unknown, numberRaw: string): string | undefined => {
-      const code = String(docType ?? '')
-        .trim()
-        .toLowerCase();
-      type DocCode = 'dni' | 'nie' | 'passport';
-      const type: DocCode | 'other' =
-        code === 'nif'
-          ? 'dni'
-          : (['dni', 'nie', 'passport'] as DocCode[]).includes(code as DocCode)
-            ? (code as DocCode)
-            : 'other';
-      const number = numberRaw.toUpperCase().replace(/[\s-]/g, '');
-
-      const res = ContactSchema.safeParse({
-        contactType: 'person',
-        name: '_',
-        saleChannelId: null,
-        documents: [{ type, number }],
-      });
-      if (res.success) {
-        return undefined;
-      }
-
-      const issue = res.error.issues.find(
-        (i) => i.path[0] === 'documents' && i.path[1] === 0 && i.path[2] === 'number',
-      );
-      return issue?.message;
-    };
-
-    const validateDocumentsPresence = (): DocumentRowError[] => {
-      const docs = contactForm.documents ?? [];
-      if (docs.length === 0) {
-        return [];
-      }
-      return docs.map((d) => {
-        const row: DocumentRowError = {};
-        if (d.country?.id === 0 || d.country?.id === undefined) {
-          row.country = 'contacts.errors.countryRequired';
-        }
-        if (!d.category?.id) {
-          row.category = 'contacts.errors.documentTypeRequired';
-        }
-        const raw = String(d?.name ?? '').trim();
-        if (!raw) {
-          row.number = 'contacts.errors.documentNumberRequired';
-        } else if (d.category?.id) {
-          const err = docNumberErrorBySchema(d.category.name, raw);
-          if (err !== null) {
-            row.number = err;
-          }
-        }
-        return row;
-      });
-    };
-
-    const mapVeeValidateErrorsToUI = (): void => {
+    const mapVeeValidateErrors = (): void => {
       const flat = vvErrors.value as Record<string, string>;
+      uiErrors.general = {};
+      uiErrors.documents = [];
+
       for (const [path, msg] of Object.entries(flat)) {
         if (path === 'name' || path === 'saleChannelId') {
           (uiErrors.general as GeneralErrors)[path as keyof GeneralErrors] = msg;
           continue;
         }
-        const m = path.match(/^documents(?:\.|\[)(\d+)(?:\]|\.)number$/);
-        if (m) {
-          const idx = Number(m[1]);
-          uiErrors.documents[idx] ??= {};
-          uiErrors.documents[idx].number = msg;
+        const m = path.match(/^documents(?:\[(\d+)\]|\.([0-9]+))\.(.+)$/);
+
+        if (!m) {
+          continue;
         }
+        const idx = Number(m[1] ?? m[2]);
+        const field = m[3];
+        while (uiErrors.documents.length <= idx) {
+          uiErrors.documents.push({});
+        }
+        const prev = uiErrors.documents[idx] ?? {};
+        const next = {
+          ...prev,
+          ...(field === 'number' ? { number: msg } : {}),
+          ...(field === 'countryCode' ? { country: msg } : {}),
+          ...(field === 'documentTypeName' ? { category: msg } : {}),
+        };
+
+        uiErrors.documents.splice(idx, 1, next);
       }
+
+      uiErrors.documents = uiErrors.documents.map((r) => ({ ...r }));
     };
 
     const resetUiErrors = (): void => {
@@ -508,8 +455,10 @@ export default defineComponent({
       ).trim(),
       saleChannelId: contactForm.saleChannel?.id ?? null,
       documents: (contactForm.documents ?? []).map((d) => ({
-        type: normalizeDocType(d?.category?.code),
         number: String(d?.name ?? '').trim(),
+        countryCode: d?.country?.code?.toUpperCase() ?? '',
+        documentTypeName: d?.category?.name?.toLowerCase() ?? '',
+        isValidable: d?.category?.isValidableDocument,
       })),
     });
 
@@ -518,19 +467,13 @@ export default defineComponent({
       clearHiddenFields();
       contactForm.contactType = contactType.value;
 
-      uiErrors.documents = validateDocumentsPresence();
-
       const payload = buildPayloadToValidate();
       setValues(payload);
-      const { valid } = await validate();
 
-      if (
-        !valid ||
-        uiErrors.documents.some(
-          (r) => r.country !== undefined || r.category !== undefined || r.number !== undefined,
-        )
-      ) {
-        mapVeeValidateErrorsToUI();
+      const { valid } = await validate();
+      mapVeeValidateErrors();
+
+      if (!valid || badges.value.total > 0) {
         return;
       }
       if (
