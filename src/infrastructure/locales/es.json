@@ -228,8 +228,7 @@
       "nameRequired": "El nombre es obligatorio",
       "saleChannelRequiredForAgency": "El canal de venta es obligatorio para agencias",
       "documentNumberRequired": "El número de documento es obligatorio",
-      "invalidDni": "El DNI no es válido",
-      "invalidNie": "El NIE no es válido",
+      "invalidDocument": "El {document} no es válido",
       "countryRequired": "El país de emisión es obligatorio",
       "documentTypeRequired": "El tipo de documento es obligatorio",
       "fieldErrors": "{count} campo con error | {count} campos con errores"
