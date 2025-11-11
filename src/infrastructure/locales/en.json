@@ -227,8 +227,7 @@
       "nameRequired": "Name is required",
       "saleChannelRequiredForAgency": "Sale channel is required for agencies",
       "documentNumberRequired": "Document number is required",
-      "invalidDni": "The DNI is not valid",
-      "invalidNie": "The NIE is not valid",
+      "invalidDocument": "The {document} is not valid",
       "countryRequired": "The issue country is required",
       "documentTypeRequired": "The document type is required",
       "fieldErrors": "{count} field with error | {count} fields with errors"
