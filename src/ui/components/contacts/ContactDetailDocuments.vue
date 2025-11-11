@@ -143,7 +143,7 @@
             variant="simple"
             class="mt-2"
           >
-            {{ t(errors[origIdx]?.number) }}
+            {{ t(errors[origIdx]?.number, { document: doc.category.name }) }}
           </Message>
         </div>
 
