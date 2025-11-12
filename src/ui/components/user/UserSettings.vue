@@ -1,11 +1,21 @@
 <template>
   <div class="user__settings">
-    <Tabs value="0">
+    <Tabs v-model:value="activeTab">
       <TabList>
-        <Tab value="0" as="div" class="flex items-center gap-2">
+        <Tab
+          value="0"
+          as="button"
+          class="flex items-center gap-2"
+          @click.capture="onTabClick('0', $event)"
+        >
           <span> {{ t('userSettings.profile') }} </span>
         </Tab>
-        <Tab value="1" as="div" class="flex items-center gap-2">
+        <Tab
+          value="1"
+          as="button"
+          class="flex items-center gap-2"
+          @click.capture="onTabClick('1', $event)"
+        >
           <span> {{ t('userSettings.securityAndAccess') }} </span>
         </Tab>
       </TabList>
@@ -156,181 +166,190 @@
             <Button
               :label="t('userSettings.save')"
               :style="{ width: 'auto', backgroundColor: '#1d4ed8', border: 'none' }"
-              @click="handleUpdateUser()"
+              @click="updateUser()"
             />
           </div>
         </TabPanel>
 
         <TabPanel value="1">
-          <div class="user__settings--security-section" v-if="!isChangeLoginVisible">
-            <div class="user__settings--section-title">
-              {{ t('userSettings.nameEmailLogin') }}
-            </div>
-            <div class="user__settings--login">
-              <div class="user__settings--login-left">
-                <Mail class="user__settings--login-icon" color="#64748B" />
-                <div class="user__settings--login-info">
-                  <div class="user__settings--login-email">{{ login }}</div>
-                  <div class="user__settings--login-text">
-                    {{ t('userSettings.yourLogin') }}
+          <div class="user__settings--section-title">
+            {{ t('userSettings.nameEmailLogin') }}
+          </div>
+          <Panel
+            toggleable
+            collapsed
+            :pt="{
+              root: (opts) => ({
+                class: opts.state.d_collapsed ? 'panel--is-collapsed' : undefined,
+                style: { backgroundColor: opts.state.d_collapsed ? '#F1F5F9' : undefined },
+              }),
+            }"
+          >
+            <template #header>
+              <div class="flex flex-col mt-2">
+                <div class="flex">
+                  <Mail class="user__settings--login-icon" color="#64748B" />
+                  <div class="user__settings--login-info">
+                    <div class="user__settings--login-email">
+                      {{ login }}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="user__settings--change-login">
-                <a class="user__settings--change-login-link" @click="showLoginVisible()">
-                  {{ t('userSettings.change') }}
-                </a>
-              </div>
-            </div>
-          </div>
-          <div v-else class="user__settings--security-section">
-            <div class="user__settings--section-title login-visible">
-              {{ t('userSettings.nameEmailLogin') }}
-            </div>
-            <div class="user__settings--card">
-              <div class="user__settings--grid-card">
-                <div class="user__settings--field">
-                  <label class="user__settings--label flex-label" for="login">
-                    {{ t('userSettings.currentLogin') }}
-                  </label>
-                  <InputText
-                    class="user__settings--control"
-                    id="login"
-                    v-model="login"
-                    disabled
-                    :style="{ minWidth: '260px' }"
-                  />
+                <div class="user__settings--login-text my-2 ml-4">
+                  {{ t('userSettings.yourLogin') }}
                 </div>
-                <div class="user__settings--field">
-                  <label class="user__settings--label" for="newLogin">
-                    {{ t('userSettings.newLogin') }}*
-                  </label>
-                  <InputText
-                    class="user__settings--control"
-                    id="newLogin"
-                    v-model="newLogin"
-                    :style="{ minWidth: '260px' }"
-                  />
+              </div>
+            </template>
+            <template #toggleicon>
+              <Pen color="#1D4ED8" :size="18" />
+            </template>
+            <div class="user__settings--security-section">
+              <div class="user__settings--card">
+                <div class="user__settings--grid-card">
+                  <div class="user__settings--field">
+                    <label class="user__settings--label flex-label" for="login">
+                      {{ t('userSettings.currentLogin') }}
+                    </label>
+                    <InputText
+                      class="user__settings--control"
+                      id="login"
+                      v-model="login"
+                      disabled
+                      :style="{ minWidth: '260px' }"
+                    />
+                  </div>
+                  <div class="user__settings--field">
+                    <label class="user__settings--label" for="newLogin">
+                      {{ t('userSettings.newLogin') }} *
+                    </label>
+                    <InputText
+                      class="user__settings--control"
+                      id="newLogin"
+                      v-model="newLogin"
+                      :style="{ minWidth: '260px' }"
+                      :invalid="
+                        loginErrorMessage === t('userSettings.loginRequired') && newLogin === ''
+                      "
+                    />
+                  </div>
+                  <Message v-if="loginErrorMessage !== ''" severity="error">
+                    {{ loginErrorMessage }}
+                  </Message>
                 </div>
                 <div class="user__settings--footer-change-login">
-                  <Button
-                    :label="t('userSettings.cancel')"
-                    severity="secondary"
-                    class="p-button-text"
-                    :style="{ width: 'auto' }"
-                    @click="cancelChangeLogin()"
-                  />
-                  <Button
-                    :label="t('userSettings.changeLogin')"
-                    :style="{ width: 'auto', border: 'none', color: '#1d4ed8' }"
-                    outlined
-                    @click="updateLogin()"
-                  />
+                  <Button :label="t('userSettings.changeLogin')" @click="updateLogin()" />
                 </div>
               </div>
             </div>
+          </Panel>
+          <div class="user__settings--section-title--second">
+            {{ t('userSettings.password') }}
           </div>
-
-          <div class="user__settings--security-section" v-if="!isChangePasswordVisible">
-            <div class="user__settings--section-title">
-              {{ t('userSettings.password') }}
-            </div>
-            <div class="user__settings--password">
-              <div class="user__settings--password-left">
-                <LockKeyhole class="user__settings--password-icon" color="#64748B" />
-                <div class="user__settings--password-info">
-                  <div class="user__settings--password-email">••••••••••</div>
-                  <div class="user__settings--password-text">
-                    {{ t('userSettings.yourPassword') }}
+          <Panel
+            toggleable
+            collapsed
+            :pt="{
+              root: (opts) => ({
+                class: opts.state.d_collapsed ? 'panel--is-collapsed' : undefined,
+                style: { backgroundColor: opts.state.d_collapsed ? '#F1F5F9' : undefined },
+              }),
+            }"
+          >
+            <template #header>
+              <div class="flex flex-col mt-2">
+                <div class="flex">
+                  <LockKeyhole class="user__settings--password-icon" color="#64748B" />
+                  <div class="user__settings--password-info">
+                    <div class="user__settings--password-email">••••••••••</div>
                   </div>
                 </div>
+                <div class="user__settings--password-text my-2 ml-4">
+                  {{ t('userSettings.yourPassword') }}
+                </div>
               </div>
-              <div class="user__settings--change-login">
-                <a class="user__settings--change-login-link" @click="showChangePasswordVisible()">
-                  {{ t('userSettings.change') }}
-                </a>
-              </div>
-            </div>
-          </div>
-          <div v-else class="user__settings--security-section">
-            <div class="user__settings--section-title login-visible">
-              {{ t('userSettings.password') }}
-            </div>
-            <div class="user__settings--card">
-              <div class="user__settings--grid-card">
-                <div class="user__settings--field">
-                  <label class="user__settings--label flex-label" for="currentPassword">
-                    {{ t('userSettings.currentPassword') }}
-                  </label>
-                  <Password
-                    v-model="currentPassword"
-                    inputId="currentPassword"
-                    :feedback="false"
-                    toggleMask
-                    :style="{ width: '100%' }"
-                    :inputProps="{ autocomplete: 'current-password' }"
-                    :invalid="errorMessage === t('userSettings.invalidPassword')"
-                  />
+            </template>
+            <template #toggleicon>
+              <Pen color="#1D4ED8" :size="18" />
+            </template>
+            <div class="user__settings--security-section">
+              <div class="user__settings--card">
+                <div class="user__settings--grid-card">
+                  <div class="user__settings--field">
+                    <label class="user__settings--label flex-label" for="currentPassword">
+                      {{ t('userSettings.currentPassword') }} *
+                    </label>
+                    <Password
+                      v-model="currentPassword"
+                      inputId="currentPassword"
+                      :feedback="false"
+                      toggleMask
+                      :style="{ width: '100%' }"
+                      :inputProps="{ autocomplete: 'current-password' }"
+                      :invalid="
+                        passwordErrorMessage === t('userSettings.invalidPassword') ||
+                        (passwordErrorMessage === t('userSettings.allPasswordFieldsRequired') &&
+                          currentPassword === '')
+                      "
+                    />
+                  </div>
+                  <div class="user__settings--field">
+                    <label class="user__settings--label" for="newPassword">
+                      {{ t('userSettings.newPassword') }} *
+                    </label>
+                    <Password
+                      v-model="newPassword"
+                      inputId="newPassword"
+                      :feedback="false"
+                      toggleMask
+                      :style="{ width: '100%' }"
+                      :inputProps="{ autocomplete: 'new-password' }"
+                      :invalid="
+                        passwordErrorMessage === t('userSettings.passwordsDoNotMatch') ||
+                        (passwordErrorMessage === t('userSettings.allPasswordFieldsRequired') &&
+                          newPassword === '')
+                      "
+                    />
+                  </div>
+                  <div class="user__settings--field">
+                    <label class="user__settings--label flex-label" for="repeatPassword">
+                      {{ t('userSettings.repeatPassword') }} *
+                    </label>
+                    <Password
+                      v-model="repeatPassword"
+                      inputId="repeatPassword"
+                      :feedback="false"
+                      toggleMask
+                      :style="{ width: '100%' }"
+                      :inputProps="{ autocomplete: 'repeat-password' }"
+                      :invalid="
+                        passwordErrorMessage === t('userSettings.passwordsDoNotMatch') ||
+                        (passwordErrorMessage === t('userSettings.allPasswordFieldsRequired') &&
+                          repeatPassword === '')
+                      "
+                    />
+                  </div>
+                  <Message v-if="passwordErrorMessage !== ''" severity="error">
+                    {{ passwordErrorMessage }}
+                  </Message>
                 </div>
-                <div class="user__settings--field">
-                  <label class="user__settings--label" for="newPassword">
-                    {{ t('userSettings.newPassword') }}*
-                  </label>
-                  <Password
-                    v-model="newPassword"
-                    inputId="newPassword"
-                    :feedback="false"
-                    toggleMask
-                    :style="{ width: '100%' }"
-                    :inputProps="{ autocomplete: 'new-password' }"
-                    :invalid="errorMessage === t('userSettings.passwordsDoNotMatch')"
-                  />
-                </div>
-                <div class="user__settings--field">
-                  <label class="user__settings--label flex-label" for="repeatPassword">
-                    {{ t('userSettings.repeatPassword') }}*
-                  </label>
-                  <Password
-                    v-model="repeatPassword"
-                    inputId="repeatPassword"
-                    :feedback="false"
-                    toggleMask
-                    :style="{ width: '100%' }"
-                    :inputProps="{ autocomplete: 'repeat-password' }"
-                    :invalid="errorMessage === t('userSettings.passwordsDoNotMatch')"
-                  />
-                </div>
-                <Message
-                  severity="error"
-                  :style="{ visibility: errorMessage !== '' ? 'visible' : 'hidden' }"
-                >
-                  {{ errorMessage }}
-                </Message>
                 <div class="user__settings--footer-change-login">
-                  <Button
-                    :label="t('userSettings.cancel')"
-                    severity="secondary"
-                    class="p-button-text"
-                    @click="cancelChangePassword()"
-                  />
                   <Button
                     :label="t('userSettings.changePassword')"
-                    :style="{ border: 'none', color: '#1d4ed8' }"
-                    outlined
                     @click="handleChangePassword()"
                   />
                 </div>
               </div>
             </div>
-          </div>
+          </Panel>
         </TabPanel>
       </TabPanels>
     </Tabs>
+    <ConfirmDialog :style="{ maxWidth: '380px' }"></ConfirmDialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, inject, type Ref } from 'vue';
+import { ref, onMounted, computed, inject, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -341,31 +360,36 @@ import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
+import Panel from 'primevue/panel';
 import Password from 'primevue/password';
 import Message from 'primevue/message';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from 'primevue/useconfirm';
 import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload';
-import { Mail, LockKeyhole } from 'lucide-vue-next';
+import { Mail, Pen, LockKeyhole } from 'lucide-vue-next';
 
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
+import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
-import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import type { Language } from '@/domain/entities/Language';
 import type { User } from '@/domain/entities/User';
-
+import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
+import { BadRequestError } from '@/application/shared/BadRequestError';
 const dialogRef = inject<Ref<{ close: (payload?: unknown) => void } | undefined>>('dialogRef');
+const confirm = useConfirm();
 
 const userStore = useUserStore();
 const instanceStore = useInstanceStore();
 const uiStore = useUIStore();
 const notificationStore = useNotificationsStore();
+const textMessageStore = useTextMessagesStore();
 
 const { t } = useI18n({ useScope: 'global' });
 
-const user = userStore.user;
 const firstName = ref('');
 const lastName = ref('');
 const secondLastName = ref('');
@@ -375,90 +399,100 @@ const login = ref('');
 const newLogin = ref('');
 const imageUrl = ref('');
 const selectedLocale = ref('');
-const isChangeLoginVisible = ref(false);
-const isChangePasswordVisible = ref(false);
-const availableLocales = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
-const showLastName2 = computed(() => userStore.userSchemas?.includes('lastname2'));
-
 const currentPassword = ref('');
 const newPassword = ref('');
 const repeatPassword = ref('');
-const errorMessage = ref('');
+const loginErrorMessage = ref('');
+const passwordErrorMessage = ref('');
+const activeTab = ref<'0' | '1'>('0');
+const pendingTab = ref<'0' | '1' | null>(null);
+const locking = ref(false);
 
-const handleUpdateUser = async (): Promise<void> => {
+const user = computed(() => userStore.user);
+
+const availableLocales = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
+const showLastName2 = computed(() => userStore.userSchemas?.includes('lastname2'));
+
+const handleUpdateUser = async (): Promise<boolean> => {
   uiStore.startLoading();
   try {
     const payload: Partial<User> = {};
-    if (firstName.value !== user?.firstName) {
+    if (firstName.value !== user.value?.firstName) {
       payload.firstName = firstName.value;
     }
-    if (lastName.value !== user?.lastName) {
+    if (lastName.value !== user.value?.lastName) {
       payload.lastName = lastName.value;
     }
-    if (showLastName2.value !== null && secondLastName.value !== user?.lastName2) {
+    if (showLastName2.value !== null && secondLastName.value !== user.value?.lastName2) {
       payload.lastName2 = secondLastName.value;
     }
-    if (phone.value !== user?.phone) {
+    if (phone.value !== user.value?.phone) {
       payload.phone = phone.value;
     }
-    if (email.value !== user?.email) {
+    if (email.value !== user.value?.email) {
       payload.email = email.value;
     }
-    if (selectedLocale.value !== user?.lang) {
+    if (selectedLocale.value !== user.value?.lang) {
       payload.lang = selectedLocale.value;
     }
-    if (imageUrl.value !== user?.avatar) {
+    if (imageUrl.value !== user.value?.avatar) {
       payload.avatar = imageUrl.value;
     }
+
     await userStore.updateUser(payload);
     notificationStore.add(t('userSettings.userUpdated'), 'success');
-    dialogRef?.value?.close({ action: 'userUpdated' });
+    uiStore.refreshView();
+    return true;
   } catch {
-    notificationStore.add(t('error.unknownError'), 'error');
+    textMessageStore.addTextMessage('Error', t('error.unknownError'));
+    return false;
   } finally {
     uiStore.stopLoading();
+  }
+};
+
+const updateUser = async (): Promise<void> => {
+  const ok = await handleUpdateUser();
+  if (ok) {
+    dialogRef?.value?.close({ action: 'userUpdated' });
   }
 };
 
 const updateLogin = async (): Promise<void> => {
-  uiStore.startLoading();
-  try {
-    if (newLogin.value && newLogin.value !== login.value) {
-      await userStore.updateUser({ login: newLogin.value });
-      notificationStore.add(t('userSettings.loginUpdated'), 'success');
-      dialogRef?.value?.close({ action: 'doLogout' });
-    }
-  } catch {
-    notificationStore.add(t('error.unknownError'), 'error');
-  } finally {
-    uiStore.stopLoading();
-  }
-};
-
-const handleCancel = (): void => {
-  dialogRef?.value?.close({ action: 'cancel' });
-};
-
-const handleChangePassword = async (): Promise<void> => {
-  if (newPassword.value !== repeatPassword.value) {
-    errorMessage.value = t('userSettings.passwordsDoNotMatch');
+  if (newLogin.value === '') {
+    loginErrorMessage.value = t('userSettings.loginRequired');
     return;
   }
-  uiStore.startLoading();
-  try {
-    if (currentPassword.value && newPassword.value) {
-      await userStore.changePassword(currentPassword.value, newPassword.value);
-      notificationStore.add(t('userSettings.passwordChanged'), 'success');
-      dialogRef?.value?.close({ action: 'doLogout' });
-    }
-  } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      errorMessage.value = t('userSettings.invalidPassword');
-    } else {
-      errorMessage.value = t('error.unknownError');
-    }
-  } finally {
-    uiStore.stopLoading();
+  if (newLogin.value !== login.value) {
+    confirm.require({
+      message: t('userSettings.areYouSureChangeLogin'),
+      header: t('userSettings.changeLogin?'),
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: { label: t('userSettings.discard'), severity: 'secondary', outlined: true },
+      acceptProps: { label: t('userSettings.change') },
+      accept: () => {
+        uiStore.startLoading();
+        userStore
+          .updateUser({ login: newLogin.value })
+          .then(() => {
+            notificationStore.add(t('userSettings.loginUpdated'), 'success');
+            dialogRef?.value?.close({ action: 'doLogout' });
+          })
+          .catch((error) => {
+            if (error instanceof BadRequestError) {
+              textMessageStore.addTextMessage('Error', t('userSettings.loginAlreadyInUse'));
+              return;
+            } else {
+              textMessageStore.addTextMessage('Error', t('error.unknownError'));
+            }
+          })
+          .finally(() => {
+            uiStore.stopLoading();
+          });
+      },
+    });
+  } else {
+    textMessageStore.addTextMessage('Error', t('userSettings.loginAlreadyInUse'));
   }
 };
 
@@ -466,56 +500,147 @@ function getSafeString(val: unknown): string {
   return typeof val === 'string' && val.trim() !== '' ? val : '';
 }
 
+const handleCancel = (): void => {
+  dialogRef?.value?.close({ action: 'cancel' });
+};
+
+const handleChangePassword = async (): Promise<void> => {
+  if (
+    currentPassword.value.trim() === '' ||
+    newPassword.value.trim() === '' ||
+    repeatPassword.value.trim() === ''
+  ) {
+    passwordErrorMessage.value = t('userSettings.allPasswordFieldsRequired');
+    return;
+  }
+  if (newPassword.value !== repeatPassword.value) {
+    passwordErrorMessage.value = t('userSettings.passwordsDoNotMatch');
+    return;
+  }
+  confirm.require({
+    message: t('userSettings.youWillBeLoggedOutAfterPasswordChange'),
+    header: t('userSettings.changePassword?'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: { label: t('userSettings.cancel'), severity: 'secondary', outlined: true },
+    acceptProps: { label: t('userSettings.change') },
+    accept: () => {
+      void (async (): Promise<void> => {
+        uiStore.startLoading();
+        try {
+          if (currentPassword.value && newPassword.value) {
+            await userStore.changePassword(currentPassword.value, newPassword.value);
+            notificationStore.add(t('userSettings.passwordChanged'), 'success');
+            dialogRef?.value?.close({ action: 'doLogout' });
+          }
+        } catch (error) {
+          if (error instanceof UnauthorizedError) {
+            textMessageStore.addTextMessage('Error', t('userSettings.invalidPassword'));
+          } else {
+            textMessageStore.addTextMessage('Error', t('error.unknownError'));
+          }
+        } finally {
+          uiStore.stopLoading();
+        }
+      })();
+    },
+  });
+};
+
+const isDirty = (): boolean => {
+  return (
+    firstName.value !== getSafeString(user.value?.firstName) ||
+    lastName.value !== getSafeString(user.value?.lastName) ||
+    secondLastName.value !== getSafeString(user.value?.lastName2) ||
+    phone.value !== getSafeString(user.value?.phone) ||
+    email.value !== getSafeString(user.value?.email) ||
+    imageUrl.value !== getSafeString(user.value?.avatar) ||
+    selectedLocale.value !==
+      (typeof user.value?.lang === 'string'
+        ? user.value.lang.replace('_', '-')
+        : i18n.global.locale.value)
+  );
+};
+
+const onTabClick = (target: '0' | '1', ev: MouseEvent): void => {
+  ev.preventDefault();
+  ev.stopPropagation();
+
+  if (locking.value || target === activeTab.value) {
+    return;
+  }
+
+  if (target === '1' && isDirty()) {
+    locking.value = true;
+    pendingTab.value = target;
+
+    confirm.require({
+      message: t('userSettings.youWillLoseChanges'),
+      header: t('userSettings.changesWithoutSaving'),
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: { label: t('userSettings.discard'), severity: 'secondary', outlined: true },
+      acceptProps: { label: t('userSettings.save') },
+      accept: () => {
+        void handleUpdateUser()
+          .then(() => {
+            activeTab.value = '1';
+          })
+          .finally(() => {
+            pendingTab.value = null;
+            locking.value = false;
+          });
+      },
+      reject: () => {
+        pendingTab.value = null;
+        locking.value = false;
+      },
+      onHide: () => {
+        pendingTab.value = null;
+        locking.value = false;
+      },
+    });
+    return;
+  }
+
+  activeTab.value = target;
+};
+
 const onAdvancedUpload = (e: FileUploadSelectEvent): void => {
   if (Boolean(e.files[0]?.objectURL) && e.files[0]?.size < 1000000) {
     imageUrl.value = e.files[0]?.objectURL;
   }
 };
 
-const showLoginVisible = (): void => {
-  isChangeLoginVisible.value = true;
-  currentPassword.value = '';
-  newPassword.value = '';
-  repeatPassword.value = '';
-  errorMessage.value = '';
-  if (isChangePasswordVisible.value) {
-    isChangePasswordVisible.value = false;
-  }
-};
+watch(
+  () => newLogin.value,
+  () => {
+    if (loginErrorMessage.value !== '') {
+      loginErrorMessage.value = '';
+    }
+  },
+  { immediate: true },
+);
 
-const showChangePasswordVisible = (): void => {
-  isChangePasswordVisible.value = true;
-  newLogin.value = '';
-
-  if (isChangeLoginVisible.value) {
-    isChangeLoginVisible.value = false;
-  }
-};
-
-const cancelChangeLogin = (): void => {
-  isChangeLoginVisible.value = false;
-  newLogin.value = '';
-};
-
-const cancelChangePassword = (): void => {
-  isChangePasswordVisible.value = false;
-  currentPassword.value = '';
-  newPassword.value = '';
-  repeatPassword.value = '';
-  errorMessage.value = '';
-};
+watch(
+  () => [currentPassword.value, newPassword.value, repeatPassword.value],
+  () => {
+    if (passwordErrorMessage.value !== '') {
+      passwordErrorMessage.value = '';
+    }
+  },
+  { immediate: true },
+);
 
 onMounted(() => {
-  firstName.value = getSafeString(user?.firstName);
-  lastName.value = getSafeString(user?.lastName);
-  secondLastName.value = getSafeString(user?.lastName2);
-  phone.value = getSafeString(user?.phone);
-  email.value = getSafeString(user?.email);
-  imageUrl.value = getSafeString(user?.avatar);
-  login.value = getSafeString(user?.login);
+  firstName.value = getSafeString(user.value?.firstName);
+  lastName.value = getSafeString(user.value?.lastName);
+  secondLastName.value = getSafeString(user.value?.lastName2);
+  phone.value = getSafeString(user.value?.phone);
+  email.value = getSafeString(user.value?.email);
+  imageUrl.value = getSafeString(user.value?.avatar);
+  login.value = getSafeString(user.value?.login);
 
-  if (typeof user?.lang === 'string' && user.lang.trim() !== '') {
-    selectedLocale.value = user.lang.replace('_', '-');
+  if (typeof user.value?.lang === 'string' && user.value.lang.trim() !== '') {
+    selectedLocale.value = user.value.lang.replace('_', '-');
   } else {
     selectedLocale.value = i18n.global.locale.value;
   }
@@ -584,7 +709,15 @@ onMounted(() => {
   &--section-title {
     font-weight: bold;
     font-size: 16px;
+    margin-bottom: 1rem;
   }
+  &--section-title--second {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+  }
+
   &--label {
     font-size: 14px;
     font-weight: 500;
@@ -596,8 +729,6 @@ onMounted(() => {
   &--password {
     margin-top: 1rem;
     padding: 1rem 0;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
     background-color: #f9fafb;
     display: flex;
     justify-content: space-between;
@@ -617,21 +748,17 @@ onMounted(() => {
     font-weight: 500;
   }
   &--security-section {
-    margin-bottom: 2rem;
     font-size: 12px;
-    .login-visible {
-      margin-bottom: 1rem;
-    }
   }
   &--card {
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
     padding: 1rem;
     background-color: #ffffff;
     .user__settings--footer-change-login {
       display: flex;
       justify-content: flex-end;
       width: 100%;
+      margin-top: 1.5rem;
+      margin-left: 8px;
     }
   }
 }

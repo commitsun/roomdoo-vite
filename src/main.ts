@@ -6,6 +6,7 @@ import { createPinia } from 'pinia';
 import { createHead } from '@vueuse/head';
 import ToastService from 'primevue/toastservice';
 import DialogService from 'primevue/dialogservice';
+import ConfirmationService from 'primevue/confirmationservice';
 
 import App from './App.vue';
 
@@ -23,5 +24,6 @@ createApp(App)
   .use(createHead())
   .use(primevuePlugin)
   .use(DialogService)
+  .use(ConfirmationService)
   .use(ToastService)
   .mount('#app');
