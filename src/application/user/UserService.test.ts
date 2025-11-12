@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { UserService } from './UserService';
 
+import { BadRequestError } from '@/application/shared/BadRequestError';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import type { UserRepository } from '@/domain/repositories/UserRepository';
 
@@ -163,9 +164,9 @@ describe('UserService - loginAndGetUser', () => {
   });
 
   it('updateUser: propagates repository errors', async () => {
-    userRepoMock.updateUser.mockRejectedValue(new Error('update failed'));
+    userRepoMock.updateUser.mockRejectedValue(new BadRequestError('update failed'));
 
-    await expect(userService.updateUser({ firstName: 'Alan' })).rejects.toThrow('update failed');
+    await expect(userService.updateUser({ firstName: 'Alan' })).rejects.toThrow(BadRequestError);
   });
 
   it('fetchUserSchemas: devuelve lo que entrega el repositorio', async () => {
