@@ -116,6 +116,10 @@
     "currentLogin": "Current login",
     "newLogin": "New login*",
     "changeLogin": "Change login",
+    "changeLogin?": "Change login?",
+    "areYouSureChangeLogin": "By changing your login, we will log you out and you will need to log in again with your login.",
+    "changePassword?": "Change password?",
+    "areYouSureChangePassword": "By changing your password, we will log you out and you will need to log in again with your new password.",
     "firstName": "First Name",
     "lastName": "Last Name",
     "secondLastName": "Second Last Name",
@@ -134,7 +138,13 @@
     "invalidPassword": "The current password is incorrect",
     "passwordsDoNotMatch": "The new passwords do not match",
     "userUpdated": "User data has been updated successfully",
-    "loginUpdated": "Login has been updated successfully"
+    "loginUpdated": "Login has been updated successfully",
+    "changesWithoutSaving": "There are unsaved changes",
+    "youWillLoseChanges": "Changes made to your profile will be lost if you do not save them.",
+    "discard": "Discard",
+    "loginAlreadyInUse": "Login already in use",
+    "loginRequired": "Login is required",
+    "allPasswordFieldsRequired": "All password fields are required"
   },
   "error404": {
     "title": "Page not found",

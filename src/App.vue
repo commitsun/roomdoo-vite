@@ -11,22 +11,22 @@
     </div>
   </teleport>
   <Dialog
-    :header="textMessage.title"
+    v-if="firstMessage"
+    :key="firstMessage.id"
+    :header="firstMessage.title"
     modal
-    v-model:visible="visible"
-    v-for="textMessage in textMessages"
-    :key="textMessage.id"
-    @hide="closeTextMessage"
+    v-model:visible="dialogVisible"
+    @hide="onHide"
   >
-    {{ textMessage.text }}
+    {{ firstMessage.text }}
     <template #footer>
-      <Button type="button" label="Aceptar" @click="visible = false"></Button>
+      <Button type="button" label="Aceptar" @click="onAccept"></Button>
     </template>
   </Dialog>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, watch, ref } from 'vue';
+import { defineComponent, computed, ref, watch } from 'vue';
 import Toast from 'primevue/toast';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useToast } from 'primevue/usetoast';
@@ -50,15 +50,34 @@ export default defineComponent({
     Button,
   },
   setup() {
-    const visible = ref(true);
     const toast = useToast();
     const { remove: consumeNotification } = useNotificationsStore();
-    const { removeTextMessage: closeTextMessage } = useTextMessagesStore();
+    const { removeTextMessage } = useTextMessagesStore();
     const notificationStore = useNotificationsStore();
     const textMessageStore = useTextMessagesStore();
     const uiStore = useUIStore();
+
     const notifications = computed(() => notificationStore.messages);
     const textMessages = computed(() => textMessageStore.messages);
+
+    const firstMessage = computed(() => textMessages.value[0] ?? null);
+
+    const dialogVisible = ref(false);
+    watch(
+      firstMessage,
+      (msg) => {
+        dialogVisible.value = Boolean(msg);
+      },
+      { immediate: true },
+    );
+
+    const onHide = (): void => {
+      removeTextMessage();
+    };
+
+    const onAccept = (): void => {
+      dialogVisible.value = false;
+    };
 
     watch(
       () => notifications.value.length,
@@ -76,10 +95,13 @@ export default defineComponent({
     return {
       uiStore,
       notifications,
-      visible,
       textMessages,
+      firstMessage,
+      dialogVisible,
+      onHide,
+      onAccept,
       consumeNotification,
-      closeTextMessage,
+      removeTextMessage,
     };
   },
 });

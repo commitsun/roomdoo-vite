@@ -259,7 +259,6 @@ import UserSettings from '@/ui/components/user/UserSettings.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 import LegacyReport from '@/_legacy/components/reports/ReportComponent.vue';
-import { useUIStore } from '@/infrastructure/stores/ui';
 
 defineProps<{
   menuOpen: boolean;
@@ -270,7 +269,6 @@ type LegacyReportType = 'kelly' | 'arrivals' | 'departures' | 'transactions' | '
 const route = useRoute();
 const userStore = useUserStore();
 const pmsPropertiesStore = usePmsPropertiesStore();
-const uiStore = useUIStore();
 const router = useRouter();
 const { t } = useI18n();
 const { open } = useAppDialog();
@@ -296,9 +294,7 @@ const items = computed(() => [
           open(UserSettings, {
             props: { header: userSettingsHeader },
             onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
-              if (data?.action === 'userUpdated') {
-                uiStore.refreshView();
-              } else if (data?.action === 'doLogout') {
+              if (data?.action === 'doLogout') {
                 userStore.logout();
                 useLegacyStore().removeVuexAndOldCookiesUser();
                 void router.push({ name: 'login' });

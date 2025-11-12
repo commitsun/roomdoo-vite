@@ -15,7 +15,7 @@ export const RoomdooPreset = definePreset(Aura, {
       200: '#8dd1f3',
       300: '#5cbced',
       400: '#33ace7',
-      500: '#1e9ed9',
+      500: '#1D4ED8',
       600: '#1a89c0',
       700: '#156e99',
       800: '#115377',
