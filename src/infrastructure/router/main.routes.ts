@@ -49,16 +49,4 @@ export const mainRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  {
-    path: '/test',
-    component: () => import('@/_legacy/layouts/MainLayout.vue'),
-    children: [
-      {
-        name: 'test',
-        path: '',
-        component: () => import('@/ui/pages/TestPage.vue'),
-        meta: { requiresAuth: true },
-      },
-    ],
-  },
 ];
