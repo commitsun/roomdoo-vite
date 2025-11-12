@@ -154,7 +154,7 @@ onBeforeMount(async () => {
 
     &__main {
       height: 100svh;
-      margin-left: 70px;
+      margin-left: 67px;
     }
   }
 }

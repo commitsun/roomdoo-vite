@@ -69,6 +69,7 @@ describe('UsersRepositoryImpl', () => {
           lastname2: 'Byron',
           lang: 'en_US',
           image: 'https://cdn/avatar.png',
+          lang: 'es_ES',
           email: 'ada@example.com',
         },
       });
@@ -79,6 +80,7 @@ describe('UsersRepositoryImpl', () => {
       expect(user.firstName).toBe('Ada');
       expect(user.lastName).toBe('Lovelace');
       expect(user.lastName2).toBe('Byron');
+      expect(user.lang).toBe('es-ES');
       expect(user.avatar).toBe('https://cdn/avatar.png');
     });
     it('propagates axios errors in fetchUser', async () => {
@@ -213,7 +215,7 @@ describe('UsersRepositoryImpl', () => {
       expect(api.patch).toHaveBeenCalledWith('/user', { lang: 'es_ES' });
 
       expect(i18n.global.locale.value).toBe('es-ES');
-      expect(updatePrimevueLocaleSpy).toHaveBeenCalledWith('es-ES');
+      expect(updatePrimevueLocaleSpy).toHaveBeenCalledWith('es');
     });
     it('propagates axios errors in updateUser', async () => {
       const err = new Error('axios fail');

@@ -20,6 +20,8 @@ export interface CustomerFilters extends BaseFilters {
 export interface GuestFilters extends BaseFilters {
   documentContains?: string;
   inHouseOnly?: boolean;
+  checkinDateFrom?: Date;
+  checkinDateTo?: Date;
 }
 
 export interface AgencyFilters extends Omit<ContactFilters, 'typeIn'> {}
