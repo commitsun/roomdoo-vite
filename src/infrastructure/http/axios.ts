@@ -13,6 +13,7 @@ import { t, i18n } from '@/infrastructure/plugins/i18n';
 import router from '@/infrastructure/plugins/router';
 import { InternalServerError } from '@/application/shared/InternalServerError';
 import { UnknownError } from '@/application/shared/UnknownError';
+import { BadRequestError } from '@/application/shared/BadRequestError';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -103,6 +104,8 @@ api.interceptors.response.use(
       }
     }
     switch (err.response?.status) {
+      case 400:
+        throw new BadRequestError();
       case 401:
         throw new UnauthorizedError();
       case 500:

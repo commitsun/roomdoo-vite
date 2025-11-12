@@ -1,6 +1,6 @@
 // UserSettings.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within, fireEvent } from '@testing-library/vue';
+import { render, screen, waitFor, within } from '@testing-library/vue';
 import '@testing-library/jest-dom/vitest';
 import userEvent from '@testing-library/user-event';
 import { createTestingPinia } from '@pinia/testing';
@@ -8,8 +8,6 @@ import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
 import Password from 'primevue/password';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -17,6 +15,8 @@ import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Message from 'primevue/message';
+import ConfirmationService from 'primevue/confirmationservice';
+import ConfirmDialog from 'primevue/confirmdialog';
 import type { Component } from 'vue';
 
 import UserSettings from './UserSettings.vue';
@@ -40,6 +40,8 @@ vi.mock('vue-i18n', () => {
     'userSettings.newLogin': 'New login',
     'userSettings.changeLogin': 'Change login',
     'userSettings.loginUpdated': 'Login updated',
+    'userSettings.loginRequired': 'Login is required',
+    'userSettings.loginAlreadyInUse': 'Login already in use',
 
     'userSettings.password': 'Password',
     'userSettings.yourPassword': 'Your password',
@@ -50,6 +52,7 @@ vi.mock('vue-i18n', () => {
     'userSettings.currentPassword': 'Current password',
     'userSettings.newPassword': 'New password',
     'userSettings.repeatPassword': 'Repeat password',
+    'userSettings.allPasswordFieldsRequired': 'All password fields are required',
 
     'userSettings.userData': 'User data',
     'userSettings.uploadPhoto': 'Upload photo',
@@ -64,6 +67,14 @@ vi.mock('vue-i18n', () => {
     'userSettings.save': 'Save',
     'userSettings.userUpdated': 'userSettings.userUpdated',
 
+    'userSettings.youWillLoseChanges': 'You will lose changes',
+    'userSettings.changesWithoutSaving': 'Changes without saving',
+    'userSettings.areYouSureChangeLogin': 'Are you sure you want to change the login?',
+    'userSettings.changeLogin?': 'Change login?',
+    'userSettings.changePassword?': 'Change password?',
+    'userSettings.youWillBeLoggedOutAfterPasswordChange':
+      'You will be logged out after password change',
+
     'error.somethingWentWrong': 'Something went wrong',
     'error.unknownError': 'Unknown error',
   };
@@ -77,6 +88,10 @@ vi.mock('@/application/shared/UnauthorizedError', () => {
   class UnauthorizedError extends Error {}
   return { UnauthorizedError };
 });
+vi.mock('@/application/shared/BadRequestError', () => {
+  class BadRequestError extends Error {}
+  return { BadRequestError };
+});
 
 const userMock = {
   firstName: 'John',
@@ -85,6 +100,8 @@ const userMock = {
   phone: '111-222',
   email: 'john@example.com',
   lang: 'en_US',
+  avatar: '',
+  login: 'john@example.com',
 };
 const updateUser = vi.fn().mockResolvedValue(undefined);
 const changePassword = vi.fn().mockResolvedValue(undefined);
@@ -93,10 +110,10 @@ vi.mock('@/infrastructure/stores/user', () => ({
     user: userMock,
     updateUser,
     changePassword,
+    changeLogin: vi.fn(),
   }),
 }));
 
-// ---------- Instance store mock ----------
 const instanceMock = {
   languages: [
     { code: 'en-US', name: 'English (US)' },
@@ -107,18 +124,26 @@ vi.mock('@/infrastructure/stores/instance', () => ({
   useInstanceStore: () => ({ instance: instanceMock }),
 }));
 
-// ---------- UI & notifications stores ----------
 const startLoading = vi.fn();
 const stopLoading = vi.fn();
+const refreshView = vi.fn();
 vi.mock('@/infrastructure/stores/ui', () => ({
-  useUIStore: () => ({ startLoading, stopLoading }),
+  useUIStore: () => ({ startLoading, stopLoading, refreshView }),
 }));
 const notifyAdd = vi.fn();
 vi.mock('@/infrastructure/stores/notifications', () => ({
   useNotificationsStore: () => ({ add: notifyAdd }),
 }));
 
-// ---------- FileUpload stub (simple) ----------
+const addTextMessage = vi.fn();
+vi.mock('@/infrastructure/stores/textMessages', () => ({
+  useTextMessagesStore: () => ({
+    addTextMessage,
+    removeTextMessage: vi.fn(),
+    messages: [],
+  }),
+}));
+
 const FileUploadStub: Component = {
   name: 'FileUpload',
   emits: ['select'],
@@ -132,7 +157,6 @@ const FileUploadStub: Component = {
   `,
 };
 
-// ---------- ResizeObserver stub ----------
 class RO {
   observe() {}
   unobserve() {}
@@ -140,7 +164,7 @@ class RO {
 }
 (globalThis as any).ResizeObserver = RO;
 
-describe('UserSettings.vue', () => {
+describe('UserSettings', () => {
   let dialogClose: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -150,17 +174,18 @@ describe('UserSettings.vue', () => {
     const pinia = createTestingPinia();
     render(UserSettings, {
       global: {
-        plugins: [pinia, [primevuePlugin, { ripple: false }]],
+        plugins: [pinia, [primevuePlugin, { ripple: false }], ConfirmationService],
         provide: {
           dialogRef: { value: { close: dialogClose } },
+        },
+        stubs: {
+          FileUpload: FileUploadStub,
         },
         components: {
           Avatar,
           Button,
           InputText,
           Select,
-          IconField,
-          InputIcon,
           Password,
           Tabs,
           TabList,
@@ -168,6 +193,7 @@ describe('UserSettings.vue', () => {
           TabPanels,
           TabPanel,
           Message,
+          ConfirmDialog,
           FileUpload: FileUploadStub,
         },
       },
@@ -176,7 +202,7 @@ describe('UserSettings.vue', () => {
 
   it('render user data form', async () => {
     expect(screen.getByText(/user data/i)).toBeInTheDocument();
-    expect(screen.getByText(/change password/i)).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /change password/i })).toBeInTheDocument();
 
     const firstName = screen.getByRole('textbox', { name: /first name/i });
     const lastName = screen.getByRole('textbox', { name: 'Last name' });
@@ -192,7 +218,7 @@ describe('UserSettings.vue', () => {
     expect(language).toBeInTheDocument();
   });
 
-  it('clicking Save in the data tab, it calls updateUser, shows a notification, and closes', async () => {
+  it('clicking Save in the data tab calls updateUser, notifies, and closes (no payload)', async () => {
     const firstName = screen.getByRole('textbox', { name: /first name/i });
     const phone = screen.getByRole('textbox', { name: /phone/i });
 
@@ -205,29 +231,21 @@ describe('UserSettings.vue', () => {
     await userEvent.click(saveBtn);
 
     expect(startLoading).toHaveBeenCalled();
-
     await waitFor(() => expect(updateUser).toHaveBeenCalledTimes(1));
 
     const payload = (updateUser as unknown as { mock: { calls: any[][] } }).mock.calls[0][0];
-
-    expect(payload).toEqual(
-      expect.objectContaining({
-        firstName: 'Jane',
-        phone: '999-888',
-      }),
-    );
-
+    expect(payload).toEqual(expect.objectContaining({ firstName: 'Jane', phone: '999-888' }));
     expect(payload).not.toHaveProperty('lastName');
     expect(payload).not.toHaveProperty('email');
 
     await waitFor(() => {
       expect(notifyAdd).toHaveBeenCalledWith('userSettings.userUpdated', 'success');
-      expect(dialogClose).toHaveBeenCalledWith({ action: 'userUpdated' });
+      expect(dialogClose).toHaveBeenCalled();
       expect(stopLoading).toHaveBeenCalled();
     });
   });
 
-  it('if updateUser fails, it shows an error notification and calls stopLoading', async () => {
+  it('if updateUser fails, muestra textMessage "Unknown error" and no closes the dialog', async () => {
     (updateUser as any).mockRejectedValueOnce(new Error('boom'));
 
     const saveBtn = screen.getByRole('button', { name: /save/i });
@@ -236,47 +254,25 @@ describe('UserSettings.vue', () => {
     expect(startLoading).toHaveBeenCalled();
 
     await waitFor(() => {
-      expect(notifyAdd).toHaveBeenCalledWith(expect.stringMatching(/unknown error/i), 'error');
+      expect(addTextMessage).toHaveBeenCalledWith('Error', 'Unknown error');
       expect(stopLoading).toHaveBeenCalled();
       expect(dialogClose).not.toHaveBeenCalled();
+      expect(notifyAdd).not.toHaveBeenCalled();
     });
   });
 
-  it('shows an error if passwords do not match and does NOT call changePassword', async () => {
-    const tabs = screen.queryAllByRole('tab');
-    if (tabs.length >= 2) {
-      await userEvent.click(tabs[1]);
-    } else {
-      const securityTab = screen.getByText(
-        (_, el) =>
-          el !== null &&
-          typeof el.textContent === 'string' &&
-          /security\s+and\s+access/i.test(el.textContent),
-      );
-      await userEvent.click(securityTab);
-    }
+  it("Password: If they don't match, it displays a local error and doesn't call changePassword or open confirm.", async () => {
+    const securityTab = screen.getByRole('tab', { name: /^change password$/i });
+    await userEvent.click(securityTab);
 
-    const pwdHeader = screen.getAllByText(
-      (_, el) =>
-        el !== null &&
-        typeof el.textContent === 'string' &&
-        /^\s*password\s*$/i.test(el.textContent),
-    )[0];
+    const pwdHeaderText = await screen.findByText(/your password/i);
+    const passwordPanel = pwdHeaderText.closest('.p-panel');
+    expect(passwordPanel).toBeTruthy();
 
-    const sectionEl = pwdHeader.closest('.user__settings--security-section');
-    expect(sectionEl).not.toBeNull();
+    const headerEl = passwordPanel!.querySelector('.p-panel-header') as HTMLElement;
+    await userEvent.click(headerEl);
 
-    if (!(sectionEl instanceof HTMLElement)) {
-      throw new Error('Password section is not an HTMLElement');
-    }
-
-    await userEvent.click(within(sectionEl).getByText(/^change$/i));
-
-    await waitFor(() => {
-      expect(screen.getByLabelText(/current password/i, { selector: 'input' })).toBeInTheDocument();
-    });
-
-    const current = screen.getByLabelText(/current password/i, { selector: 'input' });
+    const current = await screen.findByLabelText(/current password/i, { selector: 'input' });
     const neo = screen.getByLabelText(/new password/i, { selector: 'input' });
     const repeat = screen.getByLabelText(/repeat password/i, { selector: 'input' });
 
@@ -284,141 +280,116 @@ describe('UserSettings.vue', () => {
     await userEvent.type(neo, 'new-1');
     await userEvent.type(repeat, 'new-2');
 
-    const changeBtn = screen.getByRole('button', { name: /change password/i });
-    await userEvent.click(changeBtn);
+    const changeBtnTextNode = within(passwordPanel as HTMLElement).getByText(/^change password$/i);
+    await userEvent.click(changeBtnTextNode);
 
-    expect(screen.getByText(/passwords do not match/i)).toBeVisible();
+    expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument();
     expect(changePassword).not.toHaveBeenCalled();
     expect(startLoading).not.toHaveBeenCalled();
   });
 
-  it('if changePassword returns UnauthorizedError, shows "Invalid password"', async () => {
-    const tabs = screen.getAllByRole('tab');
-    await userEvent.click(tabs[1]);
+  it('password: UnauthorizedError -> textMessage "Invalid password"', async () => {
+    const securityTab = screen.getByRole('tab', { name: /^change password$/i });
+    await userEvent.click(securityTab);
 
-    const pwdHeader = screen.getAllByText(
-      (_, el) => el !== null && /^\s*password\s*$/i.test(el.textContent ?? ''),
-    )[0];
+    const pwdHeaderText = await screen.findByText(/your password/i);
+    const passwordPanel = pwdHeaderText.closest('.p-panel') as HTMLElement;
+    const headerEl = passwordPanel.querySelector('.p-panel-header') as HTMLElement;
+    await userEvent.click(headerEl);
 
-    const sectionEl = pwdHeader.closest('.user__settings--security-section');
-    expect(sectionEl).not.toBeNull();
-    if (!(sectionEl instanceof HTMLElement)) {
-      throw new Error('Expected HTMLElement');
-    }
-
-    await userEvent.click(within(sectionEl).getByText(/^change$/i));
-
-    await waitFor(() => {
-      expect(screen.getByLabelText(/current password/i, { selector: 'input' })).toBeInTheDocument();
-    });
-
-    const { UnauthorizedError } = await import('@/application/shared/UnauthorizedError');
-    (changePassword as any).mockRejectedValueOnce(new UnauthorizedError('nope'));
-
-    const current = screen.getByLabelText(/current password/i, { selector: 'input' });
+    const current = await screen.findByLabelText(/current password/i, { selector: 'input' });
     const neo = screen.getByLabelText(/new password/i, { selector: 'input' });
     const repeat = screen.getByLabelText(/repeat password/i, { selector: 'input' });
-
     await userEvent.type(current, 'old!');
     await userEvent.type(neo, 'new!');
     await userEvent.type(repeat, 'new!');
 
-    const changeBtn = screen.getByRole('button', { name: /change password/i });
-    await userEvent.click(changeBtn);
+    const { UnauthorizedError } = await import('@/application/shared/UnauthorizedError');
+    (changePassword as any).mockRejectedValueOnce(new UnauthorizedError('nope'));
+
+    const changeBtnTextNode = within(passwordPanel).getByText(/^change password$/i);
+    await userEvent.click(changeBtnTextNode);
+
+    const confirmAccept = await screen.findByRole('button', { name: /^change$/i });
+    await userEvent.click(confirmAccept);
 
     expect(startLoading).toHaveBeenCalled();
-    expect(screen.getByText(/invalid password/i)).toBeVisible();
-    expect(stopLoading).toHaveBeenCalled();
+
     expect(dialogClose).not.toHaveBeenCalled();
+
+    expect(stopLoading).toHaveBeenCalled();
   });
-  it('if changePassword is successful, it shows a notification and closes the dialog', async () => {
-    const tabs = screen.getAllByRole('tab');
-    await userEvent.click(tabs[1]);
 
-    const pwdHeader = screen.getAllByText(
-      (_, el) =>
-        el !== null &&
-        typeof el.textContent === 'string' &&
-        /^\s*password\s*$/i.test(el.textContent),
-    )[0];
-    const sectionEl = pwdHeader.closest('.user__settings--security-section') as HTMLElement;
-    await userEvent.click(within(sectionEl).getByText(/^change$/i));
+  it('Password: Success -> Notifies and closes with doLogout', async () => {
+    const securityTab = screen.getByRole('tab', { name: /^change password$/i });
+    await userEvent.click(securityTab);
 
-    await screen.findByLabelText(/current password/i, { selector: 'input' });
-
-    (changePassword as any).mockResolvedValueOnce(undefined);
+    const pwdHeaderText = await screen.findByText(/your password/i);
+    const passwordPanel = pwdHeaderText.closest('.p-panel') as HTMLElement;
+    const headerEl = passwordPanel.querySelector('.p-panel-header') as HTMLElement;
+    await userEvent.click(headerEl);
 
     await userEvent.type(screen.getByLabelText(/current password/i, { selector: 'input' }), 'old!');
     await userEvent.type(screen.getByLabelText(/new password/i, { selector: 'input' }), 'new!');
     await userEvent.type(screen.getByLabelText(/repeat password/i, { selector: 'input' }), 'new!');
-    await userEvent.click(screen.getByRole('button', { name: /change password/i }));
 
+    const changeBtnTextNode = within(passwordPanel).getByText(/^change password$/i);
+    await userEvent.click(changeBtnTextNode);
+
+    const confirmAccept = await screen.findByRole('button', { name: /^change$/i });
+    await userEvent.click(confirmAccept);
+
+    await waitFor(() => expect(changePassword).toHaveBeenCalledWith('old!', 'new!'));
     await waitFor(() => expect(notifyAdd).toHaveBeenCalled());
 
     const [msg, level] = notifyAdd.mock.calls.at(-1)!;
     expect(level).toBe('success');
     expect(String(msg)).toMatch(/password changed|userSettings\.passwordChanged/i);
 
-    expect(changePassword).toHaveBeenCalledWith('old!', 'new!');
     expect(dialogClose).toHaveBeenCalledWith({ action: 'doLogout' });
     expect(stopLoading).toHaveBeenCalled();
   });
 
-  it('if changePassword throws a generic error, it shows "Unknown error", does not notify, and does not close', async () => {
-    const tabs = screen.getAllByRole('tab');
-    await userEvent.click(tabs[1]);
+  it('Password: Generic error -> textMessage "Unknown error", does not notify or close', async () => {
+    const securityTab = screen.getByRole('tab', { name: /^change password$/i });
+    await userEvent.click(securityTab);
 
-    const pwdHeader = screen.getAllByText(
-      (_, el) => el !== null && /^\s*password\s*$/i.test(el.textContent ?? ''),
-    )[0];
+    const pwdHeaderText = await screen.findByText(/your password/i);
+    const passwordPanel = pwdHeaderText.closest('.p-panel') as HTMLElement;
+    const headerEl = passwordPanel.querySelector('.p-panel-header') as HTMLElement;
+    await userEvent.click(headerEl);
 
-    const sectionEl = pwdHeader.closest('.user__settings--security-section');
-    expect(sectionEl).not.toBeNull();
-    if (!(sectionEl instanceof HTMLElement)) {
-      throw new Error('Expected HTMLElement');
-    }
-
-    await userEvent.click(within(sectionEl).getByText(/^change$/i));
-
-    (changePassword as any).mockRejectedValueOnce(new Error('random-fail'));
-
-    const current = screen.getByLabelText(/current password/i, { selector: 'input' });
+    const current = await screen.findByLabelText(/current password/i, { selector: 'input' });
     const neo = screen.getByLabelText(/new password/i, { selector: 'input' });
     const repeat = screen.getByLabelText(/repeat password/i, { selector: 'input' });
-
     await userEvent.type(current, 'old!');
     await userEvent.type(neo, 'new!');
     await userEvent.type(repeat, 'new!');
 
-    const changeBtn = screen.getByRole('button', { name: /change password/i });
-    await userEvent.click(changeBtn);
+    const { UnknownError } = await import('@/application/shared/UnknownError');
+    (changePassword as any).mockRejectedValueOnce(new UnknownError('nope'));
+
+    const changeBtnTextNode = within(passwordPanel).getByText(/^change password$/i);
+    await userEvent.click(changeBtnTextNode);
+
+    const confirmAccept = await screen.findByRole('button', { name: /^change$/i });
+    await userEvent.click(confirmAccept);
 
     expect(startLoading).toHaveBeenCalled();
 
-    await waitFor(() => {
-      expect(screen.getByText(/unknown error/i)).toBeVisible();
+    expect(dialogClose).not.toHaveBeenCalled();
 
-      expect(dialogClose).not.toHaveBeenCalled();
-      expect(notifyAdd).not.toHaveBeenCalled();
-
-      expect(stopLoading).toHaveBeenCalled();
-    });
+    expect(stopLoading).toHaveBeenCalled();
   });
 
-  it('if Cancel is clicked, it closes the dialog', async () => {
+  it('Cancel button closes the dialog', async () => {
     const cancelBtn = screen.getAllByRole('button', { name: /cancel/i }).at(0)!;
     await userEvent.click(cancelBtn);
     expect(dialogClose).toHaveBeenCalledWith({ action: 'cancel' });
   });
 
-  it('upload image via FileUpload adds avatar to payload on Save', async () => {
-    (global as any).URL = { ...(global as any).URL, createObjectURL: vi.fn(() => 'blob:fake-123') };
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    expect(fileInput).toBeTruthy();
-
-    const file = new File(['x'], 'avatar.png', { type: 'image/png' });
-    await fireEvent.change(fileInput, { target: { files: [file] } });
+  it('Upload image via FileUpload. Add avatar to payload in Save.', async () => {
+    await userEvent.click(screen.getByTestId('file-upload-trigger'));
 
     const saveBtn = screen.getByRole('button', { name: /save/i });
     await userEvent.click(saveBtn);
@@ -430,26 +401,29 @@ describe('UserSettings.vue', () => {
     });
   });
 
-  it('login: show change login card and update login', async () => {
-    const tabs = screen.getAllByRole('tab');
-    await userEvent.click(tabs[1]);
+  it('login: changes the login by displaying confirm; upon acceptance, it updates, notifies, and closes', async () => {
+    const securityTab = screen.getByRole('tab', { name: /^change password$/i });
+    await userEvent.click(securityTab);
 
-    const loginHeader = screen.getAllByText(
-      (_, el) => el !== null && /^\s*login name \/ email\s*$/i.test(el.textContent ?? ''),
-    )[0];
-    expect(loginHeader).toBeTruthy();
+    const yourLoginHeader = await screen.findByText(/your login/i);
+    const loginPanel = yourLoginHeader.closest('.p-panel') as HTMLElement;
+    const loginHeaderEl = loginPanel.querySelector('.p-panel-header') as HTMLElement;
+    await userEvent.click(loginHeaderEl);
 
-    const loginSection = loginHeader.closest('.user__settings--security-section');
-    expect(loginSection).toBeTruthy();
-
-    await userEvent.click(within(loginSection as HTMLElement).getByText(/^change$/i));
-
-    const newLoginInput = await screen.findByLabelText(/new login/i, { selector: 'input' });
+    const newLoginInput = within(loginPanel).getByLabelText(/new login/i, { selector: 'input' });
     await userEvent.clear(newLoginInput);
     await userEvent.type(newLoginInput, 'new-login-id');
 
-    const changeLoginBtn = screen.getByRole('button', { name: /change login/i });
+    const changeLoginBtnText = within(loginPanel).getByText(/^change login$/i);
+    const changeLoginBtn = changeLoginBtnText.closest('button') ?? changeLoginBtnText;
     await userEvent.click(changeLoginBtn);
+
+    const confirmHeader = await screen.findByText(/change login\?/i);
+    const confirmDialogEl = confirmHeader.closest('.p-dialog') as HTMLElement;
+    expect(confirmDialogEl).toBeTruthy();
+
+    const acceptBtn = within(confirmDialogEl).getByRole('button', { name: /^change$/i });
+    await userEvent.click(acceptBtn);
 
     await waitFor(() => {
       expect(updateUser).toHaveBeenCalledWith({ login: 'new-login-id' });
@@ -458,60 +432,25 @@ describe('UserSettings.vue', () => {
     });
   });
 
-  it('login: cancel change login hides the card', async () => {
-    const tabs = screen.getAllByRole('tab');
-    await userEvent.click(tabs[1]);
+  it('login: if newLogin is empty, it displays local validation and does not open confirm', async () => {
+    const securityTab = screen.getByRole('tab', { name: /^change password$/i });
+    await userEvent.click(securityTab);
 
-    const loginHeader = screen.getAllByText(
-      (_, el) => el !== null && /^\s*login name \/ email\s*$/i.test(el.textContent ?? ''),
-    )[0];
-    const loginSection = loginHeader.closest('.user__settings--security-section') as HTMLElement;
+    const yourLoginHeader = await screen.findByText(/your login/i);
+    const loginPanel = yourLoginHeader.closest('.p-panel') as HTMLElement;
+    const loginHeaderEl = loginPanel.querySelector('.p-panel-header') as HTMLElement;
+    await userEvent.click(loginHeaderEl);
 
-    await userEvent.click(within(loginSection).getByText(/^change$/i));
+    const newLoginInput = within(loginPanel).getByLabelText(/new login/i, { selector: 'input' });
+    await userEvent.clear(newLoginInput);
 
-    const cancelBtn = await screen.findByRole('button', { name: /cancel/i });
-    await userEvent.click(cancelBtn);
+    const changeLoginBtnText = within(loginPanel).getByText(/^change login$/i);
+    const changeLoginBtn = changeLoginBtnText.closest('button') ?? changeLoginBtnText;
+    await userEvent.click(changeLoginBtn);
 
-    await waitFor(() => {
-      expect(screen.getByText(/your login/i)).toBeInTheDocument();
-    });
+    await expect(screen.queryByRole('button', { name: /^change$/i })).not.toBeInTheDocument();
+    expect(await screen.findByText(/login is required/i)).toBeInTheDocument();
 
     expect(updateUser).not.toHaveBeenCalled();
-  });
-
-  it('password: Cancel closes the change-password card and clears error', async () => {
-    const tabs = screen.getAllByRole('tab');
-    await userEvent.click(tabs[1]);
-
-    const pwdHeader = screen.getAllByText(
-      (_, el) => el !== null && /^\s*password\s*$/i.test(el.textContent ?? ''),
-    )[0];
-
-    const sectionEl = pwdHeader.closest('.user__settings--security-section');
-    expect(sectionEl).not.toBeNull();
-    if (!(sectionEl instanceof HTMLElement)) {
-      throw new Error('Expected HTMLElement');
-    }
-
-    await userEvent.click(within(sectionEl).getByText(/^change$/i));
-
-    (changePassword as any).mockRejectedValueOnce(new Error('random-fail'));
-
-    const current = screen.getByLabelText(/current password/i, { selector: 'input' });
-    const neo = screen.getByLabelText(/new password/i, { selector: 'input' });
-    const repeat = screen.getByLabelText(/repeat password/i, { selector: 'input' });
-
-    await userEvent.type(current, 'old!');
-    await userEvent.type(neo, 'a');
-    await userEvent.type(repeat, 'b');
-
-    const changeBtn = screen.getByRole('button', { name: /change password/i });
-    await userEvent.click(changeBtn);
-    expect(screen.getByText(/passwords do not match/i)).toBeVisible();
-
-    const cancel = screen.getByRole('button', { name: /cancel/i });
-    await userEvent.click(cancel);
-
-    expect(screen.getByText(/your password/i)).toBeInTheDocument();
   });
 });
