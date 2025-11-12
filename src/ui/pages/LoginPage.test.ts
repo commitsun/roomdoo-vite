@@ -148,7 +148,16 @@ describe('LoginPage', () => {
       id: 1,
       email: 'a@b.c',
       lang: 'en_US',
-      defaultPmsProperty: { id: 2, name: 'prop', image: '' },
+      defaultPmsProperty: {
+        id: 2,
+        name: 'prop',
+        image: '',
+        currency: {
+          id: 1,
+          code: 'USD',
+          name: 'US Dollar',
+        },
+      },
       firstName: '',
       lastName: '',
     });
@@ -173,7 +182,12 @@ describe('LoginPage', () => {
       id: 1,
       email: 'a@b.c',
       lang: 'en_US',
-      defaultPmsProperty: { id: 2, name: 'prop', image: '' },
+      defaultPmsProperty: {
+        id: 2,
+        name: 'prop',
+        image: '',
+        currency: { id: 1, code: 'USD', name: 'US Dollar' },
+      },
       firstName: '',
       lastName: '',
     });
@@ -198,7 +212,12 @@ describe('LoginPage', () => {
       id: 1,
       email: 'a@b.c',
       lang: 'en_US',
-      defaultPmsProperty: { id: 2, name: 'prop', image: '' },
+      defaultPmsProperty: {
+        id: 2,
+        name: 'prop',
+        image: '',
+        currency: { id: 1, code: 'USD', name: 'US Dollar' },
+      },
       firstName: '',
       lastName: '',
     });
