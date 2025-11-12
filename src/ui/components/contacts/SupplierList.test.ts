@@ -15,9 +15,9 @@ import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 
-import AgenciesPage from './AgenciesPage.vue';
+import SupplierList from './SupplierList.vue';
 
-import type { Agency } from '@/domain/entities/Contact';
+import type { Supplier } from '@/domain/entities/Contact';
 import primevuePlugin from '@/infrastructure/plugins/primevue';
 
 // i18n mock
@@ -26,83 +26,111 @@ vi.mock('vue-i18n', () => {
     'contacts.globalSearch': 'Global search',
     'contacts.clear': 'Clear',
     'contacts.fullName': 'Full name',
+    'contacts.vat': 'VAT',
     'contacts.email': 'Email',
     'contacts.phone': 'Phone',
     'contacts.country': 'Country',
+    'contacts.totalInvoiced': 'Total invoiced',
     'contacts.searchByName': 'Search by name',
     'contacts.searchByEmail': 'Search by email',
-    'contacts.searchByPhone': 'Search by phone',
-    'contacts.selectCountries': 'Select countries',
+    'contacts.searchByVat': 'Search by VAT',
+    'contacts.searchByCountry': 'Select countries',
+    'contacts.n_countries_selected': '{count} selected',
+    'contacts.detail': 'Contact detail',
   };
   return {
     useI18n: () => ({
-      t: (k: string) => tMap[k] ?? k,
+      t: (k: string, params?: any) =>
+        k === 'contacts.n_countries_selected' && params !== undefined && params !== null
+          ? ''
+          : (tMap[k] ?? k),
     }),
     createI18n: vi.fn(() => ({ install: () => {} })),
   };
 });
 
-// TODO: remove when legacy components are removed
+// i18n plugin mock (locale)
+vi.mock('@/infrastructure/plugins/i18n', () => ({
+  i18n: {
+    global: {
+      locale: { value: 'es-ES' },
+    },
+  },
+}));
+
+// Legacy/dialog mocks
 vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
   default: { name: 'PartnerForm', template: '<div />' },
 }));
 
-// TODO: remove when legacy stores are removed
+// Legacy store mock
 vi.mock('@/_legacy/utils/useLegacyStore', () => ({
   useLegacyStore: () => ({
     fetchAndSetVuexPartnerAndActiveProperty: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 
+// App dialog mock
 vi.mock('@/ui/composables/useAppDialog', () => ({
   useAppDialog: () => ({ open: vi.fn() }),
 }));
 
-// test data agencies
-const testAgencies: Agency[] = [
+// pmsProperties store mock
+vi.mock('@/infrastructure/stores/pmsProperties', () => ({
+  usePmsPropertiesStore: () => ({
+    currentPmsPropertyId: 'prop-1',
+    pmsProperties: [{ id: 'prop-1', currency: { code: 'EUR' } }],
+  }),
+}));
+
+// test data
+const testSuppliers: Supplier[] = [
   {
     id: 1,
-    name: 'Acme Travel',
-    email: 'booking@acme.com',
+    name: 'Acme Corp',
+    email: 'billing@acme.com',
+    vat: 'ESB12345678',
     phones: [],
     country: { code: 'ES', name: 'Spain', id: 1 },
+    totalInvoiced: 4200,
   },
   {
     id: 2,
-    name: 'Globex Agency',
-    email: 'contact@globex.pt',
-    phones: [
-      { number: '555-123-4567', type: 'mobile' },
-      { number: '555-987-6543', type: 'phone' },
-    ],
+    name: 'Globex Ltd',
+    email: 'sales@globex.co',
+    vat: 'PT999888777',
+    phones: [{ number: '555-123-456', type: 'mobile' }],
     country: { code: 'PT', name: 'Portugal', id: 2 },
+    totalInvoiced: 98765,
   },
 ];
 
+// Contacts store mock
 const mockContactsStore = {
-  agencies: testAgencies,
-  contactsCount: testAgencies.length,
-  fetchAgencies: vi.fn().mockResolvedValue(undefined),
+  suppliers: testSuppliers,
+  suppliersCount: testSuppliers.length,
+  fetchSuppliers: vi.fn().mockResolvedValue(undefined),
 };
-
 vi.mock('@/infrastructure/stores/contacts', () => ({
   useContactsStore: () => mockContactsStore,
 }));
 
+// Countries store mock
 vi.mock('@/infrastructure/stores/countries', () => ({
   useCountriesStore: () => ({
     countries: [
-      { id: 1, code: 'ES', name: 'Spain' },
-      { id: 2, code: 'PT', name: 'Portugal' },
+      { id: 1, name: 'Spain', code: 'ES' },
+      { id: 2, name: 'Portugal', code: 'PT' },
     ],
     fetchCountries: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 
-describe('AgenciesPage', () => {
+describe('SuppliersPage', () => {
   beforeEach(() => {
     const pinia = createTestingPinia();
-    render(AgenciesPage, {
+    render(SupplierList, {
+      props: { total: testSuppliers.length },
       global: {
         plugins: [pinia, [primevuePlugin, { ripple: false }]],
         components: {
@@ -122,160 +150,181 @@ describe('AgenciesPage', () => {
     });
   });
 
-  it('renders agencies by default - happy path - fetches on mount', async () => {
+  it('renders suppliers by default - happy path - fetches on mount', async () => {
     const rowGroups = screen.getAllByRole('rowgroup');
     const tbody = rowGroups[1];
     const bodyRows = within(tbody).getAllByRole('row');
 
-    // renders 2 agencies
+    // renders 2 customers
     expect(bodyRows).toHaveLength(2);
-    // check 1st row content
-    // name
-    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(testAgencies[0].name);
-    // email
-    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent(
-      testAgencies[0].email ?? '',
-    );
-    // phones
+
+    // row 1
+    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(testSuppliers[0].name); // name
+    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent(testSuppliers[0].vat); // VAT
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(
-      testAgencies[0].phones.length > 0 ? testAgencies[0].phones[0].number : '',
-    );
-    // country
+      testSuppliers[0].email ?? '',
+    ); // email
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testAgencies[0].country?.name ?? '',
+      testSuppliers[0].phones.length > 0 ? testSuppliers[0].phones[0].number : '',
+    ); // phone (empty)
+    expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
+      testSuppliers[0].country?.name ?? '',
+    ); // country
+    const expected1 = new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: true,
+    }).format(Number(testSuppliers[0].totalInvoiced));
+    const cellText1 = within(bodyRows[0]).getAllByRole('cell')[5].textContent;
+    expect(cellText1).toBe(expected1); //total invoiced
+
+    // row 2
+    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(testSuppliers[1].name);
+    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent(testSuppliers[1].vat);
+    expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent(
+      testSuppliers[1].email ?? '',
     );
-    // check 2nd row content
-    // name
-    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(testAgencies[1].name);
-    // email
-    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent(
-      testAgencies[1].email ?? '',
-    );
-    // phones
-    expect(within(bodyRows[1]).getAllByRole('cell')[2].innerHTML).toContain(
-      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[0].number : '',
-    );
-    expect(within(bodyRows[1]).getAllByRole('cell')[2].innerHTML).toContain(
-      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[1].number : '',
-    );
-    // country
-    expect(within(bodyRows[1]).getAllByRole('cell')[3]).toHaveTextContent(
-      testAgencies[1].country?.name ?? '',
-    );
+    expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
+      testSuppliers[1].phones.length > 0 ? testSuppliers[1].phones[0].number : '',
+    ); // phone
+    expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent(
+      testSuppliers[1].country?.name ?? '',
+    ); // country
+    const expected2 = new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: true,
+    }).format(Number(testSuppliers[1].totalInvoiced));
+    const cellText2 = within(bodyRows[1]).getAllByRole('cell')[5].textContent;
+    expect(cellText2).toBe(expected2); //total invoiced
   });
 
   it('applies global search input', async () => {
     vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const input = screen.getByPlaceholderText(/global search/i);
-    await user.type(input, 'Globex');
+    await user.type(input, 'Acme');
     vi.advanceTimersByTime(300);
-
-    const last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
-    expect(last && last[1].globalSearch).toBe('Globex');
-
+    const last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
+    expect(last && last[1].globalSearch).toBe('Acme');
     vi.useRealTimers();
   });
 
   it('debounces global search (only one call)', async () => {
     vi.useFakeTimers();
-    mockContactsStore.fetchAgencies.mockClear();
+    mockContactsStore.fetchSuppliers.mockClear();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const input = screen.getByPlaceholderText(/global search/i);
     await user.type(input, 'Globex');
-
-    expect(mockContactsStore.fetchAgencies).not.toHaveBeenCalled();
-
+    expect(mockContactsStore.fetchSuppliers).not.toHaveBeenCalled();
     vi.advanceTimersByTime(250);
-    expect(mockContactsStore.fetchAgencies).toHaveBeenCalledTimes(1);
-
+    expect(mockContactsStore.fetchSuppliers).toHaveBeenCalledTimes(1);
     vi.useRealTimers();
   });
 
   it('fires by maxWait even with continuous typing', async () => {
     vi.useFakeTimers();
-    mockContactsStore.fetchAgencies.mockClear();
+    mockContactsStore.fetchSuppliers.mockClear();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-
     const input = screen.getByPlaceholderText(/global search/i);
     await user.type(input, 'abc');
     vi.advanceTimersByTime(2900);
     await user.type(input, 'def');
     vi.advanceTimersByTime(200); // 3100 > maxWait
-
-    expect(mockContactsStore.fetchAgencies).toHaveBeenCalledTimes(1);
-
+    expect(mockContactsStore.fetchSuppliers).toHaveBeenCalledTimes(1);
     vi.useRealTimers();
   });
 
   it('sort by name toggles and maps orderBy', async () => {
-    const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
-    await userEvent.click(nameHeader); // asc
-    let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    const header = screen.getByRole('columnheader', { name: /full name/i });
+    await userEvent.click(header); // asc
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[2]).toBe('name');
 
-    await userEvent.click(nameHeader); // desc
-    last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    await userEvent.click(header); // desc
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[2]).toBe('-name');
   });
 
   it('sort by email toggles and maps orderBy', async () => {
-    const emailHeader = screen.getByRole('columnheader', { name: /email/i });
-    await userEvent.click(emailHeader); // asc
-    let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    const header = screen.getByRole('columnheader', { name: /email/i });
+    await userEvent.click(header); // asc
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[2]).toBe('email');
 
-    await userEvent.click(emailHeader); // desc
-    last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    await userEvent.click(header); // desc
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[2]).toBe('-email');
   });
 
   it('sort by country toggles and maps orderBy', async () => {
-    const countryHeader = screen.getByRole('columnheader', { name: /country/i });
-    await userEvent.click(countryHeader); // asc
-    let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    const header = screen.getByRole('columnheader', { name: /country/i });
+    await userEvent.click(header); // asc
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[2]).toBe('country');
 
-    await userEvent.click(countryHeader); // desc
-    last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    await userEvent.click(header); // desc
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[2]).toBe('-country');
   });
 
-  it('filters by name (column filter + apply) & clear input after click clear button', async () => {
+  it('filters by name and clears with Clear', async () => {
     const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
     const filterBtn = within(nameHeader).getByRole('button');
     await userEvent.click(filterBtn);
 
     const overlay =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const nameInput = within(overlay).getByPlaceholderText(/search by name/i);
-    await userEvent.type(nameInput, 'Globex');
-    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
-    await userEvent.click(applyBtn);
+    await userEvent.type(within(overlay).getByPlaceholderText(/search by name/i), 'Acme');
+    await userEvent.click(within(overlay).getByRole('button', { name: /apply/i }));
 
-    let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
-    expect(last && last[1].nameContains).toBe('Globex');
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
+    expect(last && last[1].nameContains).toBe('Acme');
 
     const clearBtn = within(overlay).getByRole('button', { name: /clear/i });
     await userEvent.click(clearBtn);
-    last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last && last[1].nameContains).toBeUndefined();
   });
 
-  it('filters by email (column filter + apply) & clears with clear button', async () => {
+  it('filters by VAT and clears with Clear', async () => {
+    const vatHeader = screen.getByRole('columnheader', { name: /vat/i });
+    const filterBtn = within(vatHeader).getByRole('button');
+    await userEvent.click(filterBtn);
+
+    const overlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    await userEvent.type(within(overlay).getByPlaceholderText(/search by vat/i), 'ESB12345678');
+    await userEvent.click(within(overlay).getByRole('button', { name: /apply/i }));
+
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
+    expect(last && last[1].vatContains).toBe('ESB12345678');
+
+    const clearBtn = within(overlay).getByRole('button', { name: /clear/i });
+    await userEvent.click(clearBtn);
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
+    expect(last && last[1].vatContains).toBeUndefined();
+  });
+
+  it('filters by email and clears with Clear', async () => {
     const emailHeader = screen.getByRole('columnheader', { name: /email/i });
     const filterBtn = within(emailHeader).getByRole('button');
     await userEvent.click(filterBtn);
 
     const overlay =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const emailInput = within(overlay).getByPlaceholderText(/search by email/i);
-    await userEvent.type(emailInput, 'contact@globex.pt');
-    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
-    await userEvent.click(applyBtn);
+    await userEvent.type(
+      within(overlay).getByPlaceholderText(/search by email/i),
+      'billing@acme.com',
+    );
+    await userEvent.click(within(overlay).getByRole('button', { name: /apply/i }));
 
-    let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
-    expect(last?.[1].emailContains).toBe('contact@globex.pt');
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
+    expect(last?.[1].emailContains).toBe('billing@acme.com');
 
     await userEvent.click(filterBtn);
     const overlay2 =
@@ -283,24 +332,22 @@ describe('AgenciesPage', () => {
     const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
     await userEvent.click(clearBtn);
 
-    last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[1].emailContains).toBeUndefined();
   });
 
-  it('filters by phone (column filter + apply) & clears with clear button', async () => {
+  it('filters by phone and clears with Clear', async () => {
     const phoneHeader = screen.getByRole('columnheader', { name: /phone/i });
     const filterBtn = within(phoneHeader).getByRole('button');
     await userEvent.click(filterBtn);
 
     const overlay =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const phoneInput = within(overlay).getByPlaceholderText(/search by phone/i);
-    await userEvent.type(phoneInput, '555');
-    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
-    await userEvent.click(applyBtn);
+    await userEvent.type(within(overlay).getByPlaceholderText(/search by phone/i), '555');
+    await userEvent.click(within(overlay).getByRole('button', { name: /apply/i }));
 
-    let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
-    expect(last?.[1].phonesContains).toBe('555'); // phone index en fetchAgencies
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
+    expect(last?.[1].phonesContains).toBe('555');
 
     await userEvent.click(filterBtn);
     const overlay2 =
@@ -308,11 +355,11 @@ describe('AgenciesPage', () => {
     const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
     await userEvent.click(clearBtn);
 
-    last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[1].phonesContains).toBeUndefined();
   });
 
-  it('filters by country & clears country filter', async () => {
+  it('filters by country and clears with Clear', async () => {
     const countryHeader = screen.getByRole('columnheader', { name: /country/i });
     const filterBtn = within(countryHeader).getByRole('button');
     await userEvent.click(filterBtn);
@@ -325,13 +372,11 @@ describe('AgenciesPage', () => {
     await userEvent.click(trigger);
 
     const listbox = await screen.findByRole('listbox');
-    const spainOption = within(listbox).getByRole('option', { name: /spain/i });
-    await userEvent.click(spainOption);
+    await userEvent.click(within(listbox).getByRole('option', { name: /spain/i }));
 
-    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
-    await userEvent.click(applyBtn);
+    await userEvent.click(within(overlay).getByRole('button', { name: /apply/i }));
 
-    let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[1].countryIn).toEqual(['Spain']);
 
     // clear
@@ -341,7 +386,7 @@ describe('AgenciesPage', () => {
     const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
     await userEvent.click(clearBtn);
 
-    last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[1].countryIn).toBeUndefined();
   });
 
@@ -358,33 +403,40 @@ describe('AgenciesPage', () => {
     await userEvent.click(trigger);
 
     const listbox = await screen.findByRole('listbox');
-    const spainOption = within(listbox).getByRole('option', { name: /spain/i });
-    const portugalOption = within(listbox).getByRole('option', { name: /portugal/i });
-    await userEvent.click(spainOption);
-    await userEvent.click(portugalOption);
+    const spain = within(listbox).getByRole('option', { name: /spain/i });
+    const portugal = within(listbox).getByRole('option', { name: /portugal/i });
+    await userEvent.click(spain);
+    await userEvent.click(portugal);
 
-    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
-    await userEvent.click(applyBtn);
+    await userEvent.click(within(overlay).getByRole('button', { name: /apply/i }));
 
-    const last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
+    const last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
     expect(last?.[1].countryIn).toHaveLength(2);
     expect(last?.[1].countryIn).toEqual(expect.arrayContaining(['Spain', 'Portugal']));
   });
 
   it('applies all filters + global search and clears everything with "Clear all" button', async () => {
-    mockContactsStore.fetchAgencies.mockClear();
+    mockContactsStore.fetchSuppliers.mockClear();
 
-    // Global search
+    // Global
     const globalInput = screen.getByPlaceholderText(/global search/i);
-    await userEvent.type(globalInput, 'Agency');
+    await userEvent.type(globalInput, 'global');
 
-    // Name
+    // Nombre
     const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
     await userEvent.click(within(nameHeader).getByRole('button'));
     const nameOverlay =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    await userEvent.type(within(nameOverlay).getByPlaceholderText(/search by name/i), 'Globex');
+    await userEvent.type(within(nameOverlay).getByPlaceholderText(/search by name/i), 'Acme');
     await userEvent.click(within(nameOverlay).getByRole('button', { name: /apply/i }));
+
+    // VAT
+    const vatHeader = screen.getByRole('columnheader', { name: /vat/i });
+    await userEvent.click(within(vatHeader).getByRole('button'));
+    const vatOverlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    await userEvent.type(within(vatOverlay).getByPlaceholderText(/search by vat/i), 'ESB12345678');
+    await userEvent.click(within(vatOverlay).getByRole('button', { name: /apply/i }));
 
     // Email
     const emailHeader = screen.getByRole('columnheader', { name: /email/i });
@@ -393,7 +445,7 @@ describe('AgenciesPage', () => {
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
     await userEvent.type(
       within(emailOverlay).getByPlaceholderText(/search by email/i),
-      'contact@globex.pt',
+      'billing@acme.com',
     );
     await userEvent.click(within(emailOverlay).getByRole('button', { name: /apply/i }));
 
@@ -410,39 +462,40 @@ describe('AgenciesPage', () => {
     await userEvent.click(within(countryHeader).getByRole('button'));
     const countryOverlay =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const countryTrigger =
+    const trigger =
       within(countryOverlay).queryByRole('combobox', { name: /select countries/i }) ??
       within(countryOverlay).getByText(/select countries/i);
-    await userEvent.click(countryTrigger);
+    await userEvent.click(trigger);
     const listboxCountry = await screen.findByRole('listbox');
     await userEvent.click(within(listboxCountry).getByRole('option', { name: /spain/i }));
     await userEvent.click(within(countryOverlay).getByRole('button', { name: /apply/i }));
 
-    // sort by country desc
+    // Sort country desc
     await userEvent.click(countryHeader); // asc
     await userEvent.click(countryHeader); // desc
 
-    // Verify last call has all filters set (indexes para fetchAgencies)
-    let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
-    expect(last?.[1].globalSearch).toBe('Agency'); // global
-    expect(last?.[1].nameContains).toBe('Globex'); // name
-    expect(last?.[1].emailContains).toBe('contact@globex.pt'); // email
+    // Verificar argumentos (orden en fetchSuppliers)
+    let last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
+    expect(last?.[1].globalSearch).toBe('global'); // global
+    expect(last?.[1].nameContains).toBe('Acme'); // name
+    expect(last?.[1].emailContains).toBe('billing@acme.com'); // email
+    expect(last?.[1].vatContains).toBe('ESB12345678'); // vat
     expect(last?.[1].countryIn).toEqual(['Spain']); // countries
     expect(last?.[1].phonesContains).toBe('555'); // phone
     expect(last?.[2]).toBe('-country'); // orderBy
 
-    // Clear all (header button con label "Clear")
+    // Clear all
     const clearAllBtn = screen.getByRole('button', { name: /clear global search/i });
     await userEvent.click(clearAllBtn);
 
-    // Todo limpio
-    last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
-    expect(last?.[1].globalSearch).toBeUndefined(); // global
-    expect(last?.[1].nameContains).toBeUndefined(); // name
-    expect(last?.[1].emailContains).toBeUndefined(); // email
-    expect(last?.[1].countryIn).toBeUndefined(); // countries
-    expect(last?.[1].phonesContains).toBeUndefined(); // phone
-    expect(last?.[2]).toBeUndefined(); // orderBy
+    last = mockContactsStore.fetchSuppliers.mock.calls.at(-1);
+    expect(last?.[1].globalSearch).toBeUndefined();
+    expect(last?.[1].nameContains).toBeUndefined();
+    expect(last?.[1].emailContains).toBeUndefined();
+    expect(last?.[1].vatContains).toBeUndefined();
+    expect(last?.[1].countryIn).toBeUndefined();
+    expect(last?.[1].phonesContains).toBeUndefined();
+    expect(last?.[2]).toBeUndefined();
 
     expect(globalInput).toHaveValue('');
   });

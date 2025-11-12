@@ -5,7 +5,6 @@ import { definePreset } from '@primevue/themes';
 import { en_GB } from 'primelocale/js/en_GB.js';
 import { en } from 'primelocale/js/en.js';
 import { es } from 'primelocale/js/es.js';
-import { LucideIconMap } from '@/ui/lucide-icons';
 
 export const RoomdooPreset = definePreset(Aura, {
   semantic: {
@@ -50,39 +49,6 @@ export default {
     app.use(PrimeVue, {
       theme: { preset: RoomdooPreset, options: { darkModeSelector: false } },
       locale: getLocale(window.navigator.language),
-      icons: {
-        // core / common
-        close: { component: LucideIconMap.close },
-        spinner: {
-          // render lets you add animation class; component is fine too
-          render: (props: any) => h(LucideIconMap.spinner, { class: 'animate-spin', ...props }),
-        },
-
-        // navigation
-        chevronDown: { component: LucideIconMap.chevronDown },
-        chevronUp: { component: LucideIconMap.chevronUp },
-        chevronLeft: { component: LucideIconMap.chevronLeft },
-        chevronRight: { component: LucideIconMap.chevronRight },
-
-        // actions / statuses
-        search: { component: LucideIconMap.search },
-        calendar: { component: LucideIconMap.calendar },
-        check: { component: LucideIconMap.check },
-        info: { component: LucideIconMap.info },
-        warning: { component: LucideIconMap.warning },
-        error: { component: LucideIconMap.error },
-        success: { component: LucideIconMap.success },
-        download: { component: LucideIconMap.download },
-        upload: { component: LucideIconMap.upload },
-        plus: { component: LucideIconMap.plus },
-        minus: { component: LucideIconMap.minus },
-      },
-
-      // (Optional) PT to tuning some components if needed
-      // pt: {
-      //   dialog: { closeButtonIcon: { as: LucideIconMap.close } },
-      //   button: { loadingIcon: { as: LucideIconMap.spinner } },
-      // },
     });
   },
 };
