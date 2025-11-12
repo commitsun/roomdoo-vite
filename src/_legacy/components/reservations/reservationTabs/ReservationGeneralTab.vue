@@ -254,20 +254,20 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted, watch, markRaw } from 'vue';
-import type { ReservationInterface } from '@/legacy/interfaces/ReservationInterface';
+import type { ReservationInterface } from '@/_legacy/interfaces/ReservationInterface';
 import type { AxiosResponse } from 'axios';
-import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
-import ReservationDateChanges from '@/legacy/components/reservations/ReservationDateChanges.vue';
-import { reservationStateText } from '@/legacy/utils/reservation';
-import MailComponent from '@/legacy/components/mails/MailComponent.vue';
-import { useCheckinPartner } from '@/legacy/utils/useCheckinPartner';
-import PrivateCheckinFlow from '@/legacy/components/checkinFlow/PrivateCheckinFlow.vue';
-import TransactionCharges from '@/legacy/components/transactions/TransactionCharges.vue';
+import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
+import ReservationDateChanges from '@/_legacy/components/reservations/ReservationDateChanges.vue';
+import { reservationStateText } from '@/_legacy/utils/reservation';
+import MailComponent from '@/_legacy/components/mails/MailComponent.vue';
+import { useCheckinPartner } from '@/_legacy/utils/useCheckinPartner';
+import PrivateCheckinFlow from '@/_legacy/components/checkinFlow/PrivateCheckinFlow.vue';
+import TransactionCharges from '@/_legacy/components/transactions/TransactionCharges.vue';
 
-import { useStore } from '@/legacy/store';
-import { dialogService } from '@/legacy/services/DialogService';
-import ReservationRoomChanges from '@/legacy/components/reservations/ReservationRoomChanges.vue';
-import ReservationSegmentation from '@/legacy/components/reservations/ReservationSegmentation.vue';
+import { useStore } from '@/_legacy/store';
+import { dialogService } from '@/_legacy/services/DialogService';
+import ReservationRoomChanges from '@/_legacy/components/reservations/ReservationRoomChanges.vue';
+import ReservationSegmentation from '@/_legacy/components/reservations/ReservationSegmentation.vue';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
