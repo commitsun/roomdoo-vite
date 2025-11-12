@@ -67,7 +67,6 @@ describe('UsersRepositoryImpl', () => {
           firstname: 'Ada',
           lastname: 'Lovelace',
           lastname2: 'Byron',
-          lang: 'en_US',
           image: 'https://cdn/avatar.png',
           lang: 'es_ES',
           email: 'ada@example.com',
