@@ -12,7 +12,7 @@
   "instanceNotFound": {
     "title": "Ups! Parece que {instance} todavía no existe en Roomdoo",
     "message": "Revisa el enlace de acceso y vuélvelo a intentar",
-    "joinTittle": "¿Quieres gestionar tu hotel con Roomdoo?",
+    "joinTitle": "¿Quieres gestionar tu hotel con Roomdoo?",
     "joinMessage": "Contacta con nosotros para darte de alta"
   },
   "resetPassword": {
@@ -66,7 +66,8 @@
     "links": "Enlaces"
   },
   "contacts": {
-    "allContacts": "Todos los contactos",
+    "title": "Contactos",
+    "all": "Todos",
     "customers": "Clientes",
     "guests": "Huéspedes",
     "agencies": "Agencias",
@@ -77,6 +78,7 @@
     "email": "Email",
     "phone": "Teléfono",
     "country": "País",
+    "n_countries_selected": "{count} países",
     "document": "Documento",
     "types": {
       "guest": "Huésped",
@@ -84,23 +86,57 @@
       "agency": "Agencia",
       "supplier": "Proveedor"
     },
+    "n_types_selected": "{count} tipos",
     "lastReservation": "Última reserva",
     "internalNotes": "Comentarios internos",
-    "n_countries_selected": "{count} países",
-    "n_types_selected": "{count} tipos",
     "globalSearch": "Búsqueda global",
-    "clear": "Borrar",
+    "restoreFilters": "Restablecer filtros",
+    "restoreSorting": "Restablecer orden",
+    "clear": "Limpiar",
     "searchByName": "Buscar por nombre",
     "searchByType": "Buscar por tipo",
     "searchByEmail": "Buscar por email",
     "searchByCountry": "Buscar por país",
+    "searchByPhone": "Buscar por teléfono",
     "vat": "NIF/CIF",
     "totalInvoiced": "Total facturado",
     "searchByVat": "Buscar por NIF/CIF",
     "selectCountries": "Seleccionar países",
     "searchByDocument": "Buscar por documento",
     "phoneFilterMinChars": "Introduce al menos 3 caracteres",
-    "new": "Nuevo contacto"
+    "new": "Nuevo contacto",
+    "entities": {
+      "contact": "contacto | contactos",
+      "agency": "agencia | agencias",
+      "customer": "cliente | clientes",
+      "guest": "huésped | huéspedes",
+      "supplier": "proveedor | proveedores"
+    },
+    "paginationInfo": "Mostrando {first}-{last} de {total} {entities}",
+    "noResultsFoundTitle": "No se han encontrado resultados",
+    "noResultsFoundMessage": "No hay {entities} que coincidan con tu búsqueda o filtros aplicados. Intenta ajustar los criterios.",
+    "noContactsTitle": "No hay contactos registrados",
+    "noContactsMessage": "Puedes crear contactos manualmente desde nuevo contacto.",
+    "noCustomersTitle": "No hay clientes registrados",
+    "noCustomersMessage": "Los contactos se convertirán automáticamente en clientes cuando realicen una reserva o un pago en el sistema.",
+    "noGuestsTitle": "Aún no tienes huéspedes",
+    "noGuestsMessage": "Los contactos se identificarán como huéspedes automáticamente cuando se alojen en tu establecimiento.",
+    "noAgenciesTitle": "No hay agencias registradas",
+    "noAgenciesMessage": "Puedes crear agencias manualmente desde nuevo contacto.",
+    "noSuppliersTitle": "No hay proveedores registrados",
+    "noSuppliersMessage": "Los contactos se convertirán automáticamente en proveedores cuando exista una factura de proveedor a su nombre.",
+    "datePicker": {
+      "placeHolder": "Seleccionar rango de fechas",
+      "presetRanges": "Rangos rápidos",
+      "today": "Hoy",
+      "last7Days": "Últimos 7 días",
+      "last30Days": "Últimos 30 días",
+      "thisMonth": "Este mes",
+      "clear": "Limpiar",
+      "apply": "Aplicar"
+    },
+    "allGuests": "Todos los huéspedes",
+    "inHouseGuests": "Huéspedes alojados"
   },
   "userSettings": {
     "replaceImage": "Reemplazar foto",
@@ -123,7 +159,6 @@
     "passwordsDoNotMatch": "Las nuevas contraseñas no coinciden",
     "userUpdated": "Los datos del usuario se han actualizado correctamente"
   },
-
   "error404": {
     "title": "Página no encontrada",
     "message": "Lo sentimos, la página que estás buscando no existe o ha sido movida.",
