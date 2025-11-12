@@ -5,4 +5,9 @@ export interface PmsProperty {
   id: Id;
   name: string;
   image: ImageUrl;
+  currency: {
+    code: string;
+    id: number;
+    name: string;
+  };
 }

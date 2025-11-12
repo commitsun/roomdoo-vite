@@ -15,7 +15,7 @@ import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 
-import ContactsPage from './ContactsPage.vue';
+import ContactList from './ContactList.vue';
 
 import type { Contact } from '@/domain/entities/Contact';
 import primevuePlugin from '@/infrastructure/plugins/primevue';
@@ -118,12 +118,13 @@ vi.mock('@/infrastructure/stores/countries', () => ({
   }),
 }));
 
-describe('ContactsPage', () => {
+describe('ContactList', () => {
   beforeEach(() => {
     // create pinia for testing
     const pinia = createTestingPinia();
     // render component
-    render(ContactsPage, {
+    render(ContactList, {
+      props: { total: testContacts.length },
       global: {
         plugins: [pinia, [primevuePlugin, { ripple: false }]],
         components: {

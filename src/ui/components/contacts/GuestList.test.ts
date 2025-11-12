@@ -13,12 +13,12 @@ import InputIcon from 'primevue/inputicon';
 import ToggleSwitch from 'primevue/toggleswitch';
 import CountryFlag from 'vue-country-flag-next';
 
-import GuestsPage from './GuestsPage.vue';
+import GuestList from './GuestList.vue';
 
 import type { Guest } from '@/domain/entities/Contact';
 import primevuePlugin from '@/infrastructure/plugins/primevue';
 
-// i18n mock (todas las keys que usa tu template)
+// i18n mock
 vi.mock('vue-i18n', () => {
   const tMap: Record<string, string> = {
     'contacts.globalSearch': 'Global search',
@@ -30,7 +30,17 @@ vi.mock('vue-i18n', () => {
     'contacts.internalNotes': 'Internal notes',
     'contacts.searchByName': 'Search by name',
     'contacts.searchByDocument': 'Search by document',
-    'contacts.selectCountries': 'Select countries',
+    'contacts.searchByCountry': 'Select countries',
+    'contacts.allGuests': 'All guests',
+    'contacts.inHouseGuests': 'In-house guests',
+    'contacts.datePicker.placeHolder': 'Select dates',
+    'contacts.datePicker.presetRanges': 'Preset ranges',
+    'contacts.datePicker.today': 'Today',
+    'contacts.datePicker.last7Days': 'Last 7 days',
+    'contacts.datePicker.last30Days': 'Last 30 days',
+    'contacts.datePicker.thisMonth': 'This month',
+    'contacts.datePicker.clear': 'Clear',
+    'contacts.datePicker.apply': 'Apply',
   };
   return {
     useI18n: () => ({
@@ -43,27 +53,42 @@ vi.mock('vue-i18n', () => {
   };
 });
 
+vi.mock('@/infrastructure/plugins/i18n', () => ({
+  i18n: {
+    global: {
+      locale: { value: 'es-ES' },
+    },
+  },
+}));
+
 // Legacy & dialog
 vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
   default: { name: 'PartnerForm', template: '<div />' },
 }));
+
+// Legacy store mock
 vi.mock('@/_legacy/utils/useLegacyStore', () => ({
   useLegacyStore: () => ({
     fetchAndSetVuexPartnerAndActiveProperty: vi.fn().mockResolvedValue(undefined),
   }),
 }));
+
+// App dialog mock
 vi.mock('@/ui/composables/useAppDialog', () => ({
   useAppDialog: () => ({ open: vi.fn() }),
 }));
 
-// Stores
+// UI store mock
 vi.mock('@/infrastructure/stores/ui', () => ({
   useUIStore: () => ({ startLoading: vi.fn(), stopLoading: vi.fn() }),
 }));
+
+// pmsProperties store mock
 vi.mock('@/infrastructure/stores/pmsProperties', () => ({
   usePmsPropertiesStore: () => ({ currentPmsPropertyId: 1 }),
 }));
 
+// test data
 const testGuests: Guest[] = [
   {
     id: 1,
@@ -74,10 +99,7 @@ const testGuests: Guest[] = [
       { type: 'Passport', number: 'X1234567' } as any,
       { type: 'ID', number: '12345678Z' } as any,
     ],
-    lastReservation: {
-      id: 101,
-      name: 'Reservation 101',
-    },
+    lastReservationDate: new Date('2023-08-15T12:00:00Z'),
     inHouse: true,
     internalNotes: 'VIP guest. Allergic to peanuts.',
   },
@@ -87,25 +109,23 @@ const testGuests: Guest[] = [
     email: 'bob@example.com',
     country: { code: 'PT', name: 'Portugal', id: 2 },
     identificationDocuments: [{ type: 'Passport', number: 'P7654321' } as any],
-    lastReservation: {
-      id: 102,
-      name: 'Reservation 102',
-    },
+    lastReservationDate: new Date('2023-08-15T12:00:00Z'),
     inHouse: false,
     internalNotes: 'Prefers late checkout.',
   },
 ];
 
+// Contacts store mock
 const mockContactsStore = {
   guests: testGuests,
-  contactsCount: testGuests.length,
+  guestsCount: testGuests.length,
   fetchGuests: vi.fn().mockResolvedValue(undefined),
 };
-
 vi.mock('@/infrastructure/stores/contacts', () => ({
   useContactsStore: () => mockContactsStore,
 }));
 
+// Countries store mock
 vi.mock('@/infrastructure/stores/countries', () => ({
   useCountriesStore: () => ({
     countries: [
@@ -116,10 +136,11 @@ vi.mock('@/infrastructure/stores/countries', () => ({
   }),
 }));
 
-describe('GuestsPage', () => {
+describe('GuestList', () => {
   beforeEach(() => {
     const pinia = createTestingPinia();
-    render(GuestsPage, {
+    render(GuestList, {
+      props: { total: testGuests.length },
       global: {
         plugins: [pinia, [primevuePlugin, { ripple: false }]],
         components: {
@@ -145,18 +166,16 @@ describe('GuestsPage', () => {
 
     // Row 1
     expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent('Alice Walker'); // name
-    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent('Passport X1234567'); // document
+    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent('PAS.X1234567'); // document
     expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent('+1'); // more docs
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent('Spain'); // country
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent('VIP guest.'); // notes
-    expect(within(bodyRows[0]).getAllByRole('cell')[5].innerHTML).toContain('pi pi-home'); // inHouse icon
 
     // Row 2
     expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent('Bob Martin');
-    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent('Passport P7654321');
+    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent('PAS.P7654321');
     expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent('Portugal');
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent('late checkout');
-    expect(within(bodyRows[1]).getAllByRole('cell')[5].innerHTML).not.toContain('pi pi-home');
   });
 
   it('applies global search input', async () => {
@@ -329,18 +348,6 @@ describe('GuestsPage', () => {
     expect(last?.[1].countryIn).toEqual(expect.arrayContaining(['Spain', 'Portugal']));
   });
 
-  it('toggles Inhouse and maps to fetchGuests arg', async () => {
-    const toggle = screen.getByLabelText(/in-house/i);
-    await userEvent.click(toggle);
-
-    let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[1].inHouseOnly).toBe(true);
-
-    await userEvent.click(toggle);
-    last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[1].inHouseOnly).toBeUndefined();
-  });
-
   it('applies all filters + global search and clears everything with "Clear" button', async () => {
     mockContactsStore.fetchGuests.mockClear();
 
@@ -377,9 +384,27 @@ describe('GuestsPage', () => {
     await userEvent.click(within(listbox).getByRole('option', { name: /spain/i }));
     await userEvent.click(within(countryOv).getByRole('button', { name: /apply/i }));
 
-    // Inhouse ON
-    const toggle = screen.getByLabelText(/in-house/i);
-    await userEvent.click(toggle);
+    // Date (last reservation)
+    const dateInputs = screen.getAllByPlaceholderText(/select dates/i);
+    await userEvent.click(dateInputs[0]);
+    const dpOverlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    await userEvent.click(within(dpOverlay).getByRole('button', { name: /last 7 days/i }));
+    await userEvent.click(within(dpOverlay).getByRole('button', { name: /apply/i }));
+
+    // In-house Select
+    const inHouseTrigger =
+      screen.queryByRole('combobox', { name: /All guests/i }) ||
+      screen.queryByRole('combobox') ||
+      screen.getByText(/All guests/i);
+    await userEvent.click(inHouseTrigger);
+
+    const inHouseListbox =
+      (await screen.findByRole('listbox').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const inHouseOption = within(inHouseListbox).getByRole('option', {
+      name: /In-house guests/i,
+    });
+    await userEvent.click(inHouseOption);
 
     // Sort country desc
     await userEvent.click(countryHeader); // asc
@@ -391,7 +416,16 @@ describe('GuestsPage', () => {
     expect(last?.[1].nameContains).toBe('Alice'); // name
     expect(last?.[1].documentContains).toBe('X1234567'); // documents
     expect(last?.[1].countryIn).toEqual(['Spain']); // countries
-    expect(last?.[1].inHouseOnly).toBe(true); // inHouseOnly
+    expect(last?.[1].checkinDateFrom).toBeInstanceOf(Date); // date from
+    expect(last?.[1].checkinDateTo).toBeInstanceOf(Date); // date to
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diffDays = Math.round(
+      (last?.[1].checkinDateTo.getTime() - last?.[1].checkinDateFrom.getTime()) / msPerDay,
+    );
+    // range "Last 7 days" -> 6 days difference (from today-6 to today), we allow 6–7 due to TZ
+    expect(diffDays).toBeGreaterThanOrEqual(6);
+    expect(diffDays).toBeLessThanOrEqual(7);
+    expect(last?.[1].inHouseOnly).toBe(true); // in-house
     expect(last?.[2]).toBe('-country'); // orderBy
 
     // Clear all
@@ -403,9 +437,10 @@ describe('GuestsPage', () => {
     expect(last?.[1].nameContains).toBeUndefined();
     expect(last?.[1].documentContains).toBeUndefined();
     expect(last?.[1].countryIn).toBeUndefined();
+    expect(last?.[1].checkinDateFrom).toBeUndefined();
+    expect(last?.[1].checkinDateTo).toBeUndefined();
     expect(last?.[1].inHouseOnly).toBeUndefined();
     expect(last?.[2]).toBeUndefined();
-
     expect(globalInput).toHaveValue('');
   });
 });

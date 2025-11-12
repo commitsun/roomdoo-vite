@@ -14,6 +14,7 @@
 
     <!-- NAVIGATION -->
     <nav class="layout__nav" ref="nav">
+      <!-- DASHBOARD -->
       <router-link
         :to="`/${route.params.pmsPropertyId || ''}`"
         class="layout__nav-link"
@@ -23,6 +24,7 @@
         <span>{{ t('sidebar.dashboard') }}</span>
       </router-link>
 
+      <!-- PLANNING -->
       <router-link
         :to="`/planning${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
         class="layout__nav-link"
@@ -32,73 +34,17 @@
         <span>{{ t('sidebar.planning') }}</span>
       </router-link>
 
-      <!-- CONTACTS (dropdown) -->
-      <div
-        class="layout__nav-link layout__nav-link--toggle"
-        :class="{ 'layout__nav-link--active': isContactsSectionActive }"
-        @click="isContactsOptionsOpen = !isContactsOptionsOpen"
+      <!-- CONTACTS -->
+      <router-link
+        :to="`/contacts${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
+        class="layout__nav-link"
+        :class="{ 'layout__nav-link--active': isActive('/contacts') }"
       >
-        <i class="pi pi-user layout__nav-link-icon" />
+        <i class="pi pi-users layout__nav-link-icon" />
         <span>{{ t('sidebar.contacts.title') }}</span>
-        <i
-          class="pi pi-sort-down-fill layout__nav-link-caret"
-          :class="{ 'layout__nav-link-caret--rotated': isContactsOptionsOpen }"
-        />
-      </div>
+      </router-link>
 
-      <ul class="layout__submenu" :class="{ 'layout__submenu--open': isContactsOptionsOpen }">
-        <li class="layout__submenu-item">
-          <router-link
-            class="layout__submenu-link"
-            :to="`/contacts${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
-            :class="{ 'router-link-exact-active': route.path.startsWith('/contacts') }"
-          >
-            <i class="pi pi-address-book layout__submenu-link-icon" />
-            <span>{{ t('sidebar.contacts.all') }}</span>
-          </router-link>
-        </li>
-        <li class="layout__submenu-item">
-          <router-link
-            class="layout__submenu-link"
-            :to="`/customers${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
-            :class="{ 'router-link-exact-active': route.path.startsWith('/customers') }"
-          >
-            <i class="pi pi-users layout__submenu-link-icon" />
-            <span>{{ t('sidebar.contacts.customers') }}</span>
-          </router-link>
-        </li>
-        <li class="layout__submenu-item">
-          <router-link
-            class="layout__submenu-link"
-            :to="`/guests${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
-            :class="{ 'router-link-exact-active': route.path.startsWith('/guests') }"
-          >
-            <i class="pi pi-id-card layout__submenu-link-icon" />
-            <span>{{ t('sidebar.contacts.guests') }}</span>
-          </router-link>
-        </li>
-        <li class="layout__submenu-item">
-          <router-link
-            class="layout__submenu-link"
-            :to="`/agencies${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
-            :class="{ 'router-link-exact-active': route.path.startsWith('/agencies') }"
-          >
-            <i class="pi pi-briefcase layout__submenu-link-icon" />
-            <span>{{ t('sidebar.contacts.agencies') }}</span>
-          </router-link>
-        </li>
-        <li class="layout__submenu-item">
-          <router-link
-            class="layout__submenu-link"
-            :to="`/suppliers${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
-            :class="{ 'router-link-exact-active': route.path.startsWith('/suppliers') }"
-          >
-            <i class="pi pi-truck layout__submenu-link-icon" />
-            <span>{{ t('sidebar.contacts.suppliers') }}</span>
-          </router-link>
-        </li>
-      </ul>
-
+      <!-- TRANSACTIONS -->
       <router-link
         :to="`/transactions${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
         class="layout__nav-link"
@@ -108,6 +54,7 @@
         <span>{{ t('sidebar.cashRegister') }}</span>
       </router-link>
 
+      <!-- INVOICES -->
       <router-link
         :to="`/invoices${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
         class="layout__nav-link"
@@ -130,6 +77,7 @@
         />
       </div>
 
+      <!-- REPORTS OPTIONS -->
       <ul class="layout__submenu" :class="{ 'layout__submenu--open': isReportOptionsOpen }">
         <li class="layout__submenu-item" @click="openLegacyReport('kelly')">
           <div class="layout__submenu-link">
@@ -180,6 +128,7 @@
         <span>{{ pmsPropertiesLinks[0].label }}</span>
       </div>
 
+      <!-- ONLY ONE LINK -->
       <template v-else-if="pmsPropertiesLinks.length > 1">
         <div
           class="layout__nav-link layout__nav-link--toggle"
@@ -329,12 +278,6 @@ const pmsPropertiesLinks = computed(() =>
 );
 
 const isActive = (path: string): boolean => route.path === path;
-
-const isContactsSectionActive = computed(() =>
-  ['/contacts', '/customers', '/guests', '/suppliers', '/agencies'].some((p) =>
-    route.path.startsWith(p),
-  ),
-);
 
 const collapseSidebar = (): void => {
   isReportOptionsOpen.value = false;

@@ -5,7 +5,14 @@ import type {
   GuestFilters,
   SupplierFilters,
 } from '@/domain/contact/ContactFilters';
-import type { Agency, Contact, Customer, Guest, Supplier } from '@/domain/entities/Contact';
+import type {
+  Agency,
+  Contact,
+  Customer,
+  Guest,
+  GuestDTO,
+  Supplier,
+} from '@/domain/entities/Contact';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import type { Pagination } from '@/domain/repositories/Pagination';
@@ -23,6 +30,8 @@ function buildQueryParamsFromFilters(opts: {
   phonesContains?: string;
   vatContains?: string;
   inHouseOnly?: boolean;
+  checkinDateFrom?: Date;
+  checkinDateTo?: Date;
 }): URLSearchParams {
   const params = new URLSearchParams();
 
@@ -63,6 +72,13 @@ function buildQueryParamsFromFilters(opts: {
   // Boolean — include only if property is present (even if false)
   if ('inHouseOnly' in opts) {
     params.set('inHouse', String(Boolean(opts.inHouseOnly)));
+  }
+  // Date range — include only if property is present
+  if (opts.checkinDateFrom instanceof Date) {
+    params.set('checkinDateFrom', opts.checkinDateFrom.toISOString().split('T')[0]);
+  }
+  if (opts.checkinDateTo instanceof Date) {
+    params.set('checkinDateTo', opts.checkinDateTo.toISOString().split('T')[0]);
   }
   return params;
 }
@@ -124,7 +140,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     }
 
     const url = `/guests?${params.toString()}`;
-    const { data } = await api.get<EntityListResponse<Guest>>(url);
+    const { data } = await api.get<EntityListResponse<GuestDTO>>(url);
 
     const guests: Guest[] = data.items.map((raw) => ({
       id: raw.id,
@@ -133,7 +149,11 @@ export class ContactsRepositoryImpl implements ContactsRepository {
       identificationDocuments: raw.identificationDocuments,
       inHouse: raw.inHouse,
       internalNotes: raw.internalNotes,
-      lastReservation: raw.lastReservation,
+      lastReservationDate: new Date(
+        parseInt(raw.lastReservationDate.split('-')[0]),
+        parseInt(raw.lastReservationDate.split('-')[1]) - 1,
+        parseInt(raw.lastReservationDate.split('-')[2]),
+      ),
     }));
 
     return { ...data, items: guests };
