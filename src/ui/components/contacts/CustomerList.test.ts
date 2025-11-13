@@ -245,7 +245,6 @@ describe('CustomerList', () => {
 
   it('sort by name toggles and maps orderBy', async () => {
     const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
-    console.log(nameHeader);
     await userEvent.click(nameHeader); // asc
     let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
     expect(last?.[2]).toBe('name');
