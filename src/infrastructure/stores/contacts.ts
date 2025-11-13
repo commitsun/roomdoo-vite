@@ -93,8 +93,9 @@ export const useContactsStore = defineStore('contacts', () => {
     contactSchema.value = result;
   };
 
-  const createContact = async (contact: Partial<ContactDetail>): Promise<void> => {
-    await contactsService.createContact(contact);
+  const createContact = async (contact: Partial<ContactDetail>): Promise<ContactDetail> => {
+    const result = await contactsService.createContact(contact);
+    return result;
   };
 
   const updateContactFields = async (

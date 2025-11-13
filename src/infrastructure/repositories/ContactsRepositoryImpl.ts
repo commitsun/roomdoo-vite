@@ -271,7 +271,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     ) as Partial<ContactDetail>;
   };
 
-  async createContact(contact: Partial<ContactDetail>): Promise<void> {
+  async createContact(contact: Partial<ContactDetail>): Promise<ContactDetail> {
     const payload = this.normalizeContactPayload(contact);
     if (payload.documents) {
       delete payload.documents;

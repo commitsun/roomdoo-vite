@@ -52,7 +52,7 @@ export interface ContactsRepository {
   fetchContactById(id: number): Promise<ContactDetail>;
   fetchContactPersonalDocuments(contactId: number): Promise<PersonalDocument[]>;
   fetchContactSchema(): Promise<ContactSchema>;
-  createContact(contact: Partial<ContactDetail>): Promise<void>;
+  createContact(contact: Partial<ContactDetail>): Promise<ContactDetail>;
   updateContactFields(
     contactId: number,
     original: Partial<ContactDetail>,

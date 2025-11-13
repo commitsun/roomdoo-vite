@@ -520,12 +520,15 @@ export default defineComponent({
       }
       uiStore.startLoading();
       try {
+        let contactId = 0;
         if (contact.value) {
           await contactsStore.updateContactFields(contact.value.id, contact.value, contactForm);
+          contactId = contact.value.id;
         } else {
-          await contactsStore.createContact(contactForm);
+          const createdContact = await contactsStore.createContact(contactForm);
+          contactId = createdContact.id;
         }
-        dialogRef?.value?.close({ action: 'saved' });
+        dialogRef?.value?.close({ action: 'saved', contactId });
       } catch (error) {
         textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
       } finally {

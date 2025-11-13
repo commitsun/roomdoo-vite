@@ -62,7 +62,7 @@
       <div class="doc-number-input" v-if="!selectedPartner">
         <AutocompleteComponent
           @textSearchChanges="getGuestFromVatDocNumber($event)"
-          @addNew="openNewPartnerDialog()"
+          @addNew="openNewContact()"
           id="partners-autocomplete-charge"
           v-model="selectedPartnerId"
           :items="itemsAutocompleteCustomer"
@@ -144,8 +144,11 @@ import Button from 'primevue/button';
 
 import AutocompleteComponent from '@/_legacy/components/roomdooComponents/AutocompleteComponent.vue';
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
-
+import { useAppDialog } from '@/ui/composables/useAppDialog';
+import { useI18n } from 'vue-i18n';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { type PartnerInterface } from '@/_legacy/interfaces/PartnerInterface';
 import { type TransactionInterface } from '@/_legacy/interfaces/TransactionInterface';
 
@@ -189,6 +192,10 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { fetchPartners } = usePartner();
+    const uiStore = useUIStore();
+    const contactsStore = useContactsStore();
+    const { open } = useAppDialog();
+    const { t } = useI18n();
 
     const accountJournal = ref(0);
     const reference = ref('');
@@ -295,17 +302,30 @@ export default defineComponent({
       partnerDialog.value = true;
     };
 
-    const openNewPartnerDialog = async () => {
-      await store.dispatch('partners/removePartner');
-      await store.dispatch('countryStates/removeCountryStates');
-      partnerName.value = '';
-      partnerDialog.value = true;
-      dialogService.open({
-        header: 'Nuevo contacto',
-        content: markRaw(PartnerForm),
-        closable: true,
-      });
-    };
+    const openNewContact = async (): Promise<void> => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchContactSchema();
+        open(ContactDetail, {
+          props: { header: t('contacts.new') },
+          data: { props: { contact: null } },
+          onClose: async ({ data }: { data?: { refresh?: boolean; action?: string, contactId?: number } } = {}) => {
+            if (data?.refresh === true || data?.action === 'saved') {
+              const newContactId = data?.contactId;
+              if (newContactId) {
+                await store.dispatch('partners/fetchCurrentPartner', newContactId);
+                selectedPartner.value = store.state.partners.currentPartner;
+              }
+            }
+          },
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
+    }
     const restorePartner = () => {
       void store.dispatch('partners/removePartner');
       partnerName.value = '';
@@ -414,7 +434,7 @@ export default defineComponent({
       restorePartner,
       createOrEditTransaction,
       openPartnerDialog,
-      openNewPartnerDialog,
+      openNewContact,
       getGuestFromVatDocNumber,
       checkOverTotal,
     };

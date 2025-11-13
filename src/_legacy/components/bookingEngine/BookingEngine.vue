@@ -816,7 +816,7 @@
       <div class="section-card" v-if="selectedReservationType !== 'out'">
         <div class="title-section-card flex justify-between">
           <div class="left">Información de contacto</div>
-          <span class="edit text-primary q-pr-md" @click="openPartnerForm()" v-if="selectedPartner">
+          <span class="edit text-primary q-pr-md" @click="openContactDetail()" v-if="selectedPartner">
             Editar
           </span>
         </div>
@@ -826,7 +826,7 @@
               <div class="partner-field">
                 <AutocompleteComponent
                   @textSearchChanges="updateCustomerSearchBox($event)"
-                  @addNew="openPartnerForm(true)"
+                  @addNew="openNewContact()"
                   id="partners-autocomplete"
                   icon="search"
                   v-model="selectedPartnerId"
@@ -1006,6 +1006,8 @@ import { useStore } from '@/_legacy/store';
 import { usePartner } from '@/_legacy/utils/usePartner';
 import { usePlanning } from '@/_legacy/utils/usePlanning';
 import { dialogService } from '@/_legacy/services/DialogService';
+import { useAppDialog } from '@/ui/composables/useAppDialog';
+import { useI18n } from 'vue-i18n';
 
 import type {
   ReservationsToCreateInterface,
@@ -1027,7 +1029,9 @@ import InputText from '@/_legacy/components/roomdooComponents/InputText.vue';
 import BookingEngineRoomType from '@/_legacy/components/bookingEngine/BookingEngineRoomType.vue';
 import BookingEngineReservation from '@/_legacy/components/bookingEngine/BookingEngineReservation.vue';
 import BookingEngineReservationInfo from '@/_legacy/components/bookingEngine/BookingEngineReservationInfo.vue';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
 import FolioBatchChanges from '@/_legacy/components/folios//FolioBatchChanges.vue';
 
 import type { FolioApiInterface } from '@/_legacy/interfaces/FolioInterface';
@@ -1037,7 +1041,6 @@ import type {
   ExtraServiceInterface,
 } from '@/_legacy/interfaces/BatchChangesInterface';
 import type { ReservationApiInterface } from '@/_legacy/interfaces/ReservationInterface';
-import folio from '@/_legacy/utils/folio';
 
 export default defineComponent({
   components: {
@@ -1058,6 +1061,11 @@ export default defineComponent({
     const store = useStore();
     const { fetchPartners } = usePartner();
     const { refreshPlanning } = usePlanning();
+    const uiStore = useUIStore();
+    const contactsStore = useContactsStore();
+    const { open } = useAppDialog();
+    const { t } = useI18n();
+
     // const
     const today = new Date();
     const tomorrow = new Date();
@@ -2302,13 +2310,58 @@ export default defineComponent({
     const roomShortName = (roomId: number) =>
       store.state.rooms.rooms.find((el) => el.id === roomId)?.shortName;
 
-    const openPartnerForm = (isNew?: boolean) => {
-      dialogService.open({
-        header: isNew ? 'Nuevo cliente' : 'Editar cliente',
-        content: markRaw(PartnerForm),
-        closable: true,
-      });
+    const openContactDetail = async (): Promise<void> => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchContactSchema();
+        const contactId = currentPartner.value?.id ?? 0;
+        const contact = await contactsStore.fetchContactById(contactId);
+        if (contact) {
+          contact.id = contactId;
+          open(ContactDetail, {
+            props: { header: contact.name || t('contacts.detail') },
+            data: { contact },
+            onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+              if (data?.refresh === true || data?.action === 'saved') {
+                await store.dispatch('partners/fetchCurrentPartner', contactId);
+              }
+            },
+          });
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('Contact not found for id:', contactId);
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
     };
+
+   const openNewContact = async (): Promise<void> => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchContactSchema();
+        open(ContactDetail, {
+          props: { header: t('contacts.new') },
+          data: { props: { contact: null } },
+          onClose: async ({ data }: { data?: { refresh?: boolean; action?: string, contactId?: number } } = {}) => {
+            if (data?.refresh === true || data?.action === 'saved') {
+              const newContactId = data?.contactId;
+              if (newContactId) {
+                await store.dispatch('partners/fetchCurrentPartner', newContactId);
+              }
+            }
+          },
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
+    }
 
     const updateCustomerSearchBox = async (name: string) => {
       partnerName.value = name;
@@ -2829,7 +2882,8 @@ export default defineComponent({
       toggleOldReservation,
       saveFolio,
       updateFolio,
-      openPartnerForm,
+      openContactDetail,
+      openNewContact,
       openBatchChanges,
       saveBatchChanges,
       backToLastReservationView,

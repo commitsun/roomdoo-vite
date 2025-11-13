@@ -9,7 +9,7 @@
       </div>
       <!-- PARTNER OPTIONS -->
       <div class="options" v-if="!partnerToAdd && !isSearchPartnerOpened">
-        <div class="option" @click="openPartnerForm(true)">
+        <div class="option" @click="openNewContact()">
           <div class="icon-wrapper">
             <CustomIcon
               imagePath="/app-images/icon-plus.svg"
@@ -149,7 +149,7 @@
         <div
           class="partner"
           :style="noMinimumPartnerDataError ? 'border: 1px solid #ED4A1C;' : ''"
-          @click="openPartnerForm(false)"
+          @click="openContactDetail()"
         >
           <div class="partner-name-content">
             <div class="partner-name">
@@ -475,8 +475,12 @@ import AutocompleteComponent from '@/_legacy/components/roomdooComponents/Autoco
 import TooltipComponent from '@/_legacy/components/roomdooComponents/TooltipComponent.vue';
 import InputText from '@/_legacy/components/roomdooComponents/InputText.vue';
 import { dialogService } from '@/_legacy/services/DialogService';
+import { useAppDialog } from '@/ui/composables/useAppDialog';
+import { useI18n } from 'vue-i18n';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
 
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
 
 export default defineComponent({
   components: {
@@ -485,6 +489,7 @@ export default defineComponent({
     AutocompleteComponent,
     TooltipComponent,
     InputText,
+    ContactDetail,
   },
   props: {
     isRenderSaleLines: {
@@ -515,6 +520,10 @@ export default defineComponent({
     // composables
     const store = useStore();
     const { fetchPartners } = usePartner();
+    const uiStore = useUIStore();
+    const contactsStore = useContactsStore();
+    const { open } = useAppDialog();
+    const { t } = useI18n();
     // refs
     const isSimplifiedInvoice = ref(false);
     const saleLinesToSend = ref([] as FolioSaleLineInterface[]);
@@ -701,21 +710,60 @@ export default defineComponent({
       void store.dispatch('partners/removePartner');
     };
 
-    const openPartnerForm = async (restorePartner: boolean) => {
-      if (partnerToAdd.value) {
-        await store.dispatch('partners/setCurrentPartner', partnerToAdd.value);
+    const openContactDetail = async (): Promise<void> => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchContactSchema();
+        const contactId = partnerToAdd.value?.id || 0;
+        const contact = await contactsStore.fetchContactById(contactId);
+        if (contact) {
+          contact.id = contactId;
+          open(ContactDetail, {
+            props: { header: contact.name || t('contacts.detail') },
+            data: { contact },
+            onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+              if (data?.refresh === true || data?.action === 'saved') {
+                await store.dispatch('partners/fetchCurrentPartner', contactId);
+                addPartnerToInvoice();
+              }
+            },
+          });
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('Contact not found for id:', contactId);
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
       }
-      isRestorePartner.value = restorePartner;
-      dialogService.open({
-        header: 'Crear contacto',
-        content: markRaw(PartnerForm),
-        closable: true,
-        onAccept: () => addPartnerToInvoice(),
-        props: {
-          resetCurrentPartner: isRestorePartner.value,
-        },
-      });
     };
+
+    const openNewContact = async (): Promise<void> => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchContactSchema();
+        open(ContactDetail, {
+          props: { header: t('contacts.new') },
+          data: { props: { contact: null } },
+          onClose: async ({ data }: { data?: { refresh?: boolean; action?: string, contactId?: number } } = {}) => {
+            if (data?.refresh === true || data?.action === 'saved') {
+              const newContactId = data?.contactId;
+              if (newContactId) {
+                await store.dispatch('partners/fetchCurrentPartner', newContactId);
+                addPartnerToInvoice();
+              }
+            }
+          },
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
+    }
 
     const countryName = (countryId: number) =>
       store.state.countries.countries.find((el) => el.id === countryId)?.name;
@@ -1335,7 +1383,8 @@ export default defineComponent({
       restorePartner,
       openPartnerSearchDialog,
       getGuest,
-      openPartnerForm,
+      openContactDetail,
+      openNewContact,
       countryName,
       removeAddLine,
       saveInvoice,

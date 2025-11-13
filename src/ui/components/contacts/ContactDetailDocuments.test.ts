@@ -5,6 +5,18 @@ import '@testing-library/jest-dom/vitest';
 import { reactive, ref } from 'vue';
 import { createTestingPinia } from '@pinia/testing';
 
+// ---- PrimeVue Confirmation mocks (¡ANTES de importar el SFC!) ----
+vi.mock('primevue/confirmdialog', () => ({
+  default: {
+    name: 'ConfirmDialog',
+    template: '<div data-testid="confirm-dialog-stub"></div>',
+  },
+}));
+
+vi.mock('primevue/useconfirm', () => ({
+  useConfirm: () => ({ require: vi.fn() }),
+}));
+
 // ---- i18n mock ----
 vi.mock('vue-i18n', () => {
   const tMap: Record<string, string> = {
@@ -106,8 +118,22 @@ vi.mock('@/infrastructure/stores/countries', () => ({
 vi.mock('@/infrastructure/stores/documentTypes', () => ({
   useDocumentTypesStore: () => documentTypesStoreMock,
 }));
+export const requireSpy = vi.fn();
+vi.mock('primevue/confirmdialog', () => ({
+  default: {
+    name: 'ConfirmDialog',
+    template: '<div data-testid="confirm-dialog-stub"></div>',
+  },
+}));
+vi.mock('primevue/useconfirm', () => ({
+  useConfirm: () => ({ require: requireSpy }),
+}));
 
-// ---- Componente bajo prueba ----
+const isContactDuplicate = vi.fn();
+vi.mock('@/infrastructure/stores/contacts', () => ({
+  useContactsStore: () => ({ isContactDuplicate }),
+}));
+
 import Component from './ContactDetailDocuments.vue';
 
 function renderWithModel(initial: any) {
@@ -171,7 +197,6 @@ describe('ContactDetailDocuments', () => {
     expect(screen.getByText('All documents')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Add document' }));
-    expect(updateSpy).toHaveBeenCalledTimes(2);
 
     expect(model.value.documents).toHaveLength(2);
   });

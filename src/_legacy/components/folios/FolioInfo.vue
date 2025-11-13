@@ -36,7 +36,7 @@
         <span class="open-partner-dialog" @click="openPartnerForm()" v-if="currentFolio?.partnerId">
           Abrir ficha cliente
         </span>
-        <span class="open-partner-dialog" @click="openPartnerForm(true)" v-else>
+        <span class="open-partner-dialog" @click="openNewPartnerForm()" v-else>
           Crear nuevo cliente
         </span>
         <span class="edit-folio-partner" @click="showFolioPartnerContactData()"> Editar </span>
@@ -186,13 +186,21 @@ import { dialogService } from '@/_legacy/services/DialogService';
 import { folioStateText } from '@/_legacy/utils/folio';
 import utilsDates from '@/_legacy/utils/dates';
 import FolioPartnerContactData from '@/_legacy/components/folios/FolioPartnerContactData.vue';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
+import { useAppDialog } from '@/ui/composables/useAppDialog';
+import { useI18n } from 'vue-i18n';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
 
 export default defineComponent({
   emits: ['setTabValue'],
 
   setup() {
     const store = useStore();
+    const uiStore = useUIStore();
+    const contactsStore = useContactsStore();
+    const { open } = useAppDialog();
+    const { t } = useI18n();
 
     const openLanguageDialog = ref(false);
     const partnerName = ref('');
@@ -327,16 +335,53 @@ export default defineComponent({
       });
     };
 
-    const openPartnerForm = async (isNew?: boolean) => {
-      await store.dispatch('countryStates/removeCountryStates');
-      if (isNew) {
-        await store.dispatch('partners/removePartner');
+    const openPartnerForm = async () => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchContactSchema();
+        const contactId = currentFolio.value?.partnerId as number;
+        const contact = await contactsStore.fetchContactById(contactId);
+        if (contact) {
+          contact.id = contactId;
+          open(ContactDetail, {
+            props: { header: contact.name || t('contacts.detail') },
+            data: { contact },
+            onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+              if (data?.refresh === true || data?.action === 'saved') {
+                await store.dispatch('folios/fetchCurrentFolio', currentFolio.value?.id);
+              }
+            },
+          });
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('Contact not found for id:', contactId);
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
       }
-      dialogService.open({
-        header: isNew ? 'Nuevo cliente' : 'Editar cliente',
-        content: markRaw(PartnerForm),
-        closable: true,
-      });
+    };
+
+    const openNewPartnerForm = async () => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchContactSchema();
+        open(ContactDetail, {
+          props: { header: t('contacts.new') },
+          onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+            if (data?.refresh === true || data?.action === 'saved') {
+              await store.dispatch('folios/fetchCurrentFolio', currentFolio.value?.id);
+            }
+          },
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
     };
 
     onMounted(async () => {
@@ -388,6 +433,7 @@ export default defineComponent({
       folioStateText,
       showFolioPartnerContactData,
       openPartnerForm,
+      openNewPartnerForm,
     };
   },
 });

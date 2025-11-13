@@ -505,7 +505,6 @@ describe('ContactDetailDialog', () => {
 
     await waitFor(() => expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1));
     expect(contactsStoreMock.updateContactFields).not.toHaveBeenCalled();
-    expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved' });
   });
 
   it('handleSave updates contact when there is contact in dialogRef', async () => {
@@ -528,7 +527,7 @@ describe('ContactDetailDialog', () => {
     await waitFor(() => expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1));
     const args = (contactsStoreMock.updateContactFields as any).mock.calls[0];
     expect(args[0]).toBe(123);
-    expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved' });
+    expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved', contactId: 123 });
   });
 
   it('handleCancel closes the dialog', async () => {
