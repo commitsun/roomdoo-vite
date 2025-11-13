@@ -86,7 +86,6 @@
             :showHeader="false"
             showIcon
             :showClear="true"
-            dateFormat="dd/mm/yy"
             :minDate="minDate"
             :maxDate="maxDate"
             appendTo="body"
@@ -165,7 +164,6 @@
             :showHeader="false"
             showIcon
             :showClear="true"
-            dateFormat="dd/mm/yy"
             :minDate="minDate"
             :maxDate="maxDate"
             appendTo="body"
@@ -567,7 +565,7 @@ export default defineComponent({
     const maxDate = ref();
 
     // dialog
-    const { open } = useAppDialog();
+    const { openDialog } = useAppDialog();
 
     // loading state
     const isLoading = ref(true);
@@ -842,7 +840,7 @@ export default defineComponent({
           return;
         }
         await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contact.id, propId);
-        open(PartnerForm, {
+        openDialog(PartnerForm, {
           props: { header: contact.name || t('contacts.detail') },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
@@ -859,13 +857,17 @@ export default defineComponent({
     };
 
     watch(dates, (newDates) => {
-      if (!Array.isArray(newDates) || newDates.length <= 0 || newDates[0] === null) {
+      // si no hay fechas, reseteamos límites
+      if (newDates === null || newDates[0] === null) {
         minDate.value = null;
         maxDate.value = null;
-      } else if (Array.isArray(newDates) && newDates.length === 1) {
-        maxDate.value = new Date(newDates[0]);
-        maxDate.value.setDate(maxDate.value.getDate() + 31);
+        return;
       }
+      const start = newDates[0];
+      minDate.value = start;
+      const max = new Date(start);
+      max.setDate(max.getDate() + 31);
+      maxDate.value = max;
     });
 
     // on mounted fetch data and countries
