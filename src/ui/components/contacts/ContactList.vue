@@ -479,7 +479,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     // dialog
-    const { open } = useAppDialog();
+    const { openDialog } = useAppDialog();
 
     // loading state
     const isLoading = ref(true);
@@ -714,7 +714,7 @@ export default defineComponent({
           return;
         }
         await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contact.id, propId);
-        open(PartnerForm, {
+        openDialog(PartnerForm, {
           props: { header: contact.name || t('contacts.detail') },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
