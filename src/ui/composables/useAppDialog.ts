@@ -1,5 +1,4 @@
-// useAppDialog.ts
-import { defineComponent, h, inject, markRaw } from 'vue';
+import { markRaw } from 'vue';
 import { useDialog } from 'primevue/usedialog';
 import { useDynamicDialogsStore } from '@/infrastructure/stores/dynamicDialogs';
 
@@ -13,47 +12,37 @@ const DEFAULT_PROPS = {
     root: { class: 'app-dialog__root' },
   },
 };
-const Bridge = defineComponent({
-  name: 'DialogContentBridge',
-  setup() {
-    const dialogRef = inject<any>('dialogRef');
-    return () => {
-      const C = dialogRef?.value?.data?.component;
-      const p = dialogRef?.value?.data?.props ?? {};
-      return C ? h(C, p) : null;
-    };
-  },
-});
 
 export function useAppDialog() {
   const dialog = useDialog();
-  const dynamicDialogStore = useDynamicDialogsStore();
+  const store = useDynamicDialogsStore();
 
-  const open = (component: any, options: any = {}) => {
-    const newId = Date.now();
-    const { contentProps, ...rest } = options;
+  const openDialog = (component: any, options: any = {}) => {
+    const id = Date.now();
+    const { onClose, templates, ...rest } = options;
 
-    // 👇 Evita que Vue haga reactivo al componente
-    const RawComponent = markRaw(component);
-
-    const merged = {
+    const instance = dialog.open(markRaw(component), {
       ...rest,
+      props: {
+        ...DEFAULT_PROPS,
+        ...(rest.props || {}),
+      },
+      data: rest.data,
+      // slots
+      templates: templates && {
+        header: templates.header && markRaw(templates.header),
+        footer: templates.footer && markRaw(templates.footer),
+        closeButton: templates.closeButton && markRaw(templates.closeButton),
+      },
       onClose: (e: any) => {
-        rest.onClose?.(e);
-        dynamicDialogStore.unRegisterDynamicDialog(newId);
+        onClose?.(e);
+        store.unRegisterDynamicDialog(id);
       },
-      props: { ...DEFAULT_PROPS, ...(rest.props || {}) },
-      data: {
-        ...(rest.data || {}),
-        component: RawComponent,
-        props: { ...(rest.data?.props || {}), ...(contentProps || {}) },
-      },
-    };
+    });
 
-    const instance = dialog.open(Bridge, merged);
-    dynamicDialogStore.registerDynamicDialog(newId, instance);
+    store.registerDynamicDialog(id, instance);
     return instance;
   };
 
-  return { open };
+  return { openDialog };
 }
