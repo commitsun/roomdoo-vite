@@ -105,6 +105,19 @@ export const useContactsStore = defineStore('contacts', () => {
     await contactsService.updateContactFields(contactId, original, updated);
   };
 
+  const isContactDuplicate = async (
+    documentTypeId: number,
+    documentNumber: string,
+    countryId: number,
+  ): Promise<{ id: number; name: string } | null> => {
+    const result = await contactsService.isContactDuplicate(
+      documentTypeId,
+      documentNumber,
+      countryId,
+    );
+    return result;
+  };
+
   return {
     contacts: readonly(contacts),
     customers: readonly(customers),
@@ -122,5 +135,6 @@ export const useContactsStore = defineStore('contacts', () => {
     fetchContactSchema,
     createContact,
     updateContactFields,
+    isContactDuplicate,
   };
 });

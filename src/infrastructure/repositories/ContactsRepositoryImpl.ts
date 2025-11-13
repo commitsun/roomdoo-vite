@@ -248,6 +248,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
       birthdate: normalizeBirthdate,
       id: () => null,
       pricelist: () => null,
+      paymentTerm: () => null,
       idNumbers: () => null,
     };
 
@@ -345,5 +346,19 @@ export class ContactsRepositoryImpl implements ContactsRepository {
           .map((doc) => api.delete(`contacts/${contactId}/id-numbers/${doc.id}`)),
       );
     }
+  }
+  async isContactDuplicate(
+    documentTypeId: number,
+    documentNumber: string,
+    countryId: number,
+  ): Promise<{ id: number; name: string } | null> {
+    const params = new URLSearchParams();
+    params.set('category', String(documentTypeId));
+    params.set('number', documentNumber);
+    params.set('country', String(countryId));
+
+    const url = '/contacts/duplicate/id-numbers';
+    const { data } = await api.get<{ id: number; name: string } | null>(url, { params });
+    return data;
   }
 }

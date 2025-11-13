@@ -41,6 +41,7 @@ export const ContactSchema = z
     documents: z.array(DocumentInputSchema).default([]),
   })
   .superRefine((data, ctx) => {
+    // Regla ya existente para agencias
     if (data.contactType === 'agency' && (data.saleChannelId ?? null) === null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -48,6 +49,42 @@ export const ContactSchema = z
         path: ['saleChannelId'],
       });
     }
+
+    // === NUEVO: Duplicados en el formulario (FRONT) ===
+    // key = CC(AA)::docType(lower)::number(upper)
+    const keyOf = (d: z.infer<typeof DocumentInputSchema>): string | null => {
+      const cc = (d.countryCode ?? '').trim().slice(0, 2).toUpperCase();
+      const dt = (d.documentTypeName ?? '').trim().toLowerCase();
+      const num = (d.number ?? '').trim().toUpperCase();
+      if (!cc || !dt || !num) {
+        return null;
+      }
+      return `${cc}::${dt}::${num}`;
+    };
+
+    const bucket = new Map<string, number[]>();
+    data.documents.forEach((doc, idx) => {
+      const k = keyOf(doc);
+      if (k === null) {
+        return;
+      }
+      const arr = bucket.get(k) ?? [];
+      arr.push(idx);
+      bucket.set(k, arr);
+    });
+
+    bucket.forEach((idxs) => {
+      if (idxs.length > 1) {
+        // Marcamos error en field 'number' para cada fila afectada
+        idxs.forEach((i) => {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'contacts.errors.duplicateDocument', // <- usa esta key en i18n
+            path: ['documents', i, 'number'],
+          });
+        });
+      }
+    });
   });
 
 export type ContactInput = z.infer<typeof ContactSchema>;

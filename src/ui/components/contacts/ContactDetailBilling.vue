@@ -430,7 +430,7 @@ export default defineComponent({
       documentTypesStore.fiscalDocumentTypes.map((dt) => {
         return {
           id: dt.name,
-          name: t(`contacts.${dt.name}`),
+          name: t(`contacts.fiscalDocumentType.${dt.name}`),
         };
       }),
     );

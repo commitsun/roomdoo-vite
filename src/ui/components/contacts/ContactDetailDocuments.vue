@@ -1,5 +1,8 @@
 <template>
-  <section class="documents-form">
+  <section
+    class="documents-form"
+    :class="{ 'documents-form--empty': (modelValue.documents?.length ?? 0) === 0 && !hasDraftDoc }"
+  >
     <div
       class="documents-form__no-documents-container"
       v-if="(modelValue.documents?.length ?? 0) === 0 && !hasDraftDoc"
@@ -32,7 +35,13 @@
       :key="doc.id ?? `draft-${origIdx}`"
       class="documents-form__group"
     >
-      <div class="documents-form__group-grid">
+      <div
+        class="documents-form__group-grid"
+        :class="{
+          'documents-form__group-grid-error':
+            errors[origIdx]?.country || errors[origIdx]?.category || errors[origIdx]?.number,
+        }"
+      >
         <div class="documents-form__field--full">
           {{ t('contacts.mandatoryFieldsText') }}
         </div>
@@ -54,6 +63,7 @@
             @update:modelValue="
               (id: string | null) => setDocCountry(origIdx, id ? Number(id) : null)
             "
+            @blur="checkDuplicateFor(origIdx)"
           >
             <template #value="{ value }">
               <div v-if="value" class="flex items-center w-full gap-1">
@@ -103,6 +113,7 @@
             @update:modelValue="(id: number | null) => setDocCategory(origIdx, id as number | null)"
             :disabled="!doc.country?.id"
             :invalid="!!errors[origIdx]?.category"
+            @blur="checkDuplicateFor(origIdx)"
           />
           <div
             class="flex mt-2 gap-1 items-center"
@@ -134,16 +145,23 @@
             class="documents-form__control"
             autocomplete="off"
             :placeholder="t('contacts.documentNumberPlaceholder')"
-            :invalid="!!errors[origIdx]?.number"
+            :invalid="
+              !!errors[origIdx]?.number &&
+              errors[origIdx]?.number !== 'contacts.errors.duplicateDocument'
+            "
+            @blur="checkDuplicateFor(origIdx)"
           />
           <Message
-            v-if="errors[origIdx]?.number"
+            v-if="
+              errors[origIdx]?.number &&
+              errors[origIdx]?.number !== 'contacts.errors.duplicateDocument'
+            "
             size="small"
             severity="error"
             variant="simple"
             class="mt-2"
           >
-            {{ t(errors[origIdx]?.number, { document: doc.category.name }) }}
+            {{ t(errors[origIdx]?.number, { document: doc.category?.name ?? '' }) }}
           </Message>
         </div>
 
@@ -170,26 +188,54 @@
           />
         </div>
       </div>
+      <div
+        class="flex gap-1 items-center mt-2"
+        v-if="errors[origIdx]?.number === 'contacts.errors.duplicateDocument'"
+      >
+        <CircleAlert :size="16" color="#dc2626" />
+        <Message size="small" severity="error" variant="simple">
+          {{ t('contacts.duplicateDocument') }}
+        </Message>
+      </div>
+      <div class="mt-2 flex gap-1 items-center" v-else-if="duplicatesByIdx[origIdx]">
+        <CircleAlert :size="16" color="#dc2626" />
+        <Message size="small" severity="error" variant="simple">
+          {{ t('contacts.isDuplicated', { name: duplicatesByIdx[origIdx]?.name }) }}
+          <span
+            class="underline text-sm text-blue-600 hover:text-blue-800 visited:text-purple-600 cursor-pointer font-bold"
+            @click="confirmChangeContactFor(origIdx)"
+          >
+            {{ t('contacts.seeContact') }}
+          </span>
+        </Message>
+      </div>
     </div>
+
+    <ConfirmDialog :style="{ maxWidth: '350px' }" />
   </section>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, type PropType } from 'vue';
+import type { PropType } from 'vue';
+import { defineComponent, computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Message from 'primevue/message';
-import { IdCard, Info } from 'lucide-vue-next';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from 'primevue/useconfirm';
+import { IdCard, Info, CircleAlert } from 'lucide-vue-next';
 import CountryFlag from 'vue-country-flag-next';
 
 import type { ContactDetail } from '@/domain/entities/Contact';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 
 export default defineComponent({
+  name: 'DocumentsForm',
   components: {
     Select,
     InputText,
@@ -197,7 +243,9 @@ export default defineComponent({
     Message,
     IdCard,
     Info,
+    CircleAlert,
     CountryFlag,
+    ConfirmDialog,
   },
   props: {
     modelValue: {
@@ -209,11 +257,13 @@ export default defineComponent({
       default: () => [],
     },
   },
-  emits: ['update:modelValue', 'deleteDocumentId'],
+  emits: ['update:modelValue', 'deleteDocumentId', 'changeContactForm'],
   setup(props, { emit }) {
     const { t } = useI18n();
+    const confirm = useConfirm();
     const countriesStore = useCountriesStore();
     const documentTypesStore = useDocumentTypesStore();
+    const contactsStore = useContactsStore();
 
     const countries = computed(() => countriesStore.countries);
     const documentTypes = computed(() => documentTypesStore.documentTypes);
@@ -233,6 +283,7 @@ export default defineComponent({
         .slice()
         .reverse();
     });
+    const duplicatesByIdx = ref<Record<number, { id: number; name: string } | null>>({});
 
     const patchDocuments = (
       updater: (
@@ -259,6 +310,7 @@ export default defineComponent({
 
     const removeDraftsOrDelete = (origIdx: number): void => {
       patchDocuments((docs) => docs.filter((_, i) => i !== origIdx));
+      delete duplicatesByIdx.value[origIdx];
     };
 
     const setDocCountry = (idx: number, id: number | null): void => {
@@ -300,6 +352,64 @@ export default defineComponent({
       );
     };
 
+    const checkDuplicateFor = async (origIdx: number): Promise<void> => {
+      const docs = props.modelValue.documents ?? [];
+      const doc = docs[origIdx];
+      if (doc === undefined || doc === null) {
+        return;
+      }
+
+      const countryId = doc.country?.id ?? null;
+      const categoryId = doc.category?.id ?? null;
+      const number = (doc.name ?? '').trim();
+
+      if (countryId === null || !categoryId || !number) {
+        duplicatesByIdx.value[origIdx] = null;
+        return;
+      }
+
+      const dup = await contactsStore.isContactDuplicate(categoryId, number, countryId);
+      const currentId = (props.modelValue as ContactDetail)?.id as number | undefined;
+      if (dup && dup.id !== currentId) {
+        duplicatesByIdx.value[origIdx] = { id: dup.id, name: dup.name };
+      } else {
+        duplicatesByIdx.value[origIdx] = null;
+      }
+    };
+
+    const confirmChangeContactFor = (origIdx: number): void => {
+      const dup = duplicatesByIdx.value[origIdx];
+      if (!dup) {
+        return;
+      }
+      confirm.require({
+        message: t('contacts.confirmMessage'),
+        header: t('contacts.confirmTitle'),
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: { label: t('contacts.cancel'), severity: 'secondary', outlined: true },
+        acceptProps: { label: t('contacts.seeContact') },
+        accept: () => {
+          emit('changeContactForm', dup.id);
+        },
+      });
+    };
+
+    watch(
+      () => props.modelValue.documents,
+      (newDocs, oldDocs) => {
+        if (!newDocs || !oldDocs) {
+          return;
+        }
+        newDocs.forEach((newDoc, idx) => {
+          const oldDoc = oldDocs[idx];
+          if (newDoc.country?.id !== oldDoc?.country?.id) {
+            setDocCategory(idx, null);
+          }
+        });
+      },
+      { deep: true },
+    );
+
     return {
       t,
       countries,
@@ -307,11 +417,14 @@ export default defineComponent({
       countryById,
       hasDraftDoc,
       docsView,
+      duplicatesByIdx,
       startAddDocument,
       removeDraftsOrDelete,
       setDocCountry,
       setDocCategory,
       docTypesFor,
+      checkDuplicateFor,
+      confirmChangeContactFor,
     };
   },
 });
@@ -368,6 +481,9 @@ export default defineComponent({
     border: 1px solid #cbd5e1;
     border-radius: 12px;
     padding: 16px;
+    &-error {
+      border-color: #dc2626;
+    }
   }
 
   &__field {
@@ -413,6 +529,7 @@ export default defineComponent({
     justify-content: flex-end;
   }
 }
+
 @media (min-width: 1024px) {
   .documents-form {
     width: 100%;
@@ -466,6 +583,23 @@ export default defineComponent({
     &__cancel {
       grid-column: 1 / -1;
     }
+  }
+  .documents-form--empty {
+    display: grid;
+    min-height: 60vh;
+    place-items: center;
+    padding-top: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .documents-form--empty .documents-form__no-documents-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

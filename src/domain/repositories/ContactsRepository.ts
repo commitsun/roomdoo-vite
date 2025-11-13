@@ -58,4 +58,9 @@ export interface ContactsRepository {
     original: Partial<ContactDetail>,
     updated: Partial<ContactDetail>,
   ): Promise<void>;
+  isContactDuplicate(
+    documentTypeId: number,
+    documentNumber: string,
+    countryId: number,
+  ): Promise<{ id: number; name: string } | null>;
 }

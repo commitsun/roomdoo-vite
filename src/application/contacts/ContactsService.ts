@@ -64,6 +64,7 @@ export class ContactsService {
     const contact = await this.contactsRepository.fetchContactById(id);
     const documents = await this.contactsRepository.fetchContactPersonalDocuments(id);
     contact.documents = documents;
+    contact.documents;
     return contact;
   }
   async fetchContactSchema(): Promise<ContactSchema> {
@@ -79,5 +80,18 @@ export class ContactsService {
     updated: Partial<ContactDetail>,
   ): Promise<void> {
     await this.contactsRepository.updateContactFields(contactId, original, updated);
+  }
+
+  async isContactDuplicate(
+    documentTypeId: number,
+    documentNumber: string,
+    countryId: number,
+  ): Promise<{ id: number; name: string } | null> {
+    const isDuplicate = await this.contactsRepository.isContactDuplicate(
+      documentTypeId,
+      documentNumber,
+      countryId,
+    );
+    return isDuplicate;
   }
 }
