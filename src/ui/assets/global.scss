@@ -49,3 +49,7 @@ input[type='number'] {
   appearance: textfield;
   -moz-appearance: textfield;
 }
+
+button:disabled {
+  cursor: not-allowed;
+}
