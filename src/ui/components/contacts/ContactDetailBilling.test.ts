@@ -1,4 +1,3 @@
-// ContactDetailBilling.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
@@ -34,6 +33,13 @@ vi.mock('vue-i18n', () => {
     createI18n: vi.fn(() => ({ global, install: () => {} })),
   };
 });
+
+vi.mock('primevue/confirmdialog', () => ({
+  default: {
+    name: 'ConfirmDialog',
+    template: '<div data-testid="confirm-dialog-stub"></div>',
+  },
+}));
 
 // ---- Stubs PrimeVue & CountryFlag ----
 const ButtonStub = {
@@ -149,6 +155,10 @@ const CountryFlagStub = {
 };
 
 // ---- Stores mocks ----
+const contactsStoreMock = {
+  checkContactDuplicateByFiscalDocument: vi.fn(),
+};
+
 const docTypesStoreMock = {
   fiscalDocumentTypes: [{ name: 'dni' }, { name: 'passport' }],
 };
@@ -179,6 +189,7 @@ const addressStoreMock = {
     },
   ]),
 };
+export const requireSpy = vi.fn();
 
 vi.mock('@/infrastructure/stores/documentTypes', () => ({
   useDocumentTypesStore: () => docTypesStoreMock,
@@ -197,6 +208,19 @@ vi.mock('@/infrastructure/stores/textMessages', () => ({
 }));
 vi.mock('@/infrastructure/stores/address', () => ({
   useAddressStore: () => addressStoreMock,
+}));
+vi.mock('@/infrastructure/stores/contacts', () => ({
+  useContactsStore: () => contactsStoreMock,
+}));
+
+vi.mock('primevue/confirmdialog', () => ({
+  default: {
+    name: 'ConfirmDialog',
+    template: '<div data-testid="confirm-dialog-stub"></div>',
+  },
+}));
+vi.mock('primevue/useconfirm', () => ({
+  useConfirm: () => ({ require: requireSpy }),
 }));
 
 import Component from './ContactDetailBilling.vue';
@@ -522,5 +546,211 @@ describe('ContactDetailBilling', () => {
     expect(payload.state).toEqual({ id: 7, name: 'Madrid' });
 
     vi.useRealTimers();
+  });
+  it('onBeforeMount: copies billingAddress and mode from props', async () => {
+    const initialModel = reactive({
+      residenceStreet: '',
+      residenceCity: '',
+      residenceZip: '',
+      residenceCountry: undefined,
+      residenceState: undefined,
+      street: '',
+      city: '',
+      zipCode: '',
+      country: undefined,
+      state: undefined,
+    });
+
+    const initialBilling = {
+      street: 'S',
+      city: 'C',
+      zipCode: 'Z',
+      country: { id: 34, code: 'ES', name: 'Spain' },
+      state: { id: 7, name: 'Madrid' },
+    };
+    const { getByLabelText } = renderWithModels(initialModel, initialBilling, 'other');
+
+    expect(getByLabelText('Address')).toBeInTheDocument();
+  });
+
+  it('fetchAddressByZip: with len < 3 it does not call, with len = 0 it does clean (calls debounce)', async () => {
+    vi.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    renderWithModels(
+      reactive({
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
+        street: '',
+        city: '',
+        zipCode: '',
+        country: undefined,
+        state: undefined,
+      }),
+    );
+
+    const ac = screen.getByTestId('bill_zip');
+    const input = within(ac).getByRole('textbox');
+    await user.clear(input);
+    await user.type(input, '28');
+    const completeBtn = within(ac).getByRole('button', { name: /complete/i });
+    await user.click(completeBtn);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(addressStoreMock.fetchAddressByZip).not.toHaveBeenCalled();
+
+    await user.clear(input);
+    await user.click(completeBtn);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(addressStoreMock.fetchAddressByZip).toHaveBeenCalledWith('');
+    vi.useRealTimers();
+  });
+
+  it('checkContactDuplicateByFiscalDocument (blur): with empty data it does NOT query', async () => {
+    contactsStoreMock.checkContactDuplicateByFiscalDocument.mockReset();
+
+    renderWithModels(
+      reactive({
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
+        street: '',
+        city: '',
+        zipCode: '',
+        country: undefined,
+        state: undefined,
+        fiscalIdNumberType: '',
+        fiscalIdNumber: '',
+      }),
+    );
+
+    await userEvent.tab();
+    expect(contactsStoreMock.checkContactDuplicateByFiscalDocument).not.toHaveBeenCalled();
+  });
+
+  it('checkContactDuplicateByFiscalDocument (blur): shows warning if backend returns another contact', async () => {
+    contactsStoreMock.checkContactDuplicateByFiscalDocument.mockResolvedValueOnce({
+      id: 999,
+      name: 'John Doe',
+    });
+
+    renderWithModels(
+      reactive({
+        id: 123,
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
+        street: '',
+        city: '',
+        zipCode: '',
+        country: { id: 34, code: 'ES', name: 'Spain' },
+        state: undefined,
+        fiscalIdNumberType: 'vat',
+        fiscalIdNumber: 'ES123',
+      }),
+    );
+
+    const selType = screen.getByTestId('fiscalIdNumberType');
+    const firstType = within(selType).getByTestId('fiscalIdNumberType-opt-dni');
+    await userEvent.click(firstType);
+
+    const num = screen.getByLabelText('Tax document number');
+    await userEvent.click(num);
+    await userEvent.tab();
+
+    expect(await screen.findByText(/isDuplicated/i)).toBeInTheDocument();
+    expect(screen.getByText(/seeContact/i)).toBeInTheDocument();
+  });
+
+  it('checkContactDuplicateByFiscalDocument (blur): does NOT show warning if dup.id === currentId', async () => {
+    contactsStoreMock.checkContactDuplicateByFiscalDocument.mockResolvedValueOnce({
+      id: 123,
+      name: 'John Doe',
+    });
+
+    renderWithModels(
+      reactive({
+        id: 123,
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
+        street: '',
+        city: '',
+        zipCode: '',
+        country: { id: 34, code: 'ES', name: 'Spain' },
+        state: undefined,
+        fiscalIdNumberType: 'vat',
+        fiscalIdNumber: 'ES123',
+      }),
+    );
+
+    const num = screen.getByLabelText('Tax document number');
+    await userEvent.click(num);
+    await userEvent.tab();
+
+    expect(screen.queryByText(/isDuplicated/i)).not.toBeInTheDocument();
+  });
+
+  it('confirmChangeContact: triggers confirm and on accept emits changeContactForm', async () => {
+    contactsStoreMock.checkContactDuplicateByFiscalDocument.mockResolvedValueOnce({
+      id: 987,
+      name: 'Otro',
+    });
+
+    const onChange = vi.fn();
+    render(Component, {
+      props: {
+        modelValue: reactive({
+          id: 111,
+          residenceStreet: '',
+          residenceCity: '',
+          residenceZip: '',
+          residenceCountry: undefined,
+          residenceState: undefined,
+          street: '',
+          city: '',
+          zipCode: '',
+          country: { id: 34, code: 'ES', name: 'Spain' },
+          state: undefined,
+          fiscalIdNumberType: 'vat',
+          fiscalIdNumber: 'ES123',
+        }),
+        billingAddress: { street: '', city: '', zipCode: '', country: undefined, state: undefined },
+        billingAddressMode: 'residence',
+        onChangeContactForm: onChange,
+      } as any,
+      global: {
+        plugins: [createTestingPinia()],
+        components: {
+          Select: SelectStub,
+          InputText: InputTextStub,
+          RadioButton: RadioButtonStub,
+          Message: MessageStub,
+          AutoComplete: AutoCompleteStub,
+          CountryFlag: CountryFlagStub,
+          Button: ButtonStub,
+        },
+      },
+    });
+
+    const num = screen.getByLabelText('Tax document number');
+    await userEvent.click(num);
+    await userEvent.tab();
+    const link = await screen.findByText(/seeContact/i);
+    await userEvent.click(link);
+
+    expect(requireSpy).toHaveBeenCalled();
+    const cfg = requireSpy.mock.calls.at(-1)![0];
+    cfg.accept();
+
+    expect(onChange).toHaveBeenCalledWith(987);
   });
 });

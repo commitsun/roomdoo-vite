@@ -32,9 +32,23 @@ vi.mock('vue-i18n', () => {
     'contacts.supportNumberPlaceholder': 'Enter support',
     'contacts.remove': 'Remove',
     'contacts.select': 'Select...',
+    'contacts.isDuplicated': 'Duplicated with {name}',
+    'contacts.seeContact': 'See contact',
+    'contacts.confirmMessage': 'Are you sure?',
+    'contacts.confirmTitle': 'Confirm',
+    'contacts.cancel': 'Cancel',
+  };
+  const t = (k: string, params?: Record<string, unknown>) => {
+    let s = tMap[k] ?? k;
+    if (params) {
+      for (const [key, val] of Object.entries(params)) {
+        s = s.replaceAll(`{${key}}`, String(val));
+      }
+    }
+    return s;
   };
   return {
-    useI18n: () => ({ t: (k: string) => tMap[k] ?? k }),
+    useI18n: () => ({ t }),
     createI18n: vi.fn(() => ({ global, install: () => {} })),
   };
 });
@@ -340,5 +354,160 @@ describe('ContactDetailDocuments', () => {
     expect(screen.getByText('All documents')).toBeInTheDocument();
     expect(screen.getByText('Issue country *')).toBeInTheDocument();
     expect(screen.getByText('Document type *')).toBeInTheDocument();
+  });
+
+  it('checkDuplicateFor: with incomplete data does not call store and clears duplicatesByIdx', async () => {
+    const { rerender, model } = renderWithModel(
+      reactive({
+        id: 101,
+        documents: [
+          {
+            id: 0,
+            name: '',
+            supportNumber: '',
+            category: { id: 0, name: '', code: '', countries: [] },
+            country: undefined,
+          },
+        ],
+      }),
+    );
+
+    const numberInput = screen.getByRole('textbox', { name: /document number/i });
+    await userEvent.click(numberInput);
+    await userEvent.tab();
+
+    expect(checkContactDuplicateByDocument).not.toHaveBeenCalled();
+
+    model.value = {
+      ...model.value,
+      documents: [
+        {
+          id: 0,
+          name: '',
+          supportNumber: '',
+          category: { id: 0, name: '', code: '', countries: [] },
+          country: undefined,
+        },
+      ],
+    };
+    await rerender();
+    await userEvent.click(numberInput);
+    await userEvent.tab();
+
+    expect(checkContactDuplicateByDocument).not.toHaveBeenCalled();
+  });
+
+  it('checkDuplicateFor: with valid data calls store and shows banner when duplicate differs from currentId', async () => {
+    checkContactDuplicateByDocument.mockResolvedValueOnce({ id: 888, name: 'Existing C' });
+
+    renderWithModel(
+      reactive({
+        id: 777,
+        documents: [
+          {
+            id: 0,
+            name: 'ABC123',
+            supportNumber: '',
+            category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+            country: { id: 34, code: 'ES', name: 'Spain' },
+          },
+        ],
+      }),
+    );
+
+    const numberInput = screen.getByRole('textbox', { name: /document number/i });
+    await userEvent.click(numberInput);
+    await userEvent.tab();
+
+    expect(checkContactDuplicateByDocument).toHaveBeenCalledWith(9, 'ABC123', 34);
+    expect(screen.getByText(/Duplicated with Existing C/i)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText(/See contact/i));
+    expect(requireSpy).toHaveBeenCalledTimes(1);
+
+    const cfg = requireSpy.mock.calls[0][0];
+    expect(typeof cfg.accept).toBe('function');
+    cfg.accept();
+  });
+
+  it('checkDuplicateFor: does not show duplicate when dup.id equals currentId', async () => {
+    checkContactDuplicateByDocument.mockResolvedValueOnce({ id: 777, name: 'Same' });
+
+    renderWithModel(
+      reactive({
+        id: 777,
+        documents: [
+          {
+            id: 0,
+            name: 'XYZ',
+            supportNumber: '',
+            category: { id: 5, name: 'Passport', code: 'P', countries: [] },
+            country: { id: 33, code: 'GB', name: 'UK' },
+          },
+        ],
+      }),
+    );
+
+    const numberInput = screen.getByRole('textbox', { name: /document number/i });
+    await userEvent.click(numberInput);
+    await userEvent.tab();
+
+    expect(checkContactDuplicateByDocument).toHaveBeenCalledWith(5, 'XYZ', 33);
+    expect(screen.queryByText(/Duplicated with/i)).not.toBeInTheDocument();
+  });
+
+  it('resets category when country changes (watch triggers setDocCategory(null))', async () => {
+    const initial = reactive({
+      documents: [
+        {
+          id: 0,
+          name: '',
+          supportNumber: '',
+          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          country: { id: 34, code: 'ES', name: 'Spain' },
+        },
+      ],
+    });
+    const { rerender, updateSpy } = renderWithModel(initial);
+
+    const sel = screen.getByTestId('doc-country-0');
+    const optUk = within(sel).getByTestId('doc-country-0-opt-33');
+    await userEvent.click(optUk);
+
+    await rerender();
+
+    const payload = updateSpy.mock.calls.at(-1)![0];
+    expect(payload.documents[0].category.id).toBe(0);
+  });
+
+  it('docTypesFor: without country shows no options; with country filters by matching or global types', async () => {
+    const { rerender } = renderWithModel(
+      reactive({
+        documents: [
+          {
+            id: 0,
+            name: '',
+            supportNumber: '',
+            category: { id: 0, name: '', code: '', countries: [] },
+            country: undefined,
+          },
+        ],
+      }),
+    );
+
+    let selType = screen.getByTestId('doc-type-0');
+    expect(within(selType).queryByTestId('doc-type-0-opt-5')).not.toBeInTheDocument();
+
+    const selCountry = screen.getByTestId('doc-country-0');
+    await userEvent.click(within(selCountry).getByTestId('doc-country-0-opt-33'));
+
+    await rerender();
+
+    selType = screen.getByTestId('doc-type-0');
+    const optPassport = within(selType).getByTestId('doc-type-0-opt-5');
+    expect(optPassport).toBeInTheDocument();
+
+    const optDni = within(selType).getByTestId('doc-type-0-opt-9');
+    expect(optDni).toBeInTheDocument();
   });
 });

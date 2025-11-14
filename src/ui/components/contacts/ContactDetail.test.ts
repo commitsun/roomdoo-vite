@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
 import { ref } from 'vue';
+import * as vee from 'vee-validate';
 // eslint-disable-next-line import/order
 import type { z } from 'zod';
 
@@ -20,10 +21,12 @@ vi.mock('vue-i18n', () => {
     'contacts.cancel': 'Cancel',
     'contacts.save': 'Save',
     'error.somethingWentWrong': 'Something went wrong',
+    'contacts.errors.fieldErrors': '{count} field errors',
   };
   return {
     useI18n: () => ({
-      t: (k: string) => tMap[k] ?? k,
+      t: (k: string, vars?: any) =>
+        k === 'contacts.errors.fieldErrors' ? `${vars?.count} field errors` : (tMap[k] ?? k),
     }),
     createI18n: vi.fn(() => ({ global, install: () => {} })),
   };
@@ -31,6 +34,11 @@ vi.mock('vue-i18n', () => {
 
 // ---- Mock responsive (desktop/mobile) ----
 const desktopFlag = ref<boolean>(true);
+const vvState = {
+  errors: {} as Record<string, string>,
+  validateResult: { valid: true } as { valid: boolean },
+  setValues: vi.fn(),
+};
 vi.mock('@vueuse/core', () => ({
   useMediaQuery: vi.fn(() => desktopFlag),
   __setDesktop: (v: boolean) => (desktopFlag.value = v),
@@ -39,10 +47,19 @@ vi.mock('@vueuse/core', () => ({
 vi.mock('vee-validate', () => {
   return {
     useForm: () => ({
-      validate: vi.fn().mockResolvedValue({ valid: true }),
-      setValues: vi.fn(),
-      errors: { value: {} as Record<string, string> },
+      validate: vi.fn().mockImplementation(async () => vvState.validateResult),
+      setValues: vvState.setValues,
+      errors: { value: vvState.errors },
     }),
+    // helpers de test
+    __vvSetErrors: (e: Record<string, string>) => {
+      for (const k of Object.keys(vvState.errors)) {
+        delete vvState.errors[k];
+      }
+      Object.assign(vvState.errors, e ?? {});
+    },
+    __vvSetValidate: (res: { valid: boolean }) => (vvState.validateResult = res),
+    __vvGetState: () => vvState,
   };
 });
 vi.mock('@vee-validate/zod', () => ({
@@ -162,7 +179,6 @@ export const ButtonStub = {
   `,
 };
 
-// ---- Stubs hijos (mockeados con emisión de update:modelValue) ----
 export const ContactDetailGeneralDataStub = {
   name: 'ContactDetailGeneralData',
   template: `<div data-testid="general-data"></div>`,
@@ -213,11 +229,9 @@ function expectError(
       `No se encontró error para path=${JSON.stringify(e.path)} msg=${e.message}`,
     ).toBeTruthy();
   }
-  // También comprobamos que no haya errores "extra" no esperados en estos tests.
   expect(issues.length).toBe(expected.length);
 }
 
-// ---- Iconos stubs (no funcionales) ----
 export const UserIconStub = { name: 'User', template: `<i class="icon-user"></i>` };
 export const BuildingIconStub = { name: 'Building', template: `<i class="icon-building"></i>` };
 export const StoreIconStub = { name: 'Store', template: `<i class="icon-store"></i>` };
@@ -227,18 +241,47 @@ export const BanknoteIconStub = { name: 'Banknote', template: `<i class="icon-ba
 export const NotebookPenIconStub = { name: 'NotebookPen', template: `<i class="icon-notes"></i>` };
 export const BookUserIconStub = { name: 'BookUser', template: `<i class="icon-bookuser"></i>` };
 
-// ---- Hijos reales mockeados con inputs que emiten cambios ----
 vi.mock('./ContactDetailGeneralData.vue', () => ({
   default: {
     name: 'ContactDetailGeneralData',
-    data: () => ({ first: '' }),
+    data: () => ({
+      first: '',
+      last: '',
+      last2: '',
+      rStreet: '',
+      rZip: '',
+      rCity: '',
+    }),
+    methods: {
+      emitAll(this: any) {
+        this.$emit('update:modelValue', {
+          firstname: this.first,
+          lastname: this.last,
+          lastname2: this.last2,
+          residenceStreet: this.rStreet,
+          residenceZip: this.rZip,
+          residenceCity: this.rCity,
+        });
+      },
+    },
     template: `
       <div data-testid="general-data">
         <label for="first-input">First name</label>
         <input id="first-input" aria-label="First name"
-          placeholder="first name"
-          v-model="first"
-          @input="$emit('update:modelValue', { firstname: first })" />
+          placeholder="first name" v-model="first" @input="emitAll" />
+
+        <label for="last-input">Last name</label>
+        <input id="last-input" aria-label="Last name"
+          placeholder="last name" v-model="last" @input="emitAll" />
+
+        <label for="last2-input">Second last name</label>
+        <input id="last2-input" aria-label="Second last name"
+          placeholder="second last name" v-model="last2" @input="emitAll" />
+
+        <!-- (si usas residencia) -->
+        <input aria-label="Residence street" placeholder="residence street" v-model="rStreet" @input="emitAll" />
+        <input aria-label="Residence zip" placeholder="residence zip" v-model="rZip" @input="emitAll" />
+        <input aria-label="Residence city" placeholder="residence city" v-model="rCity" @input="emitAll" />
       </div>
     `,
   },
@@ -249,18 +292,16 @@ vi.mock('./ContactDetailDocuments.vue', () => ({
     name: 'ContactDetailDocuments',
     data: () => ({
       docName: '',
-      catId: '9', // 9 = DNI, 5 = Passport (como en tus <option>)
-      countryId: '34', // Spain
+      catId: '9',
+      countryId: '34',
       support: '',
     }),
     methods: {
       catObj(catId: string): { id: number; name: string; code: string; countries: any[] } {
         const id = Number(catId);
         if (id === 5) {
-          // cuando el test selecciona 5 -> PASSPORT
           return { id, name: 'passport', code: 'passport', countries: [] };
         }
-        // por defecto -> DNI
         return { id, name: 'dni', code: 'dni', countries: [] };
       },
       emitAll(this: any) {
@@ -269,7 +310,7 @@ vi.mock('./ContactDetailDocuments.vue', () => ({
             {
               id: 0,
               name: this.docName,
-              category: this.catObj(this.catId), // <- usa passport/dni según catId
+              category: this.catObj(this.catId),
               country: { id: Number(this.countryId), name: 'Spain', code: 'ES' },
               supportNumber: this.support,
             },
@@ -312,6 +353,7 @@ vi.mock('./ContactDetailDocuments.vue', () => ({
           v-model="support"
           @input="emitAll"
         />
+        <button aria-label="open-by-doc" @click="$emit('changeContactForm', 555)">open-by-doc</button>
       </div>
     `,
   },
@@ -320,15 +362,40 @@ vi.mock('./ContactDetailDocuments.vue', () => ({
 vi.mock('./ContactDetailBilling.vue', () => ({
   default: {
     name: 'ContactDetailBilling',
-    data: () => ({ vat: '' }),
+    data: () => ({
+      vat: '',
+      bStreet: '',
+      bZip: '',
+      bCity: '',
+      bCountryId: '33', // UK
+      bStateId: '3301', // UK state dummy
+    }),
+    methods: {
+      emitBilling(this: any) {
+        this.$emit('update:billingAddress', {
+          street: this.bStreet,
+          zipCode: this.bZip,
+          city: this.bCity,
+          country: { id: Number(this.bCountryId), code: 'GB', name: 'UK' },
+          state: { id: Number(this.bStateId), name: 'England' },
+        });
+      },
+    },
     template: `
       <div data-testid="billing">
-        <label for="vat-input">VAT</label>
-        <input id="vat-input" aria-label="VAT"
-          placeholder="VAT"
-          v-model="vat"
-          @input="$emit('update:modelValue', { fiscalIdNumber: vat })"
-        />
+        <input aria-label="VAT" placeholder="VAT" v-model="vat"
+          @input="$emit('update:modelValue', { fiscalIdNumber: vat })" />
+
+        <!-- billing address inputs -->
+        <input aria-label="billing street" placeholder="billing street" v-model="bStreet" @input="emitBilling" />
+        <input aria-label="billing zip" placeholder="billing zip" v-model="bZip" @input="emitBilling" />
+        <input aria-label="billing city" placeholder="billing city" v-model="bCity" @input="emitBilling" />
+
+        <!-- cambia el modo -->
+        <button aria-label="Use other address" @click="$emit('updateBillingAddressMode', 'other')">use-other</button>
+
+        <!-- dispara cambio de contacto -->
+        <button aria-label="open-by-billing" @click="$emit('changeContactForm', 888)">open-by-billing</button>
       </div>
     `,
   },
@@ -365,6 +432,7 @@ const contactsStoreMock = {
   contactSchema: { fields: ['lastname2'] },
   createContact: vi.fn().mockResolvedValue(undefined),
   updateContactFields: vi.fn().mockResolvedValue(undefined),
+  fetchContactById: vi.fn(),
 };
 
 const uiStoreMock = {
@@ -898,5 +966,317 @@ describe('ContactDetailDialog', () => {
       documents: [doc({ countryCode: ' es ', documentTypeName: '  Nif ', number: 'NIF-OK' })],
     });
     expect(parsed.success).toBe(true);
+  });
+
+  it('does not save if validate() returns valid=false (early return)', async () => {
+    (vee as any).__vvSetValidate({ valid: false });
+    renderWith();
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+    await waitFor(() => {
+      expect(contactsStoreMock.createContact).not.toHaveBeenCalled();
+      expect(contactsStoreMock.updateContactFields).not.toHaveBeenCalled();
+    });
+
+    (vee as any).__vvSetValidate({ valid: true });
+  });
+
+  it('does not save if there are mapped errors (badges > 0)', async () => {
+    (vee as any).__vvSetErrors({
+      name: 'required',
+      'documents[0].number': 'bad',
+      'documents.1.countryCode': 'bad',
+      'documents.2.documentTypeName': 'bad',
+    });
+
+    renderWith();
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    await waitFor(() => {
+      expect(contactsStoreMock.createContact).not.toHaveBeenCalled();
+      expect(contactsStoreMock.updateContactFields).not.toHaveBeenCalled();
+    });
+
+    (vee as any).__vvSetErrors({});
+  });
+
+  it('buildPayloadToValidate: composes name and flattens documents for validation', async () => {
+    (vueuse as any).__setDesktop(true);
+    const {} = renderWith();
+
+    await userEvent.type(screen.getByPlaceholderText('first name'), ' Ana ');
+
+    await userEvent.clear(screen.getByPlaceholderText('document name'));
+    await userEvent.type(screen.getByPlaceholderText('document name'), '  X-1  ');
+    await userEvent.selectOptions(screen.getByPlaceholderText('document category'), '9');
+    await userEvent.selectOptions(screen.getByPlaceholderText('document country'), '34');
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    const { setValues } = (vee as any).__vvGetState();
+    expect(setValues).toHaveBeenCalledTimes(1);
+
+    const payload = (setValues as any).mock.calls[0][0];
+    expect(payload).toEqual(
+      expect.objectContaining({
+        contactType: 'person',
+        name: 'Ana',
+        saleChannelId: null,
+      }),
+    );
+
+    expect(payload.documents).toHaveLength(1);
+    expect(payload.documents[0]).toEqual(
+      expect.objectContaining({
+        number: 'X-1',
+        countryCode: 'ES',
+        documentTypeName: 'dni',
+        isValidable: expect.any(Boolean),
+      }),
+    );
+  });
+
+  it('when editing documents, the watch clears errors and allows saving', async () => {
+    (vueuse as any).__setDesktop(true);
+    (vee as any).__vvSetErrors({ 'documents[0].number': 'bad' });
+
+    renderWith();
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+    await waitFor(() => expect(contactsStoreMock.createContact).not.toHaveBeenCalled());
+
+    await userEvent.clear(screen.getByPlaceholderText('document name'));
+    await userEvent.type(screen.getByPlaceholderText('document name'), 'OK-77');
+    (vee as any).__vvSetErrors({});
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+    await waitFor(() => expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1));
+  });
+
+  it('billingAddressMode=residence copies residence to billing on save', async () => {
+    (vueuse as any).__setDesktop(true);
+
+    renderWith();
+
+    await userEvent.type(screen.getByPlaceholderText('residence street'), 'Calle 1');
+    await userEvent.type(screen.getByPlaceholderText('residence zip'), '15001');
+    await userEvent.type(screen.getByPlaceholderText('residence city'), 'A Coruña');
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    await waitFor(() => {
+      expect(contactsStoreMock.createContact).toHaveBeenCalled();
+    });
+    const saved = (contactsStoreMock.createContact as any).mock.calls.at(-1)[0];
+
+    expect(saved).toEqual(
+      expect.objectContaining({
+        street: 'Calle 1',
+        zipCode: '15001',
+        city: 'A Coruña',
+      }),
+    );
+  });
+
+  it('when there are first/last/last2, composes name before saving', async () => {
+    (vueuse as any).__setDesktop(true);
+    renderWith();
+
+    await userEvent.type(screen.getByPlaceholderText('first name'), 'John');
+    await userEvent.type(screen.getByPlaceholderText('last name'), 'Doe');
+    await userEvent.type(screen.getByPlaceholderText('second last name'), 'Roe');
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    await waitFor(() => expect(contactsStoreMock.createContact).toHaveBeenCalled());
+    const payload = (contactsStoreMock.createContact as any).mock.calls.at(-1)[0];
+    expect(payload.name).toBe('John Doe Roe');
+  });
+
+  it('clearHiddenFields on non-person wipes person-only fields and documents', async () => {
+    (vueuse as any).__setDesktop(true);
+    renderWith();
+
+    await userEvent.type(screen.getByPlaceholderText('first name'), 'Zoe');
+    await userEvent.clear(screen.getByPlaceholderText('document name'));
+    await userEvent.type(screen.getByPlaceholderText('document name'), 'DOC-1');
+    await userEvent.selectOptions(screen.getByPlaceholderText('document category'), '9');
+    await userEvent.selectOptions(screen.getByPlaceholderText('document country'), '34');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Company' }));
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    await waitFor(() => expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1));
+    const payload = (contactsStoreMock.createContact as any).mock.calls[0][0];
+
+    expect(payload.lastname ?? '').toBe('');
+    expect(payload.lastname2 ?? '').toBe('');
+    expect(payload.birthdate ?? null).toBeNull();
+    expect(payload.documents ?? []).toEqual([]);
+    expect(payload.residenceStreet ?? '').toBe('');
+    expect(payload.residenceZip ?? '').toBe('');
+    expect(payload.residenceCity ?? '').toBe('');
+    expect(payload.residenceCountry ?? undefined).toBeUndefined();
+    expect(payload.residenceState ?? undefined).toBeUndefined();
+  });
+
+  it('billingAddressMode="other" copies billingAddress into street/zip/city/country/state on save', async () => {
+    (vueuse as any).__setDesktop(true);
+    renderWith();
+
+    await userEvent.type(screen.getByPlaceholderText('billing street'), 'Baker St 221B');
+    await userEvent.type(screen.getByPlaceholderText('billing zip'), 'NW1');
+    await userEvent.type(screen.getByPlaceholderText('billing city'), 'London');
+
+    await userEvent.click(screen.getByLabelText(/use other address/i));
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+    await waitFor(() => expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1));
+
+    const saved = (contactsStoreMock.createContact as any).mock.calls.at(-1)[0];
+    expect(saved).toEqual(
+      expect.objectContaining({
+        street: 'Baker St 221B',
+        zipCode: 'NW1',
+        city: 'London',
+      }),
+    );
+    expect(saved.country).toEqual(expect.objectContaining({ id: 33 }));
+    expect(saved.state).toEqual(expect.objectContaining({ id: 3301 }));
+  });
+
+  it('mapVeeValidateErrors reflects in the footer counter (badges.total)', async () => {
+    (vee as any).__vvSetErrors({
+      name: 'required',
+      'documents[0].number': 'bad',
+      'documents.1.countryCode': 'bad',
+      'documents.2.documentTypeName': 'bad',
+    });
+
+    renderWith();
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    expect(screen.getByText('4 field errors')).toBeInTheDocument();
+
+    (vee as any).__vvSetErrors({});
+  });
+
+  it('buildPayloadToValidate normalizes countryCode and documentTypeName (trim/case) with validable flag', async () => {
+    (vueuse as any).__setDesktop(true);
+    renderWith();
+
+    await userEvent.clear(screen.getByPlaceholderText('document name'));
+    await userEvent.type(screen.getByPlaceholderText('document name'), '  X-99  ');
+    await userEvent.selectOptions(screen.getByPlaceholderText('document category'), '9');
+    await userEvent.selectOptions(screen.getByPlaceholderText('document country'), '34');
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    const { setValues } = (vee as any).__vvGetState();
+    const payload = (setValues as any).mock.calls.at(-1)[0];
+
+    expect(payload.documents[0]).toEqual(
+      expect.objectContaining({
+        number: 'X-99',
+        countryCode: 'ES',
+        documentTypeName: 'dni',
+        isValidable: expect.any(Boolean),
+      }),
+    );
+  });
+
+  it('Documents emits changeContactForm → loads contact via store, resets tab to "0" and updates instead of creating', async () => {
+    (vueuse as any).__setDesktop(true);
+
+    const fetched = {
+      id: 555,
+      firstname: 'Fetched',
+      lastname: 'User',
+      contactType: 'person',
+      street: 'X',
+      zipCode: 'Y',
+      city: 'Z',
+      country: { id: 33, code: 'GB', name: 'UK' },
+      state: { id: 3301, name: 'England' },
+      residenceStreet: '',
+      residenceZip: '',
+      residenceCity: '',
+      residenceCountry: undefined,
+      residenceState: undefined,
+    };
+    contactsStoreMock.fetchContactById.mockResolvedValueOnce(fetched);
+
+    renderWith();
+
+    await userEvent.click(screen.getByLabelText(/open-by-doc/i));
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    await waitFor(() => expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1));
+    const [id] = (contactsStoreMock.updateContactFields as any).mock.calls[0];
+    expect(id).toBe(555);
+
+    const tabs = await screen.findByTestId('tabs');
+    expect(tabs.getAttribute('data-model')).toBe('0');
+  });
+
+  it('Billing emits changeContactForm (mobile) → loads contact via store, resets panel to "0" and updates', async () => {
+    (vueuse as any).__setDesktop(false);
+
+    const fetched = {
+      id: 888,
+      firstname: 'Bill',
+      lastname: 'Target',
+      contactType: 'person',
+      street: 'Baker',
+      zipCode: 'NW1',
+      city: 'London',
+      country: { id: 33, code: 'GB', name: 'UK' },
+      state: { id: 3301, name: 'England' },
+      residenceStreet: '',
+      residenceZip: '',
+      residenceCity: '',
+    };
+    contactsStoreMock.fetchContactById.mockResolvedValueOnce(fetched);
+
+    renderWith();
+
+    await userEvent.click(screen.getByLabelText(/open-by-billing/i));
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    await waitFor(() => expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1));
+    const [id] = (contactsStoreMock.updateContactFields as any).mock.calls[0];
+    expect(id).toBe(888);
+
+    const acc = await screen.findByTestId('accordion');
+    expect(acc.getAttribute('data-model')).toBe('0');
+  });
+
+  it('updateBillingAddressMode="other" from Billing on mobile is honored on save', async () => {
+    (vueuse as any).__setDesktop(false);
+    renderWith();
+
+    await userEvent.type(screen.getByPlaceholderText(/billing street/i), 'Baker St 221B');
+    await userEvent.type(screen.getByPlaceholderText(/billing zip/i), 'NW1');
+    await userEvent.type(screen.getByPlaceholderText(/billing city/i), 'London');
+
+    await userEvent.click(screen.getByRole('button', { name: /use other address/i }));
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+    await waitFor(() => expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1));
+
+    const saved = (contactsStoreMock.createContact as any).mock.calls.at(-1)[0];
+    expect(saved).toEqual(
+      expect.objectContaining({
+        street: 'Baker St 221B',
+        zipCode: 'NW1',
+        city: 'London',
+      }),
+    );
+    expect(saved.country).toEqual(expect.objectContaining({ id: 33 }));
+    expect(saved.state).toEqual(expect.objectContaining({ id: 3301 }));
   });
 });

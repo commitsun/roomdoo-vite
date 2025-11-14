@@ -559,4 +559,43 @@ describe('ContactsService.updateContact', () => {
     contactsRepoMock.updateContactFields.mockRejectedValue(err);
     await expect(contactsService.updateContactFields(0, {}, {})).rejects.toThrow(err);
   });
+
+  it('calls repository to check contact duplication by document', async () => {
+    contactsRepoMock.checkContactDuplicateByDocument = vi
+      .fn()
+      .mockResolvedValue({ id: 1, name: 'John Doe' });
+    const result = await contactsService.checkContactDuplicateByDocument(1, 'A1234567', 1);
+    expect(contactsRepoMock.checkContactDuplicateByDocument).toHaveBeenCalledWith(1, 'A1234567', 1);
+    expect(result).toEqual({ id: 1, name: 'John Doe' });
+  });
+  it('propagates repository errors when checking contact duplication by document', async () => {
+    const err = new Error('boom-check-duplicate-document');
+    contactsRepoMock.checkContactDuplicateByDocument = vi.fn().mockRejectedValue(err);
+    await expect(contactsService.checkContactDuplicateByDocument(1, 'A1234567', 1)).rejects.toThrow(
+      err,
+    );
+  });
+  it('calls repository to check contact duplication by fiscal document', async () => {
+    contactsRepoMock.checkContactDuplicateByFiscalDocument = vi
+      .fn()
+      .mockResolvedValue({ id: 2, name: 'Jane Smith' });
+    const result = await contactsService.checkContactDuplicateByFiscalDocument(
+      'FISCAL_ID',
+      'F12345678',
+      1,
+    );
+    expect(contactsRepoMock.checkContactDuplicateByFiscalDocument).toHaveBeenCalledWith(
+      'FISCAL_ID',
+      'F12345678',
+      1,
+    );
+    expect(result).toEqual({ id: 2, name: 'Jane Smith' });
+  });
+  it('propagates repository errors when checking contact duplication by fiscal document', async () => {
+    const err = new Error('boom-check-duplicate-fiscal-document');
+    contactsRepoMock.checkContactDuplicateByFiscalDocument = vi.fn().mockRejectedValue(err);
+    await expect(
+      contactsService.checkContactDuplicateByFiscalDocument('FISCAL_ID', 'F12345678', 1),
+    ).rejects.toThrow(err);
+  });
 });

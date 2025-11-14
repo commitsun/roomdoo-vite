@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock axios api instance
 vi.mock('@/infrastructure/http/axios', () => {
   return {
     api: {
@@ -311,6 +310,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
 
   it('createContact should POST /contacts with normalized payload and return data', async () => {
     const contact = {
+      id: 0,
       firstname: 'Ada',
       lastname: 'Lovelace',
       name: 'Ada Lovelace',
@@ -323,6 +323,9 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       residenceState: { id: 20, name: 'England', country: { id: 33, name: 'UK', code: 'GB' } },
       lang: 'en-GB',
       tags: [{ id: 1, name: 'VIP' }],
+      pricelist: 0,
+      paymentTerm: 0,
+      idNumbers: [],
       documents: [
         {
           id: 1,
@@ -332,20 +335,23 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
             name: 'Passport',
             code: 'P',
             countries: [{ id: 33, name: 'UK', code: 'GB' }],
+            isValidableDocument: true,
           },
           country: { id: 33, name: 'UK', code: 'GB' },
         },
         {
           id: 2,
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: '111222',
         },
       ],
     };
 
-    const apiResponse = { status: 200, data: { id: 99, ...contact } };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...contactWithoutId } = contact;
+    const apiResponse = { status: 200, data: { id: 99, ...contactWithoutId } };
     vi.mocked((api as any).post).mockResolvedValue(apiResponse);
 
     const result = await repo.createContact(contact);
@@ -381,14 +387,20 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
         {
           id: 0,
           name: 'Passport',
-          category: { id: 5, name: 'Passport', code: 'P', countries: [] },
+          category: {
+            id: 5,
+            name: 'Passport',
+            code: 'P',
+            countries: [],
+            isValidableDocument: true,
+          },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: 'XYZ123',
         },
         {
           id: 0,
           name: 'DNI',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
           supportNumber: '111222',
         },
       ],
@@ -457,7 +469,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
         {
           id: 1,
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: '111222',
         },
@@ -467,36 +479,35 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       ...original,
       documents: [
         {
-          id: 0, // nuevo -> POST
+          id: 0,
           name: '123456',
           category: {
             id: 5,
             name: 'Passport',
             code: 'P',
             countries: [{ id: 33, name: 'UK', code: 'GB' }],
+            isValidableDocument: true,
           },
           country: { id: 33, name: 'UK', code: 'GB' },
         },
         {
-          id: 1, // existente -> PATCH
+          id: 1,
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
           country: { id: 33, name: 'UK', code: 'GB' },
-          supportNumber: '111333', // <-- NUEVO valor
+          supportNumber: '111333',
         },
       ],
     };
 
     await repo.updateContactFields(contactId, original, updated);
 
-    // 1) PATCH del contacto (posible payload vacío si no hay cambios fuera de documentos)
     expect((api as any).patch).toHaveBeenNthCalledWith(
       1,
       `contacts/${contactId}`,
       expect.any(Object),
     );
 
-    // 2) POST del documento nuevo (id=0)
     expect((api as any).post).toHaveBeenCalledWith(
       `contacts/${contactId}/id-numbers`,
       expect.objectContaining({
@@ -506,21 +517,83 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       }),
     );
 
-    // 3) PATCH del documento existente (id=1) con el NUEVO supportNumber
     expect((api as any).patch).toHaveBeenCalledWith(
       `contacts/${contactId}/id-numbers/1`,
       expect.objectContaining({
         name: '11111111H',
         category: 9,
         country: 33,
-        supportNumber: '111333', // <-- corrige aquí el esperado
+        supportNumber: '111333',
       }),
     );
 
-    // (Opcional) Asegura que no se hizo PATCH con el valor viejo
     expect((api as any).patch).not.toHaveBeenCalledWith(
       `contacts/${contactId}/id-numbers/1`,
       expect.objectContaining({ supportNumber: '111222' }),
     );
+  });
+
+  it('checkContactDuplicateByDocument should call GET /contacts/duplicate/id-numbers and return data', async () => {
+    const apiResponse = { id: 55, name: 'Existing Contact' };
+    vi.mocked(api.get).mockResolvedValue({ data: apiResponse });
+
+    const result = await repo.checkContactDuplicateByDocument(3, 'ABC123456', 33);
+
+    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
+
+    const [[url, cfg]] = vi.mocked(api.get).mock.calls;
+    expect(url).toBe('/contacts/duplicate/id-numbers');
+    expect(cfg).toBeDefined();
+    expect(cfg!.params).toBeInstanceOf(URLSearchParams);
+
+    const p = cfg!.params as URLSearchParams;
+    expect(p.get('category')).toBe('3');
+    expect(p.get('number')).toBe('ABC123456');
+    expect(p.get('country')).toBe('33');
+
+    expect(p.toString()).toBe('category=3&number=ABC123456&country=33');
+
+    expect(result).toBe(apiResponse);
+  });
+
+  it('checkContactDuplicateByDocument should propagate axios errors', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(repo.checkContactDuplicateByDocument(3, 'ABC123456', 33)).rejects.toThrow(err);
+  });
+
+  it('checkContactDuplicateByFiscalDocument calls GET and returns data', async () => {
+    const apiResponse = { id: 66, name: 'Existing Contact' };
+    vi.mocked(api.get).mockResolvedValue({ data: apiResponse });
+
+    const result = await repo.checkContactDuplicateByFiscalDocument('VAT', 'ESX12345678', 33);
+
+    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
+
+    const [[url, cfg]] = vi.mocked(api.get).mock.calls;
+    expect(url).toBe('/contacts/duplicate/fiscal-number');
+    expect(cfg).toBeDefined();
+    expect(cfg!.params).toBeInstanceOf(URLSearchParams);
+
+    const p = cfg!.params as URLSearchParams;
+    const sent = Object.fromEntries(p.entries());
+
+    const category = sent.category ?? sent.type ?? sent.documentType ?? sent.documentTypeName;
+
+    expect(category).toBe('VAT');
+    expect(sent.number).toBe('ESX12345678');
+    expect(sent.country).toBe('33');
+
+    expect(result).toBe(apiResponse);
+  });
+
+  it('checkContactDuplicateByFiscalDocument should propagate axios errors', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(
+      repo.checkContactDuplicateByFiscalDocument('VAT', 'ESX12345678', 33),
+    ).rejects.toThrow(err);
   });
 });
