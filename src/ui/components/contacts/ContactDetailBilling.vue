@@ -13,6 +13,7 @@
           optionValue="id"
           class="billing-form__control"
           :placeholder="t('contacts.select')"
+          @blur="checkContactDuplicateByFiscalDocument()"
         />
       </div>
       <div class="billing-form__field">
@@ -24,7 +25,20 @@
           v-model="modelValue.fiscalIdNumber"
           class="billing-form__control"
           :placeholder="t('contacts.fiscalDocumentNumberPlaceholder')"
+          @blur="checkContactDuplicateByFiscalDocument()"
         />
+      </div>
+      <div class="mt-2 flex gap-1 items-center" v-if="contactDuplicated.id !== 0">
+        <CircleAlert :size="16" color="#dc2626" />
+        <Message size="small" severity="error" variant="simple">
+          {{ t('contacts.isDuplicated', { name: contactDuplicated?.name }) }}
+          <span
+            class="underline text-sm text-blue-600 hover:text-blue-800 visited:text-purple-600 cursor-pointer font-bold"
+            @click="confirmChangeContact(contactDuplicated.id)"
+          >
+            {{ t('contacts.seeContact') }}
+          </span>
+        </Message>
       </div>
       <div
         class="billing-form__field--full billing-form__address-choice"
@@ -347,6 +361,7 @@
       </div>
     </div>
   </section>
+  <ConfirmDialog :style="{ maxWidth: '350px' }" />
 </template>
 
 <script lang="ts">
@@ -357,7 +372,9 @@ import InputText from 'primevue/inputtext';
 import RadioButton from 'primevue/radiobutton';
 import Message from 'primevue/message';
 import AutoComplete from 'primevue/autocomplete';
-import { Info } from 'lucide-vue-next';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from 'primevue/useconfirm';
+import { Info, CircleAlert } from 'lucide-vue-next';
 import CountryFlag from 'vue-country-flag-next';
 import { useDebounceFn } from '@vueuse/core';
 
@@ -365,6 +382,7 @@ import type { ContactDetail } from '@/domain/entities/Contact';
 import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useAddressStore } from '@/infrastructure/stores/address';
@@ -379,8 +397,10 @@ export default defineComponent({
     RadioButton,
     Message,
     AutoComplete,
+    ConfirmDialog,
     CountryFlag,
     Info,
+    CircleAlert,
   },
   props: {
     modelValue: {
@@ -402,16 +422,24 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:modelValue', 'update:billingAddress', 'updateBillingAddressMode'],
+  emits: [
+    'update:modelValue',
+    'update:billingAddress',
+    'updateBillingAddressMode',
+    'changeContactForm',
+  ],
 
   setup(props, context) {
     const { t } = useI18n();
     const countriesStore = useCountriesStore();
     const countryStatesStore = useCountryStatesStore();
     const documentTypesStore = useDocumentTypesStore();
+    const contactsStore = useContactsStore();
     const textMessageStore = useTextMessagesStore();
     const addressStore = useAddressStore();
     const uiStore = useUIStore();
+    const confirm = useConfirm();
+
     const billingAddress = reactive({
       street: '',
       city: '',
@@ -423,7 +451,7 @@ export default defineComponent({
     const billingAddressMode = ref<'residence' | 'other'>('residence');
     const countryStates = ref<CountryState[]>([]);
     const addressItems = ref([] as { label: string; value: Address }[]);
-
+    const contactDuplicated = ref({ id: 0, name: '' });
     const countries = computed(() => countriesStore.countries);
 
     const fiscalDocumentTypes = computed(() =>
@@ -491,6 +519,59 @@ export default defineComponent({
       }
     };
 
+    const checkContactDuplicateByFiscalDocument = async (): Promise<void> => {
+      contactDuplicated.value = { id: 0, name: '' };
+      if (
+        props.modelValue.fiscalIdNumber === '' ||
+        props.modelValue.fiscalIdNumber === undefined ||
+        props.modelValue.fiscalIdNumberType === '' ||
+        props.modelValue.fiscalIdNumberType === undefined
+      ) {
+        return;
+      }
+      let countryId: number | undefined = undefined;
+      if (
+        residenceAddressText.value &&
+        billingAddressMode.value === 'residence' &&
+        props.modelValue.residenceCountry
+      ) {
+        countryId = props.modelValue.residenceCountry.id;
+      } else if (billingAddressMode.value === 'other' && billingAddress.country) {
+        countryId = billingAddress.country.id;
+      } else if (props.modelValue.country) {
+        countryId = props.modelValue.country.id;
+      }
+      try {
+        const dup = await contactsStore.checkContactDuplicateByFiscalDocument(
+          props.modelValue.fiscalIdNumberType,
+          props.modelValue.fiscalIdNumber,
+          countryId,
+        );
+        const currentId = (props.modelValue as ContactDetail)?.id as number | undefined;
+        if (dup && dup.id !== currentId) {
+          contactDuplicated.value = { id: dup.id, name: dup.name };
+        }
+      } catch (error) {
+        textMessageStore.addTextMessage(
+          t('error.somethingWentWrong'),
+          error instanceof Error ? error.message : 'Unknown error',
+        );
+      }
+    };
+
+    const confirmChangeContact = (id: number): void => {
+      confirm.require({
+        message: t('contacts.confirmMessage'),
+        header: t('contacts.confirmTitle'),
+        icon: 'pi pi-exclamation-triangle',
+        rejectProps: { label: t('contacts.cancel'), severity: 'secondary', outlined: true },
+        acceptProps: { label: t('contacts.seeContact') },
+        accept: () => {
+          context.emit('changeContactForm', id);
+        },
+      });
+    };
+
     watch(billingAddressMode, (newMode) => {
       if (newMode === 'residence') {
         context.emit('updateBillingAddressMode', 'residence');
@@ -554,7 +635,10 @@ export default defineComponent({
       fiscalDocumentTypes,
       countryStates,
       addressItems,
+      contactDuplicated,
       fetchAddressByZip,
+      checkContactDuplicateByFiscalDocument,
+      confirmChangeContact,
       t,
     };
   },

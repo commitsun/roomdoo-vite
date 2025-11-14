@@ -129,9 +129,9 @@ vi.mock('primevue/useconfirm', () => ({
   useConfirm: () => ({ require: requireSpy }),
 }));
 
-const isContactDuplicate = vi.fn();
+const checkContactDuplicateByDocument = vi.fn();
 vi.mock('@/infrastructure/stores/contacts', () => ({
-  useContactsStore: () => ({ isContactDuplicate }),
+  useContactsStore: () => ({ checkContactDuplicateByDocument }),
 }));
 
 import Component from './ContactDetailDocuments.vue';

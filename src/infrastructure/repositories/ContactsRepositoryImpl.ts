@@ -347,17 +347,34 @@ export class ContactsRepositoryImpl implements ContactsRepository {
       );
     }
   }
-  async isContactDuplicate(
+  async checkContactDuplicateByDocument(
     documentTypeId: number,
     documentNumber: string,
     countryId: number,
   ): Promise<{ id: number; name: string } | null> {
     const params = new URLSearchParams();
-    params.set('category', String(documentTypeId));
+    params.set('category', documentTypeId.toString());
     params.set('number', documentNumber);
-    params.set('country', String(countryId));
+    params.set('country', countryId.toString());
 
     const url = '/contacts/duplicate/id-numbers';
+    const { data } = await api.get<{ id: number; name: string } | null>(url, { params });
+    return data;
+  }
+
+  async checkContactDuplicateByFiscalDocument(
+    fiscalDocumentType: string,
+    fiscalDocumentNumber: string,
+    countryId?: number,
+  ): Promise<{ id: number; name: string } | null> {
+    const params = new URLSearchParams();
+    params.set('type', fiscalDocumentType);
+    params.set('number', fiscalDocumentNumber);
+    if (countryId !== undefined) {
+      params.set('country', countryId.toString());
+    }
+
+    const url = '/contacts/duplicate/fiscal-number';
     const { data } = await api.get<{ id: number; name: string } | null>(url, { params });
     return data;
   }

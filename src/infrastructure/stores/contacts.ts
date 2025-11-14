@@ -106,14 +106,27 @@ export const useContactsStore = defineStore('contacts', () => {
     await contactsService.updateContactFields(contactId, original, updated);
   };
 
-  const isContactDuplicate = async (
+  const checkContactDuplicateByDocument = async (
     documentTypeId: number,
     documentNumber: string,
     countryId: number,
   ): Promise<{ id: number; name: string } | null> => {
-    const result = await contactsService.isContactDuplicate(
+    const result = await contactsService.checkContactDuplicateByDocument(
       documentTypeId,
       documentNumber,
+      countryId,
+    );
+    return result;
+  };
+
+  const checkContactDuplicateByFiscalDocument = async (
+    fiscalDocumentType: string,
+    fiscalDocumentNumber: string,
+    countryId?: number,
+  ): Promise<{ id: number; name: string } | null> => {
+    const result = await contactsService.checkContactDuplicateByFiscalDocument(
+      fiscalDocumentType,
+      fiscalDocumentNumber,
       countryId,
     );
     return result;
@@ -136,6 +149,7 @@ export const useContactsStore = defineStore('contacts', () => {
     fetchContactSchema,
     createContact,
     updateContactFields,
-    isContactDuplicate,
+    checkContactDuplicateByDocument,
+    checkContactDuplicateByFiscalDocument,
   };
 });

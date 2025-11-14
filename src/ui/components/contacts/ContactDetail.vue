@@ -96,6 +96,7 @@
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
               @update:billingAddress="(v: Address) => Object.assign(billingAddress, v)"
               @updateBillingAddressMode="billingAddressMode = $event"
+              @changeContactForm="(id: number) => changeContactForm(id)"
             />
           </AccordionContent>
         </AccordionPanel>
@@ -163,6 +164,7 @@
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
               @update:billingAddress="(v: Address) => Object.assign(billingAddress, v)"
               @updateBillingAddressMode="billingAddressMode = $event"
+              @changeContactForm="(id: number) => changeContactForm(id)"
             />
           </TabPanel>
           <TabPanel value="3">

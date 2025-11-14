@@ -368,7 +368,11 @@ export default defineComponent({
         return;
       }
 
-      const dup = await contactsStore.isContactDuplicate(categoryId, number, countryId);
+      const dup = await contactsStore.checkContactDuplicateByDocument(
+        categoryId,
+        number,
+        countryId,
+      );
       const currentId = (props.modelValue as ContactDetail)?.id as number | undefined;
       if (dup && dup.id !== currentId) {
         duplicatesByIdx.value[origIdx] = { id: dup.id, name: dup.name };
