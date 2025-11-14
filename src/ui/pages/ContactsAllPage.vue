@@ -192,6 +192,7 @@ export default defineComponent({
 <style scoped lang="scss">
 .main-content {
   padding: 1.1rem;
+  padding: 18px 18px 25px 18px;
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
