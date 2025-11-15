@@ -11,7 +11,7 @@
     </header>
 
     <!-- SIDEBAR -->
-    <Sidebar :menuOpen="isMenuVisible" />
+    <Sidebar :menuOpen="isMenuVisible" @hide="isMenuVisible = false" />
 
     <!-- Backdrop móvil -->
     <div v-if="isMenuVisible" class="layout__backdrop" @click="isMenuVisible = false"></div>
@@ -154,7 +154,7 @@ onBeforeMount(async () => {
 
     &__main {
       height: 100svh;
-      margin-left: 67px;
+      margin-left: 57px;
     }
   }
 }

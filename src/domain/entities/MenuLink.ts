@@ -4,4 +4,5 @@ export interface MenuLink {
   id: Id;
   label: string;
   isSupportLink: boolean;
+  isReportLink: boolean;
 }

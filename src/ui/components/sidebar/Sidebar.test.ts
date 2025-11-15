@@ -9,23 +9,25 @@ import Sidebar from './Sidebar.vue';
 import primevuePlugin from '@/infrastructure/plugins/primevue';
 import { useUserStore } from '@/infrastructure/stores/user';
 
+// ---- mocks i18n ----
 vi.mock('vue-i18n', () => {
   const tMap: Record<string, string> = {
     'sidebar.planning': 'planning',
     'sidebar.dashboard': 'dashboard',
     'sidebar.contacts.title': 'contacts section',
-    'sidebar.contacts.all': 'all contacts',
     'sidebar.options': 'options',
     'sidebar.settings': 'settings',
     'sidebar.logout': 'logout',
     'sidebar.reports': 'reports',
-    'sidebar.arrivals': 'arrivals',
+    'sidebar.reportsGroup': 'reports group',
     'sidebar.links': 'links',
+    'sidebar.cashRegister': 'cash register',
+    'sidebar.billing': 'billing',
   };
   const global = {
     locale: { value: 'en' },
     availableLocales: ['en', 'es'],
-    t: (key: string, _params?: unknown) => tMap[key] ?? key,
+    t: (key: string) => tMap[key] ?? key,
   };
   return {
     useI18n: () => ({ t: (k: string) => tMap[k] ?? k }),
@@ -33,16 +35,19 @@ vi.mock('vue-i18n', () => {
   };
 });
 
+// ---- mocks legacy store ----
 vi.mock('@/_legacy/utils/useLegacyStore', () => ({
   useLegacyStore: () => ({ removeVuexAndOldCookiesUser: vi.fn() }),
 }));
-const open = vi.fn();
+
+// ---- mock dialog composable ----
+const openDialog = vi.fn();
 vi.mock('@/ui/composables/useAppDialog', () => ({
-  useAppDialog: () => ({ open }),
+  useAppDialog: () => ({ openDialog }),
 }));
 
+// ---- mock user store ----
 vi.mock('@/infrastructure/stores/user', () => {
-  // Single store object reused by component and tests
   const userStoreMock = {
     user: {
       firstName: 'John',
@@ -50,7 +55,6 @@ vi.mock('@/infrastructure/stores/user', () => {
       email: 'john@example.com',
       avatar: 'https://example.com/avatar.png',
     },
-    // This will be spied in the test with vi.spyOn(...)
     logout: vi.fn(),
   };
 
@@ -59,61 +63,75 @@ vi.mock('@/infrastructure/stores/user', () => {
   };
 });
 
+// ---- mock pmsProperties store ----
 vi.mock('@/infrastructure/stores/pmsProperties', () => {
-  // mutable mock so tests can tweak it if needed
   const pmsPropertiesStoreMock = {
     pmsProperties: [{ id: 1, name: 'Hotel Test', image: 'https://example.com/bg.jpg' }],
     currentPmsPropertyId: 1,
-    pmsPropertyLinks: [],
-    fetchPmsPropertyLink: vi.fn(),
+    pmsPropertyLinks: [
+      {
+        id: 10,
+        label: 'Support link',
+        isSupportLink: true,
+        isReportLink: false,
+      },
+      {
+        id: 20,
+        label: 'External reports',
+        isSupportLink: false,
+        isReportLink: true,
+      },
+      {
+        id: 30,
+        label: 'External link',
+        isSupportLink: false,
+        isReportLink: false,
+      },
+    ],
+    fetchPmsPropertyLink: vi.fn().mockResolvedValue('https://example.com'),
   };
   return { usePmsPropertiesStore: () => pmsPropertiesStoreMock };
 });
 
+// ---- router ----
 const router = createRouter({
   history: createMemoryHistory(),
   routes: [
-    // Dashboard (with optional id)
     { path: '/', name: 'dashboard', component: { template: '<div />' } },
     { path: '/:pmsPropertyId?', name: 'dashboard-id', component: { template: '<div />' } },
-
-    // Planning (with optional id)
     { path: '/planning', name: 'planning', component: { template: '<div />' } },
     { path: '/planning/:pmsPropertyId?', name: 'planning-id', component: { template: '<div />' } },
-
-    // Contacts & derivatives (with optional id)
     { path: '/contacts', name: 'contacts', component: { template: '<div />' } },
     { path: '/contacts/:pmsPropertyId?', name: 'contacts-id', component: { template: '<div />' } },
-    // Login
-    {
-      path: '/login',
-      name: 'login',
-      component: { template: '<div />' },
-    },
-    // Transactions (with optional id)
+    { path: '/login', name: 'login', component: { template: '<div />' } },
     { path: '/transactions', name: 'transactions', component: { template: '<div />' } },
     {
       path: '/transactions/:pmsPropertyId?',
       name: 'transactions-id',
       component: { template: '<div />' },
     },
-    // Invoices (with optional id)
     { path: '/invoices', name: 'invoices', component: { template: '<div />' } },
-    { path: '/invoices/:pmsPropertyId?', name: 'invoices-id', component: { template: '<div />' } },
+    {
+      path: '/invoices/:pmsPropertyId?',
+      name: 'invoices-id',
+      component: { template: '<div />' },
+    },
   ],
 });
 
 let utils: ReturnType<typeof render>;
 
-describe('Sidebar - navigation & active links', () => {
+describe('Sidebar - navigation & behaviour', () => {
   beforeEach(() => {
     const pinia = createTestingPinia();
+    vi.clearAllMocks();
+
     utils = render(Sidebar, {
       global: {
         plugins: [pinia, router, [primevuePlugin, { ripple: false }]],
         stubs: {
-          Avatar: { template: '<div/>' },
-          LegacyReport: { template: '<div/>' },
+          Avatar: { template: '<div />' },
+          Select: { template: '<div />' },
         },
       },
       props: { menuOpen: true },
@@ -156,91 +174,51 @@ describe('Sidebar - navigation & active links', () => {
     expect(dashboardLink).not.toHaveAttribute('aria-current', 'page');
   });
 
-  it('applies open class on the aside when menuOpen is true', async () => {
+  it('applies open class on the sidebar when menuOpen is true', async () => {
     await router.push('/');
     await router.isReady();
 
-    const aside = screen.getByRole('complementary');
-    expect(aside).toHaveClass('layout__sidebar--open');
+    const sidebar = utils.container.querySelector('.sidebar') as HTMLElement;
+    expect(sidebar).toHaveClass('is-open');
   });
 
-  it('does not apply open class on the aside when menuOpen is false', async () => {
-    // Navigate to a known route and wait for the router to be ready.
+  it('does not apply open class on the sidebar when menuOpen is false', async () => {
     await router.push('/');
     await router.isReady();
+
     await utils.rerender({ menuOpen: false });
 
-    // The aside should not have the "open" class when menuOpen is false.
-    const aside = screen.getByRole('complementary');
-    expect(aside).not.toHaveClass('layout__sidebar--open');
+    const sidebar = utils.container.querySelector('.sidebar') as HTMLElement;
+    expect(sidebar).not.toHaveClass('is-open');
   });
 
-  it('opens user menu on user block click ', async () => {
-    // Ensure we are on a known route and the router is ready.
+  it('renders user info in the footer', async () => {
     await router.push('/');
     await router.isReady();
 
-    // Wait until the user block is in the DOM (email is a stable visible selector).
-    const email = await screen.findByText('john@example.com');
-    const userBlock = email.closest('.property__user') as HTMLElement;
-    const userMenu = userBlock.querySelector('.property__user-menu') as HTMLElement;
-
-    // Initially the menu should be closed (no "is-open" class).
-    expect(userMenu).not.toHaveClass('is-open');
-
-    // Clicking the user block toggles the menu open.
-    await fireEvent.click(userBlock);
-    expect(userMenu).toHaveClass('is-open');
-
-    // Clicking outside (the aside) should hide the menu.
-    const aside = screen.getByRole('complementary');
-    await fireEvent.click(aside);
-    expect(userMenu).not.toHaveClass('is-open');
-  });
-
-  it('calls logout from user store when clicking Logout', async () => {
-    // Spy on the logout function before the test runs
     const userStore = useUserStore();
-    const logoutSpy = vi.spyOn(userStore, 'logout');
+    const { user = { firstName: '', lastName: '', email: '' } } = useUserStore();
 
-    // Ensure we are on a known route and the router is ready
-    await router.push('/');
-    await router.isReady();
+    const fullName = `${user!.firstName} ${user!.lastName}`;
 
-    // Open the sidebar (hover) so the footer area is interactable
-    const aside = screen.getByRole('complementary');
-    await fireEvent.mouseEnter(aside);
-
-    // Open the user menu: click on the user block (email is a stable visible selector)
-    const emailNode = await screen.findByText('john@example.com');
-    await fireEvent.click(emailNode);
-
-    // Click the "logout" menu item (PrimeVue Menu renders items as role="menuitem")
-    const logoutItem = await screen.findByRole('menuitem', { name: /logout/i });
-    const logoutAnchor = logoutItem.querySelector('a') as HTMLAnchorElement;
-    await fireEvent.click(logoutAnchor);
-
-    // // Assert asynchronously: the command callback runs, then we observe logout
-    await waitFor(() => {
-      expect(logoutSpy).toHaveBeenCalledTimes(1);
-    });
+    expect(await screen.findByText(fullName)).toBeInTheDocument();
+    expect(screen.getByText(userStore.user!.email)).toBeInTheDocument();
   });
 
-  it('opens Reports submenu and launches "arrivals" report via dialog', async () => {
+  it('opens reports dialog when clicking Reports item in submenu', async () => {
     await router.push('/');
     await router.isReady();
 
-    const aside = screen.getByRole('complementary');
-    await fireEvent.mouseEnter(aside);
+    // abrir grupo de reports
+    const reportsGroupToggle = await screen.findByText(/reports group/i);
+    await fireEvent.click(reportsGroupToggle);
 
-    const reportsToggle = screen.getByText(/reports/i);
-    expect(reportsToggle).toBeInTheDocument();
-    await fireEvent.click(reportsToggle);
-    const arrivalsItem = screen.getByText(/arrivals/i);
-    await fireEvent.click(arrivalsItem);
+    // hacer click en la opción "reports" del submenu (Generar informes)
+    const reportsItem = await screen.findByText(/^reports$/i);
+    await fireEvent.click(reportsItem);
 
     await waitFor(() => {
-      expect(open).toHaveBeenCalled();
+      expect(openDialog).toHaveBeenCalledTimes(1);
     });
   });
 });
