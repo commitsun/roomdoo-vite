@@ -5,6 +5,7 @@
     </div>
     <Select
       :value="currentPmsProperty"
+      @value-change="setCurrentPmsPropertyId($event)"
       :options="pmsProperties"
       optionLabel="name"
       optionValue="id"
@@ -17,7 +18,6 @@
           style: {
             height: '38px',
             width: '235px',
-            marginBottom: '23px',
             color: 'red',
           },
         },
@@ -72,14 +72,18 @@
         </div>
       </template>
     </Select>
+    <div class="sidebar-separator" />
   </div>
 </template>
 <script lang="ts">
 import Avatar from 'primevue/avatar';
 import Select from 'primevue/select';
 import { computed, defineComponent, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
+import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
+import { useUIStore } from '@/infrastructure/stores/ui';
 
 export default defineComponent({
   components: {
@@ -94,6 +98,10 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const route = useRoute();
+    const uiStore = useUIStore();
+
+    const router = useRouter();
     const refPropertySelect = ref();
     const pmsPropertiesStore = usePmsPropertiesStore();
     const pmsProperties = computed(() => pmsPropertiesStore.pmsProperties.slice());
@@ -103,6 +111,24 @@ export default defineComponent({
         (p) => p.id === pmsPropertiesStore.currentPmsPropertyId,
       ),
     );
+
+    const setCurrentPmsPropertyId = async (propertyId: number): Promise<void> => {
+      await pmsPropertiesStore.setCurrentPmsPropertyId(propertyId);
+      await useLegacyStore().setCurrentPmsPropertyId(propertyId);
+
+      const newParams = {
+        ...route.params,
+        pmsPropertyId: String(propertyId),
+      };
+
+      await router.push({
+        name: route.name ?? undefined,
+        params: newParams,
+        query: route.query,
+      });
+
+      uiStore.reloadTick++;
+    };
 
     watch(
       () => props.isOpen,
@@ -114,25 +140,28 @@ export default defineComponent({
       },
     );
     return {
+      refPropertySelect,
       pmsProperties,
       currentPmsProperty,
-      refPropertySelect,
+      setCurrentPmsPropertyId,
     };
   },
 });
 </script>
 <style lang="scss" scoped>
 .sidebar-header {
+  height: 106px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   .logo,
   .property {
     width: 28px;
   }
   .logo {
-    margin-bottom: 12px;
     overflow-x: hidden;
     border: none;
     margin-left: 14.5px;
-    margin-top: 17.5px;
     img {
       height: 28px;
       width: auto;
@@ -144,6 +173,7 @@ export default defineComponent({
     }
   }
   .property-select-dropdown {
+    margin-top: 1rem;
     margin-left: 10px;
     border-color: transparent;
     box-shadow: none;
@@ -161,12 +191,19 @@ export default defineComponent({
       }
     }
     &.is-open {
-      border: 1px solid var(--p-select-border-color);
+      // border: 1px solid var(--p-select-border-color);
       box-shadow: var(--p-select-shadow);
+      background-color: #eff6ff;
       span {
         color: black;
       }
     }
+  }
+  .sidebar-separator {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin-left: 7px;
+    margin-right: 7px;
   }
 }
 </style>

@@ -5,23 +5,30 @@
     @mouseleave="closeSidebar"
     :class="{ 'is-open': isOpen }"
   >
-    <div>
-      <SidebarHeader :isOpen="isOpen" />
-      <SidebarMenu :isOpen="isOpen" @hide="$emit('hide')" />
-    </div>
-    <div>
-      <SidebarSupport />
-      <SidebarFooter :isOpen="isOpen" />
-    </div>
+    <SidebarHeader :isOpen="isOpen" />
+    <SidebarMenu
+      :isOpen="isOpen"
+      :pmsPropertiesLinks="pmsPropertiesLinks"
+      :pmsPropertyReportLink="pmsPropertyReportLink"
+      @hide="$emit('hide')"
+      @openLink="openLink($event)"
+    />
+    <SidebarFooter
+      :isOpen="isOpen"
+      :pmsPropertySupportLink="pmsPropertySupportLink"
+      @openLink="openLink($event)"
+    />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 
 import SidebarHeader from './SidebarHeader.vue';
 import SidebarMenu from './SidebarMenu.vue';
 import SidebarSupport from './SidebarSupport.vue';
 import SidebarFooter from './SidebarFooter.vue';
+
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 export default defineComponent({
   name: 'Sidebar',
@@ -39,12 +46,44 @@ export default defineComponent({
   },
   emits: ['hide'],
   setup(props) {
+    const pmsPropertiesStore = usePmsPropertiesStore();
     const isOpen = ref(false);
+
+    const pmsPropertiesLinks = computed(() =>
+      pmsPropertiesStore.pmsPropertyLinks.filter(
+        (link) => !link.isSupportLink && !link.isReportLink,
+      ),
+    );
+
+    const pmsPropertySupportLink = computed(() =>
+      pmsPropertiesStore.pmsPropertyLinks.find((link) => link.isSupportLink),
+    );
+
+    const pmsPropertyReportLink = computed(() =>
+      pmsPropertiesStore.pmsPropertyLinks.find((link) => link.isReportLink),
+    );
+
     const openSidebar = (): void => {
       isOpen.value = true;
     };
     const closeSidebar = (): void => {
       isOpen.value = false;
+    };
+    const openLink = async (linkId: number): Promise<void> => {
+      // eslint-disable-next-line no-console
+      console.log('openLink called with linkId:', linkId);
+      const currentPmsPropertyId = pmsPropertiesStore.currentPmsPropertyId;
+      if (
+        typeof currentPmsPropertyId === 'number' &&
+        !isNaN(currentPmsPropertyId) &&
+        currentPmsPropertyId !== 0
+      ) {
+        const foundLink = await pmsPropertiesStore.fetchPmsPropertyLink(
+          currentPmsPropertyId,
+          linkId,
+        );
+        window.open(foundLink, '_blank');
+      }
     };
     watch(
       () => props.menuOpen,
@@ -55,8 +94,12 @@ export default defineComponent({
     );
     return {
       isOpen,
+      pmsPropertiesLinks,
+      pmsPropertySupportLink,
+      pmsPropertyReportLink,
       openSidebar,
       closeSidebar,
+      openLink,
     };
   },
 });
@@ -64,6 +107,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .sidebar {
   font-size: 14px;
+  padding: 1rem 0;
   position: absolute;
   top: 0;
   left: 0;
@@ -90,7 +134,6 @@ export default defineComponent({
   .sidebar {
     display: flex;
     width: 57px;
-
     transform: translateX(0);
     &.is-open {
       width: 254px;
