@@ -26,10 +26,15 @@ export function useLegacyStore() {
     await store.dispatch('partners/removePartner');
   };
 
+  const setCurrentPmsPropertyId = async (pmsPropertyId: number) => {
+    await store.dispatch('properties/setActiveProperty', pmsPropertyId);
+  };
+
   return {
     doVuexLogin,
     removeVuexAndOldCookiesUser,
     fetchAndSetVuexPartnerAndActiveProperty,
     removeVuexPartner,
+    setCurrentPmsPropertyId
   };
 }

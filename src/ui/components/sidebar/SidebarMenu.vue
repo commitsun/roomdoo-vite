@@ -1,5 +1,4 @@
 <template>
-  <div class="sidebar-separator" />
   <!-- NAVIGATION -->
   <nav class="sidebar-nav" ref="nav" :class="{ 'is-open': isOpen }">
     <!-- DASHBOARD -->
@@ -70,7 +69,7 @@
         </div>
       </li>
       <li class="submenu-item">
-        <div class="submenu-link" @click="openLink(pmsPropertyReportLink.id)">
+        <div class="submenu-link" @click="$emit('openLink', pmsPropertyReportLink.id)">
           <ChartPie :size="14" class="nav-link-icon" />
           <span>{{ pmsPropertyReportLink.label }}</span>
         </div>
@@ -92,7 +91,7 @@
     <div
       class="nav-link nav-link-toggle"
       v-if="pmsPropertiesLinks.length === 1"
-      @click="openLink(pmsPropertiesLinks[0].id)"
+      @click="$emit('openLink', pmsPropertiesLinks[0].id)"
     >
       <ExternalLink :size="14" class="nav-link-icon" />
       <span>{{ pmsPropertiesLinks[0].label }}</span>
@@ -114,7 +113,7 @@
       v-if="pmsPropertiesLinks.length > 1"
     >
       <li class="submenu-item" v-for="link in pmsPropertiesLinks" :key="link.id">
-        <div class="submenu-link" @click="openLink(link.id)">
+        <div class="submenu-link" @click="$emit('openLink', link.id)">
           <Link :size="14" class="nav-link-icon" />
           <span>{{ link.label }}</span>
         </div>
@@ -124,7 +123,7 @@
 </template>
 <script lang="ts">
 import { useRoute } from 'vue-router';
-import { computed, defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   House,
@@ -139,10 +138,10 @@ import {
   Link,
 } from 'lucide-vue-next';
 
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import ReportsBody from '@/ui/components/reports/Reports.vue';
 import ReportsHeader from '@/ui/components/reports/ReportsHeader.vue';
+import type { MenuLink } from '@/domain/entities/MenuLink';
 
 export default defineComponent({
   name: 'SidebarMenu',
@@ -164,47 +163,29 @@ export default defineComponent({
       required: false,
       default: false,
     },
+    pmsPropertiesLinks: {
+      type: Array as () => Array<MenuLink>,
+      required: false,
+      default: () => [],
+    },
+    pmsPropertyReportLink: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
-  emits: ['hide'],
+  emits: ['hide', 'openLink'],
   setup(props, { emit }) {
     const { t } = useI18n();
     const route = useRoute();
-    const pmsPropertiesStore = usePmsPropertiesStore();
     const { openDialog } = useAppDialog();
 
     const isReportOptionsOpen = ref(false);
     const isLinkOptionsOpen = ref(false);
 
-    const pmsPropertiesLinks = computed(() =>
-      pmsPropertiesStore.pmsPropertyLinks.filter(
-        (link) => !link.isSupportLink && !link.isReportLink,
-      ),
-    );
-
-    const pmsPropertyReportLink = computed(() =>
-      pmsPropertiesStore.pmsPropertyLinks.find((link) => link.isReportLink),
-    );
-
     const isActive = (path: string): boolean => route.name === path;
 
-    const openLink = async (linkId: number): Promise<void> => {
-      const currentPmsPropertyId = pmsPropertiesStore.currentPmsPropertyId;
-      if (
-        typeof currentPmsPropertyId === 'number' &&
-        !isNaN(currentPmsPropertyId) &&
-        currentPmsPropertyId !== 0
-      ) {
-        const foundLink = await pmsPropertiesStore.fetchPmsPropertyLink(
-          currentPmsPropertyId,
-          linkId,
-        );
-        window.open(foundLink, '_blank');
-      }
-    };
-
     const openGenerateReports = (): void => {
-      // eslint-disable-next-line no-console
-      console.log('Open generate reports modal');
       emit('hide');
       openDialog(ReportsBody, {
         templates: {
@@ -239,38 +220,26 @@ export default defineComponent({
       ExternalLink,
       Link,
       /// icons
-      pmsPropertiesLinks,
-      pmsPropertyReportLink,
       isReportOptionsOpen,
       isLinkOptionsOpen,
       isActive,
-      openLink,
       openGenerateReports,
     };
   },
 });
 </script>
 <style lang="scss" scoped>
-.sidebar-separator {
-  height: 1px;
-  background-color: #e0e0e0;
-  margin-left: 7px;
-  margin-right: 7px;
-  margin-bottom: 18px;
-}
 .sidebar-nav {
   font-size: 14px;
-  margin: 0 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1 1 auto;
+  margin: 1rem 1rem;
+  flex: 1;
   padding: 0 0.5rem;
   overflow-y: auto;
   overflow-x: hidden;
 
   .nav-link,
   .submenu-link {
+    margin-top: 1rem;
     position: relative;
     display: flex;
     align-items: center;
