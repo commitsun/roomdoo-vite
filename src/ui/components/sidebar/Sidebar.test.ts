@@ -209,11 +209,9 @@ describe('Sidebar - navigation & behaviour', () => {
     await router.push('/');
     await router.isReady();
 
-    // abrir grupo de reports
     const reportsGroupToggle = await screen.findByText(/reports group/i);
     await fireEvent.click(reportsGroupToggle);
 
-    // hacer click en la opción "reports" del submenu (Generar informes)
     const reportsItem = await screen.findByText(/^reports$/i);
     await fireEvent.click(reportsItem);
 
