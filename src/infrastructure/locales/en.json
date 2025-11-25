@@ -103,6 +103,8 @@
     "searchByPhone": "Search by phone",
     "vat": "VAT",
     "passport": "Passport",
+    "residential_certificate": "Residential certificate",
+    "another_document": "Another document",
     "residence_card": "Residence card",
     "other": "Other",
     "totalInvoiced": "Total invoiced",

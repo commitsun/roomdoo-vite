@@ -24,7 +24,7 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
-      @rowClick="openContactDetail($event.data)"
+      @rowClick="openContactDetail($event.data.id)"
       :showHeaders="numTotalRecords > 0"
       :pt="{
         thead: { style: { zIndex: 5, backgroundColor: 'red' } },

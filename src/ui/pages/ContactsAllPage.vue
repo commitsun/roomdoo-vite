@@ -2,7 +2,7 @@
   <div class="main-content">
     <div class="header">
       <h1>{{ t('contacts.title') }}</h1>
-      <Button :label="t('contacts.new')" icon="pi pi-plus" />
+      <Button :label="t('contacts.new')" icon="pi pi-plus" @click="openNewContact()" />
     </div>
     <Tabs v-model:value="activeTab" class="tabs" lazy>
       <TabList>
@@ -89,6 +89,8 @@ import CustomerList from '@/ui/components/contacts/CustomerList.vue';
 import GuestList from '@/ui/components/contacts/GuestList.vue';
 import SupplierList from '@/ui/components/contacts/SupplierList.vue';
 import AgencyList from '@/ui/components/contacts/AgencyList.vue';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useUIStore } from '@/infrastructure/stores/ui';
@@ -115,6 +117,7 @@ export default defineComponent({
   },
   setup() {
     const { t } = useI18n();
+    const { openDialog } = useAppDialog();
     const uiStore = useUIStore();
     const userStore = useUserStore();
     const contactsStore = useContactsStore();
@@ -151,6 +154,26 @@ export default defineComponent({
       return activeTab.value === tab ? 'var(--p-primary-color)' : 'lightgray';
     };
 
+    const openNewContact = async (): Promise<void> => {
+      uiStore.startLoading();
+      try {
+        openDialog(ContactDetail, {
+          props: { header: t('contacts.new') },
+          data: { props: { contact: null } },
+          // onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+          //   if (data?.refresh === true || data?.action === 'saved') {
+          //     void fetchNow();
+          //   }
+          // },
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
+    };
+
     onMounted(async () => {
       const initialPagination = {
         page: 1,
@@ -179,6 +202,7 @@ export default defineComponent({
       allNumbersFormatted,
       t,
       getTabColor,
+      openNewContact,
       numContacts,
       numCustomers,
       numGuests,
