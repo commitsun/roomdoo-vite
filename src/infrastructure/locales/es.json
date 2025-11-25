@@ -102,6 +102,8 @@
     "searchByPhone": "Buscar por teléfono",
     "vat": "NIF/CIF",
     "passport": "Pasaporte",
+    "residential_certificate": "Certificado de residencia",
+    "another_document": "Otro documento",
     "residence_card": "Tarjeta de residencia",
     "other": "Otro",
     "totalInvoiced": "Total facturado",

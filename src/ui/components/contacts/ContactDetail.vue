@@ -198,7 +198,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed, onBeforeMount, watch, inject } from 'vue';
 import {
   defineComponent,
   ref,
@@ -242,8 +241,6 @@ import ContactDetailDocuments from './ContactDetailDocuments.vue';
 import ContactDetailBilling from './ContactDetailBilling.vue';
 import ContactDetailInternalNotes from './ContactDetailInternalNotes.vue';
 
-import { useTagsStore } from '@/infrastructure/stores/tags';
-import { useUIStore } from '@/infrastructure/stores/ui';
 import { ContactSchema, type ContactInput } from '@/application/contacts/ContactSchemas';
 import type { ContactDetail } from '@/domain/entities/Contact';
 import { usePaymentTermsStore } from '@/infrastructure/stores/paymentTerms';
@@ -252,8 +249,8 @@ import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useSaleChannelsStore } from '@/infrastructure/stores/saleChannels';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
-import type { Phone } from '@/domain/entities/Phone';
-import { APP_LANGUAGES } from '@/application/instance/InstanceService';
+import { useTagsStore } from '@/infrastructure/stores/tags';
+import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import type { Country } from '@/domain/entities/Country';
 import type { CountryState } from '@/domain/entities/CountryState';
@@ -395,58 +392,6 @@ export default defineComponent({
     const mergeIntoForm = (v: ContactDetail): ContactDetail => Object.assign(contactForm, v);
 
     const clearHiddenFields = (): void => {
-      if (contactType.value !== 'person') {
-        contactForm.lastname = '';
-        contactForm.lastname2 = '';
-        contactForm.birthdate = null;
-        contactForm.gender = '';
-        contactForm.documents = [];
-        contactForm.nationality = undefined;
-        contactForm.residenceStreet = '';
-        contactForm.residenceZip = '';
-        contactForm.residenceCity = '';
-        contactForm.residenceState = undefined;
-        contactForm.residenceCountry = undefined;
-      }
-    };
-    const paymentTerms = computed(() => paymentTermsStore.paymentTerms);
-    const documentTypes = computed(() => documentTypesStore.documentTypes);
-    const languages = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
-
-    const countryStates = computed(() =>
-      countryStatesStore.countryStates?.map((state) => ({
-        label: state.name,
-        value: state.id,
-      })),
-    );
-
-    const age = computed(() => {
-      if (!contactForm.birthdate) {
-        return null;
-      }
-      const today = new Date();
-      let years = today.getFullYear() - contactForm.birthdate.getFullYear();
-      const m = today.getMonth() - contactForm.birthdate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < contactForm.birthdate.getDate())) {
-        years--;
-      }
-      return years;
-    });
-
-    const birthdateLabel = computed(() =>
-      age.value !== null
-        ? `${t('contacts.birthDate')} (${age.value} ${t('contacts.yearsOld')})`
-        : t('contacts.birthDate'),
-    );
-
-    const pricelists = computed(() =>
-      pricelistStore.pricelists?.map((list) => ({
-        label: list.name,
-        value: list.id,
-      })),
-    );
-
-    const handleSave = async () => {
       if (!isPerson.value) {
         Object.assign(contactForm, {
           lastname: '',
@@ -560,10 +505,6 @@ export default defineComponent({
         }
         dialogRef?.value?.close({ action: 'saved' });
       } catch (error) {
-        textMessageStore.addTextMessage(
-          t('error.somethingWentWrong'),
-          error instanceof Error ? error.message : 'Unknown error',
-        );
         textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
       } finally {
         uiStore.stopLoading();
@@ -573,34 +514,6 @@ export default defineComponent({
     const handleCancel = (): void => {
       dialogRef?.value?.close({ action: 'cancel' });
     };
-
-    watch(contactType, () => {
-      activeTab.value = '0';
-    });
-
-    watch(
-      () => contactForm.countryId,
-      async () => {
-        uiStore.startLoading();
-        try {
-          if (contactForm.countryId) {
-            await countryStatesStore.fetchCountryStatesByCountryId(contactForm.countryId);
-            const countryStateToSelect = countryStatesStore.countryStates?.find(
-              (s) => s.id === contactForm.stateId,
-            );
-            if (countryStateToSelect) {
-              contactForm.stateId = countryStateToSelect.id;
-            } else {
-              contactForm.stateId = null;
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching country states:', error);
-        } finally {
-          uiStore.stopLoading();
-        }
-      },
-    );
 
     watch(contactType, () => {
       activeTab.value = '0';
@@ -656,43 +569,6 @@ export default defineComponent({
 
           if (contact.value.birthdate) {
             contactForm.birthdate = new Date(contact.value.birthdate);
-          }
-          contactType.value =
-            contact.value.contactType === 'agency'
-              ? 'agency'
-              : contact.value.contactType === 'company'
-                ? 'company'
-                : 'person';
-          contactForm.id = contact.value.id;
-          contactForm.name = contact.value.name || '';
-          contactForm.firstname = contact.value.firstname || '';
-          contactForm.lastname = contact.value.lastname || '';
-          contactForm.lastname2 = contact.value.lastname2 || '';
-          contactForm.birthdate = contact.value.birthdate
-            ? new Date(contact.value.birthdate)
-            : null;
-          contactForm.nationality = contact.value?.nationality ?? undefined;
-          contactForm.lang = contact.value.lang || '';
-          contactForm.gender = contact.value.gender || '';
-          contactForm.phones = (contact.value.phones as Phone[]) || [];
-          contactForm.email = contact.value.email || '';
-          contactForm.documents = contact.value.documents || [];
-          // contactForm.fiscalIdNumberType = contact.value.fiscalIdNumberType?.name || null;
-          contactForm.fiscalIdNumber = contact.value.fiscalIdNumber || '';
-          contactForm.street = contact.value.street || contact.value.street2 || '';
-          contactForm.zipCode = contact.value.zipCode || '';
-          contactForm.city = contact.value.city || '';
-          contactForm.country = contact.value.country ?? undefined;
-          contactForm.state = contact.value.state ?? undefined;
-          contactForm.paymentTerm = contact.value.paymentTerm ?? undefined;
-          contactForm.tags = contact.value.tags || [];
-          contactForm.pricelist = contact.value.pricelist ?? undefined;
-          contactForm.internalNotes = contact.value.internalNotes || '';
-          contactForm.invoicingPolicy = contact.value.invoicingPolicy || '';
-          contactForm.reference = contact.value.reference || '';
-          if (!contactForm.firstname && (contactForm.lastname || contactForm.lastname2)) {
-            contactForm.firstname = contactForm.lastname ?? contactForm.lastname2 ?? '';
-            contactForm.lastname = contactForm.lastname2 = '';
             contact.value.birthdate = new Date(contact.value.birthdate);
           }
           if (contact.value.lang !== undefined) {
@@ -718,10 +594,6 @@ export default defineComponent({
           }
         }
       } catch (error) {
-        textMessageStore.addTextMessage(
-          t('error.somethingWentWrong'),
-          error instanceof Error ? error.message : 'Unknown error',
-        );
         textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
       } finally {
         uiStore.stopLoading();
@@ -751,28 +623,19 @@ export default defineComponent({
 </script>
 <style scoped lang="scss">
 .contact-detail {
-  height: auto;
-}
-
-.contact-type {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: #f1f5f9;
-  min-height: 56px;
+  height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 0 var(--bleed-x) #f1f5f9;
-}
-
-.contact-detail__tablist {
-  position: sticky;
-  top: 56px;
-  z-index: 19;
-  background: #fff;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 0 0 var(--bleed-x) #fff;
-}
+  flex-direction: column;
+  .contact-type {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #f1f5f9;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .contact-type::before {
     content: '';
