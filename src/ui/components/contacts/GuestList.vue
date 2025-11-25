@@ -513,12 +513,9 @@ import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
-import type { Contact } from '@/domain/entities/Contact';
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { firstTwoInitials } from '@/ui/utils/strings';
 import { i18n } from '@/infrastructure/plugins/i18n';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -550,7 +547,6 @@ export default defineComponent({
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
-    const pmsPropertiesStore = usePmsPropertiesStore();
 
     // translation
     const { t } = useI18n();
@@ -832,16 +828,19 @@ export default defineComponent({
     };
 
     // open contact detail
-    const openContactDetail = async (contact: Contact): Promise<void> => {
+    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
-        const propId = pmsPropertiesStore.currentPmsPropertyId;
-        if (!isNonEmptyString(propId)) {
+        await contactsStore.fetchContactSchema();
+        const contact = await contactsStore.fetchContactById(contactId);
+        if (!contact) {
+          uiStore.stopLoading();
           return;
         }
-        await useLegacyStore().fetchAndSetVuexPartnerAndActiveProperty(contact.id, propId);
-        openDialog(PartnerForm, {
+        contact.id = contactId;
+        openDialog(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
+          data: { contact: contact },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
