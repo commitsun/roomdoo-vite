@@ -24,6 +24,7 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
+      @rowClick="openContactDetail($event.data)"
       :showHeaders="numTotalRecords > 0"
       :pt="{
         thead: { style: { zIndex: 5, backgroundColor: 'red' } },
@@ -55,7 +56,6 @@
           },
         },
       }"
-      @rowClick="openContactDetail($event.data.id)"
     >
       <!-- header -->
       <template #header v-if="numTotalRecords > 0">
@@ -543,14 +543,12 @@ export default defineComponent({
       })),
     );
 
+    // METHOD DEFINITIONS
+
     // fetch contacts
     const currentRequest = ref(0);
     const fetchNow = async (): Promise<void> => {
       const id = ++currentRequest.value; // identificador de esta petición
-    const contacts = computed(() => contactsStore.contacts);
-    const setCountFromStore = (): number => (numTotalRecords.value = contactsStore.contactsCount);
-
-    async function fetchNow(): Promise<void> {
       uiStore.startLoading();
       isLoading.value = true;
       try {
@@ -703,26 +701,26 @@ export default defineComponent({
       applyFilter?.();
     };
 
+    // open contact detail
     const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
-        if (contact) {
-          contact.id = contactId;
-          open(ContactDetail, {
-            props: { header: contact.name || t('contacts.detail') },
-            data: { contact },
-            onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-              if (data?.refresh === true || data?.action === 'saved') {
-                void fetchNow();
-              }
-            },
-          });
-        } else {
-          // eslint-disable-next-line no-console
-          console.error('Contact not found for id:', contactId);
+        if (!contact) {
+          uiStore.stopLoading();
+          return;
         }
+        contact.id = contactId;
+        openDialog(ContactDetail, {
+          props: { header: contact.name || t('contacts.detail') },
+          data: { contact: contact },
+          onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+            if (data?.refresh === true || data?.action === 'saved') {
+              void fetchNow();
+            }
+          },
+        });
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
