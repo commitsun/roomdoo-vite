@@ -1,91 +1,104 @@
 <template>
-  <div class="login-container">
-    <div class="login-form-header">
+  <div class="reset-password-container">
+    <div class="reset-password-form-logo-header">
       <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
     </div>
-    <div class="login-form-container">
-      <div class="reset-password-title">
-        {{ t('resetPassword.title') }}
+    <div class="reset-password-card">
+      <div class="reset-password-card__image" v-if="instanceImage">
+        <img :src="instanceImage" alt="Imagen del hotel" />
       </div>
-      <div class="first-input">
-        <label class="label">
-          {{ t('resetPassword.newPassword') }}
-        </label>
-        <IconField>
-          <InputIcon class="pi pi-lock" />
-          <Password
-            v-model="firstPassword"
-            :style="{ width: '100%' }"
-            :inputStyle="{ width: '100%' }"
-            :placeholder="t('resetPassword.password')"
-            :promptLabel="t('resetPassword.enterPassword')"
-            toggleMask
-            @blur="firstPasswordBlur"
+      <div class="reset-password-card__content">
+        <div class="reset-password-form-header">
+          <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+        </div>
+        <div class="reset-password-form-container">
+          <div class="request-password">
+            {{ t('requestResetPassword.resetPassword') }}
+          </div>
+          <Message
+            class="mt-4 mb-3"
+            v-if="firstPasswordError || secondPasswordError"
+            severity="error"
+            icon="pi pi-times-circle"
           >
-            <template #header>
-              <div class="font-semibold text-xm mb-4">
-                {{ t('resetPassword.chooseNewPassword') }}
-              </div>
-            </template>
-            <template #footer>
-              <Divider />
-              <ul class="pl-2 my-0 text-sm">
-                <li>{{ t('resetPassword.minimumChars', { count: 8 }) }}</li>
-                <li>{{ t('resetPassword.passwordLetterRequired') }}</li>
-                <li>{{ t('resetPassword.passwordNumberRequired') }}</li>
-              </ul>
-            </template>
-          </Password>
-        </IconField>
-      </div>
-      <div class="second-input">
-        <label class="label">
-          {{ t('resetPassword.repeatNewPassword') }}
-        </label>
-        <IconField>
-          <InputIcon class="pi pi-lock" />
-          <Password
-            v-model="secondPassword"
-            :placeholder="t('resetPassword.password')"
-            :style="{ width: '100%' }"
-            :inputStyle="{ width: '100%' }"
-            :promptLabel="t('resetPassword.enterPassword')"
-            toggleMask
-            @blur="secondPasswordBlur"
+            {{ translate(firstPasswordError || secondPasswordError) }}
+          </Message>
+          <Message
+            v-else-if="errorMessage"
+            severity="error"
+            icon="pi pi-times-circle"
+            class="mt-4 mb-3"
           >
-            <template #header>
-              <div class="font-semibold text-xm mb-4">
-                {{ t('resetPassword.repeatNewPassword') }}
-              </div>
-            </template>
-            <template #footer>
-              <Divider />
-              <ul class="pl-2 my-0 text-sm">
-                <li>{{ t('resetPassword.minimumChars', { count: 8 }) }}</li>
-                <li>{{ t('resetPassword.passwordLetterRequired') }}</li>
-                <li>{{ t('resetPassword.passwordNumberRequired') }}</li>
-              </ul>
-            </template>
-          </Password>
-        </IconField>
-      </div>
-      <Message v-if="firstPasswordError || secondPasswordError" severity="error">
-        {{ translate(firstPasswordError || secondPasswordError) }}
-      </Message>
-      <Message v-else-if="errorMessage" severity="error">
-        {{ errorMessage }}
-      </Message>
-      <div class="button">
-        <Button
-          :label="t('resetPassword.savePassword')"
-          :disabled="!isFormValid"
-          @click="() => handleSubmit(resetPassword)()"
-        />
-      </div>
-      <div class="back-link">
-        <a href="/login">
-          {{ t('resetPassword.backToLogin') }}
-        </a>
+            {{ errorMessage }}
+          </Message>
+          <div class="first-input">
+            <label class="label" for="username">
+              {{ t('login.email') }}
+            </label>
+            <Password
+              v-model="firstPassword"
+              :style="{ width: '100%' }"
+              :inputStyle="{ width: '100%' }"
+              :placeholder="t('resetPassword.password')"
+              :promptLabel="t('resetPassword.enterPassword')"
+              toggleMask
+              @blur="firstPasswordBlur"
+            >
+              <template #header>
+                <div class="font-semibold text-xm mb-4">
+                  {{ t('resetPassword.chooseNewPassword') }}
+                </div>
+              </template>
+              <template #footer>
+                <Divider />
+                <ul class="pl-2 my-0 text-sm">
+                  <li>{{ t('resetPassword.minimumChars', { count: 8 }) }}</li>
+                  <li>{{ t('resetPassword.passwordLetterRequired') }}</li>
+                  <li>{{ t('resetPassword.passwordNumberRequired') }}</li>
+                </ul>
+              </template>
+            </Password>
+          </div>
+          <div class="second-input">
+            <label class="label" for="password-input">
+              {{ t('login.password') }}
+            </label>
+            <Password
+              v-model="secondPassword"
+              :placeholder="t('resetPassword.password')"
+              :style="{ width: '100%' }"
+              :inputStyle="{ width: '100%' }"
+              :promptLabel="t('resetPassword.enterPassword')"
+              toggleMask
+              @blur="secondPasswordBlur"
+            >
+              <template #header>
+                <div class="font-semibold text-xm mb-4">
+                  {{ t('resetPassword.repeatNewPassword') }}
+                </div>
+              </template>
+              <template #footer>
+                <Divider />
+                <ul class="pl-2 my-0 text-sm">
+                  <li>{{ t('resetPassword.minimumChars', { count: 8 }) }}</li>
+                  <li>{{ t('resetPassword.passwordLetterRequired') }}</li>
+                  <li>{{ t('resetPassword.passwordNumberRequired') }}</li>
+                </ul>
+              </template>
+            </Password>
+          </div>
+          <div class="button">
+            <Button
+              :label="t('resetPassword.savePassword')"
+              :disabled="!isFormValid"
+              @click="() => handleSubmit(resetPassword)()"
+            />
+          </div>
+          <a href="/login">
+            <ArrowLeft :size="18" color="#3B82F6" style="margin-top: 1px" />
+            {{ t('resetPassword.backToLogin') }}
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -104,6 +117,7 @@ import Message from 'primevue/message';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useRoute } from 'vue-router';
+import { ArrowLeft } from 'lucide-vue-next';
 
 import { useTranslatedError } from '@/ui/composables/useTranslatedValidationError';
 import { resetPasswordSchema } from '@/application/user/UserSchemas';
@@ -111,6 +125,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
+import { useInstanceStore } from '@/infrastructure/stores/instance';
 
 export default defineComponent({
   components: {
@@ -122,6 +137,7 @@ export default defineComponent({
     AppSelect: Select,
     Divider,
     Message,
+    ArrowLeft,
   },
   setup() {
     const { t } = useI18n();
@@ -129,8 +145,11 @@ export default defineComponent({
     const userStore = useUserStore();
     const notificationStore = useNotificationsStore();
     const uiStore = useUIStore();
+    const instanceStore = useInstanceStore();
     const { translate } = useTranslatedError();
     const errorMessage = ref('');
+
+    const instanceImage = computed(() => instanceStore.instance?.image ?? '');
 
     const { handleSubmit } = useForm({
       validationSchema: toTypedSchema(resetPasswordSchema),
@@ -189,6 +208,7 @@ export default defineComponent({
       isFormValid,
       handleSubmit,
       errorMessage,
+      instanceImage,
       t,
       firstPasswordBlur,
       secondPasswordBlur,
@@ -199,95 +219,176 @@ export default defineComponent({
 });
 </script>
 <style scoped lang="scss">
-.login-container {
+.reset-password-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100svh;
+  justify-content: center;
+  height: 100%;
   width: 100%;
-  background-color: #f9fafb;
-  padding-top: 2rem;
-  position: relative;
-  .login-form-header {
+  padding: 1.5rem 1rem;
+  background-color: transparent;
+  box-sizing: border-box;
+
+  .reset-password-form-logo-header {
+    display: none;
+  }
+
+  .reset-password-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0px 10px 35px rgba(15, 23, 42, 0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .reset-password-card__image img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .reset-password-card__content {
+    padding: 1.75rem 1.75rem 2rem;
+  }
+
+  .reset-password-form-header {
+    display: flex;
+    margin-bottom: 1.75rem;
+
     .logo {
-      width: 200px;
+      width: 150px;
       height: auto;
     }
   }
-  .login-form-container {
-    background-color: #ffffff;
-    width: 100%;
-    height: 100svh;
 
-    padding: 2rem;
-    margin-top: 2.5rem;
-    font-size: 16px;
-
-    .reset-password-title {
-      font-weight: bold;
+  .reset-password-form-container {
+    .request-password {
+      font-size: 16px;
+      font-weight: 600;
       margin-bottom: 1rem;
-      font-size: 20px;
-      margin-bottom: 1.5rem;
       color: #334155;
     }
-    .first-input {
+    .reset-password-title {
       margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      color: #334155;
+      font-size: 13px;
+    }
+    .instance-name {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 18px;
+      color: #334155;
+    }
+    .instance-name-error {
+      margin-bottom: 0 !important;
+    }
+
+    .p-error {
+      color: red;
+    }
+
+    .first-input,
+    .second-input {
+      margin-bottom: 1.5rem;
+
       .label {
         margin-bottom: 0.5rem;
         display: block;
         color: #334155;
       }
     }
+
     .second-input {
       margin-bottom: 2rem;
-      .label {
-        margin-bottom: 0.5rem;
-        display: block;
-        color: #334155;
-      }
     }
+
     .button {
       display: flex;
       justify-content: center;
       align-items: center;
       width: 100%;
-      font-size: 16px;
+
       .p-button {
         width: 100%;
-        background-color: #1d4ed8;
         border: none;
+        height: 28px;
+        font-size: 12px;
       }
     }
-    .back-link {
-      margin-top: 1.5rem;
+
+    a {
       font-size: 14px;
-      a {
-        color: #64748b;
-        &:hover {
-          text-decoration: underline;
-        }
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      color: #3b82f6;
+      &:hover {
+        text-decoration: underline;
       }
     }
   }
 }
-@media (min-width: 640px) {
-  .login-container {
+:deep(.p-inputtext) {
+  font-size: 12px;
+  height: 28px;
+}
+
+@media (min-width: 768px) {
+  .reset-password-container {
     justify-content: center;
     height: 100%;
-    .login-form-header {
-      .logo {
+
+    .reset-password-form-logo-header {
+      display: flex;
+      justify-content: center;
+      img {
         width: 270px;
+        height: auto;
+        margin-bottom: 5rem;
       }
     }
-    .login-form-container {
+    .reset-password-card {
+      flex-direction: row;
+      max-width: 800px;
+      .button {
+        .p-button {
+          height: 40px;
+          font-size: 14px;
+        }
+      }
+      .reset-password-card__image {
+        display: none;
+      }
+    }
+    .reset-password-form-header {
+      display: none;
+    }
+    .reset-password-form-container {
       width: 480px;
       height: auto;
-      border-radius: 8px;
-      box-shadow: 0px 1px 3px 0px #0000001a;
+      .request-password {
+        font-size: 24px;
+      }
+      .reset-password-title {
+        font-size: 15px;
+        margin-bottom: 2rem;
+      }
+      .instance-name {
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+        font-size: 24px;
+      }
     }
-    .button {
-      margin-top: 2rem;
-    }
+  }
+  :deep(.p-inputtext) {
+    font-size: 14px;
+    height: 35px;
   }
 }
 </style>
