@@ -291,6 +291,7 @@ export default defineComponent({
     max-height: 0;
     opacity: 0;
     transform: translateY(-4px);
+    margin-top: -0.5rem;
     // animation transition
     transition:
       max-height 200ms ease,
