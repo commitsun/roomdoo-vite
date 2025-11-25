@@ -157,7 +157,7 @@ describe('CookieService', () => {
     document.cookie = `defaultPmsProperty=${JSON.stringify({ id: 1, name: 'X', image: '' })};path=/`;
     const u = CookieService.getUserCookies();
     expect(u).not.toBeNull();
-    expect(u!.lang).toBe('en');
+    expect(u!.lang).toBe('en-US');
   });
 
   it('availabilityRuleFields with invalid JSON returns []', () => {
