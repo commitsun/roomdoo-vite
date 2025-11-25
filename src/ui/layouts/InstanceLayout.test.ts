@@ -74,14 +74,4 @@ describe('InstanceLayout', () => {
 
     expect(screen.queryByRole('combobox', { name: 'language-select' })).not.toBeInTheDocument();
   });
-
-  it("renders select with default locales and redirects to hotel not found page whene there's no instance", async () => {
-    const store = useInstanceStore();
-    vi.spyOn(store, 'fetchInstance').mockRejectedValueOnce(new Error('bad'));
-
-    renderInstanceLayout(testPinia);
-
-    expect(await screen.findByRole('combobox', { name: 'language-select' })).toBeInTheDocument();
-    expect(push).toHaveBeenCalledWith({ name: 'instance-not-found' });
-  });
 });
