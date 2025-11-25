@@ -31,10 +31,11 @@
     "invalidToken": "El enlace ha caducado o no es válido"
   },
   "requestResetPassword": {
-    "title": "Introduce tu correo o nombre de usuario para restablecer tu contraseña",
+    "title": "Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña",
     "username": "Nombre de usuario",
     "email": "Correo electrónico",
-    "sendRequest": "Enviar solicitud",
+    "resetPassword": "Restablecer contraseña",
+    "sendRequest": "Enviar solicitud de recuperación",
     "backToLogin": "Volver al inicio de sesión",
     "requestSent": "Se ha enviado un correo para restablecer tu contraseña"
   },

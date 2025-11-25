@@ -31,10 +31,11 @@
     "invalidToken": "The link has expired or is invalid"
   },
   "requestResetPassword": {
-    "title": "Enter your email or username to reset your password",
+    "title": "Enter your email and we will send you a link to reset your password",
     "username": "Username",
     "email": "Email",
-    "sendRequest": "Send request",
+    "resetPassword": "Reset password",
+    "sendRequest": "Send reset password request",
     "backToLogin": "Back to login",
     "requestSent": "An email has been sent to reset your password"
   },
