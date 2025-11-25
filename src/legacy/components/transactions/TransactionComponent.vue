@@ -210,7 +210,7 @@ export default defineComponent({
     const accountJournals = computed(() =>
       store.state.accountJournals.accountJournals
         .filter((journal) => journal.allowedPayments)
-        .map((el) => ({ value: el.id, label: el.name }))
+        .map((el) => ({ value: el.id, label: el.name })),
     );
 
     const getGuestFromVatDocNumber = async (name: string) => {
@@ -263,9 +263,15 @@ export default defineComponent({
         } else {
           await store.dispatch('transactions/createTransaction', payload);
         }
-        await store.dispatch('folios/fetchFolio', props.folioId);
-        await store.dispatch('folios/fetchFolioTransactions', props.folioId);
-        await store.dispatch('folios/fetchFolioSaleLines', props.folioId);
+        if (
+          props.folioId &&
+          (router.currentRoute.value.name === 'planning' ||
+            router.currentRoute.value.name === 'dashboard')
+        ) {
+          await store.dispatch('folios/fetchFolio', props.folioId);
+          await store.dispatch('folios/fetchFolioTransactions', props.folioId);
+          await store.dispatch('folios/fetchFolioSaleLines', props.folioId);
+        }
         if (router.currentRoute.value.name === 'planning') {
           await store.dispatch('planning/fetchPlanning', {
             dateStart: store.state.planning.dateStart,
@@ -376,7 +382,7 @@ export default defineComponent({
         amount.value = props.transaction.amount;
         reference.value = props.transaction.reference;
         const journal = accountJournals.value.find(
-          (el) => props.transaction && el.value === props.transaction.journalId
+          (el) => props.transaction && el.value === props.transaction.journalId,
         );
         if (journal) {
           accountJournal.value = journal.value;
