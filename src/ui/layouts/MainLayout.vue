@@ -40,6 +40,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
+import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
 
 const route = useRoute();
 const pmsPropertiesStore = usePmsPropertiesStore();
@@ -65,6 +66,7 @@ watch(
 onBeforeMount(async () => {
   await instanceStore.fetchInstance();
   await pmsPropertiesStore.fetchPmsProperties();
+  await useLegacyStore().fetchPmsProperties();
   const pmsPropertyId = (route.params.pmsPropertyId as string) || '';
   if (pmsPropertyId) {
     await pmsPropertiesStore.setCurrentPmsPropertyId(parseInt(pmsPropertyId));
