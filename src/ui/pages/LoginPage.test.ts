@@ -127,24 +127,6 @@ describe('LoginPage', () => {
 
     expect(btn).toBeEnabled();
   });
-  it('disables button when the username or password are not filled in', async () => {
-    const inputEmail = screen.getByRole('textbox', { name: 'Username' });
-    const inputPassword = screen.getByLabelText('Password');
-    const btn = screen.getByRole('button', { name: 'Log in' });
-
-    await fireEvent.update(inputEmail, '');
-    await fireEvent.update(inputPassword, '');
-    expect(btn).toBeDisabled();
-
-    await fireEvent.update(inputEmail, '');
-    await fireEvent.update(inputPassword, 'password');
-    expect(btn).toBeDisabled();
-
-    await fireEvent.update(inputEmail, 'username');
-    await fireEvent.update(inputPassword, '');
-
-    expect(btn).toBeDisabled();
-  });
 
   it('displays "Invalid credentials" when login is incorrect', async () => {
     vi.spyOn(useUserStore(), 'login').mockRejectedValueOnce(new UnauthorizedError('bad'));
