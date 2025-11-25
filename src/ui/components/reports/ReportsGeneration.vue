@@ -112,7 +112,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import Button from 'primevue/button';
 import Message from 'primevue/message';
 import DatePicker from 'primevue/datepicker';
@@ -156,6 +156,19 @@ export default defineComponent({
     const reportsService = new ReportsService(new ReportsRepositoryImpl());
     const dateFrom = ref<Date | null>(null);
     const dateTo = ref<Date | null>(null);
+    const minDateForTo = computed(() => {
+      if (!dateFrom.value) {
+        return null;
+      }
+      return dateFrom.value;
+    });
+
+    const maxDateForFrom = computed(() => {
+      if (!dateTo.value) {
+        return null;
+      }
+      return dateTo.value;
+    });
     const generationDisabled = computed(() => {
       if (
         (props.reportType === 'kelly' ||
@@ -175,6 +188,10 @@ export default defineComponent({
       }
       return false;
     });
+
+    const isRangeReport = computed(() =>
+      ['services', 'transactions', 'ine'].includes(props.reportType),
+    );
 
     const convertResponseToReport = (response: { data: string }, fileName: string): void => {
       const a: HTMLAnchorElement = document.createElement('a');
@@ -261,7 +278,41 @@ export default defineComponent({
         uiStore.stopLoading();
       }
     };
-    return { t, dateFrom, dateTo, generationDisabled, generateReport };
+
+    watch(dateFrom, (newValue) => {
+      if (!isRangeReport.value) {
+        return;
+      }
+      if (!newValue || !dateTo.value) {
+        return;
+      }
+      if (dateTo.value < newValue) {
+        // Keep dateTo aligned when user selects a dateFrom after current dateTo
+        dateTo.value = newValue;
+      }
+    });
+
+    watch(dateTo, (newValue) => {
+      if (!isRangeReport.value) {
+        return;
+      }
+      if (!newValue || !dateFrom.value) {
+        return;
+      }
+      if (newValue < dateFrom.value) {
+        // Keep dateFrom aligned when user selects a dateTo before current dateFrom
+        dateFrom.value = newValue;
+      }
+    });
+    return {
+      t,
+      dateFrom,
+      dateTo,
+      minDateForTo,
+      maxDateForFrom,
+      generationDisabled,
+      generateReport,
+    };
   },
 });
 </script>
