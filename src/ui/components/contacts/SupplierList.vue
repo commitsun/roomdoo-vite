@@ -24,6 +24,7 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
+      @rowClick="openContactDetail($event.data)"
       :showHeaders="numTotalRecords > 0"
       :pt="{
         thead: { style: { zIndex: 5, backgroundColor: 'red' } },
@@ -55,7 +56,6 @@
           },
         },
       }"
-      @rowClick="openContactDetail($event.data.id)"
     >
       <!-- header -->
       <template #header v-if="numTotalRecords > 0">
@@ -404,6 +404,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
   type DataTableFilterEvent,
@@ -431,6 +432,7 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { firstTwoInitials } from '@/ui/utils/strings';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -457,9 +459,11 @@ export default defineComponent({
     },
   },
   setup() {
+    // stores
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
+    const pmsPropertiesStore = usePmsPropertiesStore();
     const currency = computed(
       () =>
         pmsPropertiesStore.pmsProperties.find(
@@ -503,13 +507,6 @@ export default defineComponent({
 
     // orderBy: returns undefined when no sort
     const orderBy = computed(() => {
-    const globalQuery = ref<string>('');
-
-    const suppliers = computed(() =>
-      Array.isArray(contactsStore.suppliers) ? contactsStore.suppliers : [],
-    );
-
-    const orderBy = computed<string | undefined>(() => {
       if (sortField.value !== null && sortField.value !== '') {
         const prefix = sortOrder.value === -1 ? '-' : '';
         return `${prefix}${sortField.value}`;
@@ -689,29 +686,11 @@ export default defineComponent({
 
     // open contact detail
     const openContactDetail = async (contactId: number): Promise<void> => {
-    async function clearAll(): Promise<void> {
-      globalQuery.value = '';
-      sortField.value = null;
-      sortOrder.value = 1;
-      page.value = 1;
-      first.value = 0;
-
-      filters.value = {
-        name: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        email: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        vat: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        phones: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        country: { value: null, matchMode: FilterMatchMode.IN },
-      };
-      await fetchNow();
-    }
-
-    const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
-        if (contact === null) {
+        if (!contact) {
           uiStore.stopLoading();
           return;
         }

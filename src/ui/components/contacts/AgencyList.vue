@@ -24,6 +24,7 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
+      @rowClick="openContactDetail($event.data)"
       :showHeaders="numTotalRecords > 0"
       :pt="{
         thead: { style: { zIndex: 5, backgroundColor: 'red' } },
@@ -55,7 +56,6 @@
           },
         },
       }"
-      @rowClick="openContactDetail($event.data.id)"
     >
       <!-- header -->
       <template #header v-if="numTotalRecords > 0">
@@ -351,6 +351,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
   type DataTableFilterEvent,
@@ -374,8 +375,8 @@ import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 import { firstTwoInitials } from '@/ui/utils/strings';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -426,26 +427,10 @@ export default defineComponent({
     // sorting
     const sortField = ref<string | null>(null);
     const sortOrder = ref<number>(1);
-    const SORT_FIELD_MAP: Record<string, string> = {
-      name: 'name',
-      country: 'country',
-      email: 'email',
-    };
-    const currentPmsPropertyId = computed(() => pmsPropertiesStore.currentPmsPropertyId);
 
-    const orderBy = computed<string | undefined>(() => {
-      if (sortField.value !== null && sortField.value !== '') {
-        const key = SORT_FIELD_MAP[sortField.value] ?? sortField.value;
-        const prefix = sortOrder.value === -1 ? '-' : '';
-        return `${prefix}${key}`;
-      }
-      return undefined;
-    });
-
-    const safeSortField = computed<string | undefined>(() =>
-      sortField.value === null || sortField.value === '' ? undefined : sortField.value,
-    );
-
+    // filters
+    const globalQuery = ref<string>('');
+    const phoneFilterDraft = ref('');
     const filters = ref({
       name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
       email: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
@@ -630,15 +615,20 @@ export default defineComponent({
       applyFilter?.();
     };
 
+    // open contact detail
     const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
+        if (!contact) {
+          uiStore.stopLoading();
+          return;
+        }
         contact.id = contactId;
-        open(ContactDetail, {
+        openDialog(ContactDetail, {
           props: { header: contact.name || t('contacts.detail') },
-          data: { contact: contact || null },
+          data: { contact: contact },
           onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               void fetchNow();
@@ -653,6 +643,7 @@ export default defineComponent({
       }
     };
 
+    // on mounted fetch data and countries
     onMounted(async () => {
       await Promise.all([fetchNow(), countriesStore.fetchCountries()]);
     });
