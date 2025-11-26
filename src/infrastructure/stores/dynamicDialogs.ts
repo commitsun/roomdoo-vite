@@ -1,17 +1,27 @@
 import { defineStore } from 'pinia';
-import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions';
 import { ref } from 'vue';
 
-export const useDynamicDialogsStore = defineStore('dynamicDialogs', () => {
-  const dynamicDialogs = ref<{ id: number; dialog: DynamicDialogInstance }[]>([]);
+type SimpleDynamicDialogInstance = {
+  close: () => void;
+};
 
-  const registerDynamicDialog = (id: number, dialog: DynamicDialogInstance): void => {
+type DynamicDialogItem = {
+  id: number;
+  dialog: SimpleDynamicDialogInstance;
+};
+
+export const useDynamicDialogsStore = defineStore('dynamicDialogs', () => {
+  const dynamicDialogs = ref<DynamicDialogItem[]>([]);
+
+  const registerDynamicDialog = (id: number, dialog: SimpleDynamicDialogInstance): void => {
     dynamicDialogs.value.push({ id, dialog });
   };
 
   const unRegisterDynamicDialog = (id: number): void => {
     const indexDialogToClose = dynamicDialogs.value.findIndex((d) => d.id === id);
-    dynamicDialogs.value.splice(indexDialogToClose, 1);
+    if (indexDialogToClose !== -1) {
+      dynamicDialogs.value.splice(indexDialogToClose, 1);
+    }
   };
 
   const closeAndUnregisterAllDynamicDialogs = (): void => {
