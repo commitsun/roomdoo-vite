@@ -154,27 +154,7 @@ export default defineComponent({
       return activeTab.value === tab ? 'var(--p-primary-color)' : 'lightgray';
     };
 
-    const openNewContact = async (): Promise<void> => {
-      uiStore.startLoading();
-      try {
-        openDialog(ContactDetail, {
-          props: { header: t('contacts.new') },
-          data: { props: { contact: null } },
-          // onClose: ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
-          //   if (data?.refresh === true || data?.action === 'saved') {
-          //     void fetchNow();
-          //   }
-          // },
-        });
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      } finally {
-        uiStore.stopLoading();
-      }
-    };
-
-    onMounted(async () => {
+    const fetchAllContacts = async (): Promise<void> => {
       const initialPagination = {
         page: 1,
         pageSize: 50,
@@ -196,6 +176,30 @@ export default defineComponent({
       } finally {
         uiStore.stopLoading();
       }
+    };
+
+    const openNewContact = async (): Promise<void> => {
+      uiStore.startLoading();
+      try {
+        openDialog(ContactDetail, {
+          props: { header: t('contacts.new') },
+          data: { props: { contact: null } },
+          onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+            if (data?.refresh === true || data?.action === 'saved') {
+              await fetchAllContacts();
+            }
+          },
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
+    };
+
+    onMounted(async () => {
+      await fetchAllContacts();
     });
     return {
       activeTab,
