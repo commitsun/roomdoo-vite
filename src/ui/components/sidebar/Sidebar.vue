@@ -17,6 +17,7 @@
       :isOpen="isOpen"
       :pmsPropertySupportLink="pmsPropertySupportLink"
       @openLink="openLink($event)"
+      @hide="hide()"
     />
   </div>
 </template>
@@ -45,7 +46,7 @@ export default defineComponent({
     },
   },
   emits: ['hide'],
-  setup(props) {
+  setup(props, context) {
     const pmsPropertiesStore = usePmsPropertiesStore();
     const isOpen = ref(false);
 
@@ -85,6 +86,10 @@ export default defineComponent({
         window.open(foundLink, '_blank');
       }
     };
+    const hide = (): void => {
+      isOpen.value = false;
+      context.emit('hide');
+    };
     watch(
       () => props.menuOpen,
       (newVal) => {
@@ -100,6 +105,7 @@ export default defineComponent({
       openSidebar,
       closeSidebar,
       openLink,
+      hide,
     };
   },
 });
