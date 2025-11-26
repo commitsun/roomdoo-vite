@@ -180,7 +180,7 @@ import type { CheckinPartnerInterface } from '@/_legacy/interfaces/CheckinPartne
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 import PrivateCheckinFlow from '@/_legacy/components/checkinFlow/PrivateCheckinFlow.vue';
 import ReservationSegmentation from '@/_legacy/components/reservations/ReservationSegmentation.vue';
-import CheckinPartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
+import CheckinPartnerForm from '@/_legacy/components/checkinPartners/CheckinPartnerForm.vue';
 import CheckinCardFlow from '@/_legacy/components/checkinFlow/CheckinCardFlow.vue';
 import ReservationModifyAdultsAndChildren from '@/_legacy/components/reservations/ReservationModifyAdultsAndChildren.vue';
 
