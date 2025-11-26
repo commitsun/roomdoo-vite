@@ -28,11 +28,21 @@ describe('PmsPropertiesService', () => {
           id: 1,
           name: 'Roomdoo Test Property',
           image: 'https://example.com/image1.jpg',
+          currency: {
+            code: 'USD',
+            id: 840,
+            name: 'US Dollar',
+          },
         },
         {
           id: 2,
           name: 'Another Property',
           image: 'https://example.com/image2.jpg',
+          currency: {
+            code: 'EUR',
+            id: 978,
+            name: 'Euro',
+          },
         },
       ];
       repoMock.fetchPmsProperties!.mockResolvedValue(properties);
@@ -60,8 +70,8 @@ describe('PmsPropertiesService', () => {
       // Arrange
       const pmsPropertyId = 42;
       const links: MenuLink[] = [
-        { id: 10, label: 'Dashboard', isSupportLink: false },
-        { id: 11, label: 'Reservations', isSupportLink: false },
+        { id: 10, label: 'Dashboard', isSupportLink: false, isReportLink: false },
+        { id: 11, label: 'Reservations', isSupportLink: false, isReportLink: false },
       ];
       repoMock.fetchMenuLinks!.mockResolvedValue(links);
 

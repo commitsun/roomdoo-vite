@@ -271,25 +271,8 @@
           optionLabel="value.zip"
           :placeholder="t('contacts.zipCodePlaceholder')"
           @complete="fetchAddressByZip($event)"
-          @update:modelValue="
-            (val: { value: { zip: string } } | string) => {
-              const zip =
-                typeof val === 'object' && val !== null && 'value' in val ? val.value.zip : val;
-              $emit('update:modelValue', { ...modelValue, residenceZip: zip });
-            }
-          "
-          @optionSelect="
-            (e: { value: { value: Address } }) => {
-              const address: Address = e?.value?.value;
-              $emit('update:modelValue', {
-                ...modelValue,
-                residenceZip: address.zip,
-                residenceCity: address.city,
-                residenceCountry: address.country,
-                residenceState: address.state,
-              });
-            }
-          "
+          @update:modelValue="handleResidenceZipUpdate"
+          @optionSelect="handleResidenceZipOptionSelect"
         >
           <template #option="{ option }">
             <div>{{ option.label }}</div>
@@ -585,6 +568,28 @@ export default defineComponent({
       }
     };
 
+    const handleResidenceZipUpdate = (val: { value: { zip: string } } | string): void => {
+      const zip =
+        typeof val === 'object' && val !== null && 'value' in val ? val.value.zip : (val as string);
+
+      context.emit('update:modelValue', {
+        ...props.modelValue,
+        residenceZip: zip,
+      });
+    };
+
+    const handleResidenceZipOptionSelect = (e: { value: { value: Address } }): void => {
+      const address: Address = e.value.value;
+
+      context.emit('update:modelValue', {
+        ...props.modelValue,
+        residenceZip: address.zip,
+        residenceCity: address.city,
+        residenceCountry: address.country,
+        residenceState: address.state,
+      });
+    };
+
     watch(
       () => props.modelValue.residenceCountry,
       async () => {
@@ -634,6 +639,8 @@ export default defineComponent({
       addressItems,
       showComercialName,
       fetchAddressByZip,
+      handleResidenceZipUpdate,
+      handleResidenceZipOptionSelect,
       t,
     };
   },

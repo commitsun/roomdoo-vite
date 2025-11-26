@@ -167,7 +167,7 @@
           <div class="document-number" v-if="partnerToAdd?.fiscalIdNumber">
             {{ partnerToAdd?.fiscalIdNumber }}
           </div>
-          <div class="partner-state-and-country" v-else-if="partnerToAdd?.idNumbers.length > 0">
+          <div class="partner-state-and-country" v-else-if="partnerToAdd?.idNumbers && partnerToAdd?.idNumbers.length > 0">
             <span class="partner-state">
               {{ partnerToAdd?.idNumbers[0].name }}
             </span>
@@ -487,6 +487,9 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import type { ContactDetail} from '@/domain/entities/Contact.ts';
 
+type LegacyContactDetail = ContactDetail & {
+  idNumbers?: { id: number; name: string }[];
+};
 
 export default defineComponent({
   components: {
@@ -536,7 +539,7 @@ export default defineComponent({
     const saleLinesToSend = ref([] as FolioSaleLineInterface[]);
     const invoiceLinesToSend = ref([] as InvoiceLineInterface[]);
     const isLineRemoved = ref([] as boolean[]);
-    const partnerToAdd: Ref<ContactDetail> = ref({
+    const partnerToAdd: Ref<LegacyContactDetail> = ref({
       id: 0,
       name: '',
       firstname: '',
@@ -568,6 +571,7 @@ export default defineComponent({
       saleChannel: undefined,
       comercial: '',
       contactType: 'person',
+      idNumbers: [],
     });
     const noMinimumPartnerDataError = ref(false);
     const partnerStateName = ref('');
@@ -777,7 +781,8 @@ export default defineComponent({
       saleChannel: undefined,
       comercial: '',
       contactType: 'person',
-      } as ContactDetail;
+      idNumbers: [],
+      } as LegacyContactDetail;
       noMinimumPartnerDataError.value = false;
       isSearchPartnerOpened.value = false;
       isRenderCheckinPartners.value = false;
@@ -942,8 +947,7 @@ export default defineComponent({
       }
       try{
         void store.dispatch('layout/showSpinner', true);
-        if (partnerToAdd.value.fiscalIdNumber === '' && partnerToAdd.value.idNumbers?.length > 0) {
-          const idNumberToSetAsFiscal = partnerToAdd.value.idNumbers[0];
+        if (partnerToAdd.value.fiscalIdNumber === '' && partnerToAdd.value.idNumbers && partnerToAdd.value.idNumbers?.length > 0) {
           await fetch(
             `/pmsApi/contacts/${partnerToAdd.value.id}/id-numbers/${partnerToAdd.value.idNumbers[0].id}/set-fiscal-number`,
             { method: 'PUT' }

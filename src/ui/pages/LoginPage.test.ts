@@ -158,6 +158,7 @@ describe('LoginPage', () => {
           name: 'US Dollar',
         },
       },
+      login: '',
       firstName: '',
       lastName: '',
     });
@@ -188,6 +189,7 @@ describe('LoginPage', () => {
         image: '',
         currency: { id: 1, code: 'USD', name: 'US Dollar' },
       },
+      login: '',
       firstName: '',
       lastName: '',
     });
@@ -218,6 +220,7 @@ describe('LoginPage', () => {
         image: '',
         currency: { id: 1, code: 'USD', name: 'US Dollar' },
       },
+      login: '',
       firstName: '',
       lastName: '',
     });

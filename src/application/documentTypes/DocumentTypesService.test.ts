@@ -24,12 +24,14 @@ describe('DocumentTypesService.fetchDocumentTypes', () => {
         name: 'DocType1',
         code: 'DT1',
         countries: [{ id: 1, name: 'Country1', code: 'US' }],
+        isValidableDocument: true,
       },
       {
         id: 2,
         name: 'DocType2',
         code: 'DT2',
         countries: [{ id: 2, name: 'Country2', code: 'US' }],
+        isValidableDocument: false,
       },
     ];
     repoMock.fetchDocumentTypes.mockResolvedValue(documentTypes);
@@ -54,6 +56,7 @@ describe('DocumentTypesService.fetchDocumentTypes', () => {
         name: 'DocType1',
         code: 'DT1',
         countries: [{ id: 1, name: 'Country1', code: 'US' }],
+        isValidableDocument: true,
       },
     ];
     repoMock.fetchDocumentTypes.mockResolvedValue(documentTypes);
