@@ -8,7 +8,7 @@
         Busca a un {{ !isRenderCheckinPartners ? 'cliente' : 'huésped' }} ya registrado
       </div>
       <!-- PARTNER OPTIONS -->
-      <div class="options" v-if="!partnerToAdd && !isSearchPartnerOpened">
+      <div class="options" v-if="partnerToAdd && !isSearchPartnerOpened">
         <div class="option" @click="openNewContact()">
           <div class="icon-wrapper">
             <CustomIcon
@@ -115,7 +115,7 @@
           </div>
         </div>
       </div>
-      <div class="select-partner-autocomplete" v-else-if="!partnerToAdd && isSearchPartnerOpened">
+      <div class="select-partner-autocomplete" v-else-if="partnerToAdd.id === 0 && isSearchPartnerOpened">
         <div class="select-partner-autocomplete-back">
           <CustomIcon
             imagePath="/app-images/back-arrow-blue.svg"
@@ -164,26 +164,31 @@
               class="icon-close"
             />
           </div>
-          <div class="document-number">
-            {{ partnerToAdd?.vatNumber }}
+          <div class="document-number" v-if="partnerToAdd?.fiscalIdNumber">
+            {{ partnerToAdd?.fiscalIdNumber }}
+          </div>
+          <div class="partner-state-and-country" v-else-if="partnerToAdd?.idNumbers.length > 0">
+            <span class="partner-state">
+              {{ partnerToAdd?.idNumbers[0].name }}
+            </span>
           </div>
           <div class="partner-street" v-if="partnerToAdd?.street">
             {{ partnerToAdd?.street }}
           </div>
           <div class="partner-zip-and-city">
-            <span class="partner-zip" v-if="partnerToAdd?.zip">{{ partnerToAdd?.zip }}</span>
-            <span v-if="partnerToAdd?.zip && partnerToAdd?.city">, </span>
+            <span class="partner-zip" v-if="partnerToAdd?.zipCode">{{ partnerToAdd?.zipCode }}</span>
+            <span v-if="partnerToAdd?.zipCode && partnerToAdd?.city">, </span>
             <span class="partner-city" v-if="partnerToAdd?.city">
               {{ partnerToAdd?.city }}
             </span>
           </div>
           <div class="partner-state-and-country">
-            <span class="partner-state" v-if="partnerToAdd?.stateId">
+            <span class="partner-state" v-if="partnerToAdd?.state?.id">
               {{ partnerStateName }}
             </span>
-            <span v-if="partnerToAdd?.stateId && partnerToAdd?.countryId">, </span>
-            <span class="partner-country" v-if="partnerToAdd?.countryId">
-              {{ countryName(partnerToAdd?.countryId || 0) }}
+            <span v-if="partnerToAdd?.state?.id && partnerToAdd?.country?.id">, </span>
+            <span class="partner-country" v-if="partnerToAdd?.country?.id">
+              {{ countryName(partnerToAdd?.country?.id || 0) }}
             </span>
           </div>
           <div class="error" v-if="noMinimumPartnerDataError">Datos de facturación incompletos</div>
@@ -460,7 +465,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, markRaw, nextTick, onMounted, ref, watch, type Ref } from 'vue';
+import { computed, defineComponent, reactive, nextTick, onMounted, ref, watch, type Ref } from 'vue';
 
 import type { InvoiceLineInterface } from '@/_legacy/interfaces/InvoiceLineInterface';
 import type { FolioSaleLineInterface } from '@/_legacy/interfaces/FolioSaleLineInterface';
@@ -475,12 +480,12 @@ import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 import AutocompleteComponent from '@/_legacy/components/roomdooComponents/AutocompleteComponent.vue';
 import TooltipComponent from '@/_legacy/components/roomdooComponents/TooltipComponent.vue';
 import InputText from '@/_legacy/components/roomdooComponents/InputText.vue';
-import { dialogService } from '@/_legacy/services/DialogService';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useI18n } from 'vue-i18n';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import ContactDetailForm from '@/ui/components/contacts/ContactDetail.vue';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
+import type { ContactDetail} from '@/domain/entities/Contact.ts';
 
 
 export default defineComponent({
@@ -490,7 +495,7 @@ export default defineComponent({
     AutocompleteComponent,
     TooltipComponent,
     InputText,
-    ContactDetail,
+    ContactDetailForm,
   },
   props: {
     isRenderSaleLines: {
@@ -531,7 +536,39 @@ export default defineComponent({
     const saleLinesToSend = ref([] as FolioSaleLineInterface[]);
     const invoiceLinesToSend = ref([] as InvoiceLineInterface[]);
     const isLineRemoved = ref([] as boolean[]);
-    const partnerToAdd: Ref<PartnerInterface | null> = ref(null);
+    const partnerToAdd: Ref<ContactDetail> = ref({
+      id: 0,
+      name: '',
+      firstname: '',
+      lastname: '',
+      lastname2: '',
+      birthdate: null as Date | null,
+      nationality: undefined,
+      lang: '',
+      gender: '',
+      phones: [],
+      email: '',
+      documents: [],
+      fiscalIdNumberType: '',
+      fiscalIdNumber: '',
+      residenceStreet: '',
+      residenceZip: '',
+      residenceCity: '',
+      residenceState: undefined,
+      residenceCountry: undefined,
+      street: '',
+      zipCode: '',
+      city: '',
+      state: undefined,
+      country: undefined,
+      reference: '',
+      tags: [],
+      internalNotes: '',
+      defaultCommission: 0,
+      saleChannel: undefined,
+      comercial: '',
+      contactType: 'person',
+    });
     const noMinimumPartnerDataError = ref(false);
     const partnerStateName = ref('');
     const isSearchPartnerOpened = ref(false);
@@ -582,18 +619,19 @@ export default defineComponent({
       return total;
     });
 
-    const checkMinimumPartnerData = (partner: PartnerInterface) => {
+    const checkMinimumPartnerData = (partner: ContactDetail) => {
       const partnerCountryCode = store.state.countries.countries.find(
-        (el) => el.id === partner.countryId,
+        (el) => el.id === partner.country?.id
       )?.code;
       if (
         !partner?.name ||
-        !partner?.zip ||
+        !partner?.zipCode ||
         !partner?.street ||
         !partner?.city ||
-        !partner?.countryId ||
-        !partner?.vatNumber ||
-        (partnerCountryCode === 'ES' && !partner?.stateId)
+        !partner?.country?.id ||
+        (!partner?.fiscalIdNumber &&
+        partner.documents?.length === 0) ||
+        (partnerCountryCode === 'ES' && !partner?.state?.id)
       ) {
         noMinimumPartnerDataError.value = true;
       } else {
@@ -601,27 +639,18 @@ export default defineComponent({
       }
     };
 
-    const addPartnerToInvoice = async () => {
-      partnerToAdd.value = store.state.partners.currentPartner;
+    const addPartnerToInvoice = async (contact: ContactDetail) => {
+      partnerToAdd.value = contact;
       if (partnerToAdd.value) {
         checkMinimumPartnerData(partnerToAdd.value);
-        if (partnerToAdd.value.stateId) {
+        if (partnerToAdd.value.state?.id) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.countryId);
-            partnerStateName.value =
-              store.state.countryStates.countryStates.find(
-                (el) => el.id === partnerToAdd.value?.stateId,
-              )?.name ?? '';
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.country?.id);
+          partnerStateName.value =
+            store.state.countryStates.countryStates.find(
+              (el) => el.id === partnerToAdd.value.state?.id
+            )?.name ?? '';
+          void store.dispatch('layout/showSpinner', false);
         }
       }
       void store.dispatch('partners/setCurrentPartner', partnerToAdd.value);
@@ -716,8 +745,43 @@ export default defineComponent({
 
     const restorePartner = () => {
       selectedPartnerId.value = 0;
-      partnerToAdd.value = null;
+      partnerToAdd.value = {
+        id: 0,
+      name: '',
+      firstname: '',
+      lastname: '',
+      lastname2: '',
+      birthdate: null as Date | null,
+      nationality: undefined,
+      lang: '',
+      gender: '',
+      phones: [],
+      email: '',
+      documents: [],
+      fiscalIdNumberType: '',
+      fiscalIdNumber: '',
+      residenceStreet: '',
+      residenceZip: '',
+      residenceCity: '',
+      residenceState: undefined,
+      residenceCountry: undefined,
+      street: '',
+      zipCode: '',
+      city: '',
+      state: undefined,
+      country: undefined,
+      reference: '',
+      tags: [],
+      internalNotes: '',
+      defaultCommission: 0,
+      saleChannel: undefined,
+      comercial: '',
+      contactType: 'person',
+      } as ContactDetail;
       noMinimumPartnerDataError.value = false;
+      isSearchPartnerOpened.value = false;
+      isRenderCheckinPartners.value = false;
+      isRestorePartner.value = true;
       void store.dispatch('partners/removePartner');
     };
 
@@ -726,16 +790,18 @@ export default defineComponent({
       try {
         await contactsStore.fetchContactSchema();
         const contactId = partnerToAdd.value?.id || 0;
-        const contact = await contactsStore.fetchContactById(contactId);
+        let contact = await contactsStore.fetchContactById(contactId);
         if (contact) {
           contact.id = contactId;
-          openDialog(ContactDetail, {
+          openDialog(ContactDetailForm, {
             props: { header: contact.name || t('contacts.detail') },
             data: { contact },
             onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
               if (data?.refresh === true || data?.action === 'saved') {
-                await store.dispatch('partners/fetchCurrentPartner', contactId);
-                addPartnerToInvoice();
+                contact = await contactsStore.fetchContactById(contactId);
+                 if (contact) {
+                  addPartnerToInvoice(contact);
+                 }
               }
             },
           });
@@ -755,15 +821,19 @@ export default defineComponent({
       uiStore.startLoading();
       try {
         await contactsStore.fetchContactSchema();
-        openDialog(ContactDetail, {
+        openDialog(ContactDetailForm, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },
           onClose: async ({ data }: { data?: { refresh?: boolean; action?: string, contactId?: number } } = {}) => {
             if (data?.refresh === true || data?.action === 'saved') {
               const newContactId = data?.contactId;
               if (newContactId) {
-                await store.dispatch('partners/fetchCurrentPartner', newContactId);
-                addPartnerToInvoice();
+                const contact = await contactsStore.fetchContactById(newContactId);
+                if (contact) {
+                  console.log('New contact added with id:', newContactId);
+                  addPartnerToInvoice(contact);
+                  isSearchPartnerOpened.value = true;
+                }
               }
             }
           },
@@ -857,7 +927,7 @@ export default defineComponent({
     const saveInvoice = async () => {
       if (
         getTotalToInvoice.value === 0 ||
-        (!partnerToAdd.value && !isSimplifiedInvoice.value) ||
+        (!partnerToAdd && !isSimplifiedInvoice.value) ||
         noMinimumPartnerDataError.value ||
         (props.isRenderSaleLines &&
           saleLinesToSend.value.some(
@@ -870,10 +940,15 @@ export default defineComponent({
       ) {
         return;
       }
-
-      void store.dispatch('layout/showSpinner', true);
-
-      try {
+      try{
+        void store.dispatch('layout/showSpinner', true);
+        if (partnerToAdd.value.fiscalIdNumber === '' && partnerToAdd.value.idNumbers?.length > 0) {
+          const idNumberToSetAsFiscal = partnerToAdd.value.idNumbers[0];
+          await fetch(
+            `/pmsApi/contacts/${partnerToAdd.value.id}/id-numbers/${partnerToAdd.value.idNumbers[0].id}/set-fiscal-number`,
+            { method: 'PUT' }
+          );
+        }
         if (props.isRenderSaleLines) {
           const linesSend: FolioSaleLineInterface[] = [];
           isLineRemoved.value.forEach((el, index) => {
@@ -886,58 +961,42 @@ export default defineComponent({
               }
             }
           });
-
           if (linesSend.length === 0) {
             partnerError.value = false;
             noLinesToSendError.value = true;
             return;
           }
-
-          await store.dispatch('folios/createFolioInvoice', {
+          const payload = {
             folioId: folio.value?.id,
             partnerId: partnerToAdd.value?.id,
             saleLines: linesSend,
             narration: comment.value,
             isSimplifiedInvoice: isSimplifiedInvoice.value,
-          });
+          };
+          await store.dispatch('folios/createFolioInvoice', payload);
         } else {
           const invoicesLinesToSend: InvoiceLineInterface[] = [];
           isLineRemoved.value.forEach((el, index) => {
-            if (el && invoiceLinesToSend.value[index].displayType !== 'line_section') {
-              invoicesLinesToSend.push(invoiceLinesToSend.value[index]);
+            if (el) {
+              if (invoiceLinesToSend.value[index].displayType !== 'line_section') {
+                invoicesLinesToSend.push(invoiceLinesToSend.value[index]);
+              }
             }
           });
-
-          await store.dispatch('folios/updateFolioInvoice', {
+          const payload = {
             invoiceId: props.invoiceId,
             partnerId: partnerToAdd.value?.id,
             moveLines: invoicesLinesToSend,
             narration: comment.value,
             isSimplifiedInvoice: isSimplifiedInvoice.value,
-          });
+          };
+          await store.dispatch('folios/updateFolioInvoice', payload);
         }
-
-        // Estos normalmente conviene esperarlos si al cerrar quieres datos consistentes
-        await store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
-        await store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
-
-        if (router.currentRoute.value.name === 'planning') {
-          await store.dispatch('planning/fetchPlanning', {
-            dateStart: store.state.planning.dateStart,
-            dateEnd: store.state.planning.dateEnd,
-            propertyId: store.state.properties.activeProperty?.id,
-            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
-          });
-        }
-
+        void store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
+        void store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
         context.emit('update:invoiceDialog', false);
         context.emit('close');
-      } catch {
-        dialogService.open({
-          header: 'Error',
-          content: 'Algo ha ido mal',
-          btnAccept: 'Ok',
-        });
+        void store.dispatch('layout/showSpinner', false);
       } finally {
         void store.dispatch('layout/showSpinner', false);
       }
@@ -1190,34 +1249,22 @@ export default defineComponent({
 
     watch(selectedPartnerId, async () => {
       if (selectedPartnerId.value !== 0) {
-        if (isRenderCheckinPartners.value) {
-          partnerToAdd.value =
-            partners.value.find((el) => el.id === selectedPartnerId.value) ?? null;
-        } else {
-          partnerToAdd.value =
-            store.state.partners.partners.find((el) => el.id === selectedPartnerId.value) ?? null;
+        const foundedContact = await contactsStore.fetchContactById(selectedPartnerId.value);
+        if (foundedContact) {
+          partnerToAdd.value = foundedContact;
+          isSearchPartnerOpened.value = true;
         }
-        isSearchPartnerOpened.value = false;
       }
       if (partnerToAdd.value) {
         checkMinimumPartnerData(partnerToAdd.value);
-        if (partnerToAdd.value.stateId) {
+        if (partnerToAdd.value.state?.id) {
           void store.dispatch('layout/showSpinner', true);
-          try {
-            await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.countryId);
-            partnerStateName.value =
-              store.state.countryStates.countryStates.find(
-                (el) => el.id === partnerToAdd.value?.stateId,
-              )?.name ?? '';
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.country?.id);
+          partnerStateName.value =
+            store.state.countryStates.countryStates.find(
+              (el) => el.id === partnerToAdd.value.state?.id
+            )?.name ?? '';
+          void store.dispatch('layout/showSpinner', false);
         }
       }
       if (isSimplifiedInvoice.value) {
@@ -1361,24 +1408,24 @@ export default defineComponent({
         }
         if (invoice?.partnerId) {
           void store.dispatch('layout/showSpinner', true);
-
           try {
-            await store.dispatch('partners/fetchCurrentPartner', invoice.partnerId);
-
-            const current = store.state.partners.currentPartner;
-            if (current) {
-              isSearchPartnerOpened.value = false;
-              partnerToAdd.value = current;
-
-              if (partnerToAdd.value.stateId) {
-                await store.dispatch(
-                  'countryStates/fetchCountryStates',
-                  partnerToAdd.value.countryId,
-                );
-                partnerStateName.value =
-                  store.state.countryStates.countryStates.find(
-                    (el) => el.id === partnerToAdd.value?.stateId,
-                  )?.name ?? '';
+          const foundedContact = await contactsStore.fetchContactById(invoice?.partnerId);
+          await store
+            .dispatch('partners/fetchCurrentPartner', invoice?.partnerId)
+            .then(async () => {
+              if (foundedContact) {
+                isSearchPartnerOpened.value = false;
+                partnerToAdd.value = foundedContact;
+                if (partnerToAdd.value.state?.id) {
+                  await store.dispatch(
+                    'countryStates/fetchCountryStates',
+                    partnerToAdd.value.country?.id
+                  );
+                  partnerStateName.value =
+                    store.state.countryStates.countryStates.find(
+                      (el) => el.id === partnerToAdd.value.state?.id
+                    )?.name ?? '';
+                }
               }
             }
           } catch {
