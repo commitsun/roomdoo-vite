@@ -285,17 +285,18 @@ export default defineComponent({
           content: props.transaction ? 'Pago modificado con éxito' : 'Pago realizado con éxito',
           btnAccept: 'Ok',
         });
+
+        context.emit('transactionCreated');
+      } catch {
+        dialogService.open({
+          header: 'Error',
+          content: 'Algo ha ido mal',
+          btnAccept: 'Ok',
+        });
+      } finally {
+        void store.dispatch('layout/showSpinner', false);
+        context.emit('accept', true);
       }
-
-      dialogService.open({
-        header: props.transaction ? 'Pago modificado' : 'Pago realizado',
-        content: props.transaction ? 'Pago modificado con éxito' : 'Pago realizado con éxito',
-        btnAccept: 'Ok',
-      });
-
-      context.emit('transactionCreated');
-      void store.dispatch('layout/showSpinner', false);
-      context.emit('accept', true);
     };
 
     const openPartnerDialog = () => {
@@ -390,15 +391,24 @@ export default defineComponent({
         isReconcilied.value = props.transaction.isReconcilied;
         if (props.transaction.partnerId) {
           void store.dispatch('layout/showSpinner', true);
-          await store
-            .dispatch('partners/fetchCurrentPartner', props.transaction.partnerId)
-            .then(() => {
-              if (store.state.partners.currentPartner) {
-                partnerName.value = store.state.partners.currentPartner.name ?? '';
-                selectedPartner.value = store.state.partners.currentPartner;
-              }
+          try {
+            await store
+              .dispatch('partners/fetchCurrentPartner', props.transaction.partnerId)
+              .then(() => {
+                if (store.state.partners.currentPartner) {
+                  partnerName.value = store.state.partners.currentPartner.name ?? '';
+                  selectedPartner.value = store.state.partners.currentPartner;
+                }
+              });
+          } catch {
+            dialogService.open({
+              header: 'Error',
+              content: 'Algo ha ido mal',
+              btnAccept: 'Ok',
             });
-          void store.dispatch('layout/showSpinner', false);
+          } finally {
+            void store.dispatch('layout/showSpinner', false);
+          }
         }
       }
     });
