@@ -14,9 +14,9 @@ let endPoint;
 if (import.meta.env.DEV) {
   endPoint = '/api';
 } else if (import.meta.env.MODE === 'staging') {
-  endPoint = import.meta.env.ROOMDOO_API_URL + '/pmsApi';
+  endPoint = import.meta.env.ROOMDOO_API_URL + '/api';
 } else {
-  endPoint = `${window.location.href.split('.')[0]}.host.roomdoo.com/pmsApi`;
+  endPoint = `${window.location.href.split('.')[0]}.host.roomdoo.com/api`;
 }
 
 const api: AxiosInstance = axios.create({
