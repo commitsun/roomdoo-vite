@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "type-check": "vue-tsc -b",
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "build:staging": "vue-tsc -b && vite build --mode staging",

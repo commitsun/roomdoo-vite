@@ -66,6 +66,32 @@ jobs:
         run: npm run lint
 
   # ---------------------------------------
+  # TYPE CHECK (depends on Lint)
+  # ---------------------------------------
+  typecheck:
+    name: Type check
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.8.0'
+          cache: 'npm'
+
+      - name: Use npm 11.6.0 (match engines)
+        run: npm i -g npm@11.6.0
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Run vue-tsc
+        run: npm run type-check
+
+  # ---------------------------------------
   # TESTS + COVERAGE (depends on Lint)
   # ---------------------------------------
   tests:
@@ -97,8 +123,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           vite-config-path: vitest.config.ts
-          comment-title: '✅ Test Coverage Report'
-          badge-title: 'Coverage'
+          name: '✅ Test Coverage Report'
 
       - name: Upload HTML coverage report
         if: always()
