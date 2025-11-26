@@ -8,7 +8,12 @@
       <Headset :size="14" class="nav-link-icon" />
       <span>{{ pmsPropertySupportLink.label }}</span>
     </div>
-    <div class="user" :class="{ 'is-open': isOpen }" @click="toggleUserMenu" aria-haspopup="true">
+    <div
+      class="user"
+      :class="{ 'is-open': isUserMenuVisible }"
+      @click="toggleUserMenu"
+      aria-haspopup="true"
+    >
       <Menu appendTo="self" :model="userItems" ref="refUserMenu" id="overlay_menu" :popup="true" />
       <div class="avatar-container">
         <Avatar
@@ -79,8 +84,9 @@ export default defineComponent({
     const userStore = useUserStore();
     const uiStore = useUIStore();
     const router = useRouter();
-    const user = computed(() => userStore.user);
     const refUserMenu = ref();
+    const user = computed(() => userStore.user);
+    const isUserMenuVisible = computed(() => refUserMenu.value?.overlayVisible);
     const userItems = computed(() => [
       {
         label: t('sidebar.options'),
@@ -134,6 +140,7 @@ export default defineComponent({
       user,
       userItems,
       refUserMenu,
+      isUserMenuVisible,
       firstTwoInitials,
       toggleUserMenu,
     };
