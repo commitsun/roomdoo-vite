@@ -154,49 +154,54 @@ describe('CustomerList', () => {
     // renders 2 customers
     expect(bodyRows).toHaveLength(2);
 
+    const first = testCustomers[0];
+    const second = testCustomers[1];
+    const firstPhones = first.phones ?? [];
+    const secondPhones = second.phones ?? [];
+
     // row 1
-    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(testCustomers[0].name); // name
-    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent(testCustomers[0].vat);
-    expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(
-      testCustomers[0].email ?? '',
-    ); // email
+    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(first.name); // name
+    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent(first.vat); // vat
+    expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(first.email ?? ''); // email
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testCustomers[0].phones.length > 0 ? testCustomers[0].phones[0].number : '',
+      firstPhones.length > 0 ? firstPhones[0].number : '',
     ); // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
-      testCustomers[0].country?.name ?? '',
+      first.country?.name ?? '',
     ); // country
+
     const expected1 = new Intl.NumberFormat('es-ES', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
       useGrouping: true,
-    }).format(Number(testCustomers[0].totalInvoiced));
+    }).format(Number(first.totalInvoiced));
+
     const cellText1 = within(bodyRows[0]).getAllByRole('cell')[5].textContent;
-    expect(cellText1).toBe(expected1); //total invoiced
+    expect(cellText1).toBe(expected1); // total invoiced
 
     // row 2
-    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(testCustomers[1].name); // name
-    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent(testCustomers[1].vat); // vat
-    expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent(
-      testCustomers[1].email ?? '',
-    ); // email
+    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(second.name); // name
+    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent(second.vat); // vat
+    expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent(second.email ?? ''); // email
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testCustomers[1].phones.length > 0 ? testCustomers[1].phones[0].number : '',
+      secondPhones.length > 0 ? secondPhones[0].number : '',
     ); // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent(
-      testCustomers[1].country?.name ?? '',
+      second.country?.name ?? '',
     ); // country
+
     const expected2 = new Intl.NumberFormat('es-ES', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
       useGrouping: true,
-    }).format(Number(testCustomers[1].totalInvoiced));
+    }).format(Number(second.totalInvoiced));
+
     const cellText2 = within(bodyRows[1]).getAllByRole('cell')[5].textContent;
-    expect(cellText2).toBe(expected2); //total invoiced
+    expect(cellText2).toBe(expected2); // total invoiced
   });
 
   it('applies global search input', async () => {

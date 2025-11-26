@@ -447,6 +447,8 @@ describe('ContactDetailDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (vueuse as any).__setDesktop(true);
+    (contactsStoreMock.createContact as any).mockResolvedValue({ id: 123 });
+    (contactsStoreMock.updateContactFields as any).mockResolvedValue(undefined);
   });
 
   it('it displays Tabs on desktop and Accordion on mobile', async () => {
@@ -503,9 +505,14 @@ describe('ContactDetailDialog', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1));
-    expect(contactsStoreMock.updateContactFields).not.toHaveBeenCalled();
-    expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved', contactId: 123 });
+    await waitFor(() => {
+      expect(contactsStoreMock.createContact).toHaveBeenCalledTimes(1);
+      expect(contactsStoreMock.updateContactFields).not.toHaveBeenCalled();
+      expect(dialogRef.value.close).toHaveBeenCalledWith({
+        action: 'saved',
+        contactId: 123,
+      });
+    });
   });
 
   it('handleSave updates contact when there is contact in dialogRef', async () => {
@@ -525,10 +532,16 @@ describe('ContactDetailDialog', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    await waitFor(() => expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1));
-    const args = (contactsStoreMock.updateContactFields as any).mock.calls[0];
-    expect(args[0]).toBe(123);
-    expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved' });
+    await waitFor(() => {
+      expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1);
+      const args = (contactsStoreMock.updateContactFields as any).mock.calls[0];
+      expect(args[0]).toBe(123);
+
+      expect(dialogRef.value.close).toHaveBeenCalledWith({
+        action: 'saved',
+        contactId: 123,
+      });
+    });
   });
 
   it('handleCancel closes the dialog', async () => {

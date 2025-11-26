@@ -51,7 +51,13 @@ describe('router global beforeEach (with createTestingPinia)', () => {
       id: 1,
       email: 'a@b.c',
       lang: 'en',
-      defaultPmsProperty: { id: 2, name: 'prop', image: '' },
+      defaultPmsProperty: {
+        id: 2,
+        name: 'prop',
+        image: '',
+        currency: { code: 'USD', id: 840, name: 'US Dollar' },
+      },
+      login: '',
       firstName: '',
       lastName: '',
     });
@@ -71,14 +77,20 @@ describe('router global beforeEach (with createTestingPinia)', () => {
       id: 1,
       email: 'a@b.c',
       lang: 'en',
-      defaultPmsProperty: { id: 2, name: 'prop', image: '' },
+      defaultPmsProperty: {
+        id: 2,
+        name: 'prop',
+        image: '',
+        currency: { code: 'USD', id: 840, name: 'US Dollar' },
+      },
+      login: '',
       firstName: '',
       lastName: '',
     });
 
     vi.spyOn(usePmsPropertiesStore(), 'pmsProperties', 'get').mockReturnValue([
-      { id: 1, name: 'prop1', image: '' },
-      { id: 2, name: 'prop2', image: '' },
+      { id: 1, name: 'prop1', image: '', currency: { code: 'EUR', id: 978, name: 'Euro' } },
+      { id: 2, name: 'prop2', image: '', currency: { code: 'USD', id: 840, name: 'US Dollar' } },
     ]);
 
     await router.push('/planning/2');

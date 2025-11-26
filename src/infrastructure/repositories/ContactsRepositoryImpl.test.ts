@@ -122,7 +122,13 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     const data: EntityListResponse<GuestDTO> = {
       count: 1,
       items: [
-        { id: 1, name: 'John', identificationDocuments: [], lastReservationDate: '2024-05-01' },
+        {
+          id: 1,
+          name: 'John',
+          identificationDocuments: [],
+          lastReservationDate: '2024-05-01',
+          lastReservation: { id: 1, name: 'Reservation 1' },
+        },
       ],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
@@ -343,13 +349,14 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
             name: 'Passport',
             code: 'P',
             countries: [{ id: 33, name: 'UK', code: 'GB' }],
+            isValidableDocument: true,
           },
           country: { id: 33, name: 'UK', code: 'GB' },
         },
         {
           id: 2,
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: '111222',
         },
@@ -392,14 +399,20 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
         {
           id: 0,
           name: 'Passport',
-          category: { id: 5, name: 'Passport', code: 'P', countries: [] },
+          category: {
+            id: 5,
+            name: 'Passport',
+            code: 'P',
+            countries: [],
+            isValidableDocument: true,
+          },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: 'XYZ123',
         },
         {
           id: 0,
           name: 'DNI',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
           supportNumber: '111222',
         },
       ],
@@ -468,7 +481,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
         {
           id: 1,
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: '111222',
         },
@@ -485,29 +498,28 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
             name: 'Passport',
             code: 'P',
             countries: [{ id: 33, name: 'UK', code: 'GB' }],
+            isValidableDocument: true,
           },
           country: { id: 33, name: 'UK', code: 'GB' },
         },
         {
           id: 1, // existente -> PATCH
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [] },
+          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
           country: { id: 33, name: 'UK', code: 'GB' },
-          supportNumber: '111333', // <-- NUEVO valor
+          supportNumber: '111333',
         },
       ],
     };
 
     await repo.updateContactFields(contactId, original, updated);
 
-    // 1) PATCH del contacto (posible payload vacío si no hay cambios fuera de documentos)
     expect((api as any).patch).toHaveBeenNthCalledWith(
       1,
       `contacts/${contactId}`,
       expect.any(Object),
     );
 
-    // 2) POST del documento nuevo (id=0)
     expect((api as any).post).toHaveBeenCalledWith(
       `contacts/${contactId}/id-numbers`,
       expect.objectContaining({
@@ -517,18 +529,16 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       }),
     );
 
-    // 3) PATCH del documento existente (id=1) con el NUEVO supportNumber
     expect((api as any).patch).toHaveBeenCalledWith(
       `contacts/${contactId}/id-numbers/1`,
       expect.objectContaining({
         name: '11111111H',
         category: 9,
         country: 33,
-        supportNumber: '111333', // <-- corrige aquí el esperado
+        supportNumber: '111333',
       }),
     );
 
-    // (Opcional) Asegura que no se hizo PATCH con el valor viejo
     expect((api as any).patch).not.toHaveBeenCalledWith(
       `contacts/${contactId}/id-numbers/1`,
       expect.objectContaining({ supportNumber: '111222' }),

@@ -37,6 +37,14 @@ vi.mock('vue-i18n', () => {
   };
 });
 
+vi.mock('primevue/usedialog', () => {
+  return {
+    useDialog: () => ({
+      open: vi.fn(),
+    }),
+  };
+});
+
 vi.mock('@/infrastructure/stores/ui', () => ({
   useUIStore: () => ({
     startLoading: vi.fn(),

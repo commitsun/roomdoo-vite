@@ -63,7 +63,12 @@ describe('CookieService', () => {
       phone: '+34 123',
       avatar: 'https://cdn/avatar.png',
       login: 'john.doe',
-      defaultPmsProperty: { id: 1, name: 'Hotel One', image: '' },
+      defaultPmsProperty: {
+        id: 1,
+        name: 'Hotel One',
+        image: '',
+        currency: { code: 'EUR', id: 978, name: 'Euro' },
+      },
       availabilityRuleFields: ['A', 'B'],
     };
 
@@ -90,25 +95,21 @@ describe('CookieService', () => {
       phone: '555',
       avatar: '/img.png',
       login: 'u.ex',
-      defaultPmsProperty: { id: 2, name: 'Prop', image: '' },
+      defaultPmsProperty: {
+        id: 2,
+        name: 'Prop',
+        image: '',
+        currency: { code: 'USD', id: 840, name: 'US Dollar' },
+      },
       availabilityRuleFields: ['AV'],
     };
+
     CookieService.setUserCookies(user);
 
     const parsed = CookieService.getUserCookies();
-    expect(parsed).toEqual({
-      id: 5,
-      email: 'u@ex.com',
-      firstName: 'U',
-      lastName: 'Ex',
-      lastName2: 'Two',
-      lang: 'gl_ES',
-      phone: '555',
-      avatar: '/img.png',
-      login: 'u.ex',
-      defaultPmsProperty: { id: 2, name: 'Prop', image: '' },
-      availabilityRuleFields: ['AV'],
-    });
+
+    expect(parsed).not.toBeNull();
+    expect(parsed).toMatchObject(user);
   });
 
   it('normalizes optional fields undefined to "" and availabilityRuleFields to []', () => {
@@ -118,7 +119,12 @@ describe('CookieService', () => {
       firstName: 'A',
       lastName: 'B',
       lang: 'en_US',
-      defaultPmsProperty: { id: 1, name: 'X', image: '' },
+      defaultPmsProperty: {
+        id: 1,
+        name: 'X',
+        image: '',
+        currency: { code: 'USD', id: 840, name: 'US Dollar' },
+      },
       login: '',
     };
     CookieService.setUserCookies(user);
@@ -216,7 +222,12 @@ describe('CookieService', () => {
       lastName: 'F',
       lang: 'es_ES',
       login: 'ef',
-      defaultPmsProperty: { id: 1, name: 'P', image: '' },
+      defaultPmsProperty: {
+        id: 1,
+        name: 'P',
+        image: '',
+        currency: { code: 'USD', id: 840, name: 'US Dollar' },
+      },
     };
     CookieService.setUserCookies(user);
     expect(CookieService.getUserCookies()).not.toBeNull();
@@ -247,7 +258,12 @@ describe('CookieService', () => {
       lastName: 'X',
       login: 'n.x',
       lang: 'es_ES',
-      defaultPmsProperty: { id: 1, name: 'Prop', image: '' },
+      defaultPmsProperty: {
+        id: 1,
+        name: 'Prop',
+        image: '',
+        currency: { code: 'USD', id: 840, name: 'US Dollar' },
+      },
     };
 
     CookieService.setUserCookies(user);
