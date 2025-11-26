@@ -8,8 +8,8 @@
       <Headset :size="14" class="nav-link-icon" />
       <span>{{ pmsPropertySupportLink.label }}</span>
     </div>
-    <div class="user" :class="{ 'is-open': isOpen }">
-      <Menu :model="userItems" />
+    <div class="user" :class="{ 'is-open': isOpen }" @click="toggleUserMenu" aria-haspopup="true">
+      <Menu appendTo="self" :model="userItems" ref="refUserMenu" id="overlay_menu" :popup="true" />
       <div class="avatar-container">
         <Avatar
           v-if="user?.avatar"
@@ -40,7 +40,7 @@
 <script lang="ts">
 import Avatar from 'primevue/avatar';
 import Menu from 'primevue/menu';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { ChevronsUpDown, Headset } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
@@ -73,14 +73,14 @@ export default defineComponent({
       default: null,
     },
   },
-  setup() {
+  setup(props, context) {
     const { t } = useI18n();
     const { openDialog } = useAppDialog();
     const userStore = useUserStore();
     const uiStore = useUIStore();
     const router = useRouter();
     const user = computed(() => userStore.user);
-
+    const refUserMenu = ref();
     const userItems = computed(() => [
       {
         label: t('sidebar.options'),
@@ -89,6 +89,7 @@ export default defineComponent({
             label: t('sidebar.settings'),
             icon: 'pi pi-cog',
             command: (): void => {
+              context.emit('hide');
               openDialog(UserSettings, {
                 props: { header: t('sidebar.userSettings') },
                 onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
@@ -112,10 +113,29 @@ export default defineComponent({
         ],
       },
     ]);
+
+    const toggleUserMenu = (event: unknown): void => {
+      if (!props.isOpen) {
+        return;
+      }
+      refUserMenu.value.toggle(event);
+    };
+
+    watch(
+      () => props.isOpen,
+      (newIsOpen) => {
+        if (!newIsOpen) {
+          refUserMenu.value.hide();
+        }
+      },
+    );
+
     return {
       user,
       userItems,
+      refUserMenu,
       firstTwoInitials,
+      toggleUserMenu,
     };
   },
 });
