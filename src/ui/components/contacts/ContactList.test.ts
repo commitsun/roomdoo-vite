@@ -149,53 +149,54 @@ describe('ContactList', () => {
     const tbody = rowGroups[1];
     const bodyRows = within(tbody).getAllByRole('row');
 
+    const first = testContacts[0];
+    const second = testContacts[1];
+    const firstPhones = first.phones ?? [];
+    const secondPhones = second.phones ?? [];
+
     // renders 2 contacts
     expect(bodyRows).toHaveLength(2);
-    // check 1st row content
+
     // name
-    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(testContacts[0].name);
+    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(first.name);
     // types
     expect(within(bodyRows[0]).getAllByRole('cell')[1].innerHTML).toContain(
-      testContacts[0].types[0].charAt(0).toUpperCase() + testContacts[0].types[0].slice(1),
+      first.types[0].charAt(0).toUpperCase() + first.types[0].slice(1),
     );
     // email
-    expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(
-      testContacts[0].email ?? '',
-    );
+    expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(first.email ?? '');
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testContacts[0].phones.length > 0 ? testContacts[0].phones[0].number : '',
+      firstPhones.length > 0 ? firstPhones[0].number : '',
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent(
-      testContacts[0].country?.name ?? '',
+      first.country?.name ?? '',
     );
-    // check 2nd row content
-    // name
-    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(testContacts[1].name);
+
+    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(second.name);
     // types
     expect(within(bodyRows[1]).getAllByRole('cell')[1].innerHTML).toContain(
-      testContacts[1].types[0].charAt(0).toUpperCase() + testContacts[1].types[0].slice(1),
+      second.types[0].charAt(0).toUpperCase() + second.types[0].slice(1),
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[1].innerHTML).toContain(
-      testContacts[1].types[1].charAt(0).toUpperCase() + testContacts[1].types[1].slice(1),
+      second.types[1].charAt(0).toUpperCase() + second.types[1].slice(1),
     );
     // email
-    expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent(
-      testContacts[1].email ?? '',
-    );
+    expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent(second.email ?? '');
     // phones
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testContacts[1].phones.length > 0 ? testContacts[1].phones[0].number : '',
+      secondPhones.length > 0 ? secondPhones[0].number : '',
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[3].innerHTML).toContain(
-      testContacts[1].phones.length > 0 ? testContacts[1].phones[1].number : '',
+      secondPhones.length > 1 ? secondPhones[1].number : '',
     );
     // country
     expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent(
-      testContacts[1].country?.name ?? '',
+      second.country?.name ?? '',
     );
   });
+
   it('applies global search input', async () => {
     // start fake timers
     vi.useFakeTimers();

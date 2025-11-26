@@ -136,40 +136,37 @@ describe('AgencyList', () => {
     const tbody = rowGroups[1];
     const bodyRows = within(tbody).getAllByRole('row');
 
+    const first = testAgencies[0];
+    const second = testAgencies[1];
+    const firstPhones = first.phones ?? [];
+    const secondPhones = second.phones ?? [];
+
     // renders 2 agencies
     expect(bodyRows).toHaveLength(2);
-    // check 1st row content
     // name
-    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(testAgencies[0].name);
+    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent(first.name);
     // email
-    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent(
-      testAgencies[0].email ?? '',
-    );
+    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent(first.email ?? '');
     // phones
     expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent(
-      testAgencies[0].phones.length > 0 ? testAgencies[0].phones[0].number : '',
+      firstPhones.length > 0 ? firstPhones[0].number : '',
     );
     // country
     expect(within(bodyRows[0]).getAllByRole('cell')[3]).toHaveTextContent(
-      testAgencies[0].country?.name ?? '',
+      first.country?.name ?? '',
     );
-    // check 2nd row content
-    // name
-    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(testAgencies[1].name);
-    // email
-    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent(
-      testAgencies[1].email ?? '',
-    );
-    // phones
+
+    // 2ª fila
+    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent(second.name);
+    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent(second.email ?? '');
     expect(within(bodyRows[1]).getAllByRole('cell')[2].innerHTML).toContain(
-      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[0].number : '',
+      secondPhones.length > 0 ? secondPhones[0].number : '',
     );
     expect(within(bodyRows[1]).getAllByRole('cell')[2].innerHTML).toContain(
-      testAgencies[1].phones.length > 0 ? testAgencies[1].phones[1].number : '',
+      secondPhones.length > 1 ? secondPhones[1].number : '',
     );
-    // country
     expect(within(bodyRows[1]).getAllByRole('cell')[3]).toHaveTextContent(
-      testAgencies[1].country?.name ?? '',
+      second.country?.name ?? '',
     );
   });
 

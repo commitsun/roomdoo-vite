@@ -95,31 +95,8 @@
                 optionLabel="value.zip"
                 :placeholder="t('contacts.zipCodePlaceholder')"
                 @complete="fetchAddressByZip($event)"
-                @update:modelValue="
-                  (val: { value: { zip: string } } | string) => {
-                    const zip =
-                      typeof val === 'object' && val !== null && 'value' in val
-                        ? val.value.zip
-                        : val;
-                    $emit('update:billingAddress', { ...billingAddress, zipCode: zip });
-                  }
-                "
-                @optionSelect="
-                  (e: { value: { value: Address } }) => {
-                    const address: Address = e?.value?.value;
-                    billingAddress.zipCode = address.zip;
-                    billingAddress.city = address.city;
-                    billingAddress.country = address.country;
-                    billingAddress.state = address.state;
-                    $emit('update:billingAddress', {
-                      ...billingAddress,
-                      zipCode: address.zip,
-                      city: address.city,
-                      country: address.country,
-                      state: address.state,
-                    });
-                  }
-                "
+                @update:modelValue="handleBillingAddressZipUpdate"
+                @optionSelect="handleBillingAddressZipOptionSelect"
               >
                 <template #option="{ option }">
                   <div>{{ option.label }}</div>
@@ -253,25 +230,8 @@
             optionLabel="value.zip"
             :placeholder="t('contacts.zipCodePlaceholder')"
             @complete="fetchAddressByZip($event)"
-            @update:modelValue="
-              (val: { value: { zip: string } } | string) => {
-                const zip =
-                  typeof val === 'object' && val !== null && 'value' in val ? val.value.zip : val;
-                $emit('update:modelValue', { ...modelValue, zipCode: zip });
-              }
-            "
-            @optionSelect="
-              (e: { value: { value: Address } }) => {
-                const address: Address = e?.value?.value;
-                $emit('update:modelValue', {
-                  ...modelValue,
-                  zipCode: address.zip,
-                  city: address.city,
-                  country: address.country,
-                  state: address.state,
-                });
-              }
-            "
+            @update:modelValue="handleModelZipUpdate"
+            @optionSelect="handleModelZipOptionSelect"
           >
             <template #option="{ option }">
               <div>{{ option.label }}</div>
@@ -402,7 +362,15 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:modelValue', 'update:billingAddress', 'updateBillingAddressMode'],
+  emits: [
+    'update:modelValue',
+    'update:billingAddress',
+    'updateBillingAddressMode',
+    'update:billingAddressZip',
+    'update:billingAddressZipOptionSelect',
+    'update:modelZip',
+    'update:modelZipOptionSelect',
+  ],
 
   setup(props, context) {
     const { t } = useI18n();
@@ -491,6 +459,49 @@ export default defineComponent({
       }
     };
 
+    const handleBillingAddressZipUpdate = (val: { value: { zip: string } } | string): void => {
+      const zip =
+        typeof val === 'object' && val !== null && 'value' in val ? val.value.zip : (val as string);
+
+      billingAddress.zipCode = zip;
+      context.emit('update:billingAddress', { ...billingAddress, zipCode: zip });
+    };
+
+    const handleBillingAddressZipOptionSelect = (e: { value: { value: Address } }): void => {
+      const address: Address = e.value.value;
+
+      billingAddress.zipCode = address.zip;
+      billingAddress.city = address.city;
+      billingAddress.country = address.country;
+      billingAddress.state = address.state;
+
+      context.emit('update:billingAddress', {
+        ...billingAddress,
+        zipCode: address.zip,
+        city: address.city,
+        country: address.country,
+        state: address.state,
+      });
+    };
+
+    const handleModelZipUpdate = (val: { value: { zip: string } } | string): void => {
+      const zip =
+        typeof val === 'object' && val !== null && 'value' in val ? val.value.zip : (val as string);
+
+      context.emit('update:modelValue', { ...props.modelValue, zipCode: zip });
+    };
+
+    const handleModelZipOptionSelect = (e: { value: { value: Address } }): void => {
+      const address: Address = e.value.value;
+
+      context.emit('update:modelValue', {
+        ...props.modelValue,
+        zipCode: address.zip,
+        city: address.city,
+        country: address.country,
+        state: address.state,
+      });
+    };
     watch(billingAddressMode, (newMode) => {
       if (newMode === 'residence') {
         context.emit('updateBillingAddressMode', 'residence');
@@ -555,6 +566,10 @@ export default defineComponent({
       countryStates,
       addressItems,
       fetchAddressByZip,
+      handleBillingAddressZipUpdate,
+      handleBillingAddressZipOptionSelect,
+      handleModelZipUpdate,
+      handleModelZipOptionSelect,
       t,
     };
   },

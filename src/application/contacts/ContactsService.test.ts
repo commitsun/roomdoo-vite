@@ -184,12 +184,14 @@ describe('ContactsService.fetchGuests', () => {
           name: 'John',
           identificationDocuments: [],
           lastReservation: { id: 1, name: 'Res 1' },
+          lastReservationDate: new Date('2024-06-15'),
         },
         {
           id: 11,
           name: 'Jane',
           identificationDocuments: [],
           lastReservation: { id: 2, name: 'Res 2' },
+          lastReservationDate: new Date('2024-06-20'),
         },
       ],
     };

@@ -34,13 +34,13 @@ describe('useAppDialog', () => {
     dateNowSpy.mockRestore();
   });
 
-  it('open() calls dialog.open with component checked, mixes DEFAULT_PROPS with props and passes data', () => {
-    const { open } = useAppDialog();
+  it('openDialog() calls dialog.open with component checked, mixes DEFAULT_PROPS with props and passes data', () => {
+    const { openDialog } = useAppDialog();
 
     const Comp = { name: 'AnyComponent' };
     const onCloseSpy = vi.fn();
 
-    const result = open(Comp, {
+    const result = openDialog(Comp, {
       props: { modal: false, customProp: 1 },
       data: { foo: 'baz' },
       onClose: onCloseSpy,
@@ -76,20 +76,20 @@ describe('useAppDialog', () => {
     expect(unRegisterDynamicDialogSpy).toHaveBeenCalledWith(123456789);
   });
 
-  it('open() without onClose: it does not fail and deregisters in the wrapper', () => {
-    const { open } = useAppDialog();
+  it('openDialog() without onClose: it does not fail and deregisters in the wrapper', () => {
+    const { openDialog } = useAppDialog();
 
-    open({ name: 'C' }, { props: { draggable: true } });
+    openDialog({ name: 'C' }, { props: { draggable: true } });
     const [, opts] = dialogOpenSpy.mock.calls[0];
 
     expect(() => opts.onClose('evt')).not.toThrow();
     expect(unRegisterDynamicDialogSpy).toHaveBeenCalledWith(123456789);
   });
 
-  it('open() maintains DEFAULT_PROPS when no overrides are passed', () => {
-    const { open } = useAppDialog();
+  it('openDialog() maintains DEFAULT_PROPS when no overrides are passed', () => {
+    const { openDialog } = useAppDialog();
 
-    open({ name: 'C' });
+    openDialog({ name: 'C' });
     const [, opts] = dialogOpenSpy.mock.calls[0];
 
     expect(opts.props).toMatchObject({
