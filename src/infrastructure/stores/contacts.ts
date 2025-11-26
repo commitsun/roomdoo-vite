@@ -20,7 +20,6 @@ import type {
   ContactSchema,
   ContactDetail,
 } from '@/domain/entities/Contact';
-import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 
 const contactsRepository = new ContactsRepositoryImpl();
 
@@ -98,15 +97,9 @@ export const useContactsStore = defineStore('contacts', () => {
     contactSchema.value = result;
   };
 
-  const persistContactDocument = async (
-    contactId: number,
-    document: PersonalDocument,
-  ): Promise<void> => {
-    await contactsService.persistContactDocument(contactId, document);
-  };
-
-  const createContact = async (contact: Partial<ContactDetail>): Promise<void> => {
-    await contactsService.createContact(contact);
+  const createContact = async (contact: Partial<ContactDetail>): Promise<ContactDetail> => {
+    const result = await contactsService.createContact(contact);
+    return result;
   };
 
   const updateContactFields = async (

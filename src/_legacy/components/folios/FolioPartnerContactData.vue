@@ -2,7 +2,7 @@
   <div class="main-container">
     <AutocompleteComponent
       @textSearchChanges="getGuestFromVatDocNumber($event)"
-      @addNew="openPartnerForm(true)"
+      @addNew="openPartnerForm()"
       class="autocomplete"
       icon="search"
       v-model="selectedPartnerId"
@@ -86,12 +86,16 @@ import { computed, defineComponent, markRaw, onMounted, ref, watch, type Ref } f
 import { useStore } from '@/_legacy/store';
 import { usePartner } from '@/_legacy/utils/usePartner';
 import { usePlanning } from '@/_legacy/utils/usePlanning';
+import { useAppDialog } from '@/ui/composables/useAppDialog';
+import { useI18n } from 'vue-i18n';
+import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { useUIStore } from '@/infrastructure/stores/ui';
+import { useContactsStore } from '@/infrastructure/stores/contacts';
 
 import AutocompleteComponent from '@/_legacy/components/roomdooComponents/AutocompleteComponent.vue';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import Button from 'primevue/button';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
 import { dialogService } from '@/_legacy/services/DialogService';
 export default defineComponent({
   components: {
@@ -99,9 +103,14 @@ export default defineComponent({
     InputText,
     AppSelect: Select,
     AppButton: Button,
+    ContactDetail,
   },
   setup(props, context) {
     const store = useStore();
+    const uiStore = useUIStore();
+    const contactsStore = useContactsStore();
+    const { openDialog } = useAppDialog();
+    const { t } = useI18n();
     const { fetchPartners } = usePartner();
     const { refreshPlanning } = usePlanning();
     const selectedPartnerId = ref(0);
@@ -138,14 +147,24 @@ export default defineComponent({
       }
     };
 
-    const openPartnerForm = async (isNew?: boolean) => {
-      await store.dispatch('partners/removePartner');
-      await store.dispatch('countryStates/removeCountryStates');
-      dialogService.open({
-        header: isNew ? 'Nuevo cliente' : 'Editar cliente',
-        content: markRaw(PartnerForm),
-        closable: true,
-      });
+    const openPartnerForm = async () => {
+      uiStore.startLoading();
+      try {
+        await contactsStore.fetchContactSchema();
+        openDialog(ContactDetail, {
+          props: { header: t('contacts.new') },
+          onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
+            if (data?.refresh === true || data?.action === 'saved') {
+              await store.dispatch('folios/fetchCurrentFolio', currentFolio.value?.id);
+            }
+          },
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      } finally {
+        uiStore.stopLoading();
+      }
     };
 
     const savePartner = async () => {

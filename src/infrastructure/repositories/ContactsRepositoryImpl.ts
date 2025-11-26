@@ -157,6 +157,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
         parseInt(raw.lastReservationDate.split('-')[1]) - 1,
         parseInt(raw.lastReservationDate.split('-')[2]),
       ),
+      lastReservation: raw.lastReservation ?? { id: 0, name: '' },
     }));
 
     return { ...data, items: guests };
@@ -284,7 +285,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     ) as Partial<ContactDetail>;
   };
 
-  async createContact(contact: Partial<ContactDetail>): Promise<void> {
+  async createContact(contact: Partial<ContactDetail>): Promise<ContactDetail> {
     const payload = this.normalizeContactPayload(contact);
     if (payload.documents) {
       delete payload.documents;
