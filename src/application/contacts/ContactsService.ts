@@ -70,8 +70,9 @@ export class ContactsService {
     const schema = await this.contactsRepository.fetchContactSchema();
     return schema;
   }
-  async createContact(contact: Partial<ContactDetail>): Promise<void> {
-    await this.contactsRepository.createContact(contact);
+  async createContact(contact: Partial<ContactDetail>): Promise<ContactDetail> {
+    const createdContact = await this.contactsRepository.createContact(contact);
+    return createdContact;
   }
   async updateContactFields(
     contactId: number,

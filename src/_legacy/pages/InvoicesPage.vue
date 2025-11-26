@@ -241,7 +241,6 @@ import ListComponent from '@/_legacy/components/roomdooComponents/ListComponent.
 import CheckboxComponent from '@/_legacy/components/roomdooComponents/CheckboxComponent.vue';
 import CustomButton from '@/_legacy/components/roomdooComponents/CustomButton.vue';
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
-import PartnerForm from '@/_legacy/components/partners/PartnerForm.vue';
 import InvoiceChanges from '@/_legacy/components/invoices/InvoiceChanges.vue';
 
 import { usePartner } from '@/_legacy/utils/usePartner';
@@ -261,7 +260,6 @@ export default defineComponent({
     CustomButton,
     CustomIcon,
     CheckboxComponent,
-    PartnerForm,
   },
   emits: ['openLeftDrawer'],
   setup(props, context) {
@@ -987,7 +985,6 @@ export default defineComponent({
       getGuestFromVatDocNumber,
       openPartnerDialog,
       addMailAddressToMails,
-      PartnerForm,
       addMailToPartner,
       openMailModal,
       invalidAddress,
