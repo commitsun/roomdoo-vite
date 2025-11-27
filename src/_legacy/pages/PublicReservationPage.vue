@@ -59,14 +59,16 @@
     </div>
     <PrecheckinFooter />
   </div>
-  <div class="checkin-flow-overlay" v-if="isCheckinFlowStepperOpen" />
-  <Transition name="checkin-flow-transition">
-    <PublicCheckinFlow
-      v-if="isCheckinFlowStepperOpen"
-      @closeCheckinFlow="closeCheckinFlow()"
-      :reservationIndex="0"
-    />
-  </Transition>
+  <Teleport to="body">
+    <div class="checkin-flow-overlay" v-if="isCheckinFlowStepperOpen" />
+    <Transition name="checkin-flow-transition">
+      <PublicCheckinFlow
+        v-if="isCheckinFlowStepperOpen"
+        @closeCheckinFlow="closeCheckinFlow()"
+        :reservationIndex="0"
+      />
+    </Transition>
+  </Teleport>
 </template>
 <script lang="ts">
 import { defineComponent, computed, onBeforeMount, ref } from 'vue';
@@ -184,7 +186,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 99;
+  z-index: 1002;
 }
 
 @media (min-width: 768px) {

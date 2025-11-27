@@ -206,13 +206,15 @@
           />
         </div>
       </div>
-      <div class="checkin-flow-overlay" v-if="isCheckinFlowStepperOpen" />
-      <Transition name="checkin-flow-transition">
-        <PrivateCheckinFlow
-          @closeCheckinFlow="closeCheckinFlow()"
-          v-if="isCheckinFlowStepperOpen"
-        />
-      </Transition>
+      <Teleport to="body">
+        <div class="checkin-flow-overlay" v-if="isCheckinFlowStepperOpen" />
+        <Transition name="checkin-flow-transition">
+          <PrivateCheckinFlow
+            @closeCheckinFlow="closeCheckinFlow()"
+            v-if="isCheckinFlowStepperOpen"
+          />
+        </Transition>
+      </Teleport>
     </div>
   </div>
 </template>
@@ -1296,7 +1298,7 @@ export default defineComponent({
   height: 100%;
   background-color: #000000;
   opacity: 0.1;
-  z-index: 99;
+  z-index: 1002;
 }
 .accordion-transition-enter-active,
 .accordion-transition-leave-active {
