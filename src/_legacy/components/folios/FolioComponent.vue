@@ -549,7 +549,8 @@ export default defineComponent({
       () =>
         `${window.location.origin}/${currentFolio.value?.id ?? 0}/precheckin/${
           currentFolio.value?.accessToken ?? ''
-        }/${i18n.global.locale.value}`,
+        }/${i18n.global.locale.value.substring(0, 2)}
+        `
     );
 
     const computedFolioClass = computed(() => {
