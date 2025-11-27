@@ -1,5 +1,5 @@
 <template>
-  <div class="login-layout-container">
+  <div class="login-layout-container" v-if="instance && instanceImage">
     <div
       v-if="instance"
       class="image-container"
@@ -78,7 +78,17 @@ onMounted(async () => {
   try {
     uiStore.startLoading();
     await instanceStore.fetchInstance();
-    instanceImage.value = instanceStore.instance?.image;
+    const url = instanceStore.instance?.image;
+
+    if (url !== undefined) {
+      await new Promise<void>((resolve) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = (): void => resolve();
+        img.onerror = (): void => resolve();
+      });
+      instanceImage.value = url;
+    }
   } catch {
     await router.push({ name: 'instance-not-found' });
   } finally {
@@ -203,16 +213,7 @@ onMounted(async () => {
 @media (min-width: 1024px) {
   .login-layout-container {
     .image-container {
-      position: relative;
-      display: flex;
       width: 33.3%;
-      height: 100%;
-      // background: linear-gradient(to bottom left, #2a0a58, #081b2b, #0e96c8);
-      background: linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%)
-        lightgray -154332.494px -794.574px / 44097.695% 9952.168% no-repeat;
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: cover;
       &::before {
         content: '';
         position: absolute;
