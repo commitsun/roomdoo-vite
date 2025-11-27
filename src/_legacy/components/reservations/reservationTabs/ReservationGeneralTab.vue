@@ -189,14 +189,16 @@
   </div>
 
   <!-- CHECKIN FLOW -->
-  <Transition name="checkin-flow-transition">
-    <div class="checkin-flow-overlay" v-if="isCheckinModalOpen">
-      <PrivateCheckinFlow
-        @closeCheckinFlow="$emit('setTabValue', 'guests')"
-        v-if="isCheckinModalOpen"
-      />
-    </div>
-  </Transition>
+   <Teleport to="body">
+     <Transition name="checkin-flow-transition">
+       <div class="checkin-flow-overlay" v-if="isCheckinModalOpen">
+         <PrivateCheckinFlow
+           @closeCheckinFlow="$emit('setTabValue', 'guests')"
+           v-if="isCheckinModalOpen"
+         />
+       </div>
+     </Transition>
+   </Teleport>
 </template>
 
 <script lang="ts">
@@ -932,7 +934,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 99;
+  z-index: 1002;
 }
 @media (min-width: 1024px) {
   .data-reservation {
