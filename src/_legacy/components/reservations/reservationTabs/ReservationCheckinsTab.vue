@@ -165,10 +165,12 @@
       />
     </div>
   </div>
-  <div class="checkin-flow-overlay" v-if="isCheckinFlowStepperOpen" />
-  <Transition name="checkin-flow-transition">
-    <PrivateCheckinFlow @closeCheckinFlow="closeCheckinFlow()" v-if="isCheckinFlowStepperOpen" />
-  </Transition>
+  <Teleport to="body">
+    <div class="checkin-flow-overlay" v-if="isCheckinFlowStepperOpen" />
+    <Transition name="checkin-flow-transition">
+      <PrivateCheckinFlow @closeCheckinFlow="closeCheckinFlow()" v-if="isCheckinFlowStepperOpen" />
+    </Transition>
+  </Teleport>
 </template>
 <script lang="ts">
 import { defineComponent, computed, onMounted, ref, type Ref, markRaw } from 'vue';
@@ -1097,7 +1099,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 99;
+  z-index: 1002;
 }
 .accordion-transition-enter-active,
 .accordion-transition-leave-active {

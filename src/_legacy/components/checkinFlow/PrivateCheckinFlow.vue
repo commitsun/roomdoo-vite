@@ -1438,7 +1438,7 @@ $heightGradients: 80px;
   height: 100%;
   min-width: 320px;
   background-color: #fff;
-  z-index: 100;
+  z-index: 1003;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.49);
 
   .stepper-wrap {
