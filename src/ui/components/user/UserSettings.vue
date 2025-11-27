@@ -23,12 +23,7 @@
         <TabPanel value="0">
           <div class="user__settings--row">
             <Avatar
-              :label="
-                !imageUrl
-                  ? (user?.firstName?.charAt(0)?.toUpperCase() ?? '') +
-                    (user?.firstName?.charAt(1)?.toUpperCase() ?? '')
-                  : ''
-              "
+              :label="!imageUrl ? labelAvatar : ''"
               shape="circle"
               :image="imageUrl ? imageUrl : ''"
               style="
@@ -409,6 +404,20 @@ const pendingTab = ref<'0' | '1' | null>(null);
 const locking = ref(false);
 
 const user = computed(() => userStore.user);
+const labelAvatar = computed(() => {
+  const userName =
+    firstName.value +
+    ' ' +
+    lastName.value +
+    ' ' +
+    (secondLastName.value !== null ? ' ' + secondLastName.value : '');
+  return userName
+    .trim()
+    .split(' ')
+    .map((n) => n.charAt(0).toUpperCase())
+    .join('')
+    .substring(0, 2);
+});
 
 const availableLocales = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
 const showLastName2 = computed(() => userStore.userSchemas?.includes('lastname2'));
@@ -590,7 +599,20 @@ const onTabClick = (target: '0' | '1', ev: MouseEvent): void => {
           });
       },
       reject: () => {
-        pendingTab.value = null;
+        pendingTab.value = '1';
+        imageUrl.value = getSafeString(user.value?.avatar);
+        firstName.value = getSafeString(user.value?.firstName);
+        lastName.value = getSafeString(user.value?.lastName);
+        secondLastName.value = getSafeString(user.value?.lastName2);
+        phone.value = getSafeString(user.value?.phone);
+        email.value = getSafeString(user.value?.email);
+        if (typeof user.value?.lang === 'string' && user.value.lang.trim() !== '') {
+          selectedLocale.value = user.value.lang.replace('_', '-');
+        } else {
+          selectedLocale.value = i18n.global.locale.value;
+        }
+        activeTab.value = '1';
+        pendingTab.value = '1';
         locking.value = false;
       },
       onHide: () => {
