@@ -653,6 +653,8 @@ export default defineComponent({
   .contact-detail-accordion {
     height: calc(100% - 56px - 65px - 16px);
     overflow-y: auto;
+    margin-right: -1.5rem;
+    padding-right: 1.5rem;
   }
   .contact-detail-tabs {
     display: none;
@@ -689,18 +691,18 @@ export default defineComponent({
     .contact-type {
       justify-content: flex-start;
     }
+
     .contact-detail-accordion {
       display: none;
     }
+
     .contact-detail-tabs {
-      height: calc(100% - 56px - 65px);
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       display: block;
-    }
-    .footer {
-      .all-errors {
-        font-size: 14px;
-      }
+      padding-right: 1.5rem;
+      margin-right: -1rem;
     }
   }
 }
