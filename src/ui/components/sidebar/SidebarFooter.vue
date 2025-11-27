@@ -120,8 +120,8 @@ export default defineComponent({
       },
     ]);
 
-    const toggleUserMenu = (event: unknown): void => {
-      if (!props.isOpen) {
+    const toggleUserMenu = (event: MouseEvent): void => {
+      if (!props.isOpen || refUserMenu.value === null) {
         return;
       }
       refUserMenu.value.toggle(event);
@@ -130,7 +130,7 @@ export default defineComponent({
     watch(
       () => props.isOpen,
       (newIsOpen) => {
-        if (!newIsOpen) {
+        if (!newIsOpen && refUserMenu.value !== null) {
           refUserMenu.value.hide();
         }
       },
