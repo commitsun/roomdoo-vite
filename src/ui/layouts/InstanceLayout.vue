@@ -1,5 +1,5 @@
 <template>
-  <div class="login-layout-container" v-if="instance && instanceImage">
+  <div class="login-layout-container" v-if="instance">
     <div
       v-if="instance"
       class="image-container"
