@@ -1,7 +1,6 @@
 <template>
   <div class="table-main-content">
     <DataTable
-      v-show="!isLoading"
       v-model:first="firstRecord"
       :value="guests"
       scrollable
@@ -25,7 +24,6 @@
       @filter="handleFilterChange"
       @sort="handleSortChange"
       @rowClick="openContactDetail($event.data.id)"
-      :showHeaders="numTotalRecords > 0"
       :pt="{
         thead: { style: { zIndex: 5, backgroundColor: 'red' } },
         headerRow: { style: { zIndex: 5 } },
@@ -58,7 +56,7 @@
       }"
     >
       <!-- header -->
-      <template #header v-if="numTotalRecords > 0">
+      <template #header>
         <div class="table-header lime-bg">
           <IconField>
             <InputIcon class="pi pi-search" />
