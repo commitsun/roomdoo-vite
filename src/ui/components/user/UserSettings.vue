@@ -34,6 +34,11 @@
                 min-width: 90px;
                 font-size: 35px;
               "
+              :pt="{
+                image: {
+                  style: 'object-fit: cover; width: 100%; height: 100%;',
+                },
+              }"
             />
             <div>
               <FileUpload
