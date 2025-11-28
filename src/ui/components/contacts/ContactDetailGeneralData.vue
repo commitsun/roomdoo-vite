@@ -481,7 +481,7 @@ export default defineComponent({
     const addressStore = useAddressStore();
     const saleChannelsStore = useSaleChannelsStore();
     const uiStore = useUIStore();
-    const textMessageStore = useTextMessagesStore();
+    const useTextMessageStore = useTextMessagesStore();
     const phoneNumber = ref('');
     const mobileNumber = ref('');
     const countryStates = ref<CountryState[]>([]);
@@ -547,7 +547,7 @@ export default defineComponent({
             addressItems.value = [];
           }
         } catch (error) {
-          textMessageStore.addTextMessage(
+          useTextMessageStore.addTextMessage(
             t('error.somethingWentWrong'),
             error instanceof Error ? error.message : 'Unknown error',
           );
@@ -593,7 +593,6 @@ export default defineComponent({
     watch(
       () => props.modelValue.residenceCountry,
       async () => {
-        uiStore.startLoading();
         try {
           if (props.modelValue.residenceCountry) {
             countryStates.value = await countryStatesStore.fetchCountryStatesByCountryId(
@@ -615,12 +614,10 @@ export default defineComponent({
             }
           }
         } catch (error) {
-          textMessageStore.addTextMessage(
+          useTextMessageStore.addTextMessage(
             t('error.somethingWentWrong'),
             error instanceof Error ? error.message : 'Unknown error',
           );
-        } finally {
-          uiStore.stopLoading();
         }
       },
       { immediate: true, deep: true },

@@ -496,9 +496,7 @@ describe('ContactDetailBilling', () => {
     model.value = objectPayload!;
     await rerender();
 
-    expect(uiStoreMock.startLoading).toHaveBeenCalled();
     expect(countryStatesStoreMock.fetchCountryStatesByCountryId).toHaveBeenCalledWith(34);
-    expect(uiStoreMock.stopLoading).toHaveBeenCalled();
   });
 
   it('other mode: AutoComplete complete + optionSelect updates billingAddress', async () => {

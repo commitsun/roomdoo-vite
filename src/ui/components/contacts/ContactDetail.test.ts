@@ -557,7 +557,6 @@ describe('ContactDetailDialog', () => {
     await waitFor(() => expect(fetches.fetchPricelists).toHaveBeenCalled());
     await waitFor(() => expect(fetches.fetchTags).toHaveBeenCalled());
 
-    await waitFor(() => expect(uiStoreMock.startLoading).toHaveBeenCalled());
     await waitFor(() => expect(uiStoreMock.stopLoading).toHaveBeenCalled());
   });
 

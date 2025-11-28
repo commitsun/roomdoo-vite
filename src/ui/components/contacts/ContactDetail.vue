@@ -300,7 +300,7 @@ export default defineComponent({
     const tagsStore = useTagsStore();
     const saleChannelsStore = useSaleChannelsStore();
     const uiStore = useUIStore();
-    const textMessageStore = useTextMessagesStore();
+    const useTextMessageStore = useTextMessagesStore();
     const isDesktop = useMediaQuery('(min-width: 1024px)');
     const { t } = useI18n();
 
@@ -527,7 +527,7 @@ export default defineComponent({
         }
         dialogRef?.value?.close({ action: 'saved' });
       } catch (error) {
-        textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
+        useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
       } finally {
         uiStore.stopLoading();
       }
@@ -622,7 +622,6 @@ export default defineComponent({
     );
 
     onBeforeMount(async () => {
-      uiStore.startLoading();
       contact.value = dialogRef?.value?.data.contact as ContactDetail | null;
       try {
         await Promise.all([
@@ -675,7 +674,9 @@ export default defineComponent({
           }
         }
       } catch (error) {
-        textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
+        if (error instanceof Error) {
+          useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
+        }
       } finally {
         uiStore.stopLoading();
       }
@@ -732,6 +733,8 @@ export default defineComponent({
   .contact-detail-accordion {
     height: calc(100% - 56px - 65px - 16px);
     overflow-y: auto;
+    margin-right: -1.5rem;
+    padding-right: 1.5rem;
   }
   .contact-detail-tabs {
     display: none;
@@ -772,9 +775,12 @@ export default defineComponent({
       display: none;
     }
     .contact-detail-tabs {
-      height: calc(100% - 56px - 65px);
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       display: block;
+      padding-right: 1.5rem;
+      margin-right: -1rem;
     }
     .footer {
       .all-errors {

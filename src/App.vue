@@ -54,11 +54,11 @@ export default defineComponent({
     const { remove: consumeNotification } = useNotificationsStore();
     const { removeTextMessage } = useTextMessagesStore();
     const notificationStore = useNotificationsStore();
-    const textMessageStore = useTextMessagesStore();
+    const useTextMessageStore = useTextMessagesStore();
     const uiStore = useUIStore();
 
     const notifications = computed(() => notificationStore.messages);
-    const textMessages = computed(() => textMessageStore.messages);
+    const textMessages = computed(() => useTextMessageStore.messages);
 
     const firstMessage = computed(() => textMessages.value[0] ?? null);
 
