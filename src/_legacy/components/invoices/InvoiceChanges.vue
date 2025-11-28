@@ -948,10 +948,7 @@ export default defineComponent({
       try{
         void store.dispatch('layout/showSpinner', true);
         if (partnerToAdd.value.fiscalIdNumber === '' && partnerToAdd.value.idNumbers && partnerToAdd.value.idNumbers?.length > 0) {
-          await fetch(
-            `/pmsApi/contacts/${partnerToAdd.value.id}/id-numbers/${partnerToAdd.value.idNumbers[0].id}/set-fiscal-number`,
-            { method: 'PUT' }
-          );
+          await contactsStore.updateFiscalNumber(partnerToAdd.value.id, partnerToAdd.value.idNumbers[0].id);
         }
         if (props.isRenderSaleLines) {
           const linesSend: FolioSaleLineInterface[] = [];

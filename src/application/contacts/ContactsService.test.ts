@@ -564,4 +564,16 @@ describe('ContactsService.updateContact', () => {
       ).rejects.toThrow(err);
     });
   });
+  describe('ContactsService.updateFiscalNumber', () => {
+    it('calls repository to update fiscal number', async () => {
+      contactsRepoMock.updateFiscalNumber = vi.fn().mockResolvedValue(undefined);
+      await expect(contactsService.updateFiscalNumber(1, 10)).resolves.toBeUndefined();
+      expect(contactsRepoMock.updateFiscalNumber).toHaveBeenCalledWith(1, 10);
+    });
+    it('propagates repository errors when updating fiscal number', async () => {
+      const err = new Error('boom-update-fiscal-number');
+      contactsRepoMock.updateFiscalNumber = vi.fn().mockRejectedValue(err);
+      await expect(contactsService.updateFiscalNumber(1, 10)).rejects.toThrow(err);
+    });
+  });
 });

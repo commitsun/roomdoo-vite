@@ -105,4 +105,7 @@ export class ContactsService {
     );
     return isDuplicate;
   }
+  async updateFiscalNumber(contactId: number, fiscalNumberId: number): Promise<void> {
+    await this.contactsRepository.updateFiscalNumber(contactId, fiscalNumberId);
+  }
 }

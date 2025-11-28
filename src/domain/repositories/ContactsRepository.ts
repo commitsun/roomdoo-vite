@@ -68,4 +68,5 @@ export interface ContactsRepository {
     fiscalDocumentNumber: string,
     countryId?: number,
   ): Promise<{ id: number; name: string } | null>;
+  updateFiscalNumber(contactId: number, fiscalNumberId: number): Promise<void>;
 }
