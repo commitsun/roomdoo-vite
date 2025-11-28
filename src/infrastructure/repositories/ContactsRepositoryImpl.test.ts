@@ -394,6 +394,8 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       lastname: 'Turing',
       name: 'Alan Turing',
       email: 'alan@math.com',
+      lang: '',
+      birthdate: null,
       residenceCountry: null as unknown as { id: number; name: string; code: string },
       documents: [
         {
@@ -543,5 +545,68 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       `contacts/${contactId}/id-numbers/1`,
       expect.objectContaining({ supportNumber: '111222' }),
     );
+  });
+  it('checkContactDuplicateByDocument should call GET /contacts/duplicate/id-numbers and return data', async () => {
+    const apiResponse = { id: 55, name: 'Existing Contact' };
+    vi.mocked(api.get).mockResolvedValue({ data: apiResponse });
+
+    const result = await repo.checkContactDuplicateByDocument(3, 'ABC123456', 33);
+
+    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
+
+    const [[url, cfg]] = vi.mocked(api.get).mock.calls;
+    expect(url).toBe('/contacts/duplicate/id-numbers');
+    expect(cfg).toBeDefined();
+    expect(cfg!.params).toBeInstanceOf(URLSearchParams);
+
+    const p = cfg!.params as URLSearchParams;
+    expect(p.get('category')).toBe('3');
+    expect(p.get('number')).toBe('ABC123456');
+    expect(p.get('country')).toBe('33');
+
+    expect(p.toString()).toBe('category=3&number=ABC123456&country=33');
+
+    expect(result).toBe(apiResponse);
+  });
+
+  it('checkContactDuplicateByDocument should propagate axios errors', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(repo.checkContactDuplicateByDocument(3, 'ABC123456', 33)).rejects.toThrow(err);
+  });
+
+  it('checkContactDuplicateByFiscalDocument calls GET and returns data', async () => {
+    const apiResponse = { id: 66, name: 'Existing Contact' };
+    vi.mocked(api.get).mockResolvedValue({ data: apiResponse });
+
+    const result = await repo.checkContactDuplicateByFiscalDocument('VAT', 'ESX12345678', 33);
+
+    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
+
+    const [[url, cfg]] = vi.mocked(api.get).mock.calls;
+    expect(url).toBe('/contacts/duplicate/fiscal-number');
+    expect(cfg).toBeDefined();
+    expect(cfg!.params).toBeInstanceOf(URLSearchParams);
+
+    const p = cfg!.params as URLSearchParams;
+    const sent = Object.fromEntries(p.entries());
+
+    const category = sent.category ?? sent.type ?? sent.documentType ?? sent.documentTypeName;
+
+    expect(category).toBe('VAT');
+    expect(sent.number).toBe('ESX12345678');
+    expect(sent.country).toBe('33');
+
+    expect(result).toBe(apiResponse);
+  });
+
+  it('checkContactDuplicateByFiscalDocument should propagate axios errors', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.get).mockRejectedValue(err);
+
+    await expect(
+      repo.checkContactDuplicateByFiscalDocument('VAT', 'ESX12345678', 33),
+    ).rejects.toThrow(err);
   });
 });

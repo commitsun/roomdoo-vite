@@ -18,7 +18,10 @@ const DocumentInputSchema = z
     }
 
     const cc = (doc.countryCode ?? '').trim().toUpperCase();
-    const dn = (doc.documentTypeName ?? '').trim().toLowerCase();
+    let dn = (doc.documentTypeName ?? '').trim().toLowerCase();
+    if (cc === 'ES' && dn === 'national identification document') {
+      dn = 'nif';
+    }
 
     const validator = S[cc]?.[dn];
     if (validator && typeof validator.validate === 'function') {
@@ -48,6 +51,39 @@ export const ContactSchema = z
         path: ['saleChannelId'],
       });
     }
+
+    const keyOf = (d: z.infer<typeof DocumentInputSchema>): string | null => {
+      const cc = (d.countryCode ?? '').trim().slice(0, 2).toUpperCase();
+      const dt = (d.documentTypeName ?? '').trim().toLowerCase();
+      const num = (d.number ?? '').trim().toUpperCase();
+      if (!cc || !dt || !num) {
+        return null;
+      }
+      return `${cc}::${dt}::${num}`;
+    };
+
+    const bucket = new Map<string, number[]>();
+    data.documents.forEach((doc, idx) => {
+      const k = keyOf(doc);
+      if (k === null) {
+        return;
+      }
+      const arr = bucket.get(k) ?? [];
+      arr.push(idx);
+      bucket.set(k, arr);
+    });
+
+    bucket.forEach((idxs) => {
+      if (idxs.length > 1) {
+        idxs.forEach((i) => {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'contacts.errors.duplicateDocument',
+            path: ['documents', i, 'number'],
+          });
+        });
+      }
+    });
   });
 
 export type ContactInput = z.infer<typeof ContactSchema>;

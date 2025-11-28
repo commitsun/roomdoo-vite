@@ -226,6 +226,17 @@
     "supportNumberPlaceholder": "Introduce el número de soporte",
     "fiscalDocumentNumberPlaceholder": "Introduce el número de documento fiscal",
     "internalNotesPlaceholder": "Escriba información adicional sobre el contacto",
+    "isDuplicated": "Este documento ya está registrado en {name}.",
+    "seeContact": "Ver contacto",
+    "confirmTitle": "Confirmar navegación",
+    "confirmMessage": "¿Deseas ver el contacto? Se perderán los cambios no guardados.",
+    "duplicateDocument": "No puedes guardar documentos duplicados.",
+    "fiscalDocumentType": {
+      "vat": "NIF/CIF",
+      "passport": "Pasaporte",
+      "residential_certificate": "Tarjeta de residencia",
+      "another_document": "Otro"
+    },
     "errors": {
       "nameRequired": "El nombre es obligatorio",
       "saleChannelRequiredForAgency": "El canal de venta es obligatorio para agencias",

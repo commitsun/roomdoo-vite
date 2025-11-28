@@ -254,7 +254,14 @@ export class ContactsRepositoryImpl implements ContactsRepository {
       if (!(v instanceof Date)) {
         return '';
       }
-      return (v as Date).toISOString().slice(0, 10);
+
+      const d = v as Date;
+
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
     };
 
     const FIELD_TRANSFORMS: Record<string, (v: unknown) => unknown> = {
@@ -360,5 +367,36 @@ export class ContactsRepositoryImpl implements ContactsRepository {
           .map((doc) => api.delete(`contacts/${contactId}/id-numbers/${doc.id}`)),
       );
     }
+  }
+  async checkContactDuplicateByDocument(
+    documentTypeId: number,
+    documentNumber: string,
+    countryId: number,
+  ): Promise<{ id: number; name: string } | null> {
+    const params = new URLSearchParams();
+    params.set('category', documentTypeId.toString());
+    params.set('number', documentNumber);
+    params.set('country', countryId.toString());
+
+    const url = '/contacts/duplicate/id-numbers';
+    const { data } = await api.get<{ id: number; name: string } | null>(url, { params });
+    return data;
+  }
+
+  async checkContactDuplicateByFiscalDocument(
+    fiscalDocumentType: string,
+    fiscalDocumentNumber: string,
+    countryId?: number,
+  ): Promise<{ id: number; name: string } | null> {
+    const params = new URLSearchParams();
+    params.set('type', fiscalDocumentType);
+    params.set('number', fiscalDocumentNumber);
+    if (countryId !== undefined) {
+      params.set('country', countryId.toString());
+    }
+
+    const url = '/contacts/duplicate/fiscal-number';
+    const { data } = await api.get<{ id: number; name: string } | null>(url, { params });
+    return data;
   }
 }

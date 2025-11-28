@@ -74,6 +74,7 @@
               :modelValue="contactForm"
               :errors="uiErrors.documents"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+              @changeContactForm="(id: number) => changeContactForm(id)"
             />
           </AccordionContent>
         </AccordionPanel>
@@ -151,6 +152,7 @@
               :modelValue="contactForm"
               :errors="uiErrors.documents"
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
+              @changeContactForm="(id: number) => changeContactForm(id)"
             />
           </TabPanel>
           <TabPanel value="2">
@@ -392,6 +394,15 @@ export default defineComponent({
     const mergeIntoForm = (v: ContactDetail): ContactDetail => Object.assign(contactForm, v);
 
     const clearHiddenFields = (): void => {
+      if (
+        contactType.value === 'person' &&
+        contactForm.name &&
+        contactForm.firstname === '' &&
+        contactForm.lastname === '' &&
+        contactForm.lastname2 === ''
+      ) {
+        contactForm.name = '';
+      }
       if (!isPerson.value) {
         Object.assign(contactForm, {
           lastname: '',
@@ -420,7 +431,6 @@ export default defineComponent({
           continue;
         }
         const m = path.match(/^documents(?:\[(\d+)\]|\.([0-9]+))\.(.+)$/);
-
         if (!m) {
           continue;
         }
@@ -448,6 +458,9 @@ export default defineComponent({
       uiErrors.documents = [];
     };
 
+    const normCode = (code?: string): string => (code ?? '').trim().slice(0, 2).toUpperCase();
+    const normDocType = (name?: string): string => (name ?? '').trim().toLowerCase();
+
     const buildPayloadToValidate = (): ContactInput => ({
       contactType: contactType.value,
       name: (
@@ -456,9 +469,9 @@ export default defineComponent({
       saleChannelId: contactForm.saleChannel?.id ?? null,
       documents: (contactForm.documents ?? []).map((d) => ({
         number: String(d?.name ?? '').trim(),
-        countryCode: d?.country?.code?.toUpperCase() ?? '',
-        documentTypeName: d?.category?.name?.toLowerCase() ?? '',
-        isValidable: d?.category?.isValidableDocument,
+        countryCode: normCode(d?.country?.code),
+        documentTypeName: normDocType(d?.category?.name),
+        isValidable: Boolean(d?.category?.isValidableDocument),
       })),
     });
 
@@ -496,17 +509,23 @@ export default defineComponent({
         contactForm.country = billingAddress.country;
         contactForm.state = billingAddress.state;
       }
+      if (
+        contactForm.firstname !== '' ||
+        contactForm.lastname !== '' ||
+        contactForm.lastname2 !== ''
+      ) {
+        contactForm.name = `${contactForm.firstname ?? ''} ${contactForm.lastname ?? ''} ${
+          contactForm.lastname2 ?? ''
+        }`.trim();
+      }
       uiStore.startLoading();
       try {
-        let contactId = 0;
         if (contact.value) {
           await contactsStore.updateContactFields(contact.value.id, contact.value, contactForm);
-          contactId = contact.value.id;
         } else {
-          const createdContact = await contactsStore.createContact(contactForm);
-          contactId = createdContact.id;
+          await contactsStore.createContact(contactForm);
         }
-        dialogRef?.value?.close({ action: 'saved', contactId });
+        dialogRef?.value?.close({ action: 'saved' });
       } catch (error) {
         textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
       } finally {
@@ -516,6 +535,56 @@ export default defineComponent({
 
     const handleCancel = (): void => {
       dialogRef?.value?.close({ action: 'cancel' });
+    };
+
+    const changeContactForm = async (id: number): Promise<void> => {
+      const contactFetched = await contactsStore.fetchContactById(id);
+      if (contactFetched) {
+        contactType.value = (contactFetched.contactType ?? 'person') as typeof contactType.value;
+        Object.assign(contactForm, contactFetched);
+        if (contact.value) {
+          Object.assign(contact.value, contactFetched);
+        } else {
+          contact.value = contactFetched;
+        }
+
+        if (contactFetched.birthdate) {
+          contactForm.birthdate = new Date(contactFetched.birthdate);
+          contact.value.birthdate = new Date(contactFetched.birthdate);
+        }
+        if (contactFetched.lang !== undefined) {
+          contactForm.lang = contactFetched.lang.replace('_', '-');
+        }
+        if (
+          contactFetched.street === contactFetched.residenceStreet &&
+          contactFetched.zipCode === contactFetched.residenceZip &&
+          contactFetched.city === contactFetched.residenceCity &&
+          contactFetched.country?.id === contactFetched.residenceCountry?.id &&
+          contactFetched.state?.id === contactFetched.residenceState?.id
+        ) {
+          billingAddressMode.value = 'residence';
+        } else {
+          billingAddressMode.value = 'other';
+          Object.assign(billingAddress, {
+            street: contactFetched.street,
+            zipCode: contactFetched.zipCode,
+            city: contactFetched.city,
+            country: contactFetched.country,
+            state: contactFetched.state,
+          });
+        }
+        if (contact.value.documents) {
+          contact.value.documents.forEach((doc) => {
+            if (doc.country) {
+              doc.country.code = countriesStore.countries.find((c) => c.id === doc.country?.id)
+                ?.code as string;
+            }
+          });
+          contactForm.documents = contact.value.documents;
+        }
+        activeTab.value = '0';
+        activePanel.value = '0';
+      }
     };
 
     watch(contactType, () => {
@@ -595,6 +664,15 @@ export default defineComponent({
               state: contact.value.state,
             });
           }
+          if (contact.value.documents) {
+            contact.value.documents.forEach((doc) => {
+              if (doc.country) {
+                doc.country.code = countriesStore.countries.find((c) => c.id === doc.country?.id)
+                  ?.code as string;
+              }
+            });
+            contactForm.documents = contact.value.documents;
+          }
         }
       } catch (error) {
         textMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
@@ -620,6 +698,7 @@ export default defineComponent({
       handleCancel,
       handleSave,
       mergeIntoForm,
+      changeContactForm,
     };
   },
 });
@@ -653,8 +732,6 @@ export default defineComponent({
   .contact-detail-accordion {
     height: calc(100% - 56px - 65px - 16px);
     overflow-y: auto;
-    margin-right: -1.5rem;
-    padding-right: 1.5rem;
   }
   .contact-detail-tabs {
     display: none;
@@ -691,18 +768,18 @@ export default defineComponent({
     .contact-type {
       justify-content: flex-start;
     }
-
     .contact-detail-accordion {
       display: none;
     }
-
     .contact-detail-tabs {
-      flex: 1;
-      min-height: 0;
+      height: calc(100% - 56px - 65px);
       overflow-y: auto;
       display: block;
-      padding-right: 1.5rem;
-      margin-right: -1rem;
+    }
+    .footer {
+      .all-errors {
+        font-size: 14px;
+      }
     }
   }
 }
