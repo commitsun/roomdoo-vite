@@ -189,7 +189,7 @@ export default defineComponent({
         if (error instanceof UnauthorizedError) {
           errorMessage.value = t('resetPassword.invalidToken');
         } else {
-          errorMessage.value = t('error.unknownError');
+          errorMessage.value = (error as Error).message;
         }
       } finally {
         uiStore.stopLoading();

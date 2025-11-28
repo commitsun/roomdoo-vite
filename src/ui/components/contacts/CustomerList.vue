@@ -426,6 +426,7 @@ import { i18n } from '@/infrastructure/plugins/i18n';
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
+import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
@@ -462,6 +463,7 @@ export default defineComponent({
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
     const pmsPropertiesStore = usePmsPropertiesStore();
+    const useTextMessageStore = useTextMessagesStore();
     const currency = computed(
       () =>
         pmsPropertiesStore.pmsProperties.find(
@@ -703,9 +705,9 @@ export default defineComponent({
           },
         });
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      } finally {
+        if (error instanceof Error) {
+          useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
+        }
         uiStore.stopLoading();
       }
     };

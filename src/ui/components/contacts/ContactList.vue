@@ -434,6 +434,7 @@ import { FilterMatchMode } from '@primevue/core/api';
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
+import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { firstTwoInitials } from '@/ui/utils/strings';
@@ -468,6 +469,7 @@ export default defineComponent({
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
+    const useTextMessageStore = useTextMessagesStore();
 
     // translation
     const { t } = useI18n();
@@ -720,9 +722,9 @@ export default defineComponent({
           },
         });
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      } finally {
+        if (error instanceof Error) {
+          useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
+        }
         uiStore.stopLoading();
       }
     };

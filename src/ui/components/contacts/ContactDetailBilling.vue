@@ -395,7 +395,7 @@ export default defineComponent({
     const countryStatesStore = useCountryStatesStore();
     const documentTypesStore = useDocumentTypesStore();
     const contactsStore = useContactsStore();
-    const textMessageStore = useTextMessagesStore();
+    const useTextMessageStore = useTextMessagesStore();
     const addressStore = useAddressStore();
     const uiStore = useUIStore();
     const confirm = useConfirm();
@@ -458,10 +458,9 @@ export default defineComponent({
             addressItems.value = [];
           }
         } catch (error) {
-          textMessageStore.addTextMessage(
-            t('error.somethingWentWrong'),
-            error instanceof Error ? error.message : 'Unknown error',
-          );
+          if (error instanceof Error) {
+            useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
+          }
         } finally {
           uiStore.stopLoading();
         }
@@ -556,10 +555,9 @@ export default defineComponent({
           contactDuplicated.value = { id: dup.id, name: dup.name };
         }
       } catch (error) {
-        textMessageStore.addTextMessage(
-          t('error.somethingWentWrong'),
-          error instanceof Error ? error.message : 'Unknown error',
-        );
+        if (error instanceof Error) {
+          useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
+        }
       }
     };
 
@@ -587,7 +585,6 @@ export default defineComponent({
     watch(
       () => props.modelValue.country,
       async () => {
-        uiStore.startLoading();
         try {
           if (props.modelValue.country) {
             countryStates.value = await countryStatesStore.fetchCountryStatesByCountryId(
@@ -609,12 +606,9 @@ export default defineComponent({
             }
           }
         } catch (error) {
-          textMessageStore.addTextMessage(
-            t('error.somethingWentWrong'),
-            error instanceof Error ? error.message : 'Unknown error',
-          );
-        } finally {
-          uiStore.stopLoading();
+          if (error instanceof Error) {
+            useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
+          }
         }
       },
       { immediate: true, deep: true },

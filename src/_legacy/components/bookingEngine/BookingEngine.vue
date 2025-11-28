@@ -2333,7 +2333,6 @@ export default defineComponent({
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
-      } finally {
         uiStore.stopLoading();
       }
     };
