@@ -22,6 +22,11 @@
           shape="circle"
           class="avatar-primary"
           :image="user?.avatar"
+          :pt="{
+            image: {
+              style: 'object-fit: cover; width: 100%; height: 100%;',
+            },
+          }"
         />
         <Avatar
           v-else
