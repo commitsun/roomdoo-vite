@@ -81,4 +81,28 @@ export class ContactsService {
   ): Promise<void> {
     await this.contactsRepository.updateContactFields(contactId, original, updated);
   }
+  async checkContactDuplicateByDocument(
+    documentTypeId: number,
+    documentNumber: string,
+    countryId: number,
+  ): Promise<{ id: number; name: string } | null> {
+    const isDuplicate = await this.contactsRepository.checkContactDuplicateByDocument(
+      documentTypeId,
+      documentNumber,
+      countryId,
+    );
+    return isDuplicate;
+  }
+  async checkContactDuplicateByFiscalDocument(
+    fiscalDocumentType: string,
+    fiscalDocumentNumber: string,
+    countryId?: number,
+  ): Promise<{ id: number; name: string } | null> {
+    const isDuplicate = await this.contactsRepository.checkContactDuplicateByFiscalDocument(
+      fiscalDocumentType,
+      fiscalDocumentNumber,
+      countryId,
+    );
+    return isDuplicate;
+  }
 }

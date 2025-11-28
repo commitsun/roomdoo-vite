@@ -225,6 +225,17 @@
     "supportNumberPlaceholder": "Enter the support number",
     "fiscalDocumentNumberPlaceholder": "Enter the tax document number",
     "internalNotesPlaceholder": "Enter additional information about the contact...",
+    "isDuplicated": "This document is already registered in {name}.",
+    "seeContact": "See contact",
+    "confirmTitle": "Confirm navigation",
+    "confirmMessage": "Do you want to view the contact? Unsaved changes will be lost.",
+    "duplicateDocument": "You cannot save duplicate documents.",
+    "fiscalDocumentType": {
+      "vat": "VAT",
+      "passport": "Passport",
+      "residential_certificate": "Residence card",
+      "another_document": "Other"
+    },
     "errors": {
       "nameRequired": "Name is required",
       "saleChannelRequiredForAgency": "Sale channel is required for agencies",
