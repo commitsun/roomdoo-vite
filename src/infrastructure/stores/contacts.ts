@@ -136,6 +136,10 @@ export const useContactsStore = defineStore('contacts', () => {
     return result;
   };
 
+  const updateFiscalNumber = async (contactId: number, fiscalNumberId: number): Promise<void> => {
+    await contactsService.updateFiscalNumber(contactId, fiscalNumberId);
+  };
+
   return {
     contacts: readonly(contacts),
     customers: readonly(customers),
@@ -159,5 +163,6 @@ export const useContactsStore = defineStore('contacts', () => {
     updateContactFields,
     checkContactDuplicateByDocument,
     checkContactDuplicateByFiscalDocument,
+    updateFiscalNumber,
   };
 });
