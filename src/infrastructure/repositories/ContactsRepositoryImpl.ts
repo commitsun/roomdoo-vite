@@ -399,4 +399,8 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     const { data } = await api.get<{ id: number; name: string } | null>(url, { params });
     return data;
   }
+  async updateFiscalNumber(contactId: number, fiscalNumberId: number): Promise<void> {
+    const url = `/contacts/${contactId}/id-numbers/${fiscalNumberId}/set-fiscal-number`;
+    await api.put(url);
+  }
 }

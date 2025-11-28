@@ -7,6 +7,7 @@ vi.mock('@/infrastructure/http/axios', () => {
       get: vi.fn(),
       post: vi.fn(),
       patch: vi.fn(),
+      put: vi.fn(),
     },
   };
 });
@@ -608,5 +609,22 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     await expect(
       repo.checkContactDuplicateByFiscalDocument('VAT', 'ESX12345678', 33),
     ).rejects.toThrow(err);
+  });
+  it('updateFiscalNumber should call PUT set-fiscal-number', async () => {
+    vi.mocked(api.put).mockResolvedValue({ status: 200 });
+
+    await repo.updateFiscalNumber(123, 456);
+
+    expect(vi.mocked(api.put)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(api.put)).toHaveBeenCalledWith(
+      '/contacts/123/id-numbers/456/set-fiscal-number',
+    );
+  });
+
+  it('updateFiscalNumber should propagate axios errors', async () => {
+    const err = new Error('axios fail');
+    vi.mocked(api.put).mockRejectedValue(err);
+
+    await expect(repo.updateFiscalNumber(123, 456)).rejects.toThrow(err);
   });
 });
