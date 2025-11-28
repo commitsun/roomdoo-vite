@@ -386,7 +386,7 @@ const userStore = useUserStore();
 const instanceStore = useInstanceStore();
 const uiStore = useUIStore();
 const notificationStore = useNotificationsStore();
-const textMessageStore = useTextMessagesStore();
+const useTextMessageStore = useTextMessagesStore();
 
 const { t } = useI18n({ useScope: 'global' });
 
@@ -458,7 +458,7 @@ const handleUpdateUser = async (): Promise<boolean> => {
     uiStore.refreshView();
     return true;
   } catch {
-    textMessageStore.addTextMessage('Error', t('error.unknownError'));
+    useTextMessageStore.addTextMessage('Error', t('error.unknownError'));
     return false;
   } finally {
     uiStore.stopLoading();
@@ -494,10 +494,10 @@ const updateLogin = async (): Promise<void> => {
           })
           .catch((error) => {
             if (error instanceof BadRequestError) {
-              textMessageStore.addTextMessage('Error', t('userSettings.loginAlreadyInUse'));
+              useTextMessageStore.addTextMessage('Error', t('userSettings.loginAlreadyInUse'));
               return;
             } else {
-              textMessageStore.addTextMessage('Error', t('error.unknownError'));
+              useTextMessageStore.addTextMessage('Error', t('error.unknownError'));
             }
           })
           .finally(() => {
@@ -506,7 +506,7 @@ const updateLogin = async (): Promise<void> => {
       },
     });
   } else {
-    textMessageStore.addTextMessage('Error', t('userSettings.loginAlreadyInUse'));
+    useTextMessageStore.addTextMessage('Error', t('userSettings.loginAlreadyInUse'));
   }
 };
 
@@ -548,9 +548,12 @@ const handleChangePassword = async (): Promise<void> => {
           }
         } catch (error) {
           if (error instanceof UnauthorizedError) {
-            textMessageStore.addTextMessage('Error', t('userSettings.invalidPassword'));
+            useTextMessageStore.addTextMessage('Error', t('userSettings.invalidPassword'));
           } else {
-            textMessageStore.addTextMessage('Error', t('error.unknownError'));
+            useTextMessageStore.addTextMessage(
+              t('error.somethingWentWrong'),
+              (error as Error).message,
+            );
           }
         } finally {
           uiStore.stopLoading();

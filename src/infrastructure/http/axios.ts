@@ -103,23 +103,24 @@ api.interceptors.response.use(
         isRefreshing = false;
       }
     }
+    const errorDetail =
+      err.response?.data && typeof err.response.data === 'object' && 'detail' in err.response.data
+        ? (err.response.data as { detail?: string }).detail
+        : undefined;
+
     switch (err.response?.status) {
       case 400:
-        throw new BadRequestError();
+        throw new BadRequestError(errorDetail);
       case 401:
-        throw new UnauthorizedError();
+        throw new UnauthorizedError(errorDetail);
       case 500:
         useTextMessagesStore().addTextMessage(
           t('error.somethingWentWrong'),
           t('error.internalError'),
         );
-        throw new InternalServerError();
+        throw new InternalServerError(errorDetail);
       default:
-        useTextMessagesStore().addTextMessage(
-          t('error.somethingWentWrong'),
-          t('error.unknownError'),
-        );
-        throw new UnknownError();
+        throw new UnknownError(errorDetail);
     }
   },
 );

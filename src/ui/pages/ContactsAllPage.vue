@@ -94,6 +94,7 @@ import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useUIStore } from '@/infrastructure/stores/ui';
+import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 
 export default defineComponent({
   components: {
@@ -121,6 +122,7 @@ export default defineComponent({
     const uiStore = useUIStore();
     const userStore = useUserStore();
     const contactsStore = useContactsStore();
+    const useTextMessageStore = useTextMessagesStore();
     const activeTab: Ref<string> = ref('all');
     const numContacts = ref(0);
     const numCustomers = ref(0);
@@ -192,8 +194,9 @@ export default defineComponent({
           },
         });
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        if (error instanceof Error) {
+          useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
+        }
       } finally {
         uiStore.stopLoading();
       }
