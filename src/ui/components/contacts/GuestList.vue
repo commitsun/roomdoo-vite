@@ -23,16 +23,19 @@
       @page="handlePageChange"
       @filter="handleFilterChange"
       @sort="handleSortChange"
+      :loading="isLoading"
       @rowClick="openContactDetail($event.data.id)"
       :pt="{
         thead: { style: { zIndex: 5, backgroundColor: 'red' } },
         headerRow: { style: { zIndex: 5 } },
+        header: { style: { zIndex: 6 } },
         headerCell: {
           style: {
             zIndex: 5,
             position: 'sticky',
           },
         },
+        mask: { style: { zIndex: 6 } },
         table: { style: { height: numTotalRecords > 0 ? 'auto' : '100%' } },
         tbody: { style: { zIndex: 1, height: '100%' } },
         bodyRow: { style: { zIndex: 1 } },
@@ -638,7 +641,6 @@ export default defineComponent({
     const currentRequest = ref(0);
     const fetchNow = async (): Promise<void> => {
       const id = ++currentRequest.value;
-      uiStore.startLoading();
       isLoading.value = true;
       const inHouseOnly = inHouseSelection.value === 'inHouse' ? true : undefined;
       try {
@@ -678,7 +680,6 @@ export default defineComponent({
       } finally {
         if (id === currentRequest.value) {
           isLoading.value = false;
-          uiStore.stopLoading();
         }
       }
     };
