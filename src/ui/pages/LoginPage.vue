@@ -2,7 +2,7 @@
   <div class="login-container">
     <form>
       <div class="login-form-logo-header">
-        <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+        <img src="/logos/logo-text.svg" class="logo" alt="Roomdoo Logo" />
       </div>
       <div class="login-card">
         <div class="login-card__image" v-if="instanceImage">
@@ -10,7 +10,7 @@
         </div>
         <div class="login-card__content">
           <div class="login-form-header">
-            <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+            <img src="/logos/logo-text.svg" class="logo" alt="Roomdoo Logo" />
           </div>
 
           <div class="login-form-container">

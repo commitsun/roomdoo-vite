@@ -6,7 +6,7 @@
         <i class="pi pi-bars" style="font-size: 1.5rem" />
       </button>
       <div class="layout__logo layout__logo--mobile">
-        <img src="/logos/logo-black-new.svg" alt="Logo" />
+        <img src="/logos/logo-text.svg" alt="Logo" />
       </div>
     </header>
 

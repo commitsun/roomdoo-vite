@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-header">
     <div class="logo" :class="{ 'is-open': isOpen }">
-      <img src="/logos/logo-black-new.svg" alt="Roomdoo" />
+      <img src="/logos/logo-text.svg" alt="Roomdoo" />
     </div>
     <Select
       :value="currentPmsProperty"
