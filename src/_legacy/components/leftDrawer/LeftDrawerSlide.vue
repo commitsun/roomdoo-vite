@@ -4,7 +4,7 @@
     <div class="left-drawer-top">
       <!-- LOGO -->
       <div class="logo-container">
-        <img src="/logos/logo-black-new.svg" @click="navigateTo(endPath)" />
+        <img src="/logos/logo-text.svg" @click="navigateTo(endPath)" />
       </div>
       <!-- OPTION ITEMS -->
       <div class="items-container">

@@ -1,7 +1,7 @@
 <template>
   <div class="reset-password-container">
     <div class="reset-password-form-logo-header">
-      <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+      <img src="/logos/logo-text.svg" class="logo" alt="Roomdoo Logo" />
     </div>
     <div class="reset-password-card">
       <div class="reset-password-card__image" v-if="instanceImage">
@@ -9,7 +9,7 @@
       </div>
       <div class="reset-password-card__content">
         <div class="reset-password-form-header">
-          <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+          <img src="/logos/logo-text.svg" class="logo" alt="Roomdoo Logo" />
         </div>
         <div class="reset-password-form-container">
           <div class="request-password">

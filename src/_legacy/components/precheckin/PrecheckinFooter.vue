@@ -1,7 +1,7 @@
 <template>
   <div class="footer-container">
     <div class="text">{{$t('with_technology')}}</div>
-    <img src="/logos/logo-black-new.svg" />
+    <img src="/logos/logo-text.svg" />
   </div>
 </template>
 <style lang="scss" scoped>

@@ -2,7 +2,7 @@
   <div class="header">
     <img src="/app-images/icon-burger.svg" @click="openLeftDrawer()" class="icon-menu" />
     <div class="logo-container">
-      <img src="/logos/logo-black-new.svg" />
+      <img src="/logos/logo-text.svg" />
     </div>
   </div>
   <div class="main" id="page-dashboard">
