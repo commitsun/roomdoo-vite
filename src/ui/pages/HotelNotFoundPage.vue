@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-form-header">
-      <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+      <img src="/logos/logo-text.svg" class="logo" alt="Roomdoo Logo" />
     </div>
     <div class="login-form-container">
       <div class="instance-not-found">

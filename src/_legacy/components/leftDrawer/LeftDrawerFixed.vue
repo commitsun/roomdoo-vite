@@ -85,7 +85,7 @@
     <div class="container-expanded" v-show="isOpen">
       <div class="top">
         <div class="logo-expanded" @click="navigateTo(endPath)">
-          <img src="/logos/logo-black-new.svg" alt="logo" />
+          <img src="/logos/logo-text.svg" alt="logo" />
         </div>
         <div class="items">
           <div
@@ -436,7 +436,7 @@ export default defineComponent({
     }
     .logo {
       overflow-x: hidden;
-      background-image: url('/logos/logo-black-new.svg');
+      background-image: url('/logos/logo-text.svg');
       background-size: cover;
       background-repeat: no-repeat;
       background-position: 0.825rem;

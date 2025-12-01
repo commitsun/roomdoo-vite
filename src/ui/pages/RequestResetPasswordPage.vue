@@ -1,7 +1,7 @@
 <template>
   <div class="request-password-container">
     <div class="request-password-form-logo-header">
-      <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+      <img src="/logos/logo-text.svg" class="logo" alt="Roomdoo Logo" />
     </div>
     <div class="request-password-card">
       <div class="request-password-card__image" v-if="instanceImage">
@@ -9,7 +9,7 @@
       </div>
       <div class="request-password-card__content">
         <div class="request-password-form-header">
-          <img src="/logos/logo-black-new.svg" class="logo" alt="Roomdoo Logo" />
+          <img src="/logos/logo-text.svg" class="logo" alt="Roomdoo Logo" />
         </div>
         <div class="request-password-form-container">
           <div class="request-password">
