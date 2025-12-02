@@ -9,21 +9,38 @@ import { es } from 'primelocale/js/es.js';
 export const RoomdooPreset = definePreset(Aura, {
   semantic: {
     primary: {
-      50: '#e3f3fc',
-      100: '#bde3f8',
-      200: '#8dd1f3',
-      300: '#5cbced',
-      400: '#33ace7',
-      500: '#1d4ed8',
-      600: '#1a89c0',
-      700: '#156e99',
-      800: '#115377',
-      900: '#0c3752',
-      950: '#08212f',
+      50: '{emerald.50}',
+      100: '{emerald.100}',
+      200: '{emerald.200}',
+      300: '{emerald.300}',
+      400: '{emerald.400}',
+      500: '{emerald.500}',
+      600: '{emerald.600}',
+      700: '{emerald.700}',
+      800: '{emerald.800}',
+      900: '{emerald.900}',
+      950: '{emerald.950}',
+    },
+    colorScheme: {
+      light: {
+        primary: {
+          color: '{primary.700}',
+        },
+      },
+    },
+  },
+  components: {
+    togglebutton: {
+      colorScheme: {
+        light: {
+          root: {
+            checkedColor: '{primary.color}',
+          },
+        },
+      },
     },
   },
 });
-
 let primevueApp: App | null = null;
 
 const getLocale = (localeCode: string) => {
