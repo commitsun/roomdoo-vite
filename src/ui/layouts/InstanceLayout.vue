@@ -1,37 +1,51 @@
 <template>
-  <div class="login-layout-container" v-if="instance">
-    <div
-      v-if="instance"
-      class="image-container"
-      :style="instanceImage ? { backgroundImage: `url(${instanceImage})` } : {}"
-    />
-    <div class="main-form">
-      <div class="form-and-language">
-        <div class="form-container">
-          <router-view />
-        </div>
-        <Select
-          v-if="availableLocales.length > 1 && instance"
-          class="select-language"
-          v-model="selectedLocale"
-          :options="availableLocales"
-          optionLabel="name"
-          optionValue="code"
-          aria-label="language-select"
-        >
-          <template #value="{ value }">
-            <div v-if="value" class="flex items-center w-full gap-1">
-              <Globe :size="15" />
-              <span class="whitespace-nowrap">{{
-                availableLocales.find((locale) => locale.code === value)?.name
-              }}</span>
+  <div v-if="instance" class="login-layout-container">
+    <div class="login-layout grid grid-cols-1 md:grid-cols-12 gap-[24px]">
+      <div
+        class="image-container md:col-span-5"
+        :style="
+          instanceImage
+            ? { backgroundImage: `url(${instanceImage})` }
+            : { backgroundImage: `url(/app-images/login-color-gradient.png)` }
+        "
+      />
+
+      <div class="form-column col-span-12 md:col-span-7">
+        <div class="grid grid-cols-12 w-full">
+          <div class="form-and-language col-span-12 md:col-span-10 md:col-start-2">
+            <div class="form-inner">
+              <div class="form-container">
+                <router-view />
+              </div>
+
+              <div class="language-select-wrapper">
+                <Select
+                  v-if="availableLocales.length > 1 && instance"
+                  class="language-select"
+                  v-model="selectedLocale"
+                  :options="availableLocales"
+                  optionLabel="name"
+                  optionValue="code"
+                  aria-label="language-select"
+                >
+                  <template #value="{ value }">
+                    <div v-if="value" class="language-select-value">
+                      <Globe :size="15" />
+                      <span class="language-select-text">
+                        {{ availableLocales.find((locale) => locale.code === value)?.name }}
+                      </span>
+                    </div>
+                  </template>
+                </Select>
+              </div>
             </div>
-          </template>
-        </Select>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
 <script lang="ts" setup>
 import { type Ref, computed, onMounted, ref, watch } from 'vue';
 import Select from 'primevue/select';
@@ -66,9 +80,7 @@ const availableLocales = computed(() => {
 
 watch(selectedLocale, (newLocale) => {
   if (newLocale) {
-    // update i18n locale
     i18n.global.locale.value = newLocale;
-    // update primevue locale
     updatePrimevueLocale(newLocale);
   }
 });
@@ -99,130 +111,104 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .login-layout-container {
-  min-width: 360px;
-  height: 100svh;
-  background-color: #eef2f7;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
-
-  .image-container {
-    display: none;
-  }
-  .main-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100svh;
-    width: 100%;
-    .form-and-language {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100svh;
-      min-width: 360px;
-      .form-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        background-color: transparent;
-      }
-      .select-language {
-        width: 70%;
-        margin-left: auto;
-        height: 35px;
-        max-width: 270px;
-        margin-right: 1rem;
-      }
-    }
-  }
-}
-:deep(.p-select-label) {
-  font-size: 12px;
-  height: 35px;
+  align-items: stretch;
+  background-color: #eef2f7;
+  overflow-x: hidden;
 }
 
-@media (min-width: 480px) {
-  .login-layout-container {
-    .main-form {
-      .form-and-language {
-        min-width: 400px;
-      }
-    }
-  }
+.login-layout {
+  width: 100%;
 }
 
-@media (min-width: 640px) {
-  .login-layout-container {
-    .main-form {
-      .form-and-language {
-        min-width: 580px;
-        .select-language {
-          margin-right: 6rem;
-        }
-      }
-    }
+.image-container {
+  display: none;
+  background-color: #eef2f7;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    z-index: 1;
   }
 }
 
 @media (min-width: 768px) {
-  .login-layout-container {
-    .image-container {
-      position: relative;
-      display: flex;
-      width: 50%;
-      height: 100%;
-      overflow: hidden;
-      box-sizing: border-box;
-      border-top-right-radius: 10px;
-      border-bottom-right-radius: 10px;
-      background:
-        linear-gradient(100deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.65) 82%),
-        radial-gradient(circle at 0% 105%, #1990d8 0%, #0a304a 38%, rgba(5, 18, 32, 0) 70%),
-        linear-gradient(180deg, #1f55dd 0%, #16386e 42%, #071521 100%);
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-
-    .image-container::before {
-      content: none;
-    }
-
-    .form-container {
-      width: 66.6%;
-    }
-    .main-form {
-      .form-and-language {
-        min-width: 580px;
-        .select-language {
-          margin-right: 1rem;
-          margin-top: 2rem;
-        }
-      }
-    }
-  }
-  :deep(.p-select-label) {
-    font-size: 14px;
-    height: 40px;
+  .image-container {
+    display: block;
+    min-height: 100vh;
+    border-radius: 0 20px 20px 0;
   }
 }
-@media (min-width: 1024px) {
-  .login-layout-container {
-    .image-container {
-      width: 33.3%;
-      &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        z-index: 1;
-        pointer-events: none;
-      }
-    }
+
+.form-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.form-and-language {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .form-and-language {
+    max-width: 600px;
   }
+}
+
+.form-inner {
+  width: 100%;
+  max-width: 420px;
+}
+
+@media (min-width: 768px) {
+  .form-inner {
+    max-width: none;
+  }
+}
+
+.form-container {
+  width: 100%;
+}
+
+.language-select-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.language-select {
+  margin-top: 0.75rem;
+  margin-right: 0.75rem;
+  width: 215px;
+}
+
+.language-select-value {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.25rem;
+}
+
+.language-select-text {
+  white-space: nowrap;
 }
 </style>

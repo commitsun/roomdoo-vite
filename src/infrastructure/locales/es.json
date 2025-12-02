@@ -1,13 +1,16 @@
 {
   "login": {
-    "username": "Nombre de usuario",
-    "email": "Correo electrónico",
+    "username": "Email o nombre de usuario",
+    "email": "Email",
     "password": "Contraseña",
     "forgotPassword": "¿Has olvidado tu contraseña?",
     "loginButton": "Iniciar sesión",
     "invalidCredentials": "Credenciales no válidas",
     "sessionExpiredTitle": "Sesión caducada. Por favor, vuelve a iniciar sesión.",
-    "accept": "Aceptar"
+    "accept": "Aceptar",
+    "missingUsername": "Debes introducir el usuario.",
+    "missingPassword": "Debes introducir la contraseña.",
+    "missingUsernameAndPassword": "Debes introducir usuario y contraseña."
   },
   "instanceNotFound": {
     "title": "Ups! Parece que {instance} todavía no existe en Roomdoo",
@@ -31,13 +34,13 @@
     "invalidToken": "El enlace ha caducado o no es válido"
   },
   "requestResetPassword": {
-    "title": "Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña",
-    "username": "Nombre de usuario",
-    "email": "Correo electrónico",
+    "title": "Introduce tu email y te enviaremos un enlace para restablecer tu contraseña",
+    "username": "Email o nombre de usuario",
+    "email": "Email",
     "resetPassword": "Restablecer contraseña",
     "sendRequest": "Enviar solicitud de recuperación",
     "backToLogin": "Volver al inicio de sesión",
-    "requestSent": "Se ha enviado un correo para restablecer tu contraseña"
+    "requestSent": "Se ha enviado un email para restablecer tu contraseña"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -213,7 +216,7 @@
     "firstNamePlaceholder": "Introduce el nombre del contacto",
     "lastNamePlaceholder": "Introduce el primer apellido",
     "secondLastNamePlaceholder": "Introduce el segundo apellido",
-    "emailPlaceholder": "Introduce el correo electrónico del contacto",
+    "emailPlaceholder": "Introduce el email del contacto",
     "phonePlaceholder": "Introduce el teléfono del contacto",
     "mobilePlaceholder": "Introduce el móvil del contacto",
     "residenceAddressPlaceholder": "Introduce la dirección de residencia",
@@ -282,7 +285,7 @@
     "removeImage": "Eliminar",
     "fileTooLarge": "El archivo es demasiado grande",
     "personalInformation": "Información personal",
-    "nameEmailLogin": "Usuario o correo de acceso",
+    "nameEmailLogin": "Usuario o email de acceso",
     "yourLogin": "Este es el nombre o email que usas para acceder a tu cuenta",
     "yourPassword": "Esta es la contraseña que usas para acceder a tu cuenta",
     "contactData": "Datos de contacto",
