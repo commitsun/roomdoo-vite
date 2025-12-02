@@ -1,13 +1,16 @@
 {
   "login": {
-    "username": "Username",
+    "username": "Email or username",
     "email": "Email",
     "password": "Password",
     "forgotPassword": "Forgot your password?",
     "loginButton": "Log in",
     "invalidCredentials": "Invalid credentials",
     "sessionExpiredTitle": "Session expired. Please log in again.",
-    "accept": "Accept"
+    "accept": "Accept",
+    "missingUsername": "Username is required",
+    "missingPassword": "Password is required",
+    "missingUsernameAndPassword": "Username and password are required"
   },
   "instanceNotFound": {
     "title": "Oops! It seems that {instance} does not exist in Roomdoo yet",
@@ -32,7 +35,7 @@
   },
   "requestResetPassword": {
     "title": "Enter your email and we will send you a link to reset your password",
-    "username": "Username",
+    "username": "Email or username",
     "email": "Email",
     "resetPassword": "Reset password",
     "sendRequest": "Send reset password request",

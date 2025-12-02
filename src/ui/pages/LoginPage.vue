@@ -32,11 +32,15 @@
               <InputText
                 id="username"
                 v-model="username"
-                :placeholder="t('login.email')"
+                :placeholder="t('login.username')"
                 :style="{ width: '100%' }"
                 :inputStyle="{ width: '100%' }"
                 autocomplete="username"
-                :invalid="errorMessage !== ''"
+                :invalid="
+                  errorMessage === t('login.invalidCredentials') ||
+                  errorMessage === t('login.missingUsername') ||
+                  errorMessage === t('login.missingUsernameAndPassword')
+                "
               />
             </div>
 
@@ -54,7 +58,11 @@
                 :inputStyle="{ width: '100%' }"
                 toggleMask
                 :inputProps="{ autocomplete: 'current-password' }"
-                :invalid="errorMessage !== ''"
+                :invalid="
+                  errorMessage === t('login.invalidCredentials') ||
+                  errorMessage === t('login.missingPassword') ||
+                  errorMessage === t('login.missingUsernameAndPassword')
+                "
               />
             </div>
             <div class="button">
@@ -115,12 +123,26 @@ export default defineComponent({
     const instanceImage = computed(() => instanceStore.instance?.image ?? '');
 
     const doLogin = async (): Promise<void> => {
+      if (!username.value && !password.value) {
+        errorMessage.value = t('login.missingUsernameAndPassword');
+        return;
+      }
+      if (!username.value) {
+        errorMessage.value = t('login.missingUsername');
+        return;
+      }
+      if (!password.value) {
+        errorMessage.value = t('login.missingPassword');
+        return;
+      }
+
       let redirect = '/';
       uiStore.startLoading();
       try {
         await userStore.login(username.value, password.value);
         await useLegacyStore().doVuexLogin(username.value, password.value);
         await pmsPropertiesStore.fetchPmsProperties();
+
         if (userStore.user) {
           await userStore.fetchUserSchemas();
           if (route.query.redirect !== undefined && route.query.redirect !== null) {
@@ -195,7 +217,7 @@ export default defineComponent({
 
   .login-card__image img {
     width: 100%;
-    height: 140px;
+    height: 165px;
     object-fit: cover;
     display: block;
   }
@@ -265,16 +287,10 @@ export default defineComponent({
       margin-top: 2rem;
       a {
         color: #3b82f6;
-        &:hover {
-          text-decoration: underline;
-        }
+        text-decoration: underline;
       }
     }
   }
-}
-:deep(.p-inputtext) {
-  font-size: 12px;
-  height: 28px;
 }
 
 @media (min-width: 768px) {
@@ -296,7 +312,7 @@ export default defineComponent({
     }
     .login-card {
       flex-direction: row;
-      max-width: 800px;
+      max-width: none;
       .button {
         .p-button {
           height: 40px;
@@ -306,23 +322,21 @@ export default defineComponent({
       .login-card__image {
         display: none;
       }
+      &__content {
+        width: 100%;
+        padding: 32px;
+      }
     }
     .login-form-header {
       display: none;
     }
     .login-form-container {
-      width: 480px;
       height: auto;
+      width: 100%;
       .instance-name {
-        margin-top: 1rem;
-        margin-bottom: 2rem;
-        font-size: 24px;
+        font-size: 20px;
       }
     }
-  }
-  :deep(.p-inputtext) {
-    font-size: 14px;
-    height: 35px;
   }
 }
 </style>

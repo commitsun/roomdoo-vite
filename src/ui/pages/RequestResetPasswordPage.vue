@@ -192,15 +192,9 @@ export default defineComponent({
       display: flex;
       align-items: center;
       color: #3b82f6;
-      &:hover {
-        text-decoration: underline;
-      }
+      text-decoration: underline;
     }
   }
-}
-:deep(.p-inputtext) {
-  font-size: 12px;
-  height: 28px;
 }
 
 @media (min-width: 768px) {
@@ -219,7 +213,7 @@ export default defineComponent({
     }
     .request-password-card {
       flex-direction: row;
-      max-width: 800px;
+      max-width: none;
       .button {
         .p-button {
           height: 40px;
@@ -229,13 +223,17 @@ export default defineComponent({
       .request-password-card__image {
         display: none;
       }
+      &__content {
+        width: 100%;
+        padding: 32px;
+      }
     }
     .request-password-form-header {
       display: none;
     }
     .request-password-form-container {
-      width: 480px;
       height: auto;
+      width: 100%;
       .request-password {
         font-size: 24px;
       }
@@ -244,19 +242,13 @@ export default defineComponent({
         margin-bottom: 2rem;
       }
       .instance-name {
-        margin-top: 1rem;
-        margin-bottom: 2rem;
-        font-size: 24px;
+        font-size: 20px;
       }
       .link {
         margin-top: 3rem;
         margin-bottom: 1rem;
       }
     }
-  }
-  :deep(.p-inputtext) {
-    font-size: 14px;
-    height: 35px;
   }
 }
 </style>

@@ -61,7 +61,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 95%;
+  width: 100%;
   padding-top: 2rem;
   position: relative;
   margin-bottom: 2rem;
@@ -75,12 +75,10 @@ export default defineComponent({
   .login-form-container {
     text-align: center;
     background-color: #ffffff;
-    width: 100%;
     padding: 2rem;
     margin-top: 2.5rem;
     font-size: 14px;
-    width: 100%;
-    max-width: 420px;
+    width: 95%;
     background-color: #ffffff;
     border-radius: 16px;
     box-shadow: 0px 10px 35px rgba(15, 23, 42, 0.15);
@@ -137,6 +135,13 @@ export default defineComponent({
       height: auto;
       border-radius: 8px;
       box-shadow: 0px 1px 3px 0px #0000001a;
+      font-size: 16px;
+      .instance-not-found {
+        font-size: 24px;
+      }
+      .hotel-not-found-contact {
+        font-size: 20px;
+      }
     }
   }
 }

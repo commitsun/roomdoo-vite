@@ -33,7 +33,7 @@
           </Message>
           <div class="first-input">
             <label class="label" for="username">
-              {{ t('login.email') }}
+              {{ t('resetPassword.newPassword') }}
             </label>
             <Password
               v-model="firstPassword"
@@ -43,6 +43,7 @@
               :promptLabel="t('resetPassword.enterPassword')"
               toggleMask
               @blur="firstPasswordBlur"
+              :strongRegex="'^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'"
             >
               <template #header>
                 <div class="font-semibold text-xm mb-4">
@@ -61,7 +62,7 @@
           </div>
           <div class="second-input">
             <label class="label" for="password-input">
-              {{ t('login.password') }}
+              {{ t('resetPassword.repeatNewPassword') }}
             </label>
             <Password
               v-model="secondPassword"
@@ -71,6 +72,7 @@
               :promptLabel="t('resetPassword.enterPassword')"
               toggleMask
               @blur="secondPasswordBlur"
+              :strongRegex="'^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'"
             >
               <template #header>
                 <div class="font-semibold text-xm mb-4">
@@ -328,15 +330,9 @@ export default defineComponent({
       display: flex;
       align-items: center;
       color: #3b82f6;
-      &:hover {
-        text-decoration: underline;
-      }
+      text-decoration: underline;
     }
   }
-}
-:deep(.p-inputtext) {
-  font-size: 12px;
-  height: 28px;
 }
 
 @media (min-width: 768px) {
@@ -355,7 +351,7 @@ export default defineComponent({
     }
     .reset-password-card {
       flex-direction: row;
-      max-width: 800px;
+      max-width: none;
       .button {
         .p-button {
           height: 40px;
@@ -365,13 +361,17 @@ export default defineComponent({
       .reset-password-card__image {
         display: none;
       }
+      &__content {
+        width: 100%;
+        padding: 32px;
+      }
     }
     .reset-password-form-header {
       display: none;
     }
     .reset-password-form-container {
-      width: 480px;
       height: auto;
+      width: 100%;
       .request-password {
         font-size: 24px;
       }
@@ -380,15 +380,9 @@ export default defineComponent({
         margin-bottom: 2rem;
       }
       .instance-name {
-        margin-top: 1rem;
-        margin-bottom: 2rem;
-        font-size: 24px;
+        font-size: 20px;
       }
     }
-  }
-  :deep(.p-inputtext) {
-    font-size: 14px;
-    height: 35px;
   }
 }
 </style>

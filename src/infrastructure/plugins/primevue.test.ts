@@ -75,8 +75,8 @@ describe('RoomdooPreset', () => {
     // assert definePreset was called with Aura and an extension containing our primary colors
     expect(definePresetSpy).toHaveBeenCalledTimes(1);
     const [, ext] = definePresetSpy.mock.calls[0];
-    expect((ext as any).semantic?.primary?.[500]).toBe('#1d4ed8'); // sample key
-    expect((ext as any).semantic?.primary?.[50]).toBe('#e3f3fc'); // another key
+    expect((ext as any).semantic?.primary?.[500]).toBe('{blue.500}'); // sample key
+    expect((ext as any).semantic?.primary?.[50]).toBe('{blue.50}'); // another key
   });
 });
 
