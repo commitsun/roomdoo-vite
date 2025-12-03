@@ -31,7 +31,8 @@
     "savePassword": "Guardar contraseña",
     "backToLogin": "Volver al inicio de sesión",
     "passwordChanged": "La contraseña se ha cambiado correctamente",
-    "invalidToken": "El enlace ha caducado o no es válido"
+    "invalidToken": "El enlace ha caducado o no es válido",
+    "unableToResetPassword": "No se ha podido restablecer la contraseña"
   },
   "requestResetPassword": {
     "title": "Introduce tu email y te enviaremos un enlace para restablecer tu contraseña",
@@ -40,7 +41,9 @@
     "resetPassword": "Restablecer contraseña",
     "sendRequest": "Enviar solicitud de recuperación",
     "backToLogin": "Volver al inicio de sesión",
-    "requestSent": "Se ha enviado un email para restablecer tu contraseña"
+    "requestSent": "Se ha enviado un email para restablecer tu contraseña",
+    "emailRequired": "El email es obligatorio",
+    "wrongEmailFormat": "Formato de email incorrecto"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -347,6 +350,7 @@
     "minimumChars": "Mínimo {count} caracteres",
     "passwordLetterRequired": "Al menos una letra",
     "passwordNumberRequired": "Al menos un número",
-    "passwordsDontMatch": "Las contraseñas no coinciden"
+    "passwordsDontMatch": "Las contraseñas no coinciden",
+    "Required": "Contraseñas obligatorias"
   }
 }
