@@ -18,21 +18,29 @@
           <div class="request-password-title">
             {{ t('requestResetPassword.title') }}
           </div>
+          <Message
+            class="mt-4 mb-3"
+            v-if="errorMessage !== ''"
+            severity="error"
+            icon="pi pi-times-circle"
+          >
+            {{ errorMessage }}
+          </Message>
           <div class="first-input">
             <label class="label" for="username">
               {{ t('login.email') }}
             </label>
             <InputText
-              v-model="username"
+              v-model="email"
               :placeholder="t('requestResetPassword.email')"
               :style="{ width: '100%' }"
               :inputStyle="{ width: '100%' }"
+              :invalid="errorMessage !== ''"
             />
           </div>
           <div class="button">
             <Button
               :label="t('requestResetPassword.sendRequest')"
-              :disabled="!username"
               @click="sendRequestChangePassword"
             />
           </div>
@@ -50,6 +58,7 @@ import { defineComponent, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import Message from 'primevue/message';
 import { ArrowLeft } from 'lucide-vue-next';
 
 import { useUserStore } from '@/infrastructure/stores/user';
@@ -60,6 +69,7 @@ export default defineComponent({
   components: {
     Button,
     InputText,
+    Message,
     ArrowLeft,
   },
   setup() {
@@ -68,14 +78,26 @@ export default defineComponent({
     const notificationStore = useNotificationsStore();
     const instanceStore = useInstanceStore();
     const instanceImage = computed(() => instanceStore.instance?.image ?? '');
-    const username = ref('');
+    const email = ref('');
+    const errorMessage = ref('');
     const sendRequestChangePassword = async (): Promise<void> => {
-      await userStore.requestChangePassword(username.value);
+      if (email.value.trim() === '') {
+        errorMessage.value = t('requestResetPassword.emailRequired');
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.value)) {
+        errorMessage.value = t('requestResetPassword.wrongEmailFormat');
+        return;
+      }
+      errorMessage.value = '';
+      await userStore.requestChangePassword(email.value);
       notificationStore.add(t('requestResetPassword.requestSent'), 'success');
     };
     return {
-      username,
+      email,
       instanceImage,
+      errorMessage,
       t,
       sendRequestChangePassword,
     };

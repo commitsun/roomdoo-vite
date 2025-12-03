@@ -31,7 +31,8 @@
     "savePassword": "Save password",
     "backToLogin": "Back to login",
     "passwordChanged": "The password has been changed successfully",
-    "invalidToken": "The link has expired or is invalid"
+    "invalidToken": "The link has expired or is invalid",
+    "unableToResetPassword": "Unable to reset password"
   },
   "requestResetPassword": {
     "title": "Enter your email and we will send you a link to reset your password",
@@ -40,7 +41,9 @@
     "resetPassword": "Reset password",
     "sendRequest": "Send reset password request",
     "backToLogin": "Back to login",
-    "requestSent": "An email has been sent to reset your password"
+    "requestSent": "An email has been sent to reset your password",
+    "emailRequired": "Email is required",
+    "wrongEmailFormat": "Wrong email format"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -346,6 +349,7 @@
     "minimumChars": "Minimum {count} characters",
     "passwordLetterRequired": "At least one letter is required",
     "passwordNumberRequired": "At least one number is required",
-    "passwordsDontMatch": "Passwords do not match"
+    "passwordsDontMatch": "Passwords do not match",
+    "Required": "Passwords are required"
   }
 }
