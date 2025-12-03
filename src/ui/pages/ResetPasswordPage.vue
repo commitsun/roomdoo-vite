@@ -44,6 +44,7 @@
               toggleMask
               @blur="firstPasswordBlur"
               :strongRegex="'^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'"
+              :invalid="errorMessage !== '' || firstPasswordError !== undefined"
             >
               <template #header>
                 <div class="font-semibold text-xm mb-4">
@@ -73,6 +74,7 @@
               toggleMask
               @blur="secondPasswordBlur"
               :strongRegex="'^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'"
+              :invalid="errorMessage !== '' || secondPasswordError !== undefined"
             >
               <template #header>
                 <div class="font-semibold text-xm mb-4">
@@ -92,7 +94,6 @@
           <div class="button">
             <Button
               :label="t('resetPassword.savePassword')"
-              :disabled="!isFormValid"
               @click="() => handleSubmit(resetPassword)()"
             />
           </div>
@@ -128,6 +129,7 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 
 export default defineComponent({
   components: {
@@ -148,6 +150,7 @@ export default defineComponent({
     const notificationStore = useNotificationsStore();
     const uiStore = useUIStore();
     const instanceStore = useInstanceStore();
+    const textMessagesStore = useTextMessagesStore();
     const { translate } = useTranslatedError();
     const errorMessage = ref('');
 
@@ -191,13 +194,15 @@ export default defineComponent({
         if (error instanceof UnauthorizedError) {
           errorMessage.value = t('resetPassword.invalidToken');
         } else {
-          errorMessage.value = (error as Error).message;
+          textMessagesStore.addTextMessage(
+            t('error.somethingWentWrong'),
+            t('resetPassword.unableToResetPassword'),
+          );
         }
       } finally {
         uiStore.stopLoading();
       }
     };
-
     const isFormValid = computed(() => {
       return firstPassword.value && secondPassword.value;
     });
