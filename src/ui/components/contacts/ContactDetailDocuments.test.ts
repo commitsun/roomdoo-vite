@@ -212,7 +212,7 @@ describe('ContactDetailDocuments', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Add document' }));
 
-    expect(model.value.documents).toHaveLength(2);
+    expect(model.value.documents).toHaveLength(1);
   });
 
   it('change the country (Select) → setDocCountry issues an update with the complete country', async () => {

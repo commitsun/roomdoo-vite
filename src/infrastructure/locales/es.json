@@ -16,7 +16,8 @@
     "title": "Ups! Parece que {instance} todavía no existe en Roomdoo",
     "message": "Revisa el enlace de acceso y vuélvelo a intentar",
     "joinTitle": "¿Quieres gestionar tu hotel con Roomdoo?",
-    "joinMessage": "Contacta con nosotros para darte de alta"
+    "joinMessage": "Contacta con nosotros para darte de alta",
+    "contactWithUs": "¿Necesitas ayuda? Escríbenos a "
   },
   "resetPassword": {
     "title": "Restablecer contraseña",
