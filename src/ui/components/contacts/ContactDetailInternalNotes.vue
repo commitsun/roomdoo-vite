@@ -21,6 +21,7 @@
           :options="[...tags]"
           optionLabel="name"
           filter
+          :showToggleAll="false"
           :placeholder="t('contacts.select')"
         />
       </div>

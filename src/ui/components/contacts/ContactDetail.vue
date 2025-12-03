@@ -9,22 +9,10 @@
         optionValue="value"
       >
         <template #option="slotProps">
-          <User
-            v-if="slotProps.option.value === 'person'"
-            :size="14"
-            :color="contactType === slotProps.option.value ? '#1D4ED8' : 'currentColor'"
-          />
-          <Building
-            v-else-if="slotProps.option.value === 'company'"
-            :size="14"
-            :color="contactType === slotProps.option.value ? '#1D4ED8' : 'currentColor'"
-          />
-          <Store
-            v-else
-            :size="14"
-            :color="contactType === slotProps.option.value ? '#1D4ED8' : 'currentColor'"
-          />
-          <span :style="contactType === slotProps.option.value ? 'color: #1D4ED8' : ''">
+          <User v-if="slotProps.option.value === 'person'" :size="14" />
+          <Building v-else-if="slotProps.option.value === 'company'" :size="14" />
+          <Store v-else :size="14" />
+          <span>
             {{ slotProps.option.label }}
           </span>
         </template>
@@ -36,7 +24,7 @@
           <AccordionHeader>
             <div
               class="flex items-center gap-2"
-              :style="{ color: activePanel === '0' ? '#1D4ED8' : '' }"
+              :style="{ color: activePanel === '0' ? 'var(--p-primary-color)' : '' }"
             >
               <FileText :size="15" />
               <span>{{ t('contacts.generalInformation') }}</span>
@@ -57,7 +45,7 @@
           <AccordionHeader>
             <div
               class="flex items-center gap-2"
-              :style="{ color: activePanel === '1' ? '#1D4ED8' : '' }"
+              :style="{ color: activePanel === '1' ? 'var(--p-primary-color)' : '' }"
             >
               <IdCard :size="15" />
               <span>{{ t('contacts.documents') }}</span>
@@ -82,7 +70,7 @@
           <AccordionHeader>
             <div
               class="flex items-center gap-2"
-              :style="{ color: activePanel === '2' ? '#1D4ED8' : '' }"
+              :style="{ color: activePanel === '2' ? 'var(--p-primary-color)' : '' }"
             >
               <Banknote :size="15" />
               <span>{{ t('contacts.invoicing') }}</span>
@@ -103,7 +91,7 @@
           <AccordionHeader>
             <div
               class="flex items-center gap-2"
-              :style="{ color: activePanel === '3' ? '#1D4ED8' : '' }"
+              :style="{ color: activePanel === '3' ? 'var(--p-primary-color)' : '' }"
             >
               <NotebookPen :size="15" />
               <span>{{ t('contacts.internalnotes') }}</span>
@@ -137,7 +125,7 @@
           <Tab value="2">{{ t('contacts.invoicing') }}</Tab>
           <Tab value="3">{{ t('contacts.internalnotes') }}</Tab>
         </TabList>
-        <TabPanels>
+        <TabPanels style="height: 450px !important; overflow-y: scroll">
           <TabPanel value="0">
             <ContactDetailGeneralData
               :contactType="contactType"
@@ -147,7 +135,7 @@
               @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
             />
           </TabPanel>
-          <TabPanel value="1">
+          <TabPanel value="1" style="height: 100%">
             <ContactDetailDocuments
               :modelValue="contactForm"
               :errors="uiErrors.documents"
@@ -763,7 +751,7 @@ export default defineComponent({
 @media (min-width: 1024px) {
   .contact-detail {
     width: 920px;
-    height: 90vh;
+    height: 632px;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -771,17 +759,18 @@ export default defineComponent({
     .contact-type {
       justify-content: flex-start;
     }
+
     .contact-detail-accordion {
       display: none;
     }
+
     .contact-detail-tabs {
       flex: 1;
       min-height: 0;
-      overflow-y: auto;
+      overflow: hidden;
       display: block;
-      padding-right: 1.5rem;
-      margin-right: -1rem;
     }
+
     .footer {
       .all-errors {
         font-size: 14px;

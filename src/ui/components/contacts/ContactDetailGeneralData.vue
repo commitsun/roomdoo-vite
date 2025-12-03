@@ -729,7 +729,6 @@ export default defineComponent({
 @media (min-width: 1024px) {
   .personal-data-form {
     max-width: none;
-
     &::before {
       inset-inline: 0;
       background: #ffffff;
