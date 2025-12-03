@@ -6,9 +6,9 @@
     <div class="login-form-container">
       <div class="instance-not-found">
         <TriangleAlert :size="30" class="mb-5" />
-        {{ t('instanceNotFound.title', { instance: instanceName }) }}
+        <span v-html="t('instanceNotFound.title', { instance: instanceNameRed })"></span>
       </div>
-      <div>
+      <div class="hotel-not-found-description">
         {{ t('hotel_not_found_description') }}
       </div>
       <Divider />
@@ -21,11 +21,15 @@
           <Button :label="t('sign_up')" @click="openRoomdoo" />
         </div>
       </div>
+      <div class="contact-email">
+        {{ t('instanceNotFound.contactWithUs') }}
+        <a href="mailto: hola@roomdoo.com">hola@roomdoo.com</a>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
@@ -45,11 +49,16 @@ export default defineComponent({
       .split(':')[0];
     const { t } = useI18n();
 
+    const instanceNameRed = computed(
+      () => `<span style="color: red; font-weight: 600;">${instanceName}</span>`,
+    );
+
     const openRoomdoo = (): void => {
       window.open('https://roomdoo.com', '_blank');
     };
     return {
       instanceName,
+      instanceNameRed,
       openRoomdoo,
       t,
     };
@@ -89,7 +98,7 @@ export default defineComponent({
     color: #334155;
     .instance-not-found {
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 600;
       margin-bottom: 0.5rem;
       display: flex;
       flex-direction: column;
@@ -98,11 +107,12 @@ export default defineComponent({
     .hotel-not-found-footer {
       background-color: #f8fafc;
       border-radius: 6px;
-      padding: 1rem 0;
+      padding: 1rem 0 2.5rem 0;
+      margin-top: 1rem;
     }
     .hotel-not-found-contact {
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 600;
       margin-bottom: 0.5rem;
     }
     .button {
@@ -110,12 +120,25 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       width: 100%;
+      height: 40px;
       .p-button {
         width: 100%;
         background-color: #1d4ed8;
         border: none;
         font-size: 14px;
-        margin: 1rem 1rem 0 1rem;
+        margin: 2rem 1rem 0 1rem;
+        height: 100%;
+      }
+    }
+    .hotel-not-found-description {
+      margin-bottom: 1rem;
+    }
+    .contact-email {
+      margin-top: 1.5rem;
+      font-size: 14px;
+      a {
+        color: #1d4ed8;
+        text-decoration: none;
       }
     }
   }
