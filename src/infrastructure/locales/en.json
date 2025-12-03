@@ -249,7 +249,9 @@
       "invalidDocument": "The {document} is not valid",
       "countryRequired": "The issue country is required",
       "documentTypeRequired": "The document type is required",
-      "fieldErrors": "{count} field with error | {count} fields with errors"
+      "issueCountryRequired": "The issue country is required",
+      "fieldErrors": "{count} field with error | {count} fields with errors",
+      "completeMandatoryToAddDocument": "Complete the mandatory fields to add a new document"
     }
   },
   "reports": {

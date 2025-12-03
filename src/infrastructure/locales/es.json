@@ -250,7 +250,9 @@
       "invalidDocument": "El {document} no es válido",
       "countryRequired": "El país de emisión es obligatorio",
       "documentTypeRequired": "El tipo de documento es obligatorio",
-      "fieldErrors": "{count} campo con error | {count} campos con errores"
+      "issueCountryRequired": "El país de emisión es obligatorio",
+      "fieldErrors": "{count} campo con error | {count} campos con errores",
+      "completeMandatoryToAddDocument": "Complete los campos obligatorios para añadir un nuevo documento"
     }
   },
   "reports": {

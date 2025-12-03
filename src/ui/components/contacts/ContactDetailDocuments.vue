@@ -39,7 +39,9 @@
         class="documents-form__group-grid"
         :class="{
           'documents-form__group-grid-error':
-            errors[origIdx]?.country || errors[origIdx]?.category || errors[origIdx]?.number,
+            mergedErrors[origIdx]?.country ||
+            mergedErrors[origIdx]?.category ||
+            mergedErrors[origIdx]?.number,
         }"
       >
         <div class="documents-form__field--full">
@@ -59,7 +61,7 @@
             class="documents-form__control"
             :placeholder="t('contacts.select')"
             filter
-            :invalid="!!errors[origIdx]?.country"
+            :invalid="!!mergedErrors[origIdx]?.country"
             @update:modelValue="
               (id: string | null) => setDocCountry(origIdx, id ? Number(id) : null)
             "
@@ -88,13 +90,13 @@
             </template>
           </Select>
           <Message
-            v-if="errors[origIdx]?.country"
+            v-if="mergedErrors[origIdx]?.country"
             size="small"
             severity="error"
             variant="simple"
             class="mt-2"
           >
-            {{ t(errors[origIdx]?.country) }}
+            {{ t(mergedErrors[origIdx]?.country) }}
           </Message>
         </div>
 
@@ -112,12 +114,12 @@
             :placeholder="t('contacts.select')"
             @update:modelValue="(id: number | null) => setDocCategory(origIdx, id as number | null)"
             :disabled="!doc.country?.id"
-            :invalid="!!errors[origIdx]?.category"
+            :invalid="!!mergedErrors[origIdx]?.category"
             @blur="checkDuplicateFor(origIdx)"
           />
           <div
             class="flex mt-2 gap-1 items-center"
-            v-if="!doc.country?.id && !errors[origIdx]?.category"
+            v-if="!doc.country?.id && !mergedErrors[origIdx]?.category"
           >
             <Info :size="13" color="#2563eb" />
             <Message size="small" severity="info" variant="simple">
@@ -125,13 +127,13 @@
             </Message>
           </div>
           <Message
-            v-if="errors[origIdx]?.category"
+            v-if="mergedErrors[origIdx]?.category"
             size="small"
             severity="error"
             variant="simple"
             class="mt-2"
           >
-            {{ t(errors[origIdx]?.category) }}
+            {{ t(mergedErrors[origIdx]?.category) }}
           </Message>
         </div>
 
@@ -146,22 +148,22 @@
             autocomplete="off"
             :placeholder="t('contacts.documentNumberPlaceholder')"
             :invalid="
-              !!errors[origIdx]?.number &&
-              errors[origIdx]?.number !== 'contacts.errors.duplicateDocument'
+              !!mergedErrors[origIdx]?.number &&
+              mergedErrors[origIdx]?.number !== 'contacts.errors.duplicateDocument'
             "
-            @blur="checkDuplicateFor(origIdx)"
+            @blur="onNumberBlur(origIdx)"
           />
           <Message
             v-if="
-              errors[origIdx]?.number &&
-              errors[origIdx]?.number !== 'contacts.errors.duplicateDocument'
+              mergedErrors[origIdx]?.number &&
+              mergedErrors[origIdx]?.number !== 'contacts.errors.duplicateDocument'
             "
             size="small"
             severity="error"
             variant="simple"
             class="mt-2"
           >
-            {{ t(errors[origIdx]?.number, { document: doc.category?.name ?? '' }) }}
+            {{ t(mergedErrors[origIdx]?.number, { document: doc.category?.name ?? '' }) }}
           </Message>
         </div>
 
@@ -188,15 +190,17 @@
           />
         </div>
       </div>
+
       <div
         class="flex gap-1 items-center mt-2"
-        v-if="errors[origIdx]?.number === 'contacts.errors.duplicateDocument'"
+        v-if="mergedErrors[origIdx]?.number === 'contacts.errors.duplicateDocument'"
       >
         <CircleAlert :size="16" color="#dc2626" />
         <Message size="small" severity="error" variant="simple">
           {{ t('contacts.duplicateDocument') }}
         </Message>
       </div>
+
       <div class="mt-2 flex gap-1 items-center" v-else-if="duplicatesByIdx[origIdx]">
         <CircleAlert :size="16" color="#dc2626" />
         <Message size="small" severity="error" variant="simple">
@@ -209,6 +213,12 @@
           </span>
         </Message>
       </div>
+    </div>
+    <div v-if="showAddError" class="documents-form__global-error mt-2 flex gap-1 items-center">
+      <CircleAlert :size="16" color="#dc2626" />
+      <Message size="small" severity="error" variant="simple">
+        {{ t('contacts.errors.completeMandatoryToAddDocument') }}
+      </Message>
     </div>
 
     <ConfirmDialog :style="{ maxWidth: '350px' }" />
@@ -229,10 +239,12 @@ import { IdCard, Info, CircleAlert } from 'lucide-vue-next';
 import CountryFlag from 'vue-country-flag-next';
 
 import type { ContactDetail } from '@/domain/entities/Contact';
+import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
 import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
-import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
+
+type DocumentRowError = { country?: string; category?: string; number?: string };
 
 export default defineComponent({
   components: {
@@ -252,7 +264,7 @@ export default defineComponent({
       required: true,
     },
     errors: {
-      type: Array as PropType<Array<{ country?: string; category?: string; number?: string }>>,
+      type: Array as PropType<Array<DocumentRowError>>,
       default: () => [],
     },
   },
@@ -282,7 +294,44 @@ export default defineComponent({
         .slice()
         .reverse();
     });
+
     const duplicatesByIdx = ref<Record<number, { id: number; name: string } | null>>({});
+
+    const localErrors = ref<Array<DocumentRowError>>([]);
+    const showAddError = ref(false);
+
+    const mergedErrors = computed(() => {
+      const maxLen = Math.max(props.errors.length, localErrors.value.length);
+      return Array.from({ length: maxLen }, (_, idx) => ({
+        ...(props.errors[idx] ?? {}),
+        ...(localErrors.value[idx] ?? {}),
+      }));
+    });
+
+    const clearLocalError = (idx: number, field: keyof DocumentRowError): void => {
+      const current = localErrors.value[idx];
+      if (current === undefined || current === null) {
+        return;
+      }
+
+      const next = { ...current };
+      delete next[field];
+
+      const arr = [...localErrors.value];
+      arr[idx] = next;
+      localErrors.value = arr;
+
+      const anyError = localErrors.value.some(
+        (e) =>
+          Boolean(e) &&
+          ((typeof e.country === 'string' && e.country.length > 0) ||
+            (typeof e.category === 'string' && e.category.length > 0) ||
+            (typeof e.number === 'string' && e.number.length > 0)),
+      );
+      if (!anyError) {
+        showAddError.value = false;
+      }
+    };
 
     const patchDocuments = (
       updater: (
@@ -295,8 +344,37 @@ export default defineComponent({
     };
 
     const startAddDocument = (): void => {
-      patchDocuments((docs) => [
-        ...docs,
+      const docs = props.modelValue.documents ?? [];
+
+      const draftIdx = docs.findIndex(
+        (d) => !d.id && (d.country?.id === null || !d.category?.id || !(d.name ?? '').trim()),
+      );
+
+      if (draftIdx !== -1) {
+        const draft = docs[draftIdx];
+        const errs: DocumentRowError = {};
+        if (draft.country?.id === 0) {
+          errs.country = 'contacts.errors.issueCountryRequired';
+        }
+        if (!draft.category?.id) {
+          errs.category = 'contacts.errors.documentTypeRequired';
+        }
+        if (!(draft.name ?? '').trim()) {
+          errs.number = 'contacts.errors.documentNumberRequired';
+        }
+
+        const nextLocal = [...localErrors.value];
+        nextLocal[draftIdx] = { ...(nextLocal[draftIdx] ?? {}), ...errs };
+        localErrors.value = nextLocal;
+
+        showAddError.value = true;
+        return;
+      }
+
+      showAddError.value = false;
+
+      patchDocuments((currentDocs) => [
+        ...currentDocs,
         {
           id: 0,
           name: '',
@@ -309,7 +387,8 @@ export default defineComponent({
 
     const removeDraftsOrDelete = (origIdx: number): void => {
       patchDocuments((docs) => docs.filter((_, i) => i !== origIdx));
-      delete duplicatesByIdx.value[origIdx];
+      localErrors.value.splice(origIdx, 1);
+      duplicatesByIdx.value = {};
     };
 
     const setDocCountry = (idx: number, id: number | null): void => {
@@ -320,6 +399,9 @@ export default defineComponent({
         next[idx] = d;
         return next;
       });
+      if (id !== null) {
+        clearLocalError(idx, 'country');
+      }
     };
 
     const setDocCategory = (idx: number, id: number | null): void => {
@@ -338,6 +420,9 @@ export default defineComponent({
         next[idx] = d;
         return next;
       });
+      if (id !== null) {
+        clearLocalError(idx, 'category');
+      }
     };
 
     const docTypesFor = (doc: PersonalDocument): typeof documentTypes.value => {
@@ -354,7 +439,7 @@ export default defineComponent({
     const checkDuplicateFor = async (origIdx: number): Promise<void> => {
       const docs = props.modelValue.documents ?? [];
       const doc = docs[origIdx];
-      if (doc === undefined || doc === null) {
+      if (doc === null) {
         return;
       }
 
@@ -380,11 +465,21 @@ export default defineComponent({
       }
     };
 
+    const onNumberBlur = (origIdx: number): void => {
+      const docs = props.modelValue.documents ?? [];
+      const doc = docs[origIdx];
+      if ((doc.name ?? '').trim()) {
+        clearLocalError(origIdx, 'number');
+      }
+      void checkDuplicateFor(origIdx);
+    };
+
     const confirmChangeContactFor = (origIdx: number): void => {
       const dup = duplicatesByIdx.value[origIdx];
       if (!dup) {
         return;
       }
+
       confirm.require({
         message: t('contacts.confirmMessage'),
         header: t('contacts.confirmTitle'),
@@ -403,9 +498,10 @@ export default defineComponent({
         if (!newDocs || !oldDocs) {
           return;
         }
+
         newDocs.forEach((newDoc, idx) => {
           const oldDoc = oldDocs[idx];
-          if (newDoc.country?.id !== oldDoc?.country?.id) {
+          if (newDoc?.country?.id !== oldDoc?.country?.id) {
             setDocCategory(idx, null);
           }
         });
@@ -428,6 +524,9 @@ export default defineComponent({
       docTypesFor,
       checkDuplicateFor,
       confirmChangeContactFor,
+      mergedErrors,
+      showAddError,
+      onNumberBlur,
     };
   },
 });
@@ -589,7 +688,6 @@ export default defineComponent({
   }
   .documents-form--empty {
     display: grid;
-    min-height: 60vh;
     place-items: center;
     padding-top: 0;
 
