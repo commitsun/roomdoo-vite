@@ -11,6 +11,7 @@ import type { Id } from '@/domain/types/Id';
 export interface Contact {
   id: Id;
   name: string;
+  image: string;
   types: ContactType[];
   email?: string;
   country?: Country;
@@ -41,7 +42,7 @@ export interface Guest extends Omit<Contact, 'types' | 'phones'> {
 export interface GuestDTO extends Omit<Guest, 'lastReservationDate'> {
   lastReservationDate: string;
 }
-export interface ContactDetail extends Omit<Contact, 'types'> {
+export interface ContactDetail extends Omit<Contact, 'types' | 'image'> {
   contactType?: string;
   reference?: string;
   firstname?: string;

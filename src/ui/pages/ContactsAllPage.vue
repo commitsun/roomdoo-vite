@@ -7,73 +7,93 @@
     <Tabs v-model:value="activeTab" class="tabs" lazy>
       <TabList>
         <Tab value="all" as="div" class="flex items-center gap-2">
-          <Users :size="14" :class="{ active: activeTab === 'all' }" />
+          <Users :size="14" />
           <span class="whitespace-nowrap text-[14px]">{{ t('contacts.all') }}</span>
           <Badge
             :value="allNumbersFormatted.all"
-            size="small"
-            :style="{ backgroundColor: getTabColor('all') }"
+            size="large"
+            :style="{
+              fontWeight: '500',
+              backgroundColor: getTabColor('all'),
+              color: getFontColor('all'),
+            }"
           />
         </Tab>
         <Tab value="customers" as="div" class="flex items-center gap-2">
-          <UserCheck :class="{ active: activeTab === 'customers' }" :size="14" />
+          <UserCheck :size="14" />
           <span class="whitespace-nowrap text-[14px]">{{ t('contacts.customers') }}</span>
           <Badge
             :value="allNumbersFormatted.customers"
-            size="small"
-            :style="{ backgroundColor: getTabColor('customers') }"
+            size="large"
+            :style="{
+              fontWeight: '500',
+              backgroundColor: getTabColor('customers'),
+              color: getFontColor('customers'),
+            }"
           />
         </Tab>
         <Tab value="guests" as="div" class="flex items-center gap-2">
-          <BedDouble :class="{ active: activeTab === 'guests' }" :size="14" />
+          <BedDouble :size="14" />
           <span class="whitespace-nowrap text-[14px]">{{ t('contacts.guests') }}</span>
           <Badge
             :value="allNumbersFormatted.guests"
-            size="small"
-            :style="{ backgroundColor: getTabColor('guests') }"
+            size="large"
+            :style="{
+              fontWeight: '500',
+              backgroundColor: getTabColor('guests'),
+              color: getFontColor('guests'),
+            }"
           />
         </Tab>
         <Tab value="agencies" as="div" class="flex items-center gap-2">
-          <Store :class="{ active: activeTab === 'agencies' }" :size="14" />
+          <Store :size="14" />
           <span class="whitespace-nowrap text-[14px]">{{ t('contacts.agencies') }}</span>
           <Badge
             :value="allNumbersFormatted.agencies"
-            size="small"
-            :style="{ backgroundColor: getTabColor('agencies') }"
+            size="large"
+            :style="{
+              fontWeight: '500',
+              backgroundColor: getTabColor('agencies'),
+              color: getFontColor('agencies'),
+            }"
           />
         </Tab>
         <Tab value="suppliers" as="div" class="flex items-center gap-2">
-          <Package :class="{ active: activeTab === 'suppliers' }" :size="14" />
+          <Package :size="14" />
           <span class="whitespace-nowrap text-[14px]">{{ t('contacts.suppliers') }}</span>
           <Badge
             :value="allNumbersFormatted.suppliers"
-            size="small"
-            :style="{ backgroundColor: getTabColor('suppliers') }"
+            size="large"
+            :style="{
+              fontWeight: '500',
+              backgroundColor: getTabColor('suppliers'),
+              color: getFontColor('suppliers'),
+            }"
           />
         </Tab>
       </TabList>
       <TabPanels>
         <TabPanel value="all">
-          <ContactList :total="numContacts" />
+          <ContactList :total="numContacts" :isLoadingPage="isLoadingPage" />
         </TabPanel>
         <TabPanel value="customers">
-          <CustomerList :total="numCustomers" />
+          <CustomerList :total="numCustomers" :isLoadingPage="isLoadingPage" />
         </TabPanel>
         <TabPanel value="guests">
-          <GuestList :total="numGuests" />
+          <GuestList :total="numGuests" :isLoadingPage="isLoadingPage" />
         </TabPanel>
         <TabPanel value="agencies">
-          <AgencyList :total="numAgencies" />
+          <AgencyList :total="numAgencies" :isLoadingPage="isLoadingPage" />
         </TabPanel>
         <TabPanel value="suppliers">
-          <SupplierList :total="numSuppliers" />
+          <SupplierList :total="numSuppliers" :isLoadingPage="isLoadingPage" />
         </TabPanel>
       </TabPanels>
     </Tabs>
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, type Ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, ref, type Ref } from 'vue';
 import Button from 'primevue/button';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -123,6 +143,7 @@ export default defineComponent({
     const userStore = useUserStore();
     const contactsStore = useContactsStore();
     const useTextMessageStore = useTextMessagesStore();
+    const isLoadingPage = ref(false);
     const activeTab: Ref<string> = ref('all');
     const numContacts = ref(0);
     const numCustomers = ref(0);
@@ -152,16 +173,22 @@ export default defineComponent({
         suppliers: abbreviateNumber(numSuppliers.value),
       };
     });
+
     const getTabColor = (tab: string): string => {
-      return activeTab.value === tab ? 'var(--p-primary-color)' : 'lightgray';
+      return activeTab.value === tab ? 'var(--p-primary-100)' : '#F1F5F9';
+    };
+
+    const getFontColor = (tab: string): string => {
+      return activeTab.value === tab ? 'var(--p-primary-color)' : '#475569';
     };
 
     const fetchAllContacts = async (): Promise<void> => {
+      isLoadingPage.value = true;
       const initialPagination = {
         page: 1,
         pageSize: 50,
       };
-      uiStore.startLoading();
+      // uiStore.startLoading();
       try {
         await Promise.all([
           contactsStore.fetchContacts(initialPagination),
@@ -176,7 +203,8 @@ export default defineComponent({
         numAgencies.value = contactsStore.agenciesCount;
         numSuppliers.value = contactsStore.suppliersCount;
       } finally {
-        uiStore.stopLoading();
+        isLoadingPage.value = false;
+        // uiStore.stopLoading();
       }
     };
 
@@ -202,14 +230,17 @@ export default defineComponent({
       }
     };
 
-    onMounted(async () => {
+    onBeforeMount(async () => {
       await fetchAllContacts();
     });
+
     return {
+      t,
+      isLoadingPage,
       activeTab,
       allNumbersFormatted,
-      t,
       getTabColor,
+      getFontColor,
       openNewContact,
       numContacts,
       numCustomers,
@@ -232,13 +263,8 @@ export default defineComponent({
   .header {
     display: flex;
     justify-content: space-between;
-
     align-items: center;
     margin-bottom: 1rem;
-    h1 {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
   }
   .tabs {
     flex: 1;
