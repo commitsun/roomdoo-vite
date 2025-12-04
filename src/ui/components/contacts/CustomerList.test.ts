@@ -81,6 +81,7 @@ const testCustomers: Customer[] = [
     phones: [],
     country: { code: 'US', name: 'United States', id: 1 },
     totalInvoiced: 1500,
+    image: '',
   },
   {
     id: 2,
@@ -90,6 +91,7 @@ const testCustomers: Customer[] = [
     phones: [{ number: '555-123-4567', type: 'mobile' }],
     country: { code: 'CA', name: 'Canada', id: 2 },
     totalInvoiced: 2500,
+    image: '',
   },
 ];
 

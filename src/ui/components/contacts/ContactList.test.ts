@@ -80,6 +80,7 @@ const testContacts: Contact[] = [
       id: 1,
     },
     types: ['customer'],
+    image: '',
   },
   {
     id: 2,
@@ -95,6 +96,7 @@ const testContacts: Contact[] = [
       id: 2,
     },
     types: ['supplier', 'guest'],
+    image: '',
   },
 ];
 
@@ -124,7 +126,7 @@ describe('ContactList', () => {
     const pinia = createTestingPinia();
     // render component
     render(ContactList, {
-      props: { total: testContacts.length },
+      props: { total: testContacts.length, isLoadingPage: false },
       global: {
         plugins: [pinia, [primevuePlugin, { ripple: false }]],
         components: {

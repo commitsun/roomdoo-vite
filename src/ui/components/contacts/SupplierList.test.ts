@@ -93,6 +93,7 @@ const testSuppliers: Supplier[] = [
     phones: [],
     country: { code: 'ES', name: 'Spain', id: 1 },
     totalInvoiced: 4200,
+    image: 'https://example.com/logo.png',
   },
   {
     id: 2,
@@ -102,6 +103,7 @@ const testSuppliers: Supplier[] = [
     phones: [{ number: '555-123-456', type: 'mobile' }],
     country: { code: 'PT', name: 'Portugal', id: 2 },
     totalInvoiced: 98765,
+    image: '',
   },
 ];
 
