@@ -1039,7 +1039,6 @@ export default defineComponent({
     .grid-layout {
       grid-column-gap: 12px;
       grid-template-columns: calc(50% - 8px);
-
       .graph {
         display: inline;
       }

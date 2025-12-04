@@ -482,7 +482,7 @@ import TooltipComponent from '@/_legacy/components/roomdooComponents/TooltipComp
 import InputText from '@/_legacy/components/roomdooComponents/InputText.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useI18n } from 'vue-i18n';
-import ContactDetailForm from '@/ui/components/contacts/ContactDetail.vue';
+import ContactDetailForm from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import type { ContactDetail} from '@/domain/entities/Contact.ts';
