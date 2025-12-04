@@ -188,7 +188,7 @@ import utilsDates from '@/_legacy/utils/dates';
 import FolioPartnerContactData from '@/_legacy/components/folios/FolioPartnerContactData.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useI18n } from 'vue-i18n';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 

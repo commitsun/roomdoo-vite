@@ -1029,7 +1029,7 @@ import InputText from '@/_legacy/components/roomdooComponents/InputText.vue';
 import BookingEngineRoomType from '@/_legacy/components/bookingEngine/BookingEngineRoomType.vue';
 import BookingEngineReservation from '@/_legacy/components/bookingEngine/BookingEngineReservation.vue';
 import BookingEngineReservationInfo from '@/_legacy/components/bookingEngine/BookingEngineReservationInfo.vue';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import FolioBatchChanges from '@/_legacy/components/folios//FolioBatchChanges.vue';

@@ -2,7 +2,7 @@
   <div class="table-main-content">
     <DataTable
       v-model:first="firstRecord"
-      :value="suppliers"
+      :value="guests"
       scrollable
       scrollHeight="flex"
       class="contacts-table"
@@ -26,7 +26,7 @@
       :loading="isLoading"
       @rowClick="openContactDetail($event.data.id)"
       :pt="{
-        thead: { style: { zIndex: 5, backgroundColor: 'red' } },
+        thead: { style: { zIndex: 5 } },
         headerRow: { style: { zIndex: 5 } },
         header: { style: { zIndex: 6, border: 'none' } },
         headerCell: {
@@ -60,7 +60,7 @@
     >
       <!-- header -->
       <template #header>
-        <div class="table-header">
+        <div class="table-header lime-bg">
           <IconField>
             <InputIcon class="pi pi-search" />
             <InputText
@@ -76,6 +76,174 @@
               v-if="globalQuery && globalQuery.length >= 3"
             />
           </IconField>
+
+          <DatePicker
+            ref="datePickerRefMobile"
+            v-model="dates"
+            class="datepicker-mobile"
+            :placeholder="t('contacts.datePicker.placeHolder')"
+            selectionMode="range"
+            :manualInput="true"
+            :showHeader="false"
+            showIcon
+            :showClear="true"
+            :minDate="minDate"
+            :maxDate="maxDate"
+            appendTo="body"
+            :numberOfMonths="1"
+            :inputStyle="{ width: '100%' }"
+            inputClass="datepicker-input-mobile"
+            :showButtonBar="false"
+            @value-change="fetchIfDatesCleared()"
+          >
+            <template #footer>
+              <div class="calendar-footer">
+                <span class="title-calendar-footer">
+                  {{ t('contacts.datePicker.presetRanges') }}
+                </span>
+                <div class="first-row">
+                  <div class="first-row-filters-1">
+                    <Button
+                      class="button"
+                      size="small"
+                      :label="t('contacts.datePicker.today')"
+                      severity="secondary"
+                      @click="setToday()"
+                    />
+                    <Button
+                      class="button"
+                      size="small"
+                      :label="t('contacts.datePicker.last7Days')"
+                      severity="secondary"
+                      @click="setLast7Days()"
+                    />
+                  </div>
+                  <div class="first-row-filters-2">
+                    <Button
+                      class="button"
+                      size="small"
+                      :label="t('contacts.datePicker.last30Days')"
+                      severity="secondary"
+                      @click="setLast30Days()"
+                    />
+                    <Button
+                      class="button"
+                      size="small"
+                      :label="t('contacts.datePicker.thisMonth')"
+                      severity="secondary"
+                      @click="setThisMonth()"
+                    />
+                  </div>
+                </div>
+                <div class="second-row">
+                  <Button
+                    class="button"
+                    size="small"
+                    :label="t('contacts.datePicker.clear')"
+                    severity="secondary"
+                    @click="clearDateFilter()"
+                  />
+                  <Button
+                    class="button"
+                    size="small"
+                    :label="t('contacts.datePicker.apply')"
+                    severity="primary"
+                    @click="apply()"
+                  />
+                </div>
+              </div>
+            </template>
+          </DatePicker>
+
+          <DatePicker
+            ref="datePickerRefDesktop"
+            v-model="dates"
+            class="datepicker-desktop"
+            :placeholder="t('contacts.datePicker.placeHolder')"
+            selectionMode="range"
+            :manualInput="true"
+            :showHeader="false"
+            showIcon
+            :showClear="true"
+            :minDate="minDate"
+            :maxDate="maxDate"
+            appendTo="body"
+            :numberOfMonths="2"
+            :inputStyle="{ width: '100%' }"
+            :showButtonBar="false"
+            @value-change="fetchIfDatesCleared()"
+          >
+            <template #footer>
+              <div class="calendar-footer">
+                <span class="title-calendar-footer">{{
+                  t('contacts.datePicker.presetRanges')
+                }}</span>
+                <div class="first-row">
+                  <div class="first-row-filters-1">
+                    <Button
+                      class="button"
+                      size="small"
+                      :label="t('contacts.datePicker.today')"
+                      severity="secondary"
+                      @click="setToday()"
+                    />
+                    <Button
+                      class="button"
+                      size="small"
+                      :label="t('contacts.datePicker.last7Days')"
+                      severity="secondary"
+                      @click="setLast7Days()"
+                    />
+                  </div>
+                  <div class="first-row-filters-2">
+                    <Button
+                      class="button"
+                      size="small"
+                      :label="t('contacts.datePicker.last30Days')"
+                      severity="secondary"
+                      @click="setLast30Days()"
+                    />
+                    <Button
+                      class="button"
+                      size="small"
+                      :label="t('contacts.datePicker.thisMonth')"
+                      severity="secondary"
+                      @click="setThisMonth()"
+                    />
+                  </div>
+                </div>
+                <div class="second-row">
+                  <Button
+                    class="button"
+                    size="small"
+                    :label="t('contacts.datePicker.clear')"
+                    severity="secondary"
+                    @click="clearDateFilter()"
+                  />
+                  <Button
+                    class="button"
+                    size="small"
+                    :label="t('contacts.datePicker.apply')"
+                    severity="primary"
+                    @click="apply()"
+                  />
+                </div>
+              </div>
+            </template>
+          </DatePicker>
+
+          <Select
+            v-model="inHouseSelection"
+            class="select"
+            :options="[
+              { name: t('contacts.allGuests'), code: 'all' },
+              { name: t('contacts.inHouseGuests'), code: 'inHouse' },
+            ]"
+            optionLabel="name"
+            optionValue="code"
+            @change="fetchNow"
+          />
+
           <Button
             icon="pi pi-filter-slash"
             v-if="(isFilter || isSorting) && numTotalRecords > 0"
@@ -94,14 +262,14 @@
       <template #empty>
         <div class="empty-state">
           <p class="empty-state__desc">
-            {{ total === 0 ? t('contacts.noSuppliersTitle') : t('contacts.noResultsFoundTitle') }}
+            {{ total === 0 ? t('contacts.noGuestsTitle') : t('contacts.noResultsFoundTitle') }}
           </p>
           <p class="empty-state__desc">
             {{
               total === 0
-                ? t('contacts.noSuppliersMessage')
+                ? t('contacts.noGuestsMessage')
                 : t('contacts.noResultsFoundMessage', {
-                    entities: t('contacts.entities.supplier', 2),
+                    entities: t('contacts.entities.guest', 2),
                   })
             }}
           </p>
@@ -188,132 +356,44 @@
         </template>
       </Column>
 
-      <!-- VAT -->
+      <!-- Main Document -->
       <Column
-        field="vat"
-        :header="t('contacts.vat')"
-        style="min-width: 150px"
+        field="identificationDocuments"
+        :header="t('contacts.document')"
+        style="min-width: 200px"
+        filter
         :showFilterMatchModes="false"
         :showFilterOperator="false"
         :showAddButton="false"
-        :showFilterApplyButton="false"
-        filter
       >
         <template #body="{ data }">
-          <Tag severity="secondary">
-            <span class="ramon">
-              {{ data.vat }}
-            </span>
-          </Tag>
+          <span
+            v-if="
+              Array.isArray(data.identificationDocuments) && data.identificationDocuments.length > 0
+            "
+          >
+            <Tag severity="secondary" class="mr-2">
+              <div class="flex items-center gap-2 px-1">
+                <span class="font-bold">
+                  {{ data.identificationDocuments[0]?.type.substring(0, 3).toUpperCase()
+                  }}{{ data.identificationDocuments[0]?.type.length > 3 ? '.' : '' }}
+                </span>
+                <span class="font-normal">
+                  {{ data.identificationDocuments[0]?.number }}
+                </span>
+              </div>
+            </Tag>
+            <Tag severity="secondary" v-if="data.identificationDocuments.length > 1">
+              <span class="font-normal"> +{{ data.identificationDocuments.length - 1 }} </span>
+            </Tag>
+          </span>
         </template>
         <template #filter="{ filterModel }">
           <InputText
             v-model="filterModel.value"
             type="text"
-            :placeholder="t('contacts.searchByVat')"
+            :placeholder="t('contacts.searchByDocument')"
           />
-        </template>
-      </Column>
-
-      <!-- Email -->
-      <Column
-        field="email"
-        :header="t('contacts.email')"
-        style="min-width: 200px"
-        :showFilterMatchModes="false"
-        :showFilterOperator="false"
-        :showAddButton="false"
-        :showFilterApplyButton="false"
-        filter
-        sortable
-      >
-        <template #body="{ data }">
-          {{ data.email }}
-        </template>
-
-        <template #filter="{ filterModel }">
-          <IconField iconPosition="left">
-            <InputIcon class="pi pi-search" />
-            <InputText
-              v-model="filterModel.value"
-              type="text"
-              :placeholder="t('contacts.searchByEmail')"
-            />
-          </IconField>
-        </template>
-      </Column>
-
-      <!-- Phones -->
-      <Column
-        field="phones"
-        :header="t('contacts.phone')"
-        style="min-width: 220px"
-        filter
-        :showFilterMatchModes="false"
-        :showFilterOperator="false"
-        :showAddButton="false"
-        :showApplyButton="false"
-        :showClearButton="false"
-        :filterMenuStyle="{ padding: '0.75rem 0.75rem 0.25rem' }"
-        :pt="{
-          bodyCell: {
-            style: {
-              padding: '0',
-            },
-          },
-        }"
-      >
-        <template #body="{ data }">
-          <template v-for="(phone, index) in data.phones" :key="`${phone.type}-${index}`">
-            <Chip
-              :label="phone.number"
-              :icon="phone.type === 'phone' ? 'pi pi-phone' : 'pi pi-mobile'"
-              :pt="{
-                root: {
-                  style: {
-                    fontSize: '12px',
-                    marginBottom: '4px',
-                    paddingTop: '2px',
-                    paddingBottom: '2px',
-                    paddingLeft: '6px',
-                    paddingRight: '6px',
-                    backgroundColor: 'transparent',
-                  },
-                },
-              }"
-            />
-          </template>
-        </template>
-
-        <template #filter="{ filterModel, filterCallback, applyFilter }">
-          <div class="flex flex-col gap-2">
-            <IconField iconPosition="left">
-              <InputIcon class="pi pi-search" />
-              <InputText
-                v-model="phoneFilterDraft"
-                type="text"
-                placeholder="Search by phone"
-                :aria-label="t('contacts.searchByPhone')"
-              />
-            </IconField>
-            <span v-if="phoneFilterDraft.length < 3" class="text-xs">
-              {{ t('contacts.phoneFilterMinChars') }}
-            </span>
-            <div class="flex justify-between">
-              <Button
-                size="small"
-                variant="outlined"
-                :label="t('contacts.clear')"
-                @click="onClearPhoneFilter(filterModel, filterCallback, applyFilter)"
-              />
-              <Button
-                :label="t('contacts.apply')"
-                :disabled="phoneFilterDraft.length < 3"
-                class="p-button p-component p-button-sm p-datatable-filter-apply-button"
-                @click="onApplyPhoneFilter(filterModel, filterCallback, applyFilter)"
-              />
-            </div>
-          </div>
         </template>
       </Column>
 
@@ -374,28 +454,32 @@
         </template>
       </Column>
 
-      <!-- Total Invoiced -->
+      <!-- Last reservation (name) -->
       <Column
-        field="totalInvoiced"
-        :header="t('contacts.totalInvoiced')"
-        style="min-width: 150px"
-        :bodyStyle="{ textAlign: 'right' }"
-        :showFilterMatchModes="false"
-        :showFilterOperator="false"
-        :showAddButton="false"
-        :showFilterApplyButton="false"
-        filter
-      >
+        field="lastReservationName"
+        :header="t('contacts.lastReservation')"
+        style="min-width: 180px"
+        >xxº
         <template #body="{ data }">
-          {{
-            new Intl.NumberFormat(i18n.global.locale.value, {
-              style: 'currency',
-              currency: currency,
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-              useGrouping: true,
-            }).format(Number(data.totalInvoiced ?? 0))
-          }}
+          <!-- <span>{{ data.lastReservationDate }}</span> -->
+          <span>
+            {{
+              new Intl.DateTimeFormat(i18n.global.locale.value, {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              }).format(data.lastReservationDate)
+            }}
+          </span>
+        </template>
+      </Column>
+
+      <!-- Internal Notes -->
+      <Column field="internalNotes" :header="t('contacts.internalNotes')" style="max-width: 300px">
+        <template #body="{ data }">
+          <span v-if="data.internalNotes" class="ellipsis-2" :title="data.internalNotes">
+            {{ data.internalNotes }}
+          </span>
         </template>
       </Column>
 
@@ -409,7 +493,7 @@
                 total: new Intl.NumberFormat(i18n.global.locale.value, {
                   useGrouping: true,
                 }).format(numTotalRecords),
-                entities: t('contacts.entities.supplier', numTotalRecords),
+                entities: t('contacts.entities.guest', numTotalRecords),
               })
             }}
           </span>
@@ -420,7 +504,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
@@ -439,9 +523,9 @@ import Button from 'primevue/button';
 import Avatar from 'primevue/avatar';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
+import DatePicker from 'primevue/datepicker';
 import { FilterMatchMode } from '@primevue/core/api';
 
-import { i18n } from '@/infrastructure/plugins/i18n';
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
@@ -449,8 +533,8 @@ import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { firstTwoInitials } from '@/ui/utils/strings';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
-import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
+import { i18n } from '@/infrastructure/plugins/i18n';
+import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -468,6 +552,7 @@ export default defineComponent({
     IconField,
     InputIcon,
     Avatar,
+    DatePicker,
     CountryFlag,
   },
   props: {
@@ -481,17 +566,19 @@ export default defineComponent({
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const countriesStore = useCountriesStore();
-    const pmsPropertiesStore = usePmsPropertiesStore();
     const useTextMessageStore = useTextMessagesStore();
-    const currency = computed(
-      () =>
-        pmsPropertiesStore.pmsProperties.find(
-          (p) => p.id === pmsPropertiesStore.currentPmsPropertyId,
-        )?.currency.code,
-    );
 
     // translation
     const { t } = useI18n();
+
+    // dates related
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const datePickerRefMobile = ref();
+    const datePickerRefDesktop = ref();
+    const dates: Ref<[Date, Date] | [Date] | null> = ref(null);
+    const minDate = ref();
+    const maxDate = ref();
 
     // dialog
     const { openDialog } = useAppDialog();
@@ -515,14 +602,16 @@ export default defineComponent({
     const phoneFilterDraft = ref('');
     const filters = ref({
       name: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
-      email: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
-      vat: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
-      phones: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+      identificationDocuments: {
+        value: null as string | null,
+        matchMode: FilterMatchMode.CONTAINS,
+      },
       country: { value: null as string[] | string | null, matchMode: FilterMatchMode.IN },
     });
+    const inHouseSelection = ref('all');
 
     // data
-    const suppliers = computed(() => contactsStore.suppliers);
+    const guests = computed(() => contactsStore.guests);
 
     // orderBy: returns undefined when no sort
     const orderBy = computed(() => {
@@ -544,10 +633,11 @@ export default defineComponent({
       return (
         isNonEmptyString(globalQuery.value) ||
         isNonEmptyString(f.name.value) ||
-        isNonEmptyString(f.email.value) ||
-        isNonEmptyString(f.vat.value) ||
+        isNonEmptyString(f.identificationDocuments.value) ||
+        (Array.isArray(dates.value) && dates.value.length > 0) ||
         (Array.isArray(f.country.value) && f.country.value.length > 0) ||
-        (typeof f.country.value === 'string' && f.country.value.trim().length > 0)
+        (typeof f.country.value === 'string' && f.country.value.trim().length > 0) ||
+        inHouseSelection.value === 'inHouse'
       );
     });
 
@@ -567,10 +657,11 @@ export default defineComponent({
     // fetch contacts
     const currentRequest = ref(0);
     const fetchNow = async (): Promise<void> => {
-      const id = ++currentRequest.value; // identificador de esta petición
+      const id = ++currentRequest.value;
       isLoading.value = true;
+      const inHouseOnly = inHouseSelection.value === 'inHouse' ? true : undefined;
       try {
-        await contactsStore.fetchSuppliers(
+        await contactsStore.fetchGuests(
           {
             page: page.value,
             pageSize: rows.value,
@@ -580,26 +671,29 @@ export default defineComponent({
             nameContains: isNonEmptyString(filters.value.name.value)
               ? filters.value.name.value
               : undefined,
-            emailContains: isNonEmptyString(filters.value.email.value)
-              ? filters.value.email.value
-              : undefined,
-            vatContains: isNonEmptyString(filters.value.vat.value)
-              ? filters.value.vat.value
-              : undefined,
             countryIn:
               Array.isArray(filters.value.country.value) && filters.value.country.value.length > 0
                 ? (filters.value.country.value as string[])
                 : undefined,
-            phonesContains: isNonEmptyString(phoneFilterDraft.value)
-              ? phoneFilterDraft.value
+            documentContains: isNonEmptyString(filters.value.identificationDocuments.value)
+              ? filters.value.identificationDocuments.value
               : undefined,
+            checkinDateFrom:
+              Array.isArray(dates.value) && dates.value.length > 0 && dates.value[0] instanceof Date
+                ? dates.value[0]
+                : undefined,
+            checkinDateTo:
+              Array.isArray(dates.value) && dates.value.length > 1 && dates.value[1] instanceof Date
+                ? dates.value[1]
+                : undefined,
+            inHouseOnly,
           },
           orderBy.value,
         );
         if (id !== currentRequest.value) {
           return;
         }
-        numTotalRecords.value = contactsStore.suppliersCount;
+        numTotalRecords.value = contactsStore.guestsCount;
       } finally {
         if (id === currentRequest.value) {
           isLoading.value = false;
@@ -619,6 +713,54 @@ export default defineComponent({
       { maxWait: 3000 },
     );
 
+    // set today
+    const setToday = (): void => {
+      dates.value = [today, today];
+    };
+
+    // set last 7 days
+    const setLast7Days = (): void => {
+      const last7 = new Date();
+      last7.setDate(today.getDate() - 6);
+      last7.setHours(0, 0, 0, 0);
+      dates.value = [last7, today];
+    };
+
+    // set last 30 days
+    const setLast30Days = (): void => {
+      const last30 = new Date();
+      last30.setDate(today.getDate() - 29);
+      last30.setHours(0, 0, 0, 0);
+      dates.value = [last30, today];
+    };
+
+    // set this month
+    const setThisMonth = (): void => {
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      firstDay.setHours(0, 0, 0, 0);
+      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      lastDay.setHours(0, 0, 0, 0);
+      dates.value = [firstDay, lastDay];
+    };
+
+    // clear date filter
+    const clearDateFilter = (): void => {
+      dates.value = null;
+    };
+    // apply date filter
+    const apply = (): void => {
+      datePickerRefDesktop.value.overlayVisible = false;
+      datePickerRefMobile.value.overlayVisible = false;
+      void fetchNow();
+    };
+
+    // dates changed and if cleared apply immediately
+    const fetchIfDatesCleared = (): void => {
+      if (dates.value === null) {
+        void fetchNow();
+      }
+    };
+
     // clear all filters and sorting
     const clearAll = async (): Promise<void> => {
       globalQuery.value = '';
@@ -626,12 +768,14 @@ export default defineComponent({
       sortOrder.value = 1;
       page.value = 1;
       firstRecord.value = 0;
-
+      dates.value = null;
+      inHouseSelection.value = 'all';
       filters.value = {
         name: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        email: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        vat: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        phones: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        identificationDocuments: {
+          value: null as string | null,
+          matchMode: FilterMatchMode.CONTAINS,
+        },
         country: { value: [] as string[] | null, matchMode: FilterMatchMode.IN },
       };
       phoneFilterDraft.value = '';
@@ -729,6 +873,20 @@ export default defineComponent({
       }
     };
 
+    watch(dates, (newDates) => {
+      // si no hay fechas, reseteamos límites
+      if (newDates === null || newDates[0] === null) {
+        minDate.value = null;
+        maxDate.value = null;
+        return;
+      }
+      const start = newDates[0];
+      minDate.value = start;
+      const max = new Date(start);
+      max.setDate(max.getDate() + 31);
+      maxDate.value = max;
+    });
+
     // on mounted fetch data and countries
     onMounted(async () => {
       await Promise.all([fetchNow(), countriesStore.fetchCountries()]);
@@ -743,7 +901,7 @@ export default defineComponent({
       numTotalRecords,
       rows,
       phoneFilterDraft,
-      suppliers,
+      guests,
       globalQuery,
       filters,
       CONTACT_TYPES,
@@ -764,7 +922,19 @@ export default defineComponent({
       onGlobalQueryInput,
       firstTwoInitials,
       clearGlobalQuery,
-      currency,
+      datePickerRefMobile,
+      datePickerRefDesktop,
+      dates,
+      minDate,
+      maxDate,
+      setToday,
+      setLast7Days,
+      setLast30Days,
+      setThisMonth,
+      clearDateFilter,
+      apply,
+      inHouseSelection,
+      fetchIfDatesCleared,
     };
   },
 });
@@ -779,21 +949,21 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     width: 100%;
-    @media (min-width: 1024px) {
-      flex-direction: row;
-      align-items: center;
-      button {
-        margin-left: 1rem;
-      }
-    }
     .pi-times {
       cursor: pointer;
     }
     .button {
       margin-top: 1rem;
-      @media (min-width: 1024px) {
-        margin-top: 0;
-      }
+    }
+    .datepicker-desktop {
+      display: none;
+    }
+    .datepicker-mobile {
+      margin-top: 1rem;
+    }
+    .select {
+      margin-top: 1rem;
+      width: 100%;
     }
   }
   .name {
@@ -820,6 +990,58 @@ export default defineComponent({
       &:nth-child(2) {
         margin-top: 8px;
         margin-bottom: 16px;
+      }
+    }
+  }
+}
+
+.calendar-footer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  .title-calendar-footer {
+    margin-top: 0.5rem;
+  }
+  .first-row {
+    display: flex;
+    flex-direction: column;
+    .first-row-filters-1,
+    .first-row-filters-2 {
+      display: flex;
+      justify-content: space-between;
+      .button {
+        width: 49%;
+        margin: 0.25rem 0;
+      }
+    }
+  }
+  .second-row {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 1024px) {
+  .table-main-content {
+    .table-header {
+      flex-direction: row;
+      .datepicker-mobile {
+        display: none;
+      }
+      .datepicker-desktop {
+        margin-left: 1rem;
+        width: 265px;
+        display: flex;
+      }
+      .select {
+        margin-top: 0;
+        margin-left: 1rem;
+        width: 220px;
+      }
+      .button {
+        margin-top: 0;
+        margin-left: 1rem;
       }
     }
   }

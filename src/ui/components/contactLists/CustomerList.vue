@@ -450,7 +450,7 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { firstTwoInitials } from '@/ui/utils/strings';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;

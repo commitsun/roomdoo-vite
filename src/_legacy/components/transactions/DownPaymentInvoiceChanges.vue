@@ -77,7 +77,7 @@ import AutocompleteComponent from '@/_legacy/components/roomdooComponents/Autoco
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
 
 import { dialogService } from '@/_legacy/services/DialogService';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useAppDialog } from '@/ui/composables/useAppDialog';

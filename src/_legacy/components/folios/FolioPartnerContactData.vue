@@ -88,7 +88,7 @@ import { usePartner } from '@/_legacy/utils/usePartner';
 import { usePlanning } from '@/_legacy/utils/usePlanning';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useI18n } from 'vue-i18n';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 
