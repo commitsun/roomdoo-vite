@@ -290,6 +290,7 @@
     "changeImage": "Cambiar foto",
     "removeImage": "Eliminar",
     "fileTooLarge": "El archivo es demasiado grande",
+    "fileTypeSupported": "JPG o PNG. Tamaño máximo {size}MB",
     "personalInformation": "Información personal",
     "nameEmailLogin": "Usuario o email de acceso",
     "yourLogin": "Este es el nombre o email que usas para acceder a tu cuenta",
