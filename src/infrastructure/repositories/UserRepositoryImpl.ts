@@ -74,7 +74,7 @@ export class UsersRepositoryImpl implements UserRepository {
     if (user.login !== undefined) {
       payload.login = user.login;
     }
-    if (user.avatar !== undefined) {
+    if (typeof user.avatar === 'string' && user.avatar !== '') {
       const res = await fetch(user.avatar);
       const blob = await res.blob();
       const ext = blob.type?.split('/')[1] ?? 'png';
@@ -84,6 +84,8 @@ export class UsersRepositoryImpl implements UserRepository {
       await api.put('/user/image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+    } else if (user.avatar === '') {
+      await api.delete('/user/image');
     }
     await api.patch('/user', payload);
   }

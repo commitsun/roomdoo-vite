@@ -289,6 +289,8 @@
     "changeImage": "Change image",
     "removeImage": "Remove",
     "fileTooLarge": "The file is too large",
+    "fileTypeSupported": "JPG or PNG. Maximum size {size}MB",
+
     "personalInformation": "Personal Information",
     "nameEmailLogin": "Name or email address for login",
     "yourLogin": "This is the name or email you use to access your account",
