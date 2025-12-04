@@ -1,6 +1,9 @@
 <template>
   <div class="header">
-    <img src="/app-images/icon-burger.svg" @click="openLeftDrawer()" class="icon-menu" />
+    <!-- <img src="/app-images/icon-burger.svg" @click="openLeftDrawer()" class="icon-menu" /> -->
+    <button class="icon-menu" @click="openLeftDrawer()" aria-label="Open menu">
+      <i class="pi pi-bars" style="font-size: 1.5rem" />
+    </button>
     <div class="logo-container">
       <img src="/logos/logo-text.svg" />
     </div>
