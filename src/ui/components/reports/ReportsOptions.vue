@@ -83,6 +83,10 @@ export default defineComponent({
     .report-icon {
       color: var(--p-primary-color);
     }
+    &:hover {
+      background-color: #eff6ff;
+      opacity: 0.95;
+    }
   }
 }
 
