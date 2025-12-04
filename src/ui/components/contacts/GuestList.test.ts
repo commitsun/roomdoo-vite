@@ -103,6 +103,7 @@ const testGuests: Guest[] = [
     lastReservation: { id: 101, name: 'RES123' },
     inHouse: true,
     internalNotes: 'VIP guest. Allergic to peanuts.',
+    image: 'https://example.com/alice.jpg',
   },
   {
     id: 2,
@@ -114,6 +115,7 @@ const testGuests: Guest[] = [
     lastReservation: { id: 102, name: 'RES456' },
     inHouse: false,
     internalNotes: 'Prefers late checkout.',
+    image: 'https://example.com/bob.jpg',
   },
 ];
 

@@ -52,7 +52,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     // arrange
     const data: EntityListResponse<Contact> = {
       count: 1,
-      items: [{ id: 1, name: 'John', types: [], phones: [] }],
+      items: [{ id: 1, name: 'John', types: [], phones: [], image: '' }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
     // act
@@ -87,7 +87,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     // arrange
     const data: EntityListResponse<Customer> = {
       count: 1,
-      items: [{ id: 1, name: 'John', phones: [], vat: '', totalInvoiced: 0 }],
+      items: [{ id: 1, name: 'John', phones: [], vat: '', totalInvoiced: 0, image: '' }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
     // act
@@ -129,6 +129,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
           identificationDocuments: [],
           lastReservationDate: '2024-05-01',
           lastReservation: { id: 1, name: 'Reservation 1' },
+          image: '',
         },
       ],
     };
@@ -167,7 +168,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     // arrange
     const data: EntityListResponse<Agency> = {
       count: 1,
-      items: [{ id: 1, name: 'John', phones: [] }],
+      items: [{ id: 1, name: 'John', phones: [], image: '' }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
     // act
@@ -200,7 +201,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     // arrange
     const data: EntityListResponse<Supplier> = {
       count: 1,
-      items: [{ id: 1, name: 'John', phones: [], vat: '', totalInvoiced: 0 }],
+      items: [{ id: 1, name: 'John', phones: [], vat: '', totalInvoiced: 0, image: '' }],
     };
     vi.mocked(api.get).mockResolvedValue({ data });
     // act
