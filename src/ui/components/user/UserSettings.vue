@@ -1,5 +1,5 @@
 <template>
-  <div class="user__settings">
+  <div class="user-settings">
     <Tabs v-model:value="activeTab">
       <TabList>
         <Tab
@@ -19,9 +19,9 @@
           <span> {{ t('userSettings.securityAndAccess') }} </span>
         </Tab>
       </TabList>
-      <TabPanels>
+      <TabPanels class="lg:h-[535px] overflow-y-scroll">
         <TabPanel value="0">
-          <div class="user__settings--row">
+          <div class="user-settings-row">
             <Avatar
               :label="!imageUrl ? labelAvatar : ''"
               shape="circle"
@@ -40,139 +40,141 @@
                 },
               }"
             />
-            <div>
-              <FileUpload
-                class="user"
-                mode="basic"
-                :maxFileSize="1000000"
-                @select="onAdvancedUpload($event)"
-                :auto="true"
-                :chooseLabel="
-                  imageUrl ? t('userSettings.changeImage') : t('userSettings.uploadPhoto')
-                "
-                chooseIcon="pi pi-upload"
-                :chooseButtonProps="{ class: 'p-button-outlined p-button-secondary' }"
-                :pt="{
-                  root: { 'data-testid': 'fileupload-root' },
-                  chooseButton: { 'data-testid': 'file-upload-trigger' },
-                }"
-                :invalidFileSizeMessage="t('userSettings.fileTooLarge')"
-              />
+            <div class="right">
+              <IconField>
+                <InputIcon class="pi pi-upload" style="color: #334155; font-size: 12px" />
+                <FileUpload
+                  class="user"
+                  mode="basic"
+                  :maxFileSize="100000"
+                  @select="onAdvancedUpload($event)"
+                  :auto="true"
+                  chooseIcon="-"
+                  :chooseLabel="
+                    imageUrl ? t('userSettings.changeImage') : t('userSettings.uploadPhoto')
+                  "
+                  :chooseButtonProps="{
+                    class: 'p-button-outlined p-button-secondary',
+                    icon: 'pi pi-upload',
+                  }"
+                  :pt="{
+                    root: { 'data-testid': 'fileupload-root' },
+                    chooseButton: { 'data-testid': 'file-upload-trigger' },
+                  }"
+                  :invalidFileSizeMessage="t('userSettings.fileTooLarge')"
+                  :style="{ fontSize: '12px', height: '27px', paddingLeft: '1.5rem' }"
+                />
+              </IconField>
+
               <Button
                 v-if="imageUrl"
                 :label="t('userSettings.removeImage')"
                 severity="secondary"
                 variant="outlined"
                 icon="pi pi-trash"
-                :style="{ marginTop: '0.5rem' }"
+                :style="{ marginTop: '0.5rem', height: '27px' }"
                 @click="imageUrl = ''"
+                size="small"
               />
+              <p>
+                {{
+                  t('userSettings.fileTypeSupported', {
+                    size: 10,
+                  })
+                }}
+              </p>
             </div>
           </div>
-          <div class="user__settings--grid">
-            <div class="user__settings--section-title">
+          <div class="user-settings-grid">
+            <div class="user-settings-section-title">
               {{ t('userSettings.personalInformation') }}
             </div>
-            <div class="user__settings--field user__settings--field--full">
-              <label class="user__settings--label" for="firstName">
+            <div class="user-settings-field user-settings-field-full">
+              <label class="user-settings-label" for="firstName">
                 {{ t('userSettings.firstName') }}
-
                 *
               </label>
               <InputText
-                class="user__settings--control"
+                class="user-settings-control"
                 id="firstName"
                 v-model="firstName"
                 :style="{ minWidth: '260px' }"
               />
             </div>
             <div
-              class="user__settings--field"
-              :class="{ 'user__settings--field--full': !showLastName2 }"
+              class="user-settings-field"
+              :class="{ 'user-settings-field-full': !showLastName2 }"
             >
-              <label class="user__settings--label" for="lastName">
+              <label class="user-settings-label" for="lastName">
                 {{ t('userSettings.lastName') }}
               </label>
               <InputText
-                class="user__settings--control"
+                class="user-settings-control"
                 id="lastName"
                 v-model="lastName"
                 :style="{ minWidth: '260px' }"
               />
             </div>
-            <div class="user__settings--field" v-if="showLastName2">
-              <label class="user__settings--label" for="secondLastName">
+            <div class="user-settings-field" v-if="showLastName2">
+              <label class="user-settings-label" for="secondLastName">
                 {{ t('userSettings.secondLastName') }}
               </label>
               <InputText
-                class="user__settings--control"
+                class="user-settings-control"
                 id="secondLastName"
                 v-model="secondLastName"
                 :style="{ minWidth: '260px' }"
               />
             </div>
           </div>
-          <div class="user__settings--grid">
-            <div class="user__settings--section-title">
+          <div class="user-settings-grid">
+            <div class="user-settings-section-title">
               {{ t('userSettings.contactData') }}
             </div>
-            <div class="user__settings--field user__settings--field--full">
-              <label class="user__settings--label" for="email">
+            <div class="user-settings-field user-settings-field-full">
+              <label class="user-settings-label" for="email">
                 {{ t('userSettings.email') }}*
               </label>
               <InputText
-                class="user__settings--control"
+                class="user-settings-control"
                 id="email"
                 v-model="email"
                 :style="{ minWidth: '260px' }"
               />
             </div>
-            <div class="user__settings--field">
-              <label class="user__settings--label" for="phone">
+            <div class="user-settings-field">
+              <label class="user-settings-label" for="phone">
                 {{ t('userSettings.phone') }}
               </label>
               <InputText
-                class="user__settings--control"
+                class="user-settings-control"
                 id="phone"
                 v-model="phone"
                 :style="{ minWidth: '260px' }"
               />
             </div>
-            <div
-              class="user__settings--field"
-              v-if="availableLocales && availableLocales.length > 1"
-            >
-              <label class="user__settings--label" for="language">
+            <div class="user-settings-field" v-if="availableLocales && availableLocales.length > 1">
+              <label class="user-settings-label" for="language">
                 {{ t('userSettings.language') }}
               </label>
-              <Select
-                class="select-language"
-                v-model="selectedLocale"
-                optionLabel="name"
-                optionValue="code"
-                :options="availableLocales as Language[]"
-                :style="{ minWidth: '260px' }"
-                aria-label="language"
-              />
+
+              <IconField>
+                <InputIcon class="pi pi-globe" style="color: #334155" />
+                <Select
+                  class="user-settings-control pl-6"
+                  v-model="selectedLocale"
+                  optionLabel="name"
+                  optionValue="code"
+                  :options="availableLocales"
+                  aria-label="language"
+                />
+              </IconField>
             </div>
           </div>
-          <div class="user__settings--footer-buttons">
-            <Button
-              :label="t('userSettings.cancel')"
-              severity="secondary"
-              :style="{ width: 'auto' }"
-              @click="handleCancel()"
-            />
-            <Button
-              :label="t('userSettings.save')"
-              :style="{ width: 'auto', backgroundColor: '#1d4ed8', border: 'none' }"
-              @click="updateUser()"
-            />
-          </div>
         </TabPanel>
-
+        <!-- TAB SECURITY -->
         <TabPanel value="1">
-          <div class="user__settings--section-title">
+          <div class="user-settings-section-title mt-4">
             {{ t('userSettings.nameEmailLogin') }}
           </div>
           <Panel
@@ -187,43 +189,43 @@
           >
             <template #header>
               <div class="flex flex-col mt-2">
-                <div class="flex">
-                  <Mail class="user__settings--login-icon" color="#64748B" />
-                  <div class="user__settings--login-info">
-                    <div class="user__settings--login-email">
+                <div class="flex items-center">
+                  <Mail class="user-settings-login-icon mr-2" color="#64748B" :size="15" />
+                  <div class="user-settings-login-info">
+                    <div class="user-settings-login-email">
                       {{ login }}
                     </div>
                   </div>
                 </div>
-                <div class="user__settings--login-text my-2 ml-4">
+                <div class="user-settings-login-text my-2">
                   {{ t('userSettings.yourLogin') }}
                 </div>
               </div>
             </template>
             <template #toggleicon>
-              <Pen color="#1D4ED8" :size="18" />
+              <Pen color="#1D4ED8" :size="15" />
             </template>
-            <div class="user__settings--security-section">
-              <div class="user__settings--card">
-                <div class="user__settings--grid-card">
-                  <div class="user__settings--field">
-                    <label class="user__settings--label flex-label" for="login">
+            <div class="user-settings-security-section">
+              <div class="user-settings-card">
+                <div class="user-settings-grid-card">
+                  <div class="user-settings-field">
+                    <label class="user-settings-label" for="login">
                       {{ t('userSettings.currentLogin') }}
                     </label>
                     <InputText
-                      class="user__settings--control"
+                      class="user-settings-control"
                       id="login"
                       v-model="login"
                       disabled
                       :style="{ minWidth: '260px' }"
                     />
                   </div>
-                  <div class="user__settings--field">
-                    <label class="user__settings--label" for="newLogin">
+                  <div class="user-settings-field">
+                    <label class="user-settings-label" for="newLogin">
                       {{ t('userSettings.newLogin') }} *
                     </label>
                     <InputText
-                      class="user__settings--control"
+                      class="user-settings-control"
                       id="newLogin"
                       v-model="newLogin"
                       :style="{ minWidth: '260px' }"
@@ -236,13 +238,13 @@
                     {{ loginErrorMessage }}
                   </Message>
                 </div>
-                <div class="user__settings--footer-change-login">
+                <div class="user-settings-footer-change-login">
                   <Button :label="t('userSettings.changeLogin')" @click="updateLogin()" />
                 </div>
               </div>
             </div>
           </Panel>
-          <div class="user__settings--section-title--second">
+          <div class="user-settings-section-title-second">
             {{ t('userSettings.password') }}
           </div>
           <Panel
@@ -257,25 +259,29 @@
           >
             <template #header>
               <div class="flex flex-col mt-2">
-                <div class="flex">
-                  <LockKeyhole class="user__settings--password-icon" color="#64748B" />
-                  <div class="user__settings--password-info">
-                    <div class="user__settings--password-email">••••••••••</div>
+                <div class="flex items-center">
+                  <LockKeyhole
+                    class="user-settings-password-icon mr-2"
+                    color="#64748B"
+                    :size="15"
+                  />
+                  <div class="user-settings-password-info">
+                    <div class="user-settings-password-email">••••••••••</div>
                   </div>
                 </div>
-                <div class="user__settings--password-text my-2 ml-4">
+                <div class="user-settings-password-text my-2">
                   {{ t('userSettings.yourPassword') }}
                 </div>
               </div>
             </template>
             <template #toggleicon>
-              <Pen color="#1D4ED8" :size="18" />
+              <Pen color="#1D4ED8" :size="15" />
             </template>
-            <div class="user__settings--security-section">
-              <div class="user__settings--card">
-                <div class="user__settings--grid-card">
-                  <div class="user__settings--field">
-                    <label class="user__settings--label flex-label" for="currentPassword">
+            <div class="user-settings-security-section">
+              <div class="user-settings-card">
+                <div class="user-settings-grid-card">
+                  <div class="user-settings-field">
+                    <label class="user-settings-label" for="currentPassword">
                       {{ t('userSettings.currentPassword') }} *
                     </label>
                     <Password
@@ -284,6 +290,7 @@
                       :feedback="false"
                       toggleMask
                       :style="{ width: '100%' }"
+                      :inputStyle="{ width: '100%' }"
                       :inputProps="{ autocomplete: 'current-password' }"
                       :invalid="
                         passwordErrorMessage === t('userSettings.invalidPassword') ||
@@ -292,8 +299,8 @@
                       "
                     />
                   </div>
-                  <div class="user__settings--field">
-                    <label class="user__settings--label" for="newPassword">
+                  <div class="user-settings-field">
+                    <label class="user-settings-label" for="newPassword">
                       {{ t('userSettings.newPassword') }} *
                     </label>
                     <Password
@@ -302,6 +309,7 @@
                       :feedback="false"
                       toggleMask
                       :style="{ width: '100%' }"
+                      :inputStyle="{ width: '100%' }"
                       :inputProps="{ autocomplete: 'new-password' }"
                       :invalid="
                         passwordErrorMessage === t('userSettings.passwordsDoNotMatch') ||
@@ -310,8 +318,8 @@
                       "
                     />
                   </div>
-                  <div class="user__settings--field">
-                    <label class="user__settings--label flex-label" for="repeatPassword">
+                  <div class="user-settings-field">
+                    <label class="user-settings-label" for="repeatPassword">
                       {{ t('userSettings.repeatPassword') }} *
                     </label>
                     <Password
@@ -320,6 +328,7 @@
                       :feedback="false"
                       toggleMask
                       :style="{ width: '100%' }"
+                      :inputStyle="{ width: '100%' }"
                       :inputProps="{ autocomplete: 'repeat-password' }"
                       :invalid="
                         passwordErrorMessage === t('userSettings.passwordsDoNotMatch') ||
@@ -332,7 +341,7 @@
                     {{ passwordErrorMessage }}
                   </Message>
                 </div>
-                <div class="user__settings--footer-change-login">
+                <div class="user-settings-footer-change-login">
                   <Button
                     :label="t('userSettings.changePassword')"
                     @click="handleChangePassword()"
@@ -344,6 +353,19 @@
         </TabPanel>
       </TabPanels>
     </Tabs>
+    <div class="user-settings-footer-buttons">
+      <Button
+        :label="t('userSettings.cancel')"
+        severity="secondary"
+        :style="{ width: 'auto' }"
+        @click="handleCancel()"
+      />
+      <Button
+        :label="t('userSettings.save')"
+        :style="{ width: 'auto', backgroundColor: '#1d4ed8', border: 'none' }"
+        @click="updateUser()"
+      />
+    </div>
     <ConfirmDialog :style="{ maxWidth: '380px' }"></ConfirmDialog>
   </div>
 </template>
@@ -361,6 +383,8 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import Panel from 'primevue/panel';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
 import Password from 'primevue/password';
 import Message from 'primevue/message';
 import ConfirmDialog from 'primevue/confirmdialog';
@@ -374,8 +398,6 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { i18n } from '@/infrastructure/plugins/i18n';
-import { APP_LANGUAGES } from '@/application/instance/InstanceService';
-import type { Language } from '@/domain/entities/Language';
 import type { User } from '@/domain/entities/User';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { BadRequestError } from '@/application/shared/BadRequestError';
@@ -424,7 +446,7 @@ const labelAvatar = computed(() => {
     .substring(0, 2);
 });
 
-const availableLocales = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
+const availableLocales = computed(() => [...(instanceStore.instance?.languages || [])]);
 const showLastName2 = computed(() => userStore.userSchemas?.includes('lastname2'));
 
 const handleUpdateUser = async (): Promise<boolean> => {
@@ -676,114 +698,102 @@ onMounted(() => {
   }
 });
 </script>
+
 <style scoped lang="scss">
-.user__settings {
+.user-settings {
   display: flex;
   flex-direction: column;
-  &--row {
+  .right {
+    p {
+      margin-top: 12px;
+      font-size: 12px;
+    }
+  }
+  .user-settings-row {
     display: flex;
     gap: 1rem;
     margin-top: 1rem;
   }
 
-  &--grid,
-  &--grid-card {
+  .user-settings-grid,
+  .user-settings-grid-card {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
     margin-top: 2rem;
   }
-  &--grid-card {
+
+  .user-settings-grid-card {
     margin-top: 0;
   }
-  &--field {
-    .user__settings-form__control {
-      width: 100%;
-    }
 
-    :deep(.p-inputtext),
-    :deep(.p-select),
-    :deep(.p-select-label),
-    :deep(.p-datepicker),
-    :deep(.p-inputwrapper) {
+  .user-settings-field {
+    .user-settings-control {
       width: 100%;
-      font-size: 12px !important;
-      height: 30px;
-    }
-
-    :deep(.p-datepicker .p-inputwrapper) {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: stretch;
-    }
-
-    :deep(.user__settings__control-input),
-    :deep(.p-datepicker .p-inputtext) {
-      width: 100%;
-    }
-
-    :deep(.p-select .p-select-label) {
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
-    .flex-label {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
   }
-  &--field--full {
+
+  .user-settings-field-full {
     grid-column: 1 / -1;
   }
-  &--section-title {
+
+  .user-settings-section-title {
     font-weight: bold;
     font-size: 16px;
     margin-bottom: 1rem;
   }
-  &--section-title--second {
+
+  .user-settings-section-title-second {
     font-weight: bold;
     font-size: 16px;
     margin-bottom: 1rem;
     margin-top: 2rem;
   }
 
-  &--label {
+  .user-settings-label {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     margin-bottom: 7px;
     display: block;
     color: #64748b;
   }
-  &--login,
-  &--password {
+
+  .user-settings-login,
+  .user-settings-password {
     margin-top: 1rem;
     padding: 1rem 0;
     background-color: #f9fafb;
     display: flex;
     justify-content: space-between;
-    &-icon {
+
+    .user-settings-login-icon {
       min-width: 50px;
     }
-    &-left {
+
+    .user-settings-login-left {
       display: flex;
     }
   }
-  .user__settings--change-login {
+
+  .user-settings-change-login {
     min-width: 70px;
   }
-  .user__settings--change-login-link {
+
+  .user-settings-change-login-link {
     cursor: pointer;
     color: #1d4ed8;
-    font-weight: 500;
+    font-weight: 400;
   }
-  &--security-section {
+
+  .user-settings-security-section {
     font-size: 12px;
   }
-  &--card {
+
+  .user-settings-card {
     padding: 1rem;
     background-color: #ffffff;
-    .user__settings--footer-change-login {
+
+    .user-settings-footer-change-login {
       display: flex;
       justify-content: flex-end;
       width: 100%;
@@ -792,57 +802,48 @@ onMounted(() => {
     }
   }
 }
-:deep(.p-message-text) {
-  font-size: 12px;
-}
-.user__settings--footer-buttons {
+
+.user-settings-footer-buttons {
   margin-top: 2rem;
   display: flex;
   justify-content: flex-end;
   width: 100%;
   gap: 1rem;
 }
-:deep(.p-button) {
-  font-size: 12px;
-}
 
 @media (min-width: 1024px) {
-  .user__settings {
+  .user-settings {
     width: 640px;
-    height: 715px;
-    &--grid {
+    height: 640px;
+    padding-bottom: 17px;
+    .user-settings-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       align-items: start;
     }
 
-    &--field {
+    .user-settings-field {
       grid-column: auto / span 1;
-      :deep(.p-inputtext),
-      :deep(.p-select),
-      :deep(.p-select-label) {
-        font-size: 14px !important;
-        height: 35px;
-      }
     }
-    :deep(.p-button) {
-      font-size: 14px;
-    }
-    &--field--full {
+
+    .user-settings-field-full {
       grid-column: 1 / -1;
     }
-    &--security-section {
+
+    .user-settings-security-section {
       font-size: 14px;
     }
-  }
-  :deep(.p-message-text) {
-    font-size: 14px;
-  }
-  .user__settings--footer-buttons {
-    flex-direction: row;
-    justify-content: flex-end;
-    width: auto;
-    height: 100%;
-    margin-top: 4rem;
+
+    .user-settings-footer-buttons {
+      margin-top: 0;
+      height: 87px;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      flex-wrap: nowrap;
+      width: auto;
+      padding-bottom: 17px;
+      margin-top: 17px;
+    }
   }
 }
 </style>
