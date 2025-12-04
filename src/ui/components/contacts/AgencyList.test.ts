@@ -74,6 +74,7 @@ const testAgencies: Agency[] = [
     email: 'booking@acme.com',
     phones: [],
     country: { code: 'ES', name: 'Spain', id: 1 },
+    image: '',
   },
   {
     id: 2,
@@ -84,6 +85,7 @@ const testAgencies: Agency[] = [
       { number: '555-987-6543', type: 'phone' },
     ],
     country: { code: 'PT', name: 'Portugal', id: 2 },
+    image: '',
   },
 ];
 

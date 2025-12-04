@@ -44,12 +44,14 @@ describe('ContactsService.fetchContacts', () => {
           name: 'A',
           types: [],
           phones: [],
+          image: '',
         },
         {
           id: 2,
           name: 'B',
           types: [],
           phones: [],
+          image: '',
         },
       ],
     };
@@ -120,6 +122,7 @@ describe('ContactsService.fetchCustomers', () => {
           vat: 'VAT123',
           totalInvoiced: 0,
           phones: [],
+          image: '',
         },
       ],
     };
@@ -185,6 +188,7 @@ describe('ContactsService.fetchGuests', () => {
           identificationDocuments: [],
           lastReservation: { id: 1, name: 'Res 1' },
           lastReservationDate: new Date('2024-06-15'),
+          image: '',
         },
         {
           id: 11,
@@ -192,6 +196,7 @@ describe('ContactsService.fetchGuests', () => {
           identificationDocuments: [],
           lastReservation: { id: 2, name: 'Res 2' },
           lastReservationDate: new Date('2024-06-20'),
+          image: '',
         },
       ],
     };
@@ -251,6 +256,7 @@ describe('ContactsService.fetchAgencies', () => {
           id: 100,
           name: 'Roomdoo Travel',
           phones: [],
+          image: '',
         },
       ],
     };
@@ -313,6 +319,7 @@ describe('ContactsService.fetchSuppliers', () => {
           vat: 'VAT123',
           totalInvoiced: 0,
           phones: [],
+          image: '',
         },
       ],
     };
