@@ -3,7 +3,10 @@
     <div class="header" v-if="!isSearchOpened">
       <div class="header-row">
         <div class="left">
-          <img src="/app-images/icon-burger.svg" @click="openLeftDrawer" class="icon-menu" />
+          <!-- <img src="/app-images/icon-burger.svg" @click="openLeftDrawer" class="icon-menu" /> -->
+          <button class="icon-menu" @click="openLeftDrawer()" aria-label="Open menu">
+            <i class="pi pi-bars" style="font-size: 1.5rem" />
+          </button>
           <div class="select-property-desk">
             <AutocompleteComponent
               id="properties-autocomplete"
@@ -214,7 +217,7 @@
           <DatePicker
             v-model="transactionDateRange"
             class="datepicker"
-            :inputStyle="{ height: '40px', fontSize: '0.9rem' }"
+            :inputStyle="{ height: '40px', fontSize: '1rem' }"
             size="small"
             dateFormat="dd/mm/yy"
             placeholder="DD/MM/YYYY"

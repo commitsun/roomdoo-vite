@@ -8,7 +8,10 @@
   >
     <div class="header">
       <div class="header-left">
-        <img src="/app-images/icon-burger.svg" @click="openLeftDrawer" class="icon-menu" />
+        <!-- <img src="/app-images/icon-burger.svg" @click="openLeftDrawer" class="icon-menu" /> -->
+        <button class="icon-menu" @click="openLeftDrawer()" aria-label="Open menu">
+          <i class="pi pi-bars" style="font-size: 1.5rem" />
+        </button>
         <DatePicker
           class="calendar-select"
           v-model="selectedDate"
@@ -16,7 +19,7 @@
           placeholder="DD/MM/YYYY"
           :manualInput="false"
           :inputStyle="{
-            width: '115px',
+            width: '135px',
             height: '25px',
             padding: '0px 5px',
             textAlign: 'center',
