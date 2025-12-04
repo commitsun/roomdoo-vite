@@ -26,7 +26,6 @@ import { computed, defineComponent, ref, watch } from 'vue';
 
 import SidebarHeader from './SidebarHeader.vue';
 import SidebarMenu from './SidebarMenu.vue';
-import SidebarSupport from './SidebarSupport.vue';
 import SidebarFooter from './SidebarFooter.vue';
 
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
@@ -36,7 +35,6 @@ export default defineComponent({
   components: {
     SidebarHeader,
     SidebarMenu,
-    SidebarSupport,
     SidebarFooter,
   },
   props: {
