@@ -34,6 +34,7 @@
           size="large"
           shape="circle"
           class="avatar-primary"
+          :style="{ backgroundColor: '#1F89E1', color: 'white' }"
         />
       </div>
       <div class="user-info">
