@@ -233,25 +233,29 @@ export default defineComponent({
   font-size: 14px;
   margin: 1rem 1rem;
   flex: 1;
-  padding: 0 0.5rem;
   overflow-y: auto;
   overflow-x: hidden;
 
   .nav-link,
   .submenu-link {
-    margin-top: 1rem;
-    position: relative;
     display: flex;
     align-items: center;
+    justify-items: center;
     gap: 1rem;
+    border-radius: 4px;
+    padding-left: 0.5rem;
+    position: relative;
     min-width: 0;
     margin-bottom: 10px;
     cursor: pointer;
     user-select: none;
+    height: 35px;
+    color: #1e293b;
+    padding-right: 14px;
+
     // icon
     .nav-link-icon {
-      color: #acacac;
-      min-width: 14px;
+      min-width: 8px;
       flex-shrink: 0;
     }
     // text
@@ -260,7 +264,6 @@ export default defineComponent({
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      // border: 1px solid red;
     }
 
     // caret for toggles
@@ -275,12 +278,7 @@ export default defineComponent({
     &:hover,
     &.is-active,
     &.router-link-exact-active {
-      .nav-link-icon {
-        color: black;
-      }
-      span {
-        font-weight: bold;
-      }
+      background-color: #f1f5f9;
     }
   }
   .submenu {

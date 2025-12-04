@@ -12,6 +12,7 @@
       appendTo="self"
       ref="refPropertySelect"
       :class="{ 'is-open': isOpen }"
+      :filter="pmsProperties.length > 5"
       :pt="{
         root: {
           class: 'property-select-dropdown',
@@ -19,6 +20,11 @@
             height: '38px',
             width: '235px',
             color: 'red',
+          },
+        },
+        header: {
+          style: {
+            padding: '8px',
           },
         },
         label: {
@@ -36,7 +42,11 @@
       <template #value="{ value }">
         <div v-if="currentPmsProperty" class="value-wrapper">
           <Avatar
-            :image="currentPmsProperty.image"
+            :image="
+              currentPmsProperty.image
+                ? currentPmsProperty.image
+                : '/images/default-property-image.svg'
+            "
             shape="square"
             :pt="{
               root: {
@@ -54,7 +64,7 @@
       <template #option="{ option }">
         <div class="value-wrapper">
           <Avatar
-            :image="option.image"
+            :image="option.image ? option.image : '/images/default-property-image.svg'"
             class="avatar-desktop-open property-avatar"
             size="large"
             shape="square"
