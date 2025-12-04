@@ -104,12 +104,12 @@ import Badge from 'primevue/badge';
 import { Users, UserCheck, BedDouble, Store, Package } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
-import ContactList from '@/ui/components/contacts/ContactList.vue';
-import CustomerList from '@/ui/components/contacts/CustomerList.vue';
-import GuestList from '@/ui/components/contacts/GuestList.vue';
-import SupplierList from '@/ui/components/contacts/SupplierList.vue';
-import AgencyList from '@/ui/components/contacts/AgencyList.vue';
-import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import ContactList from '@/ui/components/contactLists/ContactList.vue';
+import CustomerList from '@/ui/components/contactLists/CustomerList.vue';
+import GuestList from '@/ui/components/contactLists/GuestList.vue';
+import SupplierList from '@/ui/components/contactLists/SupplierList.vue';
+import AgencyList from '@/ui/components/contactLists/AgencyList.vue';
+import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
