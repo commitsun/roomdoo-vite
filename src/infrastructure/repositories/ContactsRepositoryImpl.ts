@@ -152,6 +152,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
       identificationDocuments: raw.identificationDocuments,
       inHouse: raw.inHouse,
       internalNotes: raw.internalNotes,
+      image: raw.image,
       lastReservationDate: new Date(
         parseInt(raw.lastReservationDate.split('-')[0]),
         parseInt(raw.lastReservationDate.split('-')[1]) - 1,
