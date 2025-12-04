@@ -26,9 +26,9 @@
       :loading="isLoading"
       @rowClick="openContactDetail($event.data.id)"
       :pt="{
-        thead: { style: { zIndex: 5, backgroundColor: 'red' } },
+        thead: { style: { zIndex: 5 } },
         headerRow: { style: { zIndex: 5 } },
-        header: { style: { zIndex: 6 } },
+        header: { style: { zIndex: 6, border: 'none' } },
         headerCell: {
           style: {
             zIndex: 5,
@@ -60,7 +60,7 @@
     >
       <!-- header -->
       <template #header>
-        <div class="table-header lime-bg">
+        <div class="table-header">
           <IconField>
             <InputIcon class="pi pi-search" />
             <InputText
@@ -68,7 +68,7 @@
               :placeholder="t('contacts.globalSearch')"
               @input="onGlobalQueryInput"
               :aria-label="t('contacts.globalSearch')"
-              style="width: 100%"
+              style="width: 100%; min-width: 240px"
             />
             <InputIcon
               class="pi pi-times"
@@ -82,6 +82,7 @@
             type="button"
             :label="isFilter ? t('contacts.restoreFilters') : t('contacts.restoreSorting')"
             :aria-label="t('contacts.clear') + ' ' + t('contacts.globalSearch')"
+            severity="secondary"
             variant="outlined"
             class="button"
             @click="clearAll"
@@ -108,6 +109,7 @@
           <Button
             v-if="total > 0"
             type="button"
+            severity="secondary"
             variant="outlined"
             icon="pi pi-filter-slash"
             :label="t('contacts.restoreFilters') || 'Limpiar filtros'"
@@ -121,7 +123,7 @@
       <Column
         field="name"
         :header="t('contacts.fullName')"
-        :style="{ maxWidth: '220px' }"
+        :style="{ maxWidth: '350px' }"
         frozen
         :showFilterMatchModes="false"
         :showFilterOperator="false"
@@ -149,11 +151,24 @@
       >
         <template #body="{ data }">
           <div class="flex items-center">
+            <img
+              v-if="data.image"
+              :src="data.image"
+              class="mr-2"
+              style="width: 28px; height: 28px; object-fit: scale-down"
+            />
             <Avatar
+              v-else
               :label="firstTwoInitials(data.name)"
               class="mr-2"
               shape="circle"
-              style="min-width: 28px"
+              :style="{
+                width: '24px',
+                height: '24px',
+                backgroundColor: '#1F89E1',
+                color: 'white',
+                fontSize: '12px',
+              }"
             />
             <span class="name">
               {{ data.name }}
@@ -401,7 +416,9 @@
               t('contacts.paginationInfo', {
                 first: firstRecord + 1,
                 last: Math.min(firstRecord + rows, numTotalRecords),
-                total: numTotalRecords,
+                total: new Intl.NumberFormat(i18n.global.locale.value, {
+                  useGrouping: true,
+                }).format(numTotalRecords),
                 entities: t('contacts.entities.contact', numTotalRecords),
               })
             }}
@@ -442,6 +459,7 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { firstTwoInitials } from '@/ui/utils/strings';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { i18n } from '@/infrastructure/plugins/i18n';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -462,12 +480,16 @@ export default defineComponent({
     CountryFlag,
   },
   props: {
+    isLoadingPage: {
+      type: Boolean,
+      required: true,
+    },
     total: {
       type: Number,
       required: true,
     },
   },
-  setup() {
+  setup(props) {
     // stores
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
@@ -481,7 +503,7 @@ export default defineComponent({
     const { openDialog } = useAppDialog();
 
     // loading state
-    const isLoading = ref(true);
+    const isLoading = ref(false);
 
     // pagination
     const rowsPerPageOptions = [50, 100, 200];
@@ -552,7 +574,9 @@ export default defineComponent({
     const currentRequest = ref(0);
     const fetchNow = async (): Promise<void> => {
       const id = ++currentRequest.value; // identificador de esta petición
-      isLoading.value = true;
+      if (!props.isLoadingPage) {
+        isLoading.value = true;
+      }
       try {
         await contactsStore.fetchContacts(
           {
@@ -596,15 +620,15 @@ export default defineComponent({
     const colorContactType = (contactType: string): string => {
       switch (contactType) {
         case 'guest':
-          return '#fbbf24'; // yellow-400
+          return '#14B8A6';
         case 'customer':
-          return '#22c55e'; // green-500
+          return '#3B82F6';
         case 'agency':
-          return '#ef4444'; // red-500
+          return '#D97706';
         case 'supplier':
-          return '#3b82f6'; // blue-500
+          return '#8B5CF6';
         default:
-          return '#6b7280'; // gray-500
+          return '#6b7280';
       }
     };
 
@@ -732,11 +756,16 @@ export default defineComponent({
 
     // on mounted fetch data and countries
     onMounted(async () => {
+      if (props.isLoadingPage) {
+        uiStore.startLoading();
+      }
       await Promise.all([fetchNow(), countriesStore.fetchCountries()]);
+      uiStore.stopLoading();
     });
 
     return {
       t,
+      i18n,
       rowsPerPageOptions,
       isLoading,
       firstRecord,
@@ -807,7 +836,7 @@ export default defineComponent({
   }
   .name {
     display: inline-block;
-    max-width: 220px; /* ajusta según tu columna */
+    max-width: 280px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -823,12 +852,12 @@ export default defineComponent({
     .empty-state__desc {
       max-width: 500px;
       &:first-child {
-        font-size: 1.2rem;
+        font-size: 1.125rem;
         font-weight: 600;
       }
       &:nth-child(2) {
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
+        margin-top: 8px;
+        margin-bottom: 16px;
       }
     }
   }

@@ -26,9 +26,9 @@
       :loading="isLoading"
       @rowClick="openContactDetail($event.data.id)"
       :pt="{
-        thead: { style: { zIndex: 5, backgroundColor: 'red' } },
+        thead: { style: { zIndex: 5 } },
         headerRow: { style: { zIndex: 5 } },
-        header: { style: { zIndex: 6 } },
+        header: { style: { zIndex: 6, border: 'none' } },
         headerCell: {
           style: {
             zIndex: 5,
@@ -68,7 +68,7 @@
               :placeholder="t('contacts.globalSearch')"
               @input="onGlobalQueryInput"
               :aria-label="t('contacts.globalSearch')"
-              style="width: 100%"
+              style="width: 100%; min-width: 240px"
             />
             <InputIcon
               class="pi pi-times"
@@ -82,6 +82,7 @@
             type="button"
             :label="isFilter ? t('contacts.restoreFilters') : t('contacts.restoreSorting')"
             :aria-label="t('contacts.clear') + ' ' + t('contacts.globalSearch')"
+            severity="secondary"
             variant="outlined"
             class="button"
             @click="clearAll"
@@ -108,6 +109,7 @@
           <Button
             v-if="total > 0"
             type="button"
+            severity="secondary"
             variant="outlined"
             icon="pi pi-filter-slash"
             :label="t('contacts.restoreFilters') || 'Limpiar filtros'"
@@ -121,7 +123,7 @@
       <Column
         field="name"
         :header="t('contacts.fullName')"
-        :style="{ maxWidth: '220px' }"
+        :style="{ maxWidth: '350px' }"
         frozen
         :showFilterMatchModes="false"
         :showFilterOperator="false"
@@ -149,11 +151,25 @@
       >
         <template #body="{ data }">
           <div class="flex items-center">
+            <img
+              v-if="data.image"
+              :src="data.image"
+              class="mr-2"
+              style="width: 24px; height: 24px; object-fit: scale-down"
+            />
+
             <Avatar
+              v-else
               :label="firstTwoInitials(data.name)"
               class="mr-2"
               shape="circle"
-              style="min-width: 28px"
+              :style="{
+                width: '24px',
+                height: '24px',
+                backgroundColor: '#1F89E1',
+                color: 'white',
+                fontSize: '12px',
+              }"
             />
             <span class="name">
               {{ data.name }}
@@ -339,7 +355,9 @@
               t('contacts.paginationInfo', {
                 first: firstRecord + 1,
                 last: Math.min(firstRecord + rows, numTotalRecords),
-                total: numTotalRecords,
+                total: new Intl.NumberFormat(i18n.global.locale.value, {
+                  useGrouping: true,
+                }).format(numTotalRecords),
                 entities: t('contacts.entities.agency', numTotalRecords),
               })
             }}
@@ -379,6 +397,7 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { firstTwoInitials } from '@/ui/utils/strings';
 import ContactDetail from '@/ui/components/contacts/ContactDetail.vue';
+import { i18n } from '@/infrastructure/plugins/i18n';
 
 // helper: explicit non-empty string
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -651,6 +670,7 @@ export default defineComponent({
 
     return {
       t,
+      i18n,
       rowsPerPageOptions,
       isLoading,
       firstRecord,
@@ -719,10 +739,11 @@ export default defineComponent({
   }
   .name {
     display: inline-block;
-    max-width: 220px; /* ajusta según tu columna */
+    max-width: 280px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 14px;
   }
   .empty-state {
     display: flex;
@@ -739,8 +760,8 @@ export default defineComponent({
         font-weight: 600;
       }
       &:nth-child(2) {
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
+        margin-top: 8px;
+        margin-bottom: 16px;
       }
     }
   }
