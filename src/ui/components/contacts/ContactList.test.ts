@@ -40,6 +40,9 @@ vi.mock('vue-i18n', () => {
     'contacts.types.agency': 'Agency',
     'contacts.types.guest': 'Guest',
   };
+  const i18nGlobal = {
+    locale: { value: 'en' },
+  };
   return {
     useI18n: () => ({
       t: (k: string, params?: any) =>
@@ -47,7 +50,10 @@ vi.mock('vue-i18n', () => {
           ? ''
           : (tMap[k] ?? k),
     }),
-    createI18n: vi.fn(() => ({ global, install: () => {} })),
+    createI18n: vi.fn(() => ({
+      global: i18nGlobal,
+      install: () => {},
+    })),
   };
 });
 
