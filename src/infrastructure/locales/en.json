@@ -290,7 +290,6 @@
     "removeImage": "Remove",
     "fileTooLarge": "The file is too large",
     "fileTypeSupported": "JPG or PNG. Maximum size {size}MB",
-
     "personalInformation": "Personal Information",
     "nameEmailLogin": "Name or email address for login",
     "yourLogin": "This is the name or email you use to access your account",
@@ -329,7 +328,10 @@
     "discard": "Discard",
     "loginAlreadyInUse": "Login already in use",
     "loginRequired": "Login is required",
-    "allPasswordFieldsRequired": "All password fields are required"
+    "allPasswordFieldsRequired": "All password fields are required",
+    "loginAndPasswordRequired": "Login and password are required",
+    "passwordRequired": "Password is required",
+    "wrongPassword": "Wrong password"
   },
   "error404": {
     "title": "Page not found",

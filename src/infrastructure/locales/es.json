@@ -329,7 +329,10 @@
     "discard": "Descartar",
     "loginAlreadyInUse": "El nombre de inicio de sesión ya existe",
     "loginRequired": "El nombre de inicio de sesión es obligatorio",
-    "allPasswordFieldsRequired": "Todos los campos de la contraseña son obligatorios"
+    "allPasswordFieldsRequired": "Todos los campos de la contraseña son obligatorios",
+    "loginAndPasswordRequired": "El nombre de inicio de sesión y la contraseña son obligatorios",
+    "passwordRequired": "La contraseña es obligatoria",
+    "wrongPassword": "Contraseña incorrecta"
   },
   "error404": {
     "title": "Página no encontrada",
