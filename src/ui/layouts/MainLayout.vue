@@ -1,11 +1,12 @@
 <template>
-  <div class="layout" :class="{ 'layout--menu-open': isMenuVisible }">
+  <div class="layout" :class="{ 'menu-open': isMenuVisible }">
     <!-- HEADER (mobile) -->
-    <header class="layout__header layout__header--mobile">
-      <button class="layout__hamburger" @click="isMenuVisible = true" aria-label="Open menu">
+    <header class="header mobile">
+      <button class="hamburger" @click="isMenuVisible = true" aria-label="Open menu">
         <i class="pi pi-bars" style="font-size: 1.5rem" />
       </button>
-      <div class="layout__logo layout__logo--mobile">
+
+      <div class="logo mobile">
         <img src="/logos/logo-text.svg" alt="Logo" />
       </div>
     </header>
@@ -14,10 +15,10 @@
     <Sidebar :menuOpen="isMenuVisible" @hide="isMenuVisible = false" />
 
     <!-- Backdrop móvil -->
-    <div v-if="isMenuVisible" class="layout__backdrop" @click="isMenuVisible = false"></div>
+    <div v-if="isMenuVisible" class="backdrop" @click="isMenuVisible = false"></div>
 
     <!-- Main -->
-    <main class="layout__main">
+    <main class="main">
       <router-view :key="viewKey" />
     </main>
 
@@ -91,7 +92,8 @@ onBeforeMount(async () => {
   flex-direction: column;
   height: 100svh;
 
-  &__header {
+  /* HEADER */
+  .header {
     display: flex;
     align-items: center;
     padding: 1rem;
@@ -99,12 +101,13 @@ onBeforeMount(async () => {
     background-color: #f4f4f4;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-    &--mobile {
+    &.mobile {
       display: flex;
     }
   }
 
-  &__hamburger {
+  /* HAMBURGER */
+  .hamburger {
     margin-right: 1rem;
     margin-left: 0.5rem;
     background: none;
@@ -116,12 +119,14 @@ onBeforeMount(async () => {
     height: 100%;
   }
 
-  &__logo {
+  /* LOGO */
+  .logo {
     min-height: 35px;
 
-    &--mobile {
+    &.mobile {
       margin: 0;
     }
+
     img {
       height: 30px;
       object-fit: cover;
@@ -129,19 +134,26 @@ onBeforeMount(async () => {
     }
   }
 
-  &__backdrop {
+  /* BACKDROP */
+  .backdrop {
     position: fixed;
     inset: 0;
     z-index: 1000;
     background-color: rgba(0, 0, 0, 0.4);
   }
 
-  &__main {
+  /* MAIN */
+  .main {
     flex: 1;
     height: calc(100svh - #{$header-height});
     margin-left: 0;
     overflow: hidden;
     transition: margin-left 0.3s ease;
+  }
+
+  /* MODIFICADOR menu-open */
+  &.menu-open {
+    /* No había estilos adicionales, solo lo mantengo como modificador */
   }
 }
 
@@ -150,12 +162,12 @@ onBeforeMount(async () => {
   .layout {
     flex-direction: row;
 
-    &__header--mobile,
-    &__backdrop {
+    .header.mobile,
+    .backdrop {
       display: none;
     }
 
-    &__main {
+    .main {
       height: 100svh;
       margin-left: 57px;
     }
