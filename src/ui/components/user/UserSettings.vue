@@ -21,339 +21,50 @@
       </TabList>
       <TabPanels class="lg:h-[535px] overflow-y-scroll">
         <TabPanel value="0">
-          <div class="user-settings-row">
-            <Avatar
-              :label="!imageUrl ? labelAvatar : ''"
-              shape="circle"
-              :image="imageUrl ? imageUrl : ''"
-              style="
-                background-color: #1f89e1;
-                color: #ffffff;
-                width: 90px;
-                height: 90px;
-                min-width: 90px;
-                font-size: 35px;
-              "
-              :pt="{
-                image: {
-                  style: 'object-fit: cover; width: 100%; height: 100%;',
-                },
-              }"
-            />
-            <div class="right">
-              <IconField>
-                <InputIcon class="pi pi-upload" style="color: #334155; font-size: 12px" />
-                <FileUpload
-                  class="user"
-                  mode="basic"
-                  :maxFileSize="100000"
-                  @select="onAdvancedUpload($event)"
-                  :auto="true"
-                  chooseIcon="-"
-                  :chooseLabel="
-                    imageUrl ? t('userSettings.changeImage') : t('userSettings.uploadPhoto')
-                  "
-                  :chooseButtonProps="{
-                    class: 'p-button-outlined p-button-secondary',
-                    icon: 'pi pi-upload',
-                  }"
-                  :pt="{
-                    root: { 'data-testid': 'fileupload-root' },
-                    chooseButton: { 'data-testid': 'file-upload-trigger' },
-                  }"
-                  :invalidFileSizeMessage="t('userSettings.fileTooLarge')"
-                  :style="{ fontSize: '12px', height: '27px', paddingLeft: '1.5rem' }"
-                />
-              </IconField>
-
-              <Button
-                v-if="imageUrl"
-                :label="t('userSettings.removeImage')"
-                severity="secondary"
-                variant="outlined"
-                icon="pi pi-trash"
-                :style="{ marginTop: '0.5rem', height: '27px' }"
-                @click="imageUrl = ''"
-                size="small"
-              />
-              <p>
-                {{
-                  t('userSettings.fileTypeSupported', {
-                    size: 10,
-                  })
-                }}
-              </p>
-            </div>
-          </div>
-          <div class="user-settings-grid">
-            <div class="user-settings-section-title">
-              {{ t('userSettings.personalInformation') }}
-            </div>
-            <div class="user-settings-field user-settings-field-full">
-              <label class="user-settings-label" for="firstName">
-                {{ t('userSettings.firstName') }}
-                *
-              </label>
-              <InputText
-                class="user-settings-control"
-                id="firstName"
-                v-model="firstName"
-                :style="{ minWidth: '260px' }"
-              />
-            </div>
-            <div
-              class="user-settings-field"
-              :class="{ 'user-settings-field-full': !showLastName2 }"
-            >
-              <label class="user-settings-label" for="lastName">
-                {{ t('userSettings.lastName') }}
-              </label>
-              <InputText
-                class="user-settings-control"
-                id="lastName"
-                v-model="lastName"
-                :style="{ minWidth: '260px' }"
-              />
-            </div>
-            <div class="user-settings-field" v-if="showLastName2">
-              <label class="user-settings-label" for="secondLastName">
-                {{ t('userSettings.secondLastName') }}
-              </label>
-              <InputText
-                class="user-settings-control"
-                id="secondLastName"
-                v-model="secondLastName"
-                :style="{ minWidth: '260px' }"
-              />
-            </div>
-          </div>
-          <div class="user-settings-grid">
-            <div class="user-settings-section-title">
-              {{ t('userSettings.contactData') }}
-            </div>
-            <div class="user-settings-field user-settings-field-full">
-              <label class="user-settings-label" for="email">
-                {{ t('userSettings.email') }}*
-              </label>
-              <InputText
-                class="user-settings-control"
-                id="email"
-                v-model="email"
-                :style="{ minWidth: '260px' }"
-              />
-            </div>
-            <div class="user-settings-field">
-              <label class="user-settings-label" for="phone">
-                {{ t('userSettings.phone') }}
-              </label>
-              <InputText
-                class="user-settings-control"
-                id="phone"
-                v-model="phone"
-                :style="{ minWidth: '260px' }"
-              />
-            </div>
-            <div class="user-settings-field" v-if="availableLocales && availableLocales.length > 1">
-              <label class="user-settings-label" for="language">
-                {{ t('userSettings.language') }}
-              </label>
-
-              <IconField>
-                <InputIcon class="pi pi-globe" style="color: #334155" />
-                <Select
-                  class="user-settings-control pl-6"
-                  v-model="selectedLocale"
-                  optionLabel="name"
-                  optionValue="code"
-                  :options="availableLocales"
-                  aria-label="language"
-                />
-              </IconField>
-            </div>
-          </div>
+          <UserSettingsProfileTab
+            :labelAvatar="labelAvatar"
+            :availableLocales="availableLocales"
+            :showLastName2="showLastName2 ?? false"
+            :imageUrl="imageUrl"
+            :firstName="firstName"
+            :lastName="lastName"
+            :secondLastName="secondLastName"
+            :email="email"
+            :phone="phone"
+            :selectedLocale="selectedLocale"
+            @update:imageUrl="imageUrl = $event"
+            @update:firstName="firstName = $event"
+            @update:lastName="lastName = $event"
+            @update:secondLastName="secondLastName = $event"
+            @update:email="email = $event"
+            @update:phone="phone = $event"
+            @update:selectedLocale="selectedLocale = $event"
+            @selectAvatar="onAdvancedUpload"
+          />
         </TabPanel>
-        <!-- TAB SECURITY -->
         <TabPanel value="1">
-          <div class="user-settings-section-title mt-4">
-            {{ t('userSettings.nameEmailLogin') }}
-          </div>
-          <Panel
-            toggleable
-            collapsed
-            :pt="{
-              root: (opts) => ({
-                class: opts.state.d_collapsed ? 'panel--is-collapsed' : undefined,
-                style: { backgroundColor: opts.state.d_collapsed ? '#F1F5F9' : undefined },
-              }),
-            }"
-          >
-            <template #header>
-              <div class="flex flex-col mt-2">
-                <div class="flex items-center">
-                  <Mail class="user-settings-login-icon mr-2" color="#64748B" :size="15" />
-                  <div class="user-settings-login-info">
-                    <div class="user-settings-login-email">
-                      {{ login }}
-                    </div>
-                  </div>
-                </div>
-                <div class="user-settings-login-text my-2">
-                  {{ t('userSettings.yourLogin') }}
-                </div>
-              </div>
-            </template>
-            <template #toggleicon>
-              <Pen color="#1D4ED8" :size="15" />
-            </template>
-            <div class="user-settings-security-section">
-              <div class="user-settings-card">
-                <div class="user-settings-grid-card">
-                  <div class="user-settings-field">
-                    <label class="user-settings-label" for="login">
-                      {{ t('userSettings.currentLogin') }}
-                    </label>
-                    <InputText
-                      class="user-settings-control"
-                      id="login"
-                      v-model="login"
-                      disabled
-                      :style="{ minWidth: '260px' }"
-                    />
-                  </div>
-                  <div class="user-settings-field">
-                    <label class="user-settings-label" for="newLogin">
-                      {{ t('userSettings.newLogin') }} *
-                    </label>
-                    <InputText
-                      class="user-settings-control"
-                      id="newLogin"
-                      v-model="newLogin"
-                      :style="{ minWidth: '260px' }"
-                      :invalid="
-                        loginErrorMessage === t('userSettings.loginRequired') && newLogin === ''
-                      "
-                    />
-                  </div>
-                  <Message v-if="loginErrorMessage !== ''" severity="error">
-                    {{ loginErrorMessage }}
-                  </Message>
-                </div>
-                <div class="user-settings-footer-change-login">
-                  <Button :label="t('userSettings.changeLogin')" @click="updateLogin()" />
-                </div>
-              </div>
-            </div>
-          </Panel>
-          <div class="user-settings-section-title-second">
-            {{ t('userSettings.password') }}
-          </div>
-          <Panel
-            toggleable
-            collapsed
-            :pt="{
-              root: (opts) => ({
-                class: opts.state.d_collapsed ? 'panel--is-collapsed' : undefined,
-                style: { backgroundColor: opts.state.d_collapsed ? '#F1F5F9' : undefined },
-              }),
-            }"
-          >
-            <template #header>
-              <div class="flex flex-col mt-2">
-                <div class="flex items-center">
-                  <LockKeyhole
-                    class="user-settings-password-icon mr-2"
-                    color="#64748B"
-                    :size="15"
-                  />
-                  <div class="user-settings-password-info">
-                    <div class="user-settings-password-email">••••••••••</div>
-                  </div>
-                </div>
-                <div class="user-settings-password-text my-2">
-                  {{ t('userSettings.yourPassword') }}
-                </div>
-              </div>
-            </template>
-            <template #toggleicon>
-              <Pen color="#1D4ED8" :size="15" />
-            </template>
-            <div class="user-settings-security-section">
-              <div class="user-settings-card">
-                <div class="user-settings-grid-card">
-                  <div class="user-settings-field">
-                    <label class="user-settings-label" for="currentPassword">
-                      {{ t('userSettings.currentPassword') }} *
-                    </label>
-                    <Password
-                      v-model="currentPassword"
-                      inputId="currentPassword"
-                      :feedback="false"
-                      toggleMask
-                      :style="{ width: '100%' }"
-                      :inputStyle="{ width: '100%' }"
-                      :inputProps="{ autocomplete: 'current-password' }"
-                      :invalid="
-                        passwordErrorMessage === t('userSettings.invalidPassword') ||
-                        (passwordErrorMessage === t('userSettings.allPasswordFieldsRequired') &&
-                          currentPassword === '')
-                      "
-                    />
-                  </div>
-                  <div class="user-settings-field">
-                    <label class="user-settings-label" for="newPassword">
-                      {{ t('userSettings.newPassword') }} *
-                    </label>
-                    <Password
-                      v-model="newPassword"
-                      inputId="newPassword"
-                      :feedback="false"
-                      toggleMask
-                      :style="{ width: '100%' }"
-                      :inputStyle="{ width: '100%' }"
-                      :inputProps="{ autocomplete: 'new-password' }"
-                      :invalid="
-                        passwordErrorMessage === t('userSettings.passwordsDoNotMatch') ||
-                        (passwordErrorMessage === t('userSettings.allPasswordFieldsRequired') &&
-                          newPassword === '')
-                      "
-                    />
-                  </div>
-                  <div class="user-settings-field">
-                    <label class="user-settings-label" for="repeatPassword">
-                      {{ t('userSettings.repeatPassword') }} *
-                    </label>
-                    <Password
-                      v-model="repeatPassword"
-                      inputId="repeatPassword"
-                      :feedback="false"
-                      toggleMask
-                      :style="{ width: '100%' }"
-                      :inputStyle="{ width: '100%' }"
-                      :inputProps="{ autocomplete: 'repeat-password' }"
-                      :invalid="
-                        passwordErrorMessage === t('userSettings.passwordsDoNotMatch') ||
-                        (passwordErrorMessage === t('userSettings.allPasswordFieldsRequired') &&
-                          repeatPassword === '')
-                      "
-                    />
-                  </div>
-                  <Message v-if="passwordErrorMessage !== ''" severity="error">
-                    {{ passwordErrorMessage }}
-                  </Message>
-                </div>
-                <div class="user-settings-footer-change-login">
-                  <Button
-                    :label="t('userSettings.changePassword')"
-                    @click="handleChangePassword()"
-                  />
-                </div>
-              </div>
-            </div>
-          </Panel>
+          <UserSettingsSecurityTab
+            :login="login"
+            :newLogin="newLogin"
+            :password="password"
+            :currentPassword="currentPassword"
+            :newPassword="newPassword"
+            :repeatPassword="repeatPassword"
+            :loginErrorMessage="loginErrorMessage"
+            :passwordErrorMessage="passwordErrorMessage"
+            @update:newLogin="newLogin = $event"
+            @update:password="password = $event"
+            @update:currentPassword="currentPassword = $event"
+            @update:newPassword="newPassword = $event"
+            @update:repeatPassword="repeatPassword = $event"
+            @changeLogin="handleChangeLogin"
+            @changePassword="handleChangePassword"
+          />
         </TabPanel>
       </TabPanels>
     </Tabs>
-    <div class="user-settings-footer-buttons">
+
+    <div class="user-settings-footer-buttons" v-if="activeTab === '0'">
       <Button
         :label="t('userSettings.cancel')"
         severity="secondary"
@@ -366,7 +77,8 @@
         @click="updateUser()"
       />
     </div>
-    <ConfirmDialog :style="{ maxWidth: '380px' }"></ConfirmDialog>
+
+    <ConfirmDialog :style="{ maxWidth: '380px' }" />
   </div>
 </template>
 
@@ -378,19 +90,13 @@ import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
-import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
-import Panel from 'primevue/panel';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import Password from 'primevue/password';
-import Message from 'primevue/message';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from 'primevue/useconfirm';
-import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload';
-import { Mail, Pen, LockKeyhole } from 'lucide-vue-next';
+import type { FileUploadSelectEvent } from 'primevue/fileupload';
+
+import UserSettingsProfileTab from './UserSettingsProfile.vue';
+import UserSettingsSecurityTab from './UserSettingsSecurity.vue';
 
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
@@ -401,6 +107,7 @@ import { i18n } from '@/infrastructure/plugins/i18n';
 import type { User } from '@/domain/entities/User';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { BadRequestError } from '@/application/shared/BadRequestError';
+
 const dialogRef = inject<Ref<{ close: (payload?: unknown) => void } | undefined>>('dialogRef');
 const confirm = useConfirm();
 
@@ -421,6 +128,7 @@ const login = ref('');
 const newLogin = ref('');
 const imageUrl = ref('');
 const selectedLocale = ref('');
+const password = ref('');
 const currentPassword = ref('');
 const newPassword = ref('');
 const repeatPassword = ref('');
@@ -446,7 +154,9 @@ const labelAvatar = computed(() => {
     .substring(0, 2);
 });
 
-const availableLocales = computed(() => [...(instanceStore.instance?.languages || [])]);
+const availableLocales = computed(
+  () => [...(instanceStore.instance?.languages || [])] as Array<{ code: string; name: string }>,
+);
 const showLastName2 = computed(() => userStore.userSchemas?.includes('lastname2'));
 
 const handleUpdateUser = async (): Promise<boolean> => {
@@ -494,12 +204,31 @@ const updateUser = async (): Promise<void> => {
   }
 };
 
-const updateLogin = async (): Promise<void> => {
+const handleChangeLogin = async (): Promise<void> => {
+  if (newLogin.value === '' && password.value === '') {
+    loginErrorMessage.value = t('userSettings.loginAndPasswordRequired');
+    return;
+  }
   if (newLogin.value === '') {
     loginErrorMessage.value = t('userSettings.loginRequired');
     return;
   }
+  if (password.value === '') {
+    loginErrorMessage.value = t('userSettings.passwordRequired');
+    return;
+  }
   if (newLogin.value !== login.value) {
+    try {
+      await userStore.login(login.value, password.value);
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        loginErrorMessage.value = t('userSettings.wrongPassword');
+        return;
+      } else {
+        useTextMessageStore.addTextMessage('Error', t('error.unknownError'));
+        return;
+      }
+    }
     confirm.require({
       message: t('userSettings.areYouSureChangeLogin'),
       header: t('userSettings.changeLogin?'),
@@ -663,7 +392,7 @@ const onAdvancedUpload = (e: FileUploadSelectEvent): void => {
 };
 
 watch(
-  () => newLogin.value,
+  () => [newLogin.value, password.value],
   () => {
     if (loginErrorMessage.value !== '') {
       loginErrorMessage.value = '';
@@ -703,104 +432,6 @@ onMounted(() => {
 .user-settings {
   display: flex;
   flex-direction: column;
-  .right {
-    p {
-      margin-top: 12px;
-      font-size: 12px;
-    }
-  }
-  .user-settings-row {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .user-settings-grid,
-  .user-settings-grid-card {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-
-  .user-settings-grid-card {
-    margin-top: 0;
-  }
-
-  .user-settings-field {
-    .user-settings-control {
-      width: 100%;
-    }
-  }
-
-  .user-settings-field-full {
-    grid-column: 1 / -1;
-  }
-
-  .user-settings-section-title {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 1rem;
-  }
-
-  .user-settings-section-title-second {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 1rem;
-    margin-top: 2rem;
-  }
-
-  .user-settings-label {
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 7px;
-    display: block;
-    color: #64748b;
-  }
-
-  .user-settings-login,
-  .user-settings-password {
-    margin-top: 1rem;
-    padding: 1rem 0;
-    background-color: #f9fafb;
-    display: flex;
-    justify-content: space-between;
-
-    .user-settings-login-icon {
-      min-width: 50px;
-    }
-
-    .user-settings-login-left {
-      display: flex;
-    }
-  }
-
-  .user-settings-change-login {
-    min-width: 70px;
-  }
-
-  .user-settings-change-login-link {
-    cursor: pointer;
-    color: #1d4ed8;
-    font-weight: 400;
-  }
-
-  .user-settings-security-section {
-    font-size: 12px;
-  }
-
-  .user-settings-card {
-    padding: 1rem;
-    background-color: #ffffff;
-
-    .user-settings-footer-change-login {
-      display: flex;
-      justify-content: flex-end;
-      width: 100%;
-      margin-top: 1.5rem;
-      margin-left: 8px;
-    }
-  }
 }
 
 .user-settings-footer-buttons {
@@ -816,34 +447,17 @@ onMounted(() => {
     width: 640px;
     height: 640px;
     padding-bottom: 17px;
-    .user-settings-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      align-items: start;
-    }
+  }
 
-    .user-settings-field {
-      grid-column: auto / span 1;
-    }
-
-    .user-settings-field-full {
-      grid-column: 1 / -1;
-    }
-
-    .user-settings-security-section {
-      font-size: 14px;
-    }
-
-    .user-settings-footer-buttons {
-      margin-top: 0;
-      height: 87px;
-      flex-direction: row;
-      justify-content: flex-end;
-      align-items: center;
-      flex-wrap: nowrap;
-      width: auto;
-      padding-bottom: 17px;
-      margin-top: 17px;
-    }
+  .user-settings-footer-buttons {
+    height: 87px;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: auto;
+    padding-bottom: 17px;
+    margin-top: 17px;
   }
 }
 </style>

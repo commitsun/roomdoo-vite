@@ -105,12 +105,15 @@ const userMock = {
 };
 const updateUser = vi.fn().mockResolvedValue(undefined);
 const changePassword = vi.fn().mockResolvedValue(undefined);
+const login = vi.fn().mockResolvedValue(undefined);
+
 vi.mock('@/infrastructure/stores/user', () => ({
   useUserStore: () => ({
     user: userMock,
     updateUser,
     changePassword,
     changeLogin: vi.fn(),
+    login,
   }),
 }));
 
@@ -414,6 +417,10 @@ describe('UserSettings', () => {
     await userEvent.clear(newLoginInput);
     await userEvent.type(newLoginInput, 'new-login-id');
 
+    const passwordInput = within(loginPanel).getByLabelText(/password/i, { selector: 'input' });
+    await userEvent.clear(passwordInput);
+    await userEvent.type(passwordInput, 'my-current-password');
+
     const changeLoginBtnText = within(loginPanel).getByText(/^change login$/i);
     const changeLoginBtn = changeLoginBtnText.closest('button') ?? changeLoginBtnText;
     await userEvent.click(changeLoginBtn);
@@ -426,6 +433,7 @@ describe('UserSettings', () => {
     await userEvent.click(acceptBtn);
 
     await waitFor(() => {
+      expect(login).toHaveBeenCalledWith('john@example.com', 'my-current-password');
       expect(updateUser).toHaveBeenCalledWith({ login: 'new-login-id' });
       expect(notifyAdd).toHaveBeenCalledWith('Login updated', 'success');
       expect(dialogClose).toHaveBeenCalledWith({ action: 'doLogout' });
@@ -444,11 +452,18 @@ describe('UserSettings', () => {
     const newLoginInput = within(loginPanel).getByLabelText(/new login/i, { selector: 'input' });
     await userEvent.clear(newLoginInput);
 
+    const passwordInput = within(loginPanel).getByLabelText(/password/i, { selector: 'input' });
+    await userEvent.clear(passwordInput);
+    await userEvent.type(passwordInput, 'my-current-password');
+
     const changeLoginBtnText = within(loginPanel).getByText(/^change login$/i);
     const changeLoginBtn = changeLoginBtnText.closest('button') ?? changeLoginBtnText;
     await userEvent.click(changeLoginBtn);
 
-    await expect(screen.queryByRole('button', { name: /^change$/i })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /^change$/i })).not.toBeInTheDocument();
+    });
+
     expect(await screen.findByText(/login is required/i)).toBeInTheDocument();
 
     expect(updateUser).not.toHaveBeenCalled();

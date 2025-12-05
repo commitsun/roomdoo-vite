@@ -108,6 +108,11 @@ export default defineComponent({
                   if (data?.action === 'userUpdated') {
                     uiStore.refreshView();
                   }
+                  if (data?.action === 'doLogout') {
+                    userStore.logout();
+                    useLegacyStore().removeVuexAndOldCookiesUser();
+                    void router.push({ name: 'login' });
+                  }
                 },
               });
             },
