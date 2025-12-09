@@ -10,10 +10,10 @@
               ' -70deg,white,white 2px,rgb(171,222,254) 2px, ' +
               ' rgb(171, 222, 254) 10px) !important'
             : folio.state === 'confirm'
-            ? '#1E9ED9'
-            : folio.state === 'draft'
-            ? '#DCA81C'
-            : '#263941',
+              ? '#1E9ED9'
+              : folio.state === 'draft'
+                ? '#DCA81C'
+                : '#263941',
       }"
       @click="isOpen = !isOpen"
     >
@@ -278,7 +278,7 @@
             @click="
               moveToFirstReservation(
                 folio.reservations.find((el: ReservationInterface) => el.stateCode !== 'cancel') ??
-                  null
+                  null,
               )
             "
             v-if="
@@ -408,7 +408,7 @@ export default defineComponent({
 
     const folioPendingAmount = (folioPendingToAmount: number, folioAmountTotal: number) => {
       let pendingAmount = 'pagado';
-      if (folioPendingToAmount && folioAmountTotal) {
+      if (folioPendingToAmount) {
         let amount = folioPendingToAmount;
         if (folioPendingToAmount < 0) {
           amount *= -1;
@@ -525,7 +525,7 @@ export default defineComponent({
 
         await store.dispatch(
           'services/fetchFolioServices',
-          store.state.reservations.reservations?.map((el) => el.id)
+          store.state.reservations.reservations?.map((el) => el.id),
         );
         buildReservationMappedForBatchChanges();
 
@@ -621,7 +621,7 @@ export default defineComponent({
       if (props.folio.reservations.some((el) => el.isBlocked)) {
         let titleDialog = '';
         const agencyDisplayName = store.state.agencies.agencies.find(
-          (el) => el.id === props.folio.agencyId
+          (el) => el.id === props.folio.agencyId,
         )?.name;
         if (
           props.folio.firstCheckin &&
@@ -793,7 +793,7 @@ export default defineComponent({
 
     onBeforeMount(async () => {
       const pricelist = store.state.pricelists.pricelists.find(
-        (el) => el.id === props.folio.pricelistId
+        (el) => el.id === props.folio.pricelistId,
       );
       if (pricelist) {
         pricelistName.value = pricelist.name;
