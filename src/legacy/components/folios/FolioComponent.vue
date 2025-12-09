@@ -64,7 +64,7 @@
               <div
                 v-if="
                   currentReservations?.some(
-                    (el) => el.stateCode === 'draft' || el.stateCode === 'cancel'
+                    (el) => el.stateCode === 'draft' || el.stateCode === 'cancel',
                   )
                 "
                 @click="confirmReservations()"
@@ -350,8 +350,8 @@
               currentFolio?.reservationType === 'out'
                 ? 'disabled'
                 : currentTabSelected === 'charges'
-                ? 'selected'
-                : ''
+                  ? 'selected'
+                  : ''
             "
             @click="currentFolio?.reservationType !== 'out' ? setTabValue('charges') : null"
           >
@@ -363,8 +363,8 @@
               currentFolio?.reservationType === 'out'
                 ? 'disabled'
                 : currentTabSelected === 'invoices'
-                ? 'selected'
-                : ''
+                  ? 'selected'
+                  : ''
             "
             @click="currentFolio?.reservationType !== 'out' ? setTabValue('invoices') : null"
           >
@@ -546,7 +546,7 @@ export default defineComponent({
       () =>
         `${window.location.origin}/${currentFolio.value?.id ?? 0}/precheckin/${
           currentFolio.value?.accessToken ?? ''
-        }/${selectedLang}`
+        }/${selectedLang}`,
     );
 
     const computedFolioClass = computed(() => {
@@ -559,14 +559,14 @@ export default defineComponent({
       const roomTypeClasses: roomTypeClassesInterface[] = [];
       currentReservations.value?.forEach((reser) => {
         const roomTypeClassId = store.state.roomTypes.roomTypes.find(
-          (el) => el.id === reser.roomTypeId
+          (el) => el.id === reser.roomTypeId,
         )?.classId;
         const roomTypeClass = store.state.roomTypeClasses.roomTypeClasses.find(
-          (el) => el.id === roomTypeClassId
+          (el) => el.id === roomTypeClassId,
         );
         if (roomTypeClass) {
           const roomTypeClassIndex = roomTypeClasses.findIndex(
-            (el) => el.roomTypeClass === roomTypeClass
+            (el) => el.roomTypeClass === roomTypeClass,
           );
           if (roomTypeClassIndex === -1) {
             roomTypeClasses.push({
@@ -603,19 +603,21 @@ export default defineComponent({
     const reservationsMappedForBatchChanges = ref([] as BatchChangesInterface[]);
 
     const agencyName = computed(
-      () => store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.name
+      () =>
+        store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.name,
     );
 
     const agencyImageSrc = computed(
       () =>
-        store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.imageUrl
+        store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)
+          ?.imageUrl,
     );
 
     const saleChannelName = computed(
       () =>
         store.state.saleChannels.saleChannels.find(
-          (el) => el.id === currentFolio.value?.saleChannelId
-        )?.name
+          (el) => el.id === currentFolio.value?.saleChannelId,
+        )?.name,
     );
 
     const isSomeItemMenu = computed(() => {
@@ -682,7 +684,7 @@ export default defineComponent({
 
     const folioPendingAmount = () => {
       let pendingAmount = 'pagado';
-      if (currentFolio.value?.pendingAmount && currentFolio.value.amountTotal) {
+      if (currentFolio.value?.pendingAmount) {
         let amount = currentFolio.value?.pendingAmount;
         if (currentFolio.value?.pendingAmount < 0) {
           amount *= -1;
@@ -691,6 +693,7 @@ export default defineComponent({
         if (currentFolio.value.pendingAmount === currentFolio.value.amountTotal) {
           pendingAmount = 'pendiente';
         } else if (
+          currentFolio.value.amountTotal &&
           currentFolio.value.pendingAmount > 0 &&
           currentFolio.value.pendingAmount < currentFolio.value.amountTotal
         ) {
@@ -775,7 +778,7 @@ export default defineComponent({
 
         await store.dispatch(
           'services/fetchFolioServices',
-          store.state.reservations.reservations?.map((el) => el.id)
+          store.state.reservations.reservations?.map((el) => el.id),
         );
         buildReservationMappedForBatchChanges();
 
@@ -803,7 +806,7 @@ export default defineComponent({
       await store.dispatch('reservationLines/fetchCurrentFolioReservationLines');
       await store.dispatch(
         'services/fetchFolioServices',
-        currentReservations.value?.map((el) => el.id)
+        currentReservations.value?.map((el) => el.id),
       );
       buildReservationMappedForBatchChanges();
     };
@@ -827,15 +830,15 @@ export default defineComponent({
         if (store.state.reservations.currentReservation) {
           await store.dispatch(
             'reservations/fetchReservation',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           );
           await store.dispatch(
             'services/fetchServices',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           );
           await store.dispatch(
             'reservations/fetchReservationWizardState',
-            store.state.reservations.currentReservation.id
+            store.state.reservations.currentReservation.id,
           );
         }
       } catch {
@@ -861,11 +864,11 @@ export default defineComponent({
         if (store.state.reservations.currentReservation) {
           await store.dispatch(
             'reservations/fetchReservation',
-            store.state.reservations.currentReservation.id
+            store.state.reservations.currentReservation.id,
           );
           await store.dispatch(
             'reservations/fetchReservationWizardState',
-            store.state.reservations.currentReservation.id
+            store.state.reservations.currentReservation.id,
           );
         }
         isOpenMenu.value = false;
@@ -889,7 +892,7 @@ export default defineComponent({
       if (currentReservations.value && currentReservations.value.some((el) => el.isBlocked)) {
         let titleDialog = '';
         const agencyName = store.state.agencies.agencies.find(
-          (el) => el.id === currentFolio.value?.agencyId
+          (el) => el.id === currentFolio.value?.agencyId,
         )?.name;
         if (
           currentFolio.value?.firstCheckin &&
