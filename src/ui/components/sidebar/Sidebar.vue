@@ -69,8 +69,6 @@ export default defineComponent({
       isOpen.value = false;
     };
     const openLink = async (linkId: number): Promise<void> => {
-      // eslint-disable-next-line no-console
-      console.log('openLink called with linkId:', linkId);
       const currentPmsPropertyId = pmsPropertiesStore.currentPmsPropertyId;
       if (
         typeof currentPmsPropertyId === 'number' &&
