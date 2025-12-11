@@ -457,12 +457,12 @@ describe('ContactDetailBilling', () => {
     const btnES = within(selCountry).getByTestId('bill_country-opt-34');
     await userEvent.click(btnES);
 
-    const payload1 = onUpdateBilling.mock.calls.at(-1)![0];
-    expect(payload1.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
+    const payload = onUpdateBilling.mock.calls.at(-1)![0];
+    expect(payload.country).toEqual({ id: 34, code: 'ES', name: 'Spain' });
 
     await rerender();
 
-    expect(countryStatesStoreMock.fetchCountryStatesByCountryId).not.toHaveBeenCalled();
+    expect(countryStatesStoreMock.fetchCountryStatesByCountryId).toHaveBeenCalledWith(34);
   });
 
   it('simple: selecting country emits country object and triggers loading of states', async () => {

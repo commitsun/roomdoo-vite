@@ -8,4 +8,5 @@ export interface DocumentType {
   code: string;
   countries: Country[];
   isValidableDocument: boolean;
+  shortCode: string;
 }

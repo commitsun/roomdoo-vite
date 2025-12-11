@@ -1,10 +1,12 @@
-// ContactDetailInternalNotes.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/vue';
+import { render, screen } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { ref, reactive, defineComponent, type PropType, watch } from 'vue';
 import { createTestingPinia } from '@pinia/testing';
+import { mount } from '@vue/test-utils';
+
+import Component from './ContactDetailInternalNotes.vue';
 
 // --- i18n mock ---
 vi.mock('vue-i18n', () => {
@@ -13,9 +15,17 @@ vi.mock('vue-i18n', () => {
     'contacts.internalNotesPlaceholder': 'Write internal notes...',
     'contacts.tags': 'Tags',
     'contacts.select': 'Select...',
+    'contacts.tagsSelected': '{count} tags selected',
   };
   return {
-    useI18n: () => ({ t: (k: string) => tMap[k] ?? k }),
+    useI18n: () => ({
+      t: (k: string, vars?: any) => {
+        if (k === 'contacts.tagsSelected') {
+          return `${vars?.count} tags selected`;
+        }
+        return tMap[k] ?? k;
+      },
+    }),
     createI18n: vi.fn(() => ({ global, install: () => {} })),
   };
 });
@@ -89,11 +99,36 @@ const MultiSelectStub = defineComponent({
       <div aria-label="selected-chips">
         <span v-for="(s,i) in selected" :key="'sel-' + (s?.id ?? i)">{{ s?.name }}</span>
       </div>
+      <div aria-label="value-slot">
+        <!-- aquí conectamos el #value del componente -->
+        <slot name="value" :value="selected" />
+      </div>
     </div>
   `,
 });
 
-const ChipStub = { name: 'Chip', template: `<span><slot /></span>` };
+const ChipStub = {
+  name: 'Chip',
+  props: {
+    label: { type: String, required: true },
+    removable: { type: Boolean, default: false },
+  },
+  emits: ['remove'],
+  template: `
+    <span class="chip">
+      <span class="chip-label">{{ label }}</span>
+      <button
+        v-if="removable"
+        type="button"
+        :aria-label="'remove-tag-' + label"
+        @click="$emit('remove')"
+      >
+        x
+      </button>
+    </span>
+  `,
+};
+
 const SelectStub = {
   name: 'Select',
   props: ['modelValue', 'options', 'optionLabel', 'optionValue', 'filter', 'placeholder'],
@@ -101,7 +136,6 @@ const SelectStub = {
   template: `<div class="pv-select"><slot /></div>`,
 };
 
-// --- Store de tags (Pinia) ---
 const tagsStoreMock = {
   tags: [
     { id: 1, name: 'VIP' },
@@ -113,8 +147,6 @@ const tagsStoreMock = {
 vi.mock('@/infrastructure/stores/tags', () => ({
   useTagsStore: () => tagsStoreMock,
 }));
-
-import Component from './ContactDetailInternalNotes.vue';
 
 function renderWithModel(initial: any) {
   const model = ref(initial);
@@ -144,7 +176,7 @@ function renderWithModel(initial: any) {
 describe('ContactDetailInternalNotes', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('renders tags and placeholder', () => {
+  it('renders labels and textarea placeholder', () => {
     renderWithModel(
       reactive({
         internalNotes: '',
@@ -153,7 +185,7 @@ describe('ContactDetailInternalNotes', () => {
     );
 
     expect(screen.getByText('Notes and observations')).toBeInTheDocument();
-    const ta = screen.getByRole('textbox', { name: '' });
+    const ta = screen.getByRole('textbox');
     expect(ta).toHaveAttribute('placeholder', 'Write internal notes...');
     expect(screen.getByText('Tags')).toBeInTheDocument();
   });
@@ -213,15 +245,104 @@ describe('ContactDetailInternalNotes', () => {
     expect(optVip).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('displays chips/selected (via stub) when tags are selected', async () => {
-    renderWithModel(
+  it('shows chips below the multiselect when modelValue.tags has items and clicking remove removes them', async () => {
+    const { model, rerender } = renderWithModel(
       reactive({
         internalNotes: '',
-        tags: [{ id: 3, name: 'NoSpam' }],
+        tags: [
+          { id: 1, name: 'VIP' },
+          { id: 3, name: 'NoSpam' },
+        ],
       }),
     );
 
-    const selectedArea = screen.getByLabelText('selected-chips');
-    expect(within(selectedArea).getByText('NoSpam')).toBeInTheDocument();
+    const vipTexts = screen.getAllByText('VIP');
+    const nospamTexts = screen.getAllByText('NoSpam');
+
+    expect(vipTexts.length).toBeGreaterThan(0);
+    expect(nospamTexts.length).toBeGreaterThan(0);
+
+    const removeVipButtons = screen.getAllByLabelText('remove-tag-VIP');
+    await userEvent.click(removeVipButtons[0]);
+    await rerender();
+
+    expect(model.value.tags).toHaveLength(1);
+    expect(model.value.tags[0].name).toBe('NoSpam');
+  });
+
+  it('renders value slot message "N tags selected" when there are selected tags', async () => {
+    const { rerender } = renderWithModel(
+      reactive({
+        internalNotes: '',
+        tags: [],
+      }),
+    );
+
+    const optVip = screen.getByTestId('ms-opt-1');
+    const optRepeat = screen.getByTestId('ms-opt-2');
+
+    await userEvent.click(optVip);
+    await userEvent.click(optRepeat);
+
+    await rerender();
+
+    expect(screen.getByText('2 tags selected')).toBeInTheDocument();
+  });
+});
+
+describe('ContactDetailInternalNotes – removeTag internal branches', () => {
+  it('early return when modelValue.tags is not an array', () => {
+    const model = {
+      internalNotes: '',
+      tags: null as any,
+      name: 'John Doe',
+      id: 123,
+    };
+
+    const wrapper = mount(Component, {
+      props: { modelValue: model },
+      global: {
+        plugins: [createTestingPinia()],
+        components: {
+          Textarea: TextareaStub,
+          MultiSelect: MultiSelectStub,
+          Chip: ChipStub,
+          Select: SelectStub,
+        },
+      },
+    });
+
+    (wrapper.vm as any).removeTag({ id: 1, name: 'VIP' });
+
+    expect(model.tags).toBeNull();
+  });
+
+  it('does nothing when tag is not found in the array (index === -1)', () => {
+    const model = {
+      internalNotes: '',
+      tags: [{ id: 1, name: 'VIP' }],
+      name: 'John Doe',
+      id: 123,
+    };
+
+    const wrapper = mount(Component, {
+      props: { modelValue: model },
+      global: {
+        plugins: [createTestingPinia()],
+        components: {
+          Textarea: TextareaStub,
+          MultiSelect: MultiSelectStub,
+          Chip: ChipStub,
+          Select: SelectStub,
+        },
+      },
+    });
+
+    const spliceSpy = vi.spyOn(model.tags, 'splice');
+
+    (wrapper.vm as any).removeTag({ id: 999, name: 'Unknown' });
+
+    expect(spliceSpy).not.toHaveBeenCalled();
+    expect(model.tags).toHaveLength(1);
   });
 });

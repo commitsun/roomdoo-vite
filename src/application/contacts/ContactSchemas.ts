@@ -10,20 +10,18 @@ const DocumentInputSchema = z
     number: z.string().trim().min(1, 'contacts.errors.documentNumberRequired'),
     countryCode: z.string().trim().length(2, 'contacts.errors.countryRequired'),
     documentTypeName: z.string().trim().min(1, 'contacts.errors.documentTypeRequired'),
-    isValidable: z.boolean().default(false),
+    documentTypeCode: z.string().trim().optional(),
+    isValidableDocument: z.boolean().default(false),
   })
   .superRefine((doc, ctx) => {
-    if (!doc.isValidable) {
+    if (!doc.isValidableDocument) {
       return;
     }
 
-    const cc = (doc.countryCode ?? '').trim().toUpperCase();
-    let dn = (doc.documentTypeName ?? '').trim().toLowerCase();
-    if (cc === 'ES' && dn === 'national identification document') {
-      dn = 'nif';
-    }
+    const countryCode = (doc.countryCode ?? '').trim().toUpperCase();
+    const documentTypeCode = (doc.documentTypeCode ?? '').trim().toLowerCase();
 
-    const validator = S[cc]?.[dn];
+    const validator = S[countryCode]?.[documentTypeCode];
     if (validator && typeof validator.validate === 'function') {
       const { isValid } = validator.validate(doc.number ?? '');
       if (!isValid) {
@@ -54,7 +52,7 @@ export const ContactSchema = z
 
     const keyOf = (d: z.infer<typeof DocumentInputSchema>): string | null => {
       const cc = (d.countryCode ?? '').trim().slice(0, 2).toUpperCase();
-      const dt = (d.documentTypeName ?? '').trim().toLowerCase();
+      const dt = (d.documentTypeCode ?? '').trim().toLowerCase();
       const num = (d.number ?? '').trim().toUpperCase();
       if (!cc || !dt || !num) {
         return null;

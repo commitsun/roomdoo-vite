@@ -18,149 +18,31 @@
         </template>
       </SelectButton>
     </div>
-    <div class="contact-detail-accordion" v-if="!isDesktop">
-      <Accordion v-model:value="activePanel" :lazy="true">
-        <AccordionPanel value="0">
-          <AccordionHeader>
-            <div
-              class="flex items-center gap-2"
-              :style="{ color: activePanel === '0' ? 'var(--p-primary-color)' : '' }"
-            >
-              <FileText :size="15" />
-              <span>{{ t('contacts.generalInformation') }}</span>
-              <Badge v-if="badges.general" :value="badges.general" severity="danger" size="small" />
-            </div>
-          </AccordionHeader>
-          <AccordionContent>
-            <ContactDetailGeneralData
-              :contactType="contactType"
-              :modelValue="contactForm"
-              :errors="uiErrors.general"
-              :billingAddressMode="billingAddressMode"
-              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
-            />
-          </AccordionContent>
-        </AccordionPanel>
-        <AccordionPanel value="1" v-if="contactType === 'person'">
-          <AccordionHeader>
-            <div
-              class="flex items-center gap-2"
-              :style="{ color: activePanel === '1' ? 'var(--p-primary-color)' : '' }"
-            >
-              <IdCard :size="15" />
-              <span>{{ t('contacts.documents') }}</span>
-              <Badge
-                v-if="badges.documents"
-                :value="badges.documents"
-                severity="danger"
-                size="small"
-              />
-            </div>
-          </AccordionHeader>
-          <AccordionContent>
-            <ContactDetailDocuments
-              :modelValue="contactForm"
-              :errors="uiErrors.documents"
-              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
-              @changeContactForm="(id: number) => changeContactForm(id)"
-            />
-          </AccordionContent>
-        </AccordionPanel>
-        <AccordionPanel value="2">
-          <AccordionHeader>
-            <div
-              class="flex items-center gap-2"
-              :style="{ color: activePanel === '2' ? 'var(--p-primary-color)' : '' }"
-            >
-              <Banknote :size="15" />
-              <span>{{ t('contacts.invoicing') }}</span>
-            </div>
-          </AccordionHeader>
-          <AccordionContent>
-            <ContactDetailBilling
-              :modelValue="contactForm"
-              :billingAddress="billingAddress"
-              :billingAddressMode="billingAddressMode"
-              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
-              @update:billingAddress="(v: Address) => Object.assign(billingAddress, v)"
-              @updateBillingAddressMode="billingAddressMode = $event"
-            />
-          </AccordionContent>
-        </AccordionPanel>
-        <AccordionPanel value="3">
-          <AccordionHeader>
-            <div
-              class="flex items-center gap-2"
-              :style="{ color: activePanel === '3' ? 'var(--p-primary-color)' : '' }"
-            >
-              <NotebookPen :size="15" />
-              <span>{{ t('contacts.internalnotes') }}</span>
-            </div>
-          </AccordionHeader>
-          <AccordionContent>
-            <ContactDetailInternalNotes
-              :modelValue="contactForm"
-              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
-            />
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
+    <div class="contact-detail-accordion">
+      <ContactDetailAccordion
+        v-model:modelValue="activePanel"
+        :formParts="formParts"
+        :badges="badges"
+      >
+        <template #formPart="{ formPart }">
+          <component
+            :is="components[formPart.id]"
+            v-bind="componentProps(formPart.id)"
+            v-on="componentListeners(formPart.id)"
+          />
+        </template>
+      </ContactDetailAccordion>
     </div>
-    <div class="contact-detail-tabs" v-else>
-      <Tabs v-model:value="activeTab" :lazy="true">
-        <TabList>
-          <Tab value="0">
-            {{ t('contacts.generalInformation') }}
-            <Badge v-if="badges.general" :value="badges.general" severity="danger" size="small" />
-          </Tab>
-          <Tab v-if="contactType === 'person'" value="1">
-            {{ t('contacts.documents') }}
-            <Badge
-              v-if="badges.documents"
-              :value="badges.documents"
-              severity="danger"
-              size="small"
-            />
-          </Tab>
-          <Tab value="2">{{ t('contacts.invoicing') }}</Tab>
-          <Tab value="3">{{ t('contacts.internalnotes') }}</Tab>
-        </TabList>
-        <TabPanels style="height: 450px !important; overflow-y: scroll">
-          <TabPanel value="0">
-            <ContactDetailGeneralData
-              :contactType="contactType"
-              :modelValue="contactForm"
-              :errors="uiErrors.general"
-              :billingAddressMode="billingAddressMode"
-              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
-            />
-          </TabPanel>
-          <TabPanel value="1" style="height: 100%">
-            <ContactDetailDocuments
-              :modelValue="contactForm"
-              :errors="uiErrors.documents"
-              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
-              @changeContactForm="(id: number) => changeContactForm(id)"
-            />
-          </TabPanel>
-          <TabPanel value="2">
-            <ContactDetailBilling
-              :modelValue="contactForm"
-              :billingAddress="billingAddress"
-              :billingAddressMode="billingAddressMode"
-              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
-              @update:billingAddress="(v: Address) => Object.assign(billingAddress, v)"
-              @updateBillingAddressMode="billingAddressMode = $event"
-            />
-          </TabPanel>
-          <TabPanel value="3">
-            <ContactDetailInternalNotes
-              :modelValue="contactForm"
-              @update:modelValue="(v: ContactDetail) => Object.assign(contactForm, v)"
-            />
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+    <div class="contact-detail-tabs">
+      <ContactDetailTabs v-model:modelValue="activeTab" :formParts="formParts" :badges="badges">
+        <template #formPart="{ formPart }">
+          <component
+            :is="components[formPart.id]"
+            v-bind="componentProps(formPart.id)"
+            v-on="componentListeners(formPart.id)"
+          />
+        </template>
+      </ContactDetailTabs>
     </div>
     <div
       class="footer"
@@ -170,7 +52,7 @@
       }"
     >
       <div class="all-errors" v-if="badges.general || badges.documents">
-        <Info :size="isDesktop ? 16 : 14" />
+        <Info :size="16" />
         <span>
           {{
             t('contacts.errors.fieldErrors', {
@@ -197,18 +79,9 @@ import {
   watch,
   inject,
   type Ref,
+  type Component,
 } from 'vue';
-import { useMediaQuery } from '@vueuse/core';
 import SelectButton from 'primevue/selectbutton';
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
-import TabPanels from 'primevue/tabpanels';
-import TabPanel from 'primevue/tabpanel';
-import Accordion from 'primevue/accordion';
-import AccordionHeader from 'primevue/accordionheader';
-import AccordionContent from 'primevue/accordioncontent';
-import AccordionPanel from 'primevue/accordionpanel';
 import Button from 'primevue/button';
 import Badge from 'primevue/badge';
 import { useI18n } from 'vue-i18n';
@@ -223,47 +96,34 @@ import {
   BookUser,
   Info,
 } from 'lucide-vue-next';
-import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
 
+import ContactDetailAccordion from './ContactDetailAccordion.vue';
+import ContactDetailTabs from './ContactDetailTabs.vue';
 import ContactDetailGeneralData from './ContactDetailGeneralData.vue';
 import ContactDetailDocuments from './ContactDetailDocuments.vue';
 import ContactDetailBilling from './ContactDetailBilling.vue';
 import ContactDetailInternalNotes from './ContactDetailInternalNotes.vue';
 
-import { ContactSchema, type ContactInput } from '@/application/contacts/ContactSchemas';
+import { useContactDetailErrors } from '@/ui/composables/useContactDetailErrors';
+import { useContactDetailLoader } from '@/ui/composables/useContactDetail';
 import type { ContactDetail } from '@/domain/entities/Contact';
-import { usePaymentTermsStore } from '@/infrastructure/stores/paymentTerms';
-import { usePricelistStore } from '@/infrastructure/stores/pricelist';
-import { useCountriesStore } from '@/infrastructure/stores/countries';
-import { useSaleChannelsStore } from '@/infrastructure/stores/saleChannels';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
-import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
-import { useTagsStore } from '@/infrastructure/stores/tags';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
-import type { Country } from '@/domain/entities/Country';
 import type { CountryState } from '@/domain/entities/CountryState';
-// eslint-disable-next-line
+import type { Country } from '@/domain/entities/Country';
 import type { Address } from '@/domain/entities/Address';
 
 export default defineComponent({
   components: {
     SelectButton,
-    Tabs,
     ContactDetailGeneralData,
     ContactDetailDocuments,
     ContactDetailBilling,
     ContactDetailInternalNotes,
-    TabList,
-    Tab,
-    TabPanels,
-    TabPanel,
+    ContactDetailAccordion,
+    ContactDetailTabs,
     Button,
-    Accordion,
-    AccordionHeader,
-    AccordionContent,
-    AccordionPanel,
     Badge,
     User,
     Building,
@@ -277,28 +137,22 @@ export default defineComponent({
   },
 
   setup() {
-    type GeneralErrors = { name?: string; saleChannelId?: string };
-    type DocumentRowError = { country?: string; category?: string; number?: string };
+    type BadgeKey = 'general' | 'documents';
+    type FormPartId = 'general' | 'documents' | 'billing' | 'internalNotes';
+
+    type FormPartConfig = {
+      id: FormPartId;
+      value: string;
+      icon: Component;
+      labelKey: string;
+      show: boolean;
+      badgeKey?: BadgeKey;
+    };
 
     const contactsStore = useContactsStore();
-    const countriesStore = useCountriesStore();
-    const paymentTermsStore = usePaymentTermsStore();
-    const pricelistStore = usePricelistStore();
-    const documentTypesStore = useDocumentTypesStore();
-    const tagsStore = useTagsStore();
-    const saleChannelsStore = useSaleChannelsStore();
     const uiStore = useUIStore();
     const useTextMessageStore = useTextMessagesStore();
-    const isDesktop = useMediaQuery('(min-width: 1024px)');
     const { t } = useI18n();
-
-    const {
-      validate,
-      setValues,
-      errors: vvErrors,
-    } = useForm({
-      validationSchema: toTypedSchema(ContactSchema),
-    });
 
     const dialogRef =
       inject<
@@ -314,10 +168,6 @@ export default defineComponent({
       { label: t('contacts.agency'), value: 'agency' },
     ]);
     const isPerson = computed(() => contactType.value === 'person');
-
-    const activePanel = ref<string | null>(null);
-    const activeTab = ref('0');
-    const contact = ref<ContactDetail | null>(null);
 
     const contactForm: ContactDetail = reactive({
       id: 0,
@@ -361,25 +211,123 @@ export default defineComponent({
       state: undefined as CountryState | undefined,
     });
 
-    const uiErrors = reactive<{ general: GeneralErrors; documents: DocumentRowError[] }>({
-      general: {},
-      documents: [],
-    });
+    const formParts = computed<FormPartConfig[]>(() => [
+      {
+        id: 'general',
+        value: '0',
+        icon: FileText,
+        labelKey: 'contacts.generalInformation',
+        show: true,
+        badgeKey: 'general',
+      },
+      {
+        id: 'documents',
+        value: '1',
+        icon: IdCard,
+        labelKey: 'contacts.documents',
+        show: contactType.value === 'person',
+        badgeKey: 'documents',
+      },
+      {
+        id: 'billing',
+        value: '2',
+        icon: Banknote,
+        labelKey: 'contacts.invoicing',
+        show: true,
+      },
+      {
+        id: 'internalNotes',
+        value: '3',
+        icon: NotebookPen,
+        labelKey: 'contacts.internalNotes',
+        show: true,
+      },
+    ]);
 
-    const badges = computed(() => {
-      const general = Object.keys(uiErrors.general).length;
-      const documents = uiErrors.documents.reduce(
-        (acc, r) =>
-          acc +
-          (r.country !== undefined ? 1 : 0) +
-          (r.category !== undefined ? 1 : 0) +
-          (r.number !== undefined ? 1 : 0),
-        0,
-      );
-      return { general, documents, total: general + documents };
-    });
+    const components: Record<FormPartId, Component> = {
+      general: ContactDetailGeneralData,
+      documents: ContactDetailDocuments,
+      billing: ContactDetailBilling,
+      internalNotes: ContactDetailInternalNotes,
+    };
+
+    const {
+      uiErrors,
+      badges,
+      validate,
+      setValues,
+      resetUiErrors,
+      buildPayloadToValidate,
+      mapVeeValidateErrors,
+    } = useContactDetailErrors(contactType, contactForm);
+
+    const { contact, activePanel, activeTab, changeContactForm, loadInitialData } =
+      useContactDetailLoader({
+        contactType,
+        contactForm,
+        billingAddress,
+        billingAddressMode,
+        resetUiErrors,
+      });
 
     const mergeIntoForm = (v: ContactDetail): ContactDetail => Object.assign(contactForm, v);
+
+    const componentProps = (id: FormPartId): Record<string, unknown> => {
+      switch (id) {
+        case 'general':
+          return {
+            contactType: contactType.value,
+            modelValue: contactForm,
+            errors: uiErrors.general,
+            billingAddressMode: billingAddressMode.value,
+          };
+        case 'documents':
+          return {
+            modelValue: contactForm,
+            errors: uiErrors.documents,
+          };
+        case 'billing':
+          return {
+            modelValue: contactForm,
+            billingAddress,
+            billingAddressMode: billingAddressMode.value,
+          };
+        case 'internalNotes':
+          return {
+            modelValue: contactForm,
+          };
+        default:
+          return {};
+      }
+    };
+
+    const componentListeners = (id: FormPartId): Record<string, unknown> => {
+      switch (id) {
+        case 'general':
+          return {
+            'update:modelValue': mergeIntoForm,
+          };
+        case 'documents':
+          return {
+            'update:modelValue': mergeIntoForm,
+            changeContactForm,
+          };
+        case 'billing':
+          return {
+            'update:modelValue': mergeIntoForm,
+            'update:billingAddress': (v: Address) => Object.assign(billingAddress, v),
+            updateBillingAddressMode: (v: 'residence' | 'other'): void => {
+              billingAddressMode.value = v;
+            },
+          };
+        case 'internalNotes':
+          return {
+            'update:modelValue': mergeIntoForm,
+          };
+        default:
+          return {};
+      }
+    };
 
     const clearHiddenFields = (): void => {
       if (
@@ -408,73 +356,15 @@ export default defineComponent({
       }
     };
 
-    const mapVeeValidateErrors = (): void => {
-      const flat = vvErrors.value as Record<string, string>;
-      uiErrors.general = {};
-      uiErrors.documents = [];
-
-      for (const [path, msg] of Object.entries(flat)) {
-        if (path === 'name' || path === 'saleChannelId') {
-          (uiErrors.general as GeneralErrors)[path as keyof GeneralErrors] = msg;
-          continue;
-        }
-        const m = path.match(/^documents(?:\[(\d+)\]|\.([0-9]+))\.(.+)$/);
-        if (!m) {
-          continue;
-        }
-        const idx = Number(m[1] ?? m[2]);
-        const field = m[3];
-        while (uiErrors.documents.length <= idx) {
-          uiErrors.documents.push({});
-        }
-        const prev = uiErrors.documents[idx] ?? {};
-        const next = {
-          ...prev,
-          ...(field === 'number' ? { number: msg } : {}),
-          ...(field === 'countryCode' ? { country: msg } : {}),
-          ...(field === 'documentTypeName' ? { category: msg } : {}),
-        };
-
-        uiErrors.documents.splice(idx, 1, next);
-      }
-
-      uiErrors.documents = uiErrors.documents.map((r) => ({ ...r }));
-    };
-
-    const resetUiErrors = (): void => {
-      uiErrors.general = {};
-      uiErrors.documents = [];
-    };
-
-    const normCode = (code?: string): string => (code ?? '').trim().slice(0, 2).toUpperCase();
-    const normDocType = (name?: string): string => (name ?? '').trim().toLowerCase();
-
-    const buildPayloadToValidate = (): ContactInput => ({
-      contactType: contactType.value,
-      name: (
-        contactForm.name || `${contactForm.firstname ?? ''} ${contactForm.lastname ?? ''}`
-      ).trim(),
-      saleChannelId: contactForm.saleChannel?.id ?? null,
-      documents: (contactForm.documents ?? []).map((d) => ({
-        number: String(d?.name ?? '').trim(),
-        countryCode: normCode(d?.country?.code),
-        documentTypeName: normDocType(d?.category?.name),
-        isValidable: Boolean(d?.category?.isValidableDocument),
-      })),
-    });
-
     const handleSave = async (): Promise<void> => {
       resetUiErrors();
       clearHiddenFields();
       contactForm.contactType = contactType.value;
-
       const payload = buildPayloadToValidate();
       setValues(payload);
-
       const { valid } = await validate();
       mapVeeValidateErrors();
-
-      if (!valid || badges.value.total > 0) {
+      if (!Boolean(valid) || badges.value.total > 0) {
         return;
       }
       if (
@@ -508,7 +398,7 @@ export default defineComponent({
       }
       uiStore.startLoading();
       try {
-        if (contact.value) {
+        if (contact.value !== null) {
           await contactsStore.updateContactFields(contact.value.id, contact.value, contactForm);
         } else {
           await contactsStore.createContact(contactForm);
@@ -525,142 +415,16 @@ export default defineComponent({
       dialogRef?.value?.close({ action: 'cancel' });
     };
 
-    const changeContactForm = async (id: number): Promise<void> => {
-      const contactFetched = await contactsStore.fetchContactById(id);
-      if (contactFetched) {
-        contactType.value = (contactFetched.contactType ?? 'person') as typeof contactType.value;
-        Object.assign(contactForm, contactFetched);
-        if (contact.value) {
-          Object.assign(contact.value, contactFetched);
-        } else {
-          contact.value = contactFetched;
-        }
-
-        if (contactFetched.birthdate) {
-          contactForm.birthdate = new Date(contactFetched.birthdate);
-          contact.value.birthdate = new Date(contactFetched.birthdate);
-        }
-        if (contactFetched.lang !== undefined) {
-          contactForm.lang = contactFetched.lang.replace('_', '-');
-        }
-        if (
-          contactFetched.street === contactFetched.residenceStreet &&
-          contactFetched.zipCode === contactFetched.residenceZip &&
-          contactFetched.city === contactFetched.residenceCity &&
-          contactFetched.country?.id === contactFetched.residenceCountry?.id &&
-          contactFetched.state?.id === contactFetched.residenceState?.id
-        ) {
-          billingAddressMode.value = 'residence';
-        } else {
-          billingAddressMode.value = 'other';
-          Object.assign(billingAddress, {
-            street: contactFetched.street,
-            zipCode: contactFetched.zipCode,
-            city: contactFetched.city,
-            country: contactFetched.country,
-            state: contactFetched.state,
-          });
-        }
-        if (contact.value.documents) {
-          contact.value.documents.forEach((doc) => {
-            if (doc.country) {
-              doc.country.code = countriesStore.countries.find((c) => c.id === doc.country?.id)
-                ?.code as string;
-            }
-          });
-          contactForm.documents = contact.value.documents;
-        }
-        activeTab.value = '0';
-        activePanel.value = '0';
-      }
-    };
-
     watch(contactType, () => {
       activeTab.value = '0';
       activePanel.value = null;
       resetUiErrors();
     });
 
-    watch(
-      () => [contactForm.name, contactForm.firstname],
-      () => {
-        if (uiErrors.general.name !== undefined) {
-          delete uiErrors.general.name;
-        }
-      },
-    );
-
-    watch(
-      () => contactForm.saleChannel,
-      () => {
-        if (uiErrors.general.saleChannelId !== undefined) {
-          delete uiErrors.general.saleChannelId;
-        }
-      },
-    );
-
-    watch(
-      () => contactForm.documents,
-      () => {
-        if (uiErrors.documents.length) {
-          uiErrors.documents = [];
-        }
-      },
-      { deep: true },
-    );
-
     onBeforeMount(async () => {
-      contact.value = dialogRef?.value?.data.contact as ContactDetail | null;
+      const initialContact = dialogRef?.value?.data.contact as ContactDetail | null;
       try {
-        await Promise.all([
-          documentTypesStore.fetchDocumentTypes(),
-          documentTypesStore.fetchFiscalDocumentTypes(),
-          countriesStore.fetchCountries(),
-          paymentTermsStore.fetchPaymentTerms(),
-          pricelistStore.fetchPricelists(),
-          saleChannelsStore.fetchSaleChannels(),
-          tagsStore.fetchTags(),
-        ]);
-
-        if (contact.value) {
-          contactType.value = (contact.value.contactType ?? 'person') as typeof contactType.value;
-          Object.assign(contactForm, contact.value);
-
-          if (contact.value.birthdate) {
-            contactForm.birthdate = new Date(contact.value.birthdate);
-            contact.value.birthdate = new Date(contact.value.birthdate);
-          }
-          if (contact.value.lang !== undefined) {
-            contactForm.lang = contact.value.lang.replace('_', '-');
-          }
-          if (
-            contact.value.street === contact.value.residenceStreet &&
-            contact.value.zipCode === contact.value.residenceZip &&
-            contact.value.city === contact.value.residenceCity &&
-            contact.value.country?.id === contact.value.residenceCountry?.id &&
-            contact.value.state?.id === contact.value.residenceState?.id
-          ) {
-            billingAddressMode.value = 'residence';
-          } else {
-            billingAddressMode.value = 'other';
-            Object.assign(billingAddress, {
-              street: contact.value.street,
-              zipCode: contact.value.zipCode,
-              city: contact.value.city,
-              country: contact.value.country,
-              state: contact.value.state,
-            });
-          }
-          if (contact.value.documents) {
-            contact.value.documents.forEach((doc) => {
-              if (doc.country) {
-                doc.country.code = countriesStore.countries.find((c) => c.id === doc.country?.id)
-                  ?.code as string;
-              }
-            });
-            contactForm.documents = contact.value.documents;
-          }
-        }
+        await loadInitialData(initialContact ?? null);
       } catch (error) {
         if (error instanceof Error) {
           useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
@@ -678,11 +442,14 @@ export default defineComponent({
       contact,
       activePanel,
       activeTab,
-      isDesktop,
       uiErrors,
       badges,
       billingAddressMode,
       billingAddress,
+      formParts,
+      components,
+      componentProps,
+      componentListeners,
       t,
       handleCancel,
       handleSave,
@@ -692,6 +459,7 @@ export default defineComponent({
   },
 });
 </script>
+
 <style scoped lang="scss">
 .contact-detail {
   height: 100%;
@@ -721,8 +489,6 @@ export default defineComponent({
   .contact-detail-accordion {
     height: calc(100% - 56px - 65px - 16px);
     overflow-y: auto;
-    margin-right: -1.5rem;
-    padding-right: 1.5rem;
   }
   .contact-detail-tabs {
     display: none;

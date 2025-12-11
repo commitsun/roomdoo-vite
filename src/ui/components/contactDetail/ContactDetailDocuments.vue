@@ -1,15 +1,9 @@
 <template>
-  <section
-    class="documents-form"
-    :class="{ 'documents-form--empty': (modelValue.documents?.length ?? 0) === 0 && !hasDraftDoc }"
-  >
-    <div
-      class="documents-form__no-documents-container"
-      v-if="(modelValue.documents?.length ?? 0) === 0 && !hasDraftDoc"
-    >
-      <div class="documents-form__no-documents">
+  <section class="documents-form" :class="{ 'is-empty': !hasDocuments && !hasDraftDoc }">
+    <div class="no-documents-container" v-if="!hasDocuments && !hasDraftDoc">
+      <div class="no-documents">
         <IdCard :size="40" color="#64748B" />
-        <span class="documents-form__no-documents-text">{{ t('contacts.noDocuments') }}</span>
+        <span class="no-documents-text">{{ t('contacts.noDocuments') }}</span>
         <Button
           :label="t('contacts.addDocument')"
           icon="pi pi-plus"
@@ -20,8 +14,8 @@
       </div>
     </div>
 
-    <div class="documents-form__title" v-if="modelValue.documents?.length ?? 0">
-      <div class="documents-form__title-text">{{ t('contacts.allDocuments') }}</div>
+    <div class="documents-header" v-if="hasDocuments">
+      <div class="documents-header-title">{{ t('contacts.allDocuments') }}</div>
       <Button
         :label="t('contacts.addDocument')"
         icon="pi pi-plus"
@@ -31,41 +25,45 @@
       />
     </div>
     <div
-      v-for="({ doc, origIdx }, i) in docsView"
-      :key="doc.id ?? `draft-${origIdx}`"
-      class="documents-form__group"
+      v-for="{ doc, index } in docsView"
+      :key="doc.id ?? `draft-${index}`"
+      class="document-group"
     >
       <div
-        class="documents-form__group-grid"
+        class="document-grid"
         :class="{
-          'documents-form__group-grid-error':
-            mergedErrors[origIdx]?.country ||
-            mergedErrors[origIdx]?.category ||
-            mergedErrors[origIdx]?.number,
+          'document-grid-error':
+            getRowErrors(index).country ||
+            getRowErrors(index).category ||
+            getRowErrors(index).number,
         }"
       >
-        <div class="documents-form__field--full">
+        <div class="field-full">
           {{ t('contacts.mandatoryFieldsText') }}
         </div>
 
-        <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-country-${origIdx}`">
+        <div class="field">
+          <label class="field-label" :for="`doc-country-${index}`">
             {{ t('contacts.issueCountry') }} *
           </label>
           <Select
-            :id="`doc-country-${origIdx}`"
+            :id="`doc-country-${index}`"
             :modelValue="doc.country?.id ?? null"
             :options="[...countries]"
             optionLabel="name"
             optionValue="id"
-            class="documents-form__control"
             :placeholder="t('contacts.select')"
             filter
-            :invalid="!!mergedErrors[origIdx]?.country"
-            @update:modelValue="
-              (id: string | null) => setDocCountry(origIdx, id ? Number(id) : null)
-            "
-            @blur="checkDuplicateFor(origIdx)"
+            :invalid="!!getRowErrors(index).country"
+            @update:modelValue="(id: string | null) => setDocCountry(index, id ? Number(id) : null)"
+            @blur="checkDuplicateFor(index)"
+            class="w-full flex items-center h-[30px] lg:h-[35px]"
+            overlayClass="max-w-[280px] lg:max-w-md"
+            :pt="{
+              label: {
+                class: 'text-[12px]! lg:text-[14px]! ',
+              },
+            }"
           >
             <template #value="{ value }">
               <div v-if="value" class="flex items-center w-full gap-1">
@@ -90,36 +88,42 @@
             </template>
           </Select>
           <Message
-            v-if="mergedErrors[origIdx]?.country"
+            v-if="getRowErrors(index).country"
             size="small"
             severity="error"
             variant="simple"
             class="mt-2"
           >
-            {{ t(mergedErrors[origIdx]?.country) }}
+            {{ t(getRowErrors(index).country!) }}
           </Message>
         </div>
 
-        <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-type-${origIdx}`">
+        <div class="field">
+          <label class="field-label" :for="`doc-type-${index}`">
             {{ t('contacts.documentType') }} *
           </label>
           <Select
-            :id="`doc-type-${origIdx}`"
+            :id="`doc-type-${index}`"
             :modelValue="doc.category?.id ?? null"
             :options="[...docTypesFor(doc)]"
             optionLabel="name"
             optionValue="id"
-            class="documents-form__control"
             :placeholder="t('contacts.select')"
-            @update:modelValue="(id: number | null) => setDocCategory(origIdx, id as number | null)"
+            @update:modelValue="(id: number | null) => setDocCategory(index, id as number | null)"
             :disabled="!doc.country?.id"
-            :invalid="!!mergedErrors[origIdx]?.category"
-            @blur="checkDuplicateFor(origIdx)"
+            :invalid="!!getRowErrors(index).category"
+            @blur="checkDuplicateFor(index)"
+            class="w-full flex items-center h-[30px] lg:h-[35px]"
+            overlayClass="max-w-[280px] lg:max-w-md"
+            :pt="{
+              label: {
+                class: 'text-[12px]! lg:text-[14px]! ',
+              },
+            }"
           />
           <div
             class="flex mt-2 gap-1 items-center"
-            v-if="!doc.country?.id && !mergedErrors[origIdx]?.category"
+            v-if="!doc.country?.id && !getRowErrors(index).category"
           >
             <Info :size="13" color="#2563eb" />
             <Message size="small" severity="info" variant="simple">
@@ -127,73 +131,77 @@
             </Message>
           </div>
           <Message
-            v-if="mergedErrors[origIdx]?.category"
+            v-if="getRowErrors(index).category"
             size="small"
             severity="error"
             variant="simple"
             class="mt-2"
           >
-            {{ t(mergedErrors[origIdx]?.category) }}
+            {{ t(getRowErrors(index).category!) }}
           </Message>
         </div>
 
-        <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-number-${origIdx}`">
+        <div class="field">
+          <label class="field-label" :for="`doc-number-${index}`">
             {{ t('contacts.documentNumber') }} *
           </label>
           <InputText
-            :id="`doc-number-${origIdx}`"
+            :id="`doc-number-${index}`"
             v-model="doc.name"
-            class="documents-form__control"
+            class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
             autocomplete="off"
             :placeholder="t('contacts.documentNumberPlaceholder')"
             :invalid="
-              !!mergedErrors[origIdx]?.number &&
-              mergedErrors[origIdx]?.number !== 'contacts.errors.duplicateDocument'
+              !!getRowErrors(index).number &&
+              getRowErrors(index).number !== 'contacts.errors.duplicateDocument'
             "
-            @blur="onNumberBlur(origIdx)"
+            @blur="onNumberBlur(index)"
           />
           <Message
             v-if="
-              mergedErrors[origIdx]?.number &&
-              mergedErrors[origIdx]?.number !== 'contacts.errors.duplicateDocument'
+              getRowErrors(index).number &&
+              getRowErrors(index).number !== 'contacts.errors.duplicateDocument'
             "
             size="small"
             severity="error"
             variant="simple"
             class="mt-2"
           >
-            {{ t(mergedErrors[origIdx]?.number, { document: doc.category?.name ?? '' }) }}
+            {{
+              t(getRowErrors(index).number!, {
+                document: getDocumentLabel(doc),
+              })
+            }}
           </Message>
         </div>
 
-        <div class="documents-form__field">
-          <label class="documents-form__label" :for="`doc-support-${origIdx}`">
+        <div class="field">
+          <label class="field-label" :for="`doc-support-${index}`">
             {{ t('contacts.supportNumber') }}
           </label>
           <InputText
-            :id="`doc-support-${origIdx}`"
+            :id="`doc-support-${index}`"
             v-model="doc.supportNumber"
-            class="documents-form__control"
             autocomplete="off"
             :placeholder="t('contacts.supportNumberPlaceholder')"
+            class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
           />
         </div>
 
-        <div class="documents-form__cancel">
+        <div class="document-remove">
           <Button
             :label="t('contacts.remove')"
             icon="pi pi-trash"
             text
             severity="secondary"
-            @click="removeDraftsOrDelete(origIdx)"
+            @click="removeDraftsOrDelete(index)"
           />
         </div>
       </div>
 
       <div
         class="flex gap-1 items-center mt-2"
-        v-if="mergedErrors[origIdx]?.number === 'contacts.errors.duplicateDocument'"
+        v-if="getRowErrors(index).number === 'contacts.errors.duplicateDocument'"
       >
         <CircleAlert :size="16" color="#dc2626" />
         <Message size="small" severity="error" variant="simple">
@@ -201,20 +209,21 @@
         </Message>
       </div>
 
-      <div class="mt-2 flex gap-1 items-center" v-else-if="duplicatesByIdx[origIdx]">
+      <div class="mt-2 flex gap-1 items-center" v-else-if="duplicatesByIndex[index]">
         <CircleAlert :size="16" color="#dc2626" />
         <Message size="small" severity="error" variant="simple">
-          {{ t('contacts.isDuplicated', { name: duplicatesByIdx[origIdx]?.name }) }}
+          {{ t('contacts.isDuplicated', { name: duplicatesByIndex[index]?.name }) }}
           <span
             class="underline text-sm text-blue-600 hover:text-blue-800 visited:text-purple-600 cursor-pointer font-bold"
-            @click="confirmChangeContactFor(origIdx)"
+            @click="confirmChangeContactFor(index)"
           >
             {{ t('contacts.seeContact') }}
           </span>
         </Message>
       </div>
     </div>
-    <div v-if="showAddError" class="documents-form__global-error mt-2 flex gap-1 items-center">
+
+    <div v-if="showAddError" class="global-error mt-2 flex gap-1 items-center">
       <CircleAlert :size="16" color="#dc2626" />
       <Message size="small" severity="error" variant="simple">
         {{ t('contacts.errors.completeMandatoryToAddDocument') }}
@@ -279,37 +288,40 @@ export default defineComponent({
     const countries = computed(() => countriesStore.countries);
     const documentTypes = computed(() => documentTypesStore.documentTypes);
 
+    const documents = computed(() => props.modelValue.documents ?? []);
+    const hasDocuments = computed(() => documents.value.length > 0);
+
     const countryById = computed(() => {
       const m = new Map<number, { id: number; name: string; code: string }>();
       countries.value.forEach((c) => m.set(c.id, c));
       return m;
     });
 
-    const hasDraftDoc = computed(() => (props.modelValue.documents ?? []).some((d) => !d.id));
+    const hasDraftDoc = computed(() => documents.value.some((d) => !d.id));
 
-    const docsView = computed(() => {
-      const docs = props.modelValue.documents ?? [];
-      return docs
-        .map((doc, origIdx) => ({ doc, origIdx }))
+    const docsView = computed(() =>
+      documents.value
+        .map((doc, index) => ({ doc, index }))
         .slice()
-        .reverse();
-    });
+        .reverse(),
+    );
 
-    const duplicatesByIdx = ref<Record<number, { id: number; name: string } | null>>({});
-
+    const duplicatesByIndex = ref<Record<number, { id: number; name: string } | null>>({});
     const localErrors = ref<Array<DocumentRowError>>([]);
     const showAddError = ref(false);
 
     const mergedErrors = computed(() => {
       const maxLen = Math.max(props.errors.length, localErrors.value.length);
-      return Array.from({ length: maxLen }, (_, idx) => ({
-        ...(props.errors[idx] ?? {}),
-        ...(localErrors.value[idx] ?? {}),
+      return Array.from({ length: maxLen }, (_, index) => ({
+        ...(props.errors[index] ?? {}),
+        ...(localErrors.value[index] ?? {}),
       }));
     });
 
-    const clearLocalError = (idx: number, field: keyof DocumentRowError): void => {
-      const current = localErrors.value[idx];
+    const getRowErrors = (index: number): DocumentRowError => mergedErrors.value[index] ?? {};
+
+    const clearLocalError = (index: number, field: keyof DocumentRowError): void => {
+      const current = localErrors.value[index];
       if (current === undefined || current === null) {
         return;
       }
@@ -318,15 +330,14 @@ export default defineComponent({
       delete next[field];
 
       const arr = [...localErrors.value];
-      arr[idx] = next;
+      arr[index] = next;
       localErrors.value = arr;
 
       const anyError = localErrors.value.some(
         (e) =>
-          Boolean(e) &&
-          ((typeof e.country === 'string' && e.country.length > 0) ||
-            (typeof e.category === 'string' && e.category.length > 0) ||
-            (typeof e.number === 'string' && e.number.length > 0)),
+          (typeof e?.country === 'string' && e.country.trim().length > 0) ||
+          (typeof e?.category === 'string' && e.category.trim().length > 0) ||
+          (typeof e?.number === 'string' && e.number.trim().length > 0),
       );
       if (!anyError) {
         showAddError.value = false;
@@ -338,20 +349,18 @@ export default defineComponent({
         docs: NonNullable<ContactDetail['documents']>,
       ) => NonNullable<ContactDetail['documents']>,
     ): void => {
-      const docs = props.modelValue.documents ?? [];
-      const next = updater(docs);
+      const currentDocs = documents.value;
+      const next = updater(currentDocs);
       emit('update:modelValue', { ...props.modelValue, documents: next });
     };
 
     const startAddDocument = (): void => {
-      const docs = props.modelValue.documents ?? [];
-
-      const draftIdx = docs.findIndex(
+      const draftIdx = documents.value.findIndex(
         (d) => !d.id && (d.country?.id === null || !d.category?.id || !(d.name ?? '').trim()),
       );
 
       if (draftIdx !== -1) {
-        const draft = docs[draftIdx];
+        const draft = documents.value[draftIdx];
         const errs: DocumentRowError = {};
         if (draft.country?.id === 0) {
           errs.country = 'contacts.errors.issueCountryRequired';
@@ -379,49 +388,57 @@ export default defineComponent({
           id: 0,
           name: '',
           supportNumber: '',
-          category: { id: 0, name: '', code: '', countries: [], isValidableDocument: false },
+          category: {
+            id: 0,
+            name: '',
+            code: '',
+            countries: [],
+            isValidableDocument: false,
+            shortCode: '',
+          },
           country: { id: 0, name: '', code: '' },
         },
       ]);
     };
 
-    const removeDraftsOrDelete = (origIdx: number): void => {
-      patchDocuments((docs) => docs.filter((_, i) => i !== origIdx));
-      localErrors.value.splice(origIdx, 1);
-      duplicatesByIdx.value = {};
+    const removeDraftsOrDelete = (index: number): void => {
+      patchDocuments((docs) => docs.filter((_, i) => i !== index));
+      localErrors.value.splice(index, 1);
+      duplicatesByIndex.value = {};
     };
 
-    const setDocCountry = (idx: number, id: number | null): void => {
+    const setDocCountry = (index: number, id: number | null): void => {
       const country = id !== null ? countries.value.find((c) => c.id === id) : undefined;
       patchDocuments((docs) => {
         const next = [...docs];
-        const d = { ...next[idx], country: country ?? undefined };
-        next[idx] = d;
+        const d = { ...next[index], country: country ?? undefined };
+        next[index] = d;
         return next;
       });
       if (id !== null) {
-        clearLocalError(idx, 'country');
+        clearLocalError(index, 'country');
       }
     };
 
-    const setDocCategory = (idx: number, id: number | null): void => {
+    const setDocCategory = (index: number, id: number | null): void => {
       const defaultCategory = {
         id: 0,
         name: '',
         code: '',
         countries: [],
         isValidableDocument: false,
+        shortCode: '',
       };
       const catRaw = documentTypes.value.find((c) => c.id === id) ?? defaultCategory;
       const cat = { ...catRaw, countries: [...catRaw.countries] };
       patchDocuments((docs) => {
         const next = [...docs];
-        const d = { ...next[idx], category: cat };
-        next[idx] = d;
+        const d = { ...next[index], category: cat };
+        next[index] = d;
         return next;
       });
       if (id !== null) {
-        clearLocalError(idx, 'category');
+        clearLocalError(index, 'category');
       }
     };
 
@@ -436,9 +453,11 @@ export default defineComponent({
       );
     };
 
-    const checkDuplicateFor = async (origIdx: number): Promise<void> => {
-      const docs = props.modelValue.documents ?? [];
-      const doc = docs[origIdx];
+    const getDocumentLabel = (doc: PersonalDocument): string =>
+      doc.category?.shortCode || doc.category?.name || '';
+
+    const checkDuplicateFor = async (index: number): Promise<void> => {
+      const doc = documents.value[index];
       if (doc === null) {
         return;
       }
@@ -448,7 +467,7 @@ export default defineComponent({
       const number = (doc.name ?? '').trim();
 
       if (countryId === null || !categoryId || !number) {
-        duplicatesByIdx.value[origIdx] = null;
+        duplicatesByIndex.value[index] = null;
         return;
       }
 
@@ -459,23 +478,22 @@ export default defineComponent({
       );
       const currentId = (props.modelValue as ContactDetail)?.id as number | undefined;
       if (dup && dup.id !== currentId) {
-        duplicatesByIdx.value[origIdx] = { id: dup.id, name: dup.name };
+        duplicatesByIndex.value[index] = { id: dup.id, name: dup.name };
       } else {
-        duplicatesByIdx.value[origIdx] = null;
+        duplicatesByIndex.value[index] = null;
       }
     };
 
-    const onNumberBlur = (origIdx: number): void => {
-      const docs = props.modelValue.documents ?? [];
-      const doc = docs[origIdx];
+    const onNumberBlur = (index: number): void => {
+      const doc = documents.value[index];
       if ((doc.name ?? '').trim()) {
-        clearLocalError(origIdx, 'number');
+        clearLocalError(index, 'number');
       }
-      void checkDuplicateFor(origIdx);
+      void checkDuplicateFor(index);
     };
 
-    const confirmChangeContactFor = (origIdx: number): void => {
-      const dup = duplicatesByIdx.value[origIdx];
+    const confirmChangeContactFor = (index: number): void => {
+      const dup = duplicatesByIndex.value[index];
       if (!dup) {
         return;
       }
@@ -499,10 +517,10 @@ export default defineComponent({
           return;
         }
 
-        newDocs.forEach((newDoc, idx) => {
-          const oldDoc = oldDocs[idx];
+        newDocs.forEach((newDoc, index) => {
+          const oldDoc = oldDocs[index];
           if (newDoc?.country?.id !== oldDoc?.country?.id) {
-            setDocCategory(idx, null);
+            setDocCategory(index, null);
           }
         });
       },
@@ -514,9 +532,11 @@ export default defineComponent({
       countries,
       documentTypes,
       countryById,
+      documents,
+      hasDocuments,
       hasDraftDoc,
       docsView,
-      duplicatesByIdx,
+      duplicatesByIndex,
       startAddDocument,
       removeDraftsOrDelete,
       setDocCountry,
@@ -525,6 +545,8 @@ export default defineComponent({
       checkDuplicateFor,
       confirmChangeContactFor,
       mergedErrors,
+      getRowErrors,
+      getDocumentLabel,
       showAddError,
       onNumberBlur,
     };
@@ -536,6 +558,7 @@ export default defineComponent({
 .documents-form {
   position: relative;
   padding-top: 1.2rem;
+
   &::before {
     content: '';
     position: absolute;
@@ -545,7 +568,7 @@ export default defineComponent({
     background: #e2e8f0;
   }
 
-  &__no-documents {
+  .no-documents {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -555,77 +578,60 @@ export default defineComponent({
     border-radius: 12px;
     padding-top: 32px;
     padding-bottom: 40px;
+
     &-text {
       margin-bottom: 16px;
       margin-top: 8px;
       color: #334155;
     }
   }
-  &__title {
+
+  .documents-header {
     font-size: 14px;
     color: #475569;
     margin-bottom: 16px;
-    &-text {
+
+    &-title {
       font-weight: 600;
       margin-bottom: 8px;
     }
   }
 
-  &__group + &__group {
+  .document-group + .document-group {
     margin-top: 12px;
     padding-top: 12px;
   }
 
-  &__group-grid {
+  .document-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
     border: 1px solid #cbd5e1;
     border-radius: 12px;
     padding: 16px;
+
     &-error {
       border-color: #dc2626;
     }
   }
 
-  &__field {
-    .documents-form__control {
-      width: 100%;
-    }
-    :deep(.p-inputtext),
-    :deep(.p-select),
-    :deep(.p-select-label),
-    :deep(.p-dropdown),
-    :deep(.p-inputwrapper) {
-      width: 100%;
-      font-size: 12px !important;
-      height: 30px;
-    }
-    :deep(.p-select .p-select-label) {
-      display: flex;
-      align-items: center;
+  .field {
+    .field-control {
       width: 100%;
     }
   }
-  &__actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  &__actions-left,
-  &__actions-right {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  &__label {
+
+  .field-label {
     display: block;
     margin-bottom: 0.5rem;
     color: #64748b;
   }
-  &__cancel {
+
+  .field-full {
+    grid-column: 1 / -1;
+  }
+
+  .document-remove {
     display: flex;
     align-items: flex-end;
     justify-content: flex-end;
@@ -637,70 +643,72 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     margin: auto;
+
     &::before {
       inset-inline: 0;
       background: #ffffff;
     }
-    &__no-documents-container {
+
+    .no-documents-container {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    &__no-documents {
+
+    .no-documents {
       width: 400px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
     }
-    &__title {
+
+    .documents-header {
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    &__group {
+
+    .document-group {
       width: 100%;
     }
-    &__group-grid {
+
+    .document-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       column-gap: 16px;
       row-gap: 12px;
       align-items: start;
     }
-    &__field {
+
+    .field {
       grid-column: auto / span 1;
-      :deep(.p-inputtext),
-      :deep(.p-select),
-      :deep(.p-select-label),
-      :deep(.p-datepicker),
-      :deep(.p-inputwrapper) {
-        font-size: 14px !important;
-        height: 35px;
-      }
     }
-    &__field--full,
-    &__cancel {
+
+    .field-full,
+    .document-remove {
       grid-column: 1 / -1;
     }
   }
-  .documents-form--empty {
+
+  .documents-form.is-empty {
     display: grid;
     place-items: center;
     padding-top: 0;
+    min-height: 422px;
 
     &::before {
       display: none;
     }
-  }
 
-  .documents-form--empty .documents-form__no-documents-container {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    .no-documents-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 }
 </style>
