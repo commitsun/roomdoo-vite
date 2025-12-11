@@ -1,128 +1,129 @@
 <template>
   <section class="personal-data-form">
-    <div class="personal-data-form__header">
+    <div class="header">
       {{ t('contacts.mandatoryFieldsText') }}
-      <h1 class="personal-data-form__title">
+      <h1 class="title">
         {{ t('contacts.basicInformation') }}
       </h1>
     </div>
-    <div class="personal-data-form__grid">
-      <!-- First Name (full width) (only for person) -->
+
+    <div class="grid">
+      <!-- First Name (only person) -->
       <div
-        class="personal-data-form__field"
-        :class="{ 'personal-data-form__field--full': contactType === 'person' }"
+        class="field"
+        :class="{ 'field--full': contactType === 'person' }"
         v-if="contactType === 'person'"
       >
-        <label class="personal-data-form__label" for="firstName">
-          {{ t('contacts.firstName') }} *
-        </label>
+        <label class="label" for="firstName">{{ t('contacts.firstName') }} *</label>
+
         <InputText
           id="firstName"
           v-model="modelValue.firstname"
-          class="personal-data-form__control"
           :placeholder="t('contacts.firstNamePlaceholder')"
           :invalid="!!errors.name"
+          class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
         />
+
         <Message v-if="errors.name" size="small" severity="error" variant="simple" class="mt-2">
           {{ t(errors.name) }}
         </Message>
       </div>
-      <!--  Name (full width) (company and agency) -->
-      <div
-        class="personal-data-form__field"
-        :class="{ 'personal-data-form__field--full': !showComercialName }"
-        v-else
-      >
-        <label class="personal-data-form__label" for="name">
-          {{ t('contacts.fiscalName') }} *
-        </label>
+
+      <!-- Fiscal Name (company, agency) -->
+      <div class="field" :class="{ 'field--full': !showComercialName }" v-else>
+        <label class="label" for="name">{{ t('contacts.fiscalName') }} *</label>
+
         <InputText
           id="name"
           v-model="modelValue.name"
-          class="personal-data-form__control"
           :placeholder="t('contacts.firstNamePlaceholder')"
           :invalid="!!errors.name"
+          class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
         />
+
         <Message v-if="errors.name" size="small" severity="error" variant="simple" class="mt-2">
           {{ t(errors.name) }}
         </Message>
       </div>
-      <!-- Trade Name (Company and agency)  -->
-      <div class="personal-data-form__field" v-if="showComercialName">
-        <label class="personal-data-form__label" for="tradeName">
-          {{ t('contacts.tradeName') }}
-        </label>
+
+      <!-- Trade Name -->
+      <div class="field" v-if="showComercialName">
+        <label class="label" for="tradeName">{{ t('contacts.tradeName') }}</label>
+
         <InputText
-          v-model="modelValue.comercial"
           id="tradeName"
-          class="personal-data-form__control"
+          v-model="modelValue.comercial"
           :placeholder="t('contacts.firstNamePlaceholder')"
+          class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
         />
       </div>
+
       <!-- Last Names -->
-      <div
-        class="personal-data-form__field"
-        :class="{ 'personal-data-form__field--full': !showLastName2 }"
-        v-if="contactType === 'person'"
-      >
-        <label class="personal-data-form__label" for="lastName">{{ t('contacts.lastName') }}</label>
+      <div class="field" :class="{ 'field--full': !showLastName2 }" v-if="contactType === 'person'">
+        <label class="label" for="lastName">{{ t('contacts.lastName') }}</label>
+
         <InputText
           id="lastName"
           v-model="modelValue.lastname"
-          class="personal-data-form__control"
           :placeholder="t('contacts.lastNamePlaceholder')"
+          class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
         />
       </div>
-      <div class="personal-data-form__field" v-if="showLastName2">
-        <label class="personal-data-form__label" for="lastName2">{{
-          t('contacts.secondLastName')
-        }}</label>
+
+      <div class="field" v-if="showLastName2">
+        <label class="label" for="lastName2">{{ t('contacts.secondLastName') }}</label>
+
         <InputText
           id="lastName2"
           v-model="modelValue.lastname2"
-          class="personal-data-form__control"
           :placeholder="t('contacts.secondLastNamePlaceholder')"
+          class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
         />
       </div>
+
       <!-- Birthdate -->
-      <div class="personal-data-form__field" v-if="contactType === 'person'">
-        <label class="personal-data-form__label" for="birthdate">{{ birthdateLabel }}</label>
+      <div class="field" v-if="contactType === 'person'">
+        <label class="label" for="birthdate">{{ birthdateLabel }}</label>
+
         <DatePicker
           id="birthdate"
           :modelValue="modelValue.birthdate"
           @update:modelValue="
-            (value) => {
-              modelValue.birthdate = value instanceof Date || value === null ? value : null;
-            }
+            (v) => (modelValue.birthdate = v instanceof Date || v === null ? v : null)
           "
           showIcon
           dateFormat="dd/mm/yy"
           :maxDate="new Date()"
-          class="personal-data-form__control"
-          inputClass="personal-data-form__control-input"
           :placeholder="t('contacts.datePlaceholder')"
+          class="w-full h-[30px] lg:h-[35px]"
+          inputClass="w-full text-[12px]! lg:text-[14px]!"
         />
       </div>
+
       <!-- Gender -->
-      <div class="personal-data-form__field" v-if="contactType === 'person'">
-        <label class="personal-data-form__label" for="gender">{{
-          t('contacts.gender.title')
-        }}</label>
+      <div class="field" v-if="contactType === 'person'">
+        <label class="label" for="gender">{{ t('contacts.gender.title') }}</label>
+
         <Select
           id="gender"
           v-model="modelValue.gender"
           :options="genders"
           optionLabel="label"
           optionValue="value"
-          class="personal-data-form__control"
           :placeholder="t('contacts.select')"
+          class="w-full flex items-center h-[30px] lg:h-[35px]"
+          :pt="{
+            label: {
+              class: 'text-[12px]! lg:text-[14px]! ',
+            },
+          }"
         />
       </div>
+
       <!-- Nationality -->
-      <div class="personal-data-form__field" v-if="contactType === 'person'">
-        <label class="personal-data-form__label" for="nationality">{{
-          t('contacts.nationality')
-        }}</label>
+      <div class="field" v-if="contactType === 'person'">
+        <label class="label" for="nationality">{{ t('contacts.nationality') }}</label>
+
         <Select
           id="nationality"
           :modelValue="modelValue.nationality?.id ?? null"
@@ -130,73 +131,88 @@
           optionLabel="name"
           optionValue="id"
           filter
-          class="personal-data-form__control"
           :placeholder="t('contacts.select')"
+          class="w-full flex items-center h-[30px] lg:h-[35px]"
+          overlayClass="max-w-[315px] lg:max-w-md"
+          :pt="{
+            label: {
+              class: 'text-[12px]! lg:text-[14px]! ',
+            },
+          }"
           @update:modelValue="
-            (id: number | null) => {
-              const c = countries.find((c: Country) => c.id === id);
-              $emit('update:modelValue', { ...modelValue, nationality: c || undefined });
-            }
+            (id) =>
+              $emit('update:modelValue', {
+                ...modelValue,
+                nationality: countries.find((c) => c.id === id),
+              })
           "
         >
           <template #value="{ value }">
-            <div v-if="value" class="flex items-center w-full gap-1">
+            <div v-if="value" class="flex items-center gap-1">
               <CountryFlag
-                :country="countryById.get(value)?.code?.toLowerCase() || ''"
+                :country="countryById.get(value)?.code?.toLowerCase() ?? ''"
                 size="small"
                 shadow
               />
-              <span class="whitespace-nowrap">{{ countryById.get(value)?.name }}</span>
+              <span>{{ countryById.get(value)?.name }}</span>
             </div>
           </template>
 
           <template #option="{ option }">
             <div class="flex items-center gap-2">
-              <CountryFlag
-                :country="option.code?.toLowerCase()"
-                size="normal"
-                shadow
-                style="margin-bottom: 1px"
-              />
+              <CountryFlag :country="option.code?.toLowerCase()" size="normal" shadow />
               <div>{{ option.name }}</div>
             </div>
           </template>
         </Select>
       </div>
+
       <!-- Language -->
-      <div class="personal-data-form__field">
-        <label class="personal-data-form__label" for="lang">{{ t('contacts.language') }}</label>
+      <div class="field">
+        <label class="label" for="lang">{{ t('contacts.language') }}</label>
+
         <Select
           id="lang"
           v-model="modelValue.lang"
           :options="[...languages]"
           optionLabel="name"
           optionValue="code"
-          class="personal-data-form__control"
           :placeholder="t('contacts.select')"
+          class="w-full flex items-center h-[30px] lg:h-[35px]"
+          :pt="{
+            label: {
+              class: 'text-[12px]! lg:text-[14px]! ',
+            },
+          }"
         />
       </div>
-      <div class="personal-data-form__field personal-data-form__field--full">
-        <h1 class="personal-data-form__title">{{ t('contacts.contactData') }}</h1>
+
+      <!-- Contact data title -->
+      <div class="field field--full">
+        <h1 class="title">{{ t('contacts.contactData') }}</h1>
       </div>
-      <div class="personal-data-form__field personal-data-form__field--full">
-        <!-- Email  -->
-        <label class="personal-data-form__label" for="email">{{ t('contacts.email') }}</label>
+
+      <!-- Email -->
+      <div class="field field--full">
+        <label class="label" for="email">{{ t('contacts.email') }}</label>
+
         <InputText
           id="email"
           v-model="modelValue.email"
-          class="personal-data-form__control"
           :placeholder="t('contacts.emailPlaceholder')"
+          class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
         />
       </div>
+
       <!-- Phone -->
-      <div class="personal-data-form__field">
-        <label class="personal-data-form__label" for="phone">{{ t('contacts.phone') }}</label>
+      <div class="field">
+        <label class="label" for="phone">{{ t('contacts.phone') }}</label>
+
         <InputText
           id="phone"
-          :modelValue="modelValue.phones?.filter((p: Phone) => p.type === 'phone')[0]?.number"
-          class="personal-data-form__control"
+          :modelValue="modelValue.phones?.find((p) => p.type === 'phone')?.number"
           :placeholder="t('contacts.phonePlaceholder')"
+          class="w-full flex items-center text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
           @update:modelValue="
             (value: string | undefined) => {
               const phoneExist = modelValue.phones?.filter((p: Phone) => p.type === 'phone')[0];
@@ -211,14 +227,16 @@
           "
         />
       </div>
+
       <!-- Mobile -->
-      <div class="personal-data-form__field">
-        <label class="personal-data-form__label" for="mobile">{{ t('contacts.mobile') }}</label>
+      <div class="field">
+        <label class="label" for="mobile">{{ t('contacts.mobile') }}</label>
+
         <InputText
           id="mobile"
-          :modelValue="modelValue.phones?.filter((p: Phone) => p.type === 'mobile')[0]?.number"
-          class="personal-data-form__control"
+          :modelValue="modelValue.phones?.find((p) => p.type === 'mobile')?.number"
           :placeholder="t('contacts.mobilePlaceholder')"
+          class="w-full flex items-center text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
           @update:modelValue="
             (value: string | undefined) => {
               const mobileExist = modelValue.phones?.filter((p: Phone) => p.type === 'mobile')[0];
@@ -233,65 +251,67 @@
           "
         />
       </div>
-      <!-- Residence data section  -->
-      <div
-        class="personal-data-form__residence personal-data-form__field--full"
-        v-if="contactType === 'person'"
-      >
-        <h1 class="personal-data-form__title">
-          {{ t('contacts.residenceData') }}
-        </h1>
+
+      <!-- Residence title -->
+      <div class="residence field--full" v-if="contactType === 'person'">
+        <h1 class="title">{{ t('contacts.residenceData') }}</h1>
+
         <Message severity="info" icon="pi pi-info-circle" v-if="billingAddressMode === 'residence'">
           <span>{{ t('contacts.residenceTextMessage') }}</span>
         </Message>
       </div>
+
       <!-- Address -->
-      <div
-        class="personal-data-form__field personal-data-form__field--full"
-        v-if="contactType === 'person'"
-      >
-        <label class="personal-data-form__label" for="street">{{
-          t('contacts.residenceAddress')
-        }}</label>
+      <div class="field field--full" v-if="contactType === 'person'">
+        <label class="label" for="street">{{ t('contacts.residenceAddress') }}</label>
+
         <InputText
           id="street"
           v-model="modelValue.residenceStreet"
-          class="personal-data-form__control"
           :placeholder="t('contacts.residenceAddressPlaceholder')"
+          class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
         />
       </div>
+
       <!-- Zip -->
-      <div class="personal-data-form__field" v-if="contactType === 'person'">
-        <label class="personal-data-form__label" for="zip">{{ t('contacts.postalCode') }}</label>
+      <div class="field" v-if="contactType === 'person'">
+        <label class="label" for="zip">{{ t('contacts.postalCode') }}</label>
+
         <AutoComplete
           id="zip"
           :modelValue="modelValue.residenceZip ?? ''"
-          class="personal-data-form__control"
           :suggestions="addressItems"
           optionLabel="value.zip"
           :placeholder="t('contacts.zipCodePlaceholder')"
+          class="w-full h-[30px] lg:h-[35px]"
           @complete="fetchAddressByZip($event)"
           @update:modelValue="handleResidenceZipUpdate"
           @optionSelect="handleResidenceZipOptionSelect"
+          inputClass="w-full text-[12px]! lg:text-[14px]!"
+          panelClass="text-[12px]! lg:text-[14px]! max-w-[315px] lg:max-w-md"
         >
           <template #option="{ option }">
             <div>{{ option.label }}</div>
           </template>
         </AutoComplete>
       </div>
+
       <!-- City -->
-      <div class="personal-data-form__field" v-if="contactType === 'person'">
-        <label class="personal-data-form__label" for="city">{{ t('contacts.city') }}</label>
+      <div class="field" v-if="contactType === 'person'">
+        <label class="label" for="city">{{ t('contacts.city') }}</label>
+
         <InputText
           id="city"
           v-model="modelValue.residenceCity"
-          class="personal-data-form__control"
           :placeholder="t('contacts.cityPlaceholder')"
+          class="w-full text-[12px]! h-[30px] lg:text-[14px]! lg:h-[35px]"
         />
       </div>
+
       <!-- Country -->
-      <div class="personal-data-form__field" v-if="contactType === 'person'">
-        <label class="personal-data-form__label" for="country">{{ t('contacts.country') }}</label>
+      <div class="field" v-if="contactType === 'person'">
+        <label class="label" for="country">{{ t('contacts.country') }}</label>
+
         <Select
           id="country"
           :modelValue="modelValue.residenceCountry?.id ?? null"
@@ -299,8 +319,14 @@
           optionLabel="name"
           optionValue="id"
           filter
-          class="personal-data-form__control"
           :placeholder="t('contacts.select')"
+          class="w-full flex items-center h-[30px] lg:h-[35px]"
+          overlayClass="max-w-[315px] lg:max-w-md"
+          :pt="{
+            label: {
+              class: 'text-[12px]! lg:text-[14px]! ',
+            },
+          }"
           @update:modelValue="
             (id: number | null) => {
               const c = countries.find((c: Country) => c.id === id);
@@ -313,31 +339,29 @@
           "
         >
           <template #value="{ value }">
-            <div v-if="value" class="flex items-center w-full gap-1">
+            <div v-if="value" class="flex items-center gap-1">
               <CountryFlag
-                :country="countryById.get(value)?.code?.toLowerCase() || ''"
+                :country="countryById.get(value)?.code?.toLowerCase() ?? ''"
                 size="small"
                 shadow
               />
-              <span class="whitespace-nowrap">{{ countryById.get(value)?.name }}</span>
+              <span>{{ countryById.get(value)?.name }}</span>
             </div>
           </template>
+
           <template #option="{ option }">
             <div class="flex items-center gap-2">
-              <CountryFlag
-                :country="option.code?.toLowerCase()"
-                size="normal"
-                shadow
-                style="margin-bottom: 1px"
-              />
+              <CountryFlag :country="option.code?.toLowerCase()" size="normal" shadow />
               <div>{{ option.name }}</div>
             </div>
           </template>
         </Select>
       </div>
+
       <!-- State -->
-      <div class="personal-data-form__field" v-if="contactType === 'person'">
-        <label class="personal-data-form__label" for="state">{{ t('contacts.state') }}</label>
+      <div class="field" v-if="contactType === 'person'">
+        <label class="label" for="state">{{ t('contacts.state') }}</label>
+
         <Select
           id="state"
           :modelValue="modelValue.residenceState?.id ?? null"
@@ -345,43 +369,50 @@
           optionLabel="name"
           optionValue="id"
           filter
-          class="personal-data-form__control"
           :placeholder="t('contacts.select')"
+          class="w-full flex items-center h-[30px] lg:h-[35px]"
+          :pt="{
+            label: {
+              class: 'text-[12px]! lg:text-[14px]! ',
+            },
+          }"
           @update:modelValue="
-            (id: number | null) => {
-              const s = countryStates.find((s: CountryState) => s.id === id);
-              $emit('update:modelValue', { ...modelValue, residenceState: s || undefined });
-            }
+            (id) =>
+              $emit('update:modelValue', {
+                ...modelValue,
+                residenceState: countryStates.find((s) => s.id === id),
+              })
           "
         />
       </div>
 
-      <!-- Agency data section  -->
-      <div class="personal-data-form__field--full" v-if="contactType === 'agency'">
-        <h1 class="personal-data-form__title">
-          {{ t('contacts.agencyDetails') }}
-        </h1>
+      <!-- Agency title -->
+      <div class="field--full" v-if="contactType === 'agency'">
+        <h1 class="title">{{ t('contacts.agencyDetails') }}</h1>
       </div>
-      <div class="personal-data-form__field" v-if="contactType === 'agency'">
-        <label class="personal-data-form__label" for="saleChannel"
-          >{{ t('contacts.saleChannel') }} *</label
-        >
+
+      <!-- Sale Channel -->
+      <div class="field" v-if="contactType === 'agency'">
+        <label class="label" for="saleChannel">{{ t('contacts.saleChannel') }} *</label>
+
         <Select
-          :modelValue="modelValue.saleChannel?.id ?? null"
           id="saleChannel"
+          :modelValue="modelValue.saleChannel?.id ?? null"
           :options="[...saleChannels]"
           optionLabel="name"
           optionValue="id"
-          class="personal-data-form__control"
           :placeholder="t('contacts.select')"
           :invalid="!!errors.saleChannelId"
+          class="w-full flex items-center text-[12px] h-[30px] lg:text-[14px]! lg:h-[35px]"
           @update:modelValue="
-            (id: number | null) => {
-              const sc = saleChannels.find((sc) => sc.id === id);
-              $emit('update:modelValue', { ...modelValue, saleChannel: sc || undefined });
-            }
+            (id) =>
+              $emit('update:modelValue', {
+                ...modelValue,
+                saleChannel: saleChannels.find((sc) => sc.id === id),
+              })
           "
         />
+
         <Message
           v-if="errors.saleChannelId"
           size="small"
@@ -392,10 +423,11 @@
           {{ t(errors.saleChannelId) }}
         </Message>
       </div>
-      <div class="personal-data-form__field" v-if="contactType === 'agency'">
-        <label class="personal-data-form__label" for="commission">
-          {{ t('contacts.commission') }}
-        </label>
+
+      <!-- Commission -->
+      <div class="field" v-if="contactType === 'agency'">
+        <label class="label" for="commission">{{ t('contacts.commission') }}</label>
+
         <InputNumber
           v-model="modelValue.defaultCommission"
           inputId="commission"
@@ -486,24 +518,29 @@ export default defineComponent({
     const mobileNumber = ref('');
     const countryStates = ref<CountryState[]>([]);
     const addressItems = ref([] as { label: string; value: Address }[]);
+
     const countries = computed(() => countriesStore.countries);
     const contactsStoreSchema = computed(() => contactsStore.contactSchema);
     const languages = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
     const saleChannels = computed(() =>
       saleChannelsStore.saleChannels.filter((sc) => sc.type === 'indirect'),
     );
+
     const showLastName2 = computed(
       () =>
         props.contactType === 'person' &&
         (contactsStoreSchema.value?.fields ?? []).includes('lastname2'),
     );
+
     const showComercialName = computed(
       () =>
         props.contactType !== 'person' &&
         (contactsStoreSchema.value?.fields ?? []).includes('comercial_name'),
     );
+
     const isValidDate = (d: unknown): d is Date =>
       d instanceof Date && Number.isFinite(d.getTime());
+
     const age = computed(() => {
       const b = props.modelValue.birthdate;
       if (!isValidDate(b)) {
@@ -517,16 +554,19 @@ export default defineComponent({
       }
       return years;
     });
+
     const birthdateLabel = computed(() =>
       age.value !== null
         ? `${t('contacts.birthDate')} (${age.value} ${t('contacts.yearsOld')})`
         : t('contacts.birthDate'),
     );
+
     const countryById = computed(() => {
       const m = new Map<number, { id: number; name: string; code: string }>();
       countries.value.forEach((c) => m.set(c.id, c));
       return m;
     });
+
     const genders = [
       { label: t('contacts.gender.female'), value: 'female' },
       { label: t('contacts.gender.male'), value: 'male' },
@@ -622,6 +662,7 @@ export default defineComponent({
       },
       { immediate: true, deep: true },
     );
+
     return {
       countries,
       showLastName2,
@@ -658,109 +699,47 @@ export default defineComponent({
     background: #e2e8f0;
   }
 
-  &__header {
+  .header {
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
   }
 
-  &__title {
+  .title {
     font-size: 14px;
     color: #475569;
     margin-bottom: 0.5rem;
     font-weight: 600;
   }
 
-  &__grid {
+  .grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
     margin-top: 1rem;
   }
 
-  &__field {
-    .personal-data-form__control {
-      width: 100%;
-    }
-
-    :deep(.p-inputtext),
-    :deep(.p-select),
-    :deep(.p-select-label),
-    :deep(.p-datepicker),
-    :deep(.p-inputwrapper) {
-      width: 100%;
-      font-size: 12px !important;
-      height: 30px;
-    }
-
-    :deep(.p-datepicker .p-inputwrapper) {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: stretch;
-    }
-
-    :deep(.personal-data-form__control-input),
-    :deep(.p-datepicker .p-inputtext) {
-      width: 100%;
-    }
-
-    :deep(.p-select .p-select-label) {
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
-  }
-
-  &__field--full {
+  .field--full {
     grid-column: 1 / -1;
   }
 
-  &__label {
+  .label {
     display: block;
     margin-bottom: 0.5rem;
     color: #64748b;
-  }
-
-  &__residence {
-    margin-top: 24px;
   }
 }
 
 @media (min-width: 1024px) {
   .personal-data-form {
-    max-width: none;
     &::before {
       inset-inline: 0;
       background: #ffffff;
     }
 
-    &__grid {
+    .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
-      align-items: start;
-    }
-
-    &__field {
-      grid-column: auto / span 1;
-      :deep(.p-inputtext),
-      :deep(.p-select),
-      :deep(.p-select-label),
-      :deep(.p-datepicker),
-      :deep(.p-inputwrapper) {
-        font-size: 14px !important;
-        height: 35px;
-      }
-    }
-    &__field--full {
-      grid-column: 1 / -1;
-    }
-
-    &__residence {
-      grid-column: 1 / -1;
-    }
-
-    &__residence :deep(.p-message) {
-      width: 100%;
     }
   }
 }

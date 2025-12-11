@@ -352,13 +352,21 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
             code: 'P',
             countries: [{ id: 33, name: 'UK', code: 'GB' }],
             isValidableDocument: true,
+            shortCode: 'PAS',
           },
           country: { id: 33, name: 'UK', code: 'GB' },
         },
         {
           id: 2,
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
+          category: {
+            id: 9,
+            name: 'DNI',
+            code: 'D',
+            countries: [],
+            isValidableDocument: false,
+            shortCode: 'DNI',
+          },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: '111222',
         },
@@ -409,6 +417,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
             code: 'P',
             countries: [],
             isValidableDocument: true,
+            shortCode: 'PAS',
           },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: 'XYZ123',
@@ -416,7 +425,14 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
         {
           id: 0,
           name: 'DNI',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
+          category: {
+            id: 9,
+            name: 'DNI',
+            code: 'D',
+            countries: [],
+            isValidableDocument: false,
+            shortCode: 'DNI',
+          },
           supportNumber: '111222',
         },
       ],
@@ -485,7 +501,14 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
         {
           id: 1,
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
+          category: {
+            id: 9,
+            name: 'DNI',
+            code: 'D',
+            countries: [],
+            isValidableDocument: false,
+            shortCode: 'DNI',
+          },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: '111222',
         },
@@ -495,7 +518,7 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
       ...original,
       documents: [
         {
-          id: 0, // nuevo -> POST
+          id: 0,
           name: '123456',
           category: {
             id: 5,
@@ -503,13 +526,21 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
             code: 'P',
             countries: [{ id: 33, name: 'UK', code: 'GB' }],
             isValidableDocument: true,
+            shortCode: 'PAS',
           },
           country: { id: 33, name: 'UK', code: 'GB' },
         },
         {
-          id: 1, // existente -> PATCH
+          id: 1,
           name: '11111111H',
-          category: { id: 9, name: 'DNI', code: 'D', countries: [], isValidableDocument: false },
+          category: {
+            id: 9,
+            name: 'DNI',
+            code: 'D',
+            countries: [],
+            isValidableDocument: false,
+            shortCode: 'DNI',
+          },
           country: { id: 33, name: 'UK', code: 'GB' },
           supportNumber: '111333',
         },
