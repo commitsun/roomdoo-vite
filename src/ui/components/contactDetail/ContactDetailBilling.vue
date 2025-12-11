@@ -1,33 +1,40 @@
 <template>
   <section class="billing-form">
-    <div class="billing-form__grid">
-      <div class="billing-form__field">
-        <label class="billing-form__label" for="fiscalIdNumberType">{{
-          t('contacts.taxDocumentType')
-        }}</label>
+    <div class="billing-grid">
+      <div class="field">
+        <label class="field-label" for="fiscalIdNumberType">
+          {{ t('contacts.taxDocumentType') }}
+        </label>
         <Select
           id="fiscalIdNumberType"
           v-model="modelValue.fiscalIdNumberType"
           :options="[...fiscalDocumentTypes]"
           optionLabel="name"
           optionValue="id"
-          class="billing-form__control"
           :placeholder="t('contacts.select')"
           @blur="checkContactDuplicateByFiscalDocument()"
+          class="w-full flex items-center h-[30px] lg:h-[35px]"
+          :pt="{
+            label: {
+              class: 'text-[12px]! lg:text-[14px]! ',
+            },
+          }"
         />
       </div>
-      <div class="billing-form__field">
-        <label class="billing-form__label" for="fiscalIdNumber">{{
-          t('contacts.taxDocumentNumber')
-        }}</label>
+
+      <div class="field">
+        <label class="field-label" for="fiscalIdNumber">
+          {{ t('contacts.taxDocumentNumber') }}
+        </label>
         <InputText
           id="fiscalIdNumber"
           v-model="modelValue.fiscalIdNumber"
-          class="billing-form__control"
+          class="field-control"
           :placeholder="t('contacts.fiscalDocumentNumberPlaceholder')"
           @blur="checkContactDuplicateByFiscalDocument()"
         />
       </div>
+
       <div class="mt-2 flex gap-1 items-center" v-if="contactDuplicated.id !== 0">
         <CircleAlert :size="16" color="#dc2626" />
         <Message size="small" severity="error" variant="simple">
@@ -40,16 +47,15 @@
           </span>
         </Message>
       </div>
-      <div
-        class="billing-form__field--full billing-form__address-choice"
-        v-if="residenceAddressText"
-      >
-        <div class="billing-form__address-title">
+
+      <div class="field-full address-choice" v-if="residenceAddressText">
+        <div class="billing-address-title">
           {{ t('contacts.fiscalAddress') }}
         </div>
+
         <label
           class="billing-card"
-          :class="{ 'billing-card--active': billingAddressMode === 'residence' }"
+          :class="{ 'billing-card-active': billingAddressMode === 'residence' }"
         >
           <RadioButton
             name="billingAddressMode"
@@ -57,17 +63,22 @@
             value="residence"
             v-model="billingAddressMode"
           />
-          <div class="billing-card__body">
-            <div class="billing-card__title">{{ t('contacts.useResidenceAddress') }}</div>
-            <div class="billing-card__subtitle">{{ residenceAddressText }}</div>
+          <div class="billing-card-body">
+            <div class="billing-card-title">
+              {{ t('contacts.useResidenceAddress') }}
+            </div>
+            <div class="billing-card-subtitle">
+              {{ residenceAddressText }}
+            </div>
           </div>
         </label>
+
         <div
           class="billing-card"
-          :class="{ 'billing-card--active': billingAddressMode === 'other' }"
+          :class="{ 'billing-card-active': billingAddressMode === 'other' }"
           @click="billingAddressMode = 'other'"
         >
-          <label class="billing-card__header" for="addr_other">
+          <label class="billing-card-header" for="addr_other">
             <RadioButton
               name="billingAddressMode"
               inputId="addr_other"
@@ -75,19 +86,22 @@
               v-model="billingAddressMode"
               @click.stop
             />
-            <div class="billing-card__body">
-              <div class="billing-card__title">{{ t('contacts.useOtherAddress') }}</div>
+            <div class="billing-card-body">
+              <div class="billing-card-title">
+                {{ t('contacts.useOtherAddress') }}
+              </div>
             </div>
           </label>
-          <div v-show="billingAddressMode === 'other'" class="billing-card__content">
-            <div class="billing-form__field billing-form__field--full">
-              <label class="billing-form__label" for="bill_street">{{
-                t('contacts.address')
-              }}</label>
+
+          <div v-show="billingAddressMode === 'other'" class="billing-card-content">
+            <div class="field field-full">
+              <label class="field-label" for="bill_street">
+                {{ t('contacts.address') }}
+              </label>
               <InputText
                 id="bill_street"
                 :modelValue="billingAddress.street"
-                class="billing-form__control"
+                class="field-control"
                 :placeholder="t('contacts.fiscalAddressPlaceholder')"
                 @update:modelValue="
                   (val: string | undefined) => {
@@ -97,32 +111,38 @@
                 "
               />
             </div>
-            <div class="billing-form__field">
-              <label class="billing-form__label" for="bill_zip">{{
-                t('contacts.postalCode')
-              }}</label>
+
+            <div class="field">
+              <label class="field-label" for="bill_zip">
+                {{ t('contacts.postalCode') }}
+              </label>
               <AutoComplete
                 id="bill_zip"
                 :modelValue="billingAddress.zipCode ?? ''"
-                class="billing-form__control"
                 :suggestions="addressItems"
                 optionLabel="value.zip"
                 :placeholder="t('contacts.zipCodePlaceholder')"
                 @complete="fetchAddressByZip($event)"
                 @update:modelValue="handleBillingAddressZipUpdate"
                 @optionSelect="handleBillingAddressZipOptionSelect"
+                class="h-[30px] lg:h-[35px]"
+                inputClass="w-full text-[12px]! lg:text-[14px]!"
+                panelClass="text-[12px]! lg:text-[14px]! max-w-[285px] lg:max-w-md"
               >
                 <template #option="{ option }">
                   <div>{{ option.label }}</div>
                 </template>
               </AutoComplete>
             </div>
-            <div class="billing-form__field">
-              <label class="billing-form__label" for="bill_city">{{ t('contacts.city') }}</label>
+
+            <div class="field">
+              <label class="field-label" for="bill_city">
+                {{ t('contacts.city') }}
+              </label>
               <InputText
                 id="bill_city"
                 :modelValue="billingAddress.city"
-                class="billing-form__control"
+                class="field-control"
                 :placeholder="t('contacts.fiscalCityPlaceholder')"
                 @update:modelValue="
                   (val: string | undefined) => {
@@ -132,10 +152,11 @@
                 "
               />
             </div>
-            <div class="billing-form__field">
-              <label class="billing-form__label" for="bill_country">{{
-                t('contacts.country')
-              }}</label>
+
+            <div class="field">
+              <label class="field-label" for="bill_country">
+                {{ t('contacts.country') }}
+              </label>
               <Select
                 id="bill_country"
                 :modelValue="billingAddress.country?.id ?? null"
@@ -143,8 +164,14 @@
                 optionLabel="name"
                 optionValue="id"
                 filter
-                class="billing-form__control"
                 :placeholder="t('contacts.select')"
+                class="w-full flex items-center h-[30px] lg:h-[35px]"
+                overlayClass="max-w-[285px] lg:max-w-md"
+                :pt="{
+                  label: {
+                    class: 'text-[12px]! lg:text-[14px]! ',
+                  },
+                }"
                 @update:modelValue="
                   (val: number | null) => {
                     const n =
@@ -169,9 +196,9 @@
                       size="small"
                       shadow
                     />
-                    <span class="whitespace-nowrap">{{
-                      countries.find((c: Country) => c.id === value)?.name
-                    }}</span>
+                    <span class="whitespace-nowrap">
+                      {{ countries.find((c: Country) => c.id === value)?.name }}
+                    </span>
                   </div>
                 </template>
                 <template #option="{ option }">
@@ -187,8 +214,11 @@
                 </template>
               </Select>
             </div>
-            <div class="billing-form__field">
-              <label class="billing-form__label" for="state">{{ t('contacts.state') }}</label>
+
+            <div class="field">
+              <label class="field-label" for="state">
+                {{ t('contacts.state') }}
+              </label>
               <Select
                 id="state"
                 :modelValue="billingAddress.state?.id ?? null"
@@ -196,8 +226,14 @@
                 optionLabel="name"
                 optionValue="id"
                 filter
-                class="billing-form__control"
                 :placeholder="t('contacts.select')"
+                class="w-full flex items-center h-[30px] lg:h-[35px]"
+                overlayClass="max-w-[285px] lg:max-w-md"
+                :pt="{
+                  label: {
+                    class: 'text-[12px]! lg:text-[14px]! ',
+                  },
+                }"
                 @update:modelValue="
                   (val: number | null) => {
                     const n =
@@ -214,55 +250,72 @@
           </div>
         </div>
       </div>
-      <div class="billing-form__address" v-else>
-        <div class="billing-form__address-title">
+
+      <div class="billing-address" v-else>
+        <div class="billing-address-title">
           {{ t('contacts.fiscalAddress') }}
         </div>
+
         <Message
           severity="info"
           icon="pi pi-info-circle"
           v-if="modelValue.contactType === 'person'"
+          class="field-full"
         >
           <span>{{ t('contacts.fiscalAddressTextMessage') }}</span>
         </Message>
-        <div class="billing-form__field billing-form__field--full">
-          <label class="billing-form__label" for="bill_street">{{ t('contacts.address') }}</label>
+
+        <div class="field field-full">
+          <label class="field-label" for="bill_street">
+            {{ t('contacts.address') }}
+          </label>
           <InputText
             id="bill_street"
             v-model="modelValue.street"
-            class="billing-form__control"
+            class="field-control"
             :placeholder="t('contacts.fiscalAddressPlaceholder')"
           />
         </div>
-        <div class="billing-form__field">
-          <label class="billing-form__label" for="bill_zip">{{ t('contacts.postalCode') }}</label>
+
+        <div class="field">
+          <label class="field-label" for="bill_zip">
+            {{ t('contacts.postalCode') }}
+          </label>
           <AutoComplete
             id="bill_zip"
             :modelValue="modelValue.zipCode ?? ''"
-            class="billing-form__control"
             :suggestions="addressItems"
             optionLabel="value.zip"
             :placeholder="t('contacts.zipCodePlaceholder')"
             @complete="fetchAddressByZip($event)"
             @update:modelValue="handleModelZipUpdate"
             @optionSelect="handleModelZipOptionSelect"
+            class="h-[30px] lg:h-[35px]"
+            inputClass="w-full text-[12px]! lg:text-[14px]!"
+            panelClass="text-[12px]! lg:text-[14px]! max-w-[315px] lg:max-w-md"
           >
             <template #option="{ option }">
               <div>{{ option.label }}</div>
             </template>
           </AutoComplete>
         </div>
-        <div class="billing-form__field">
-          <label class="billing-form__label" for="bill_city">{{ t('contacts.city') }}</label>
+
+        <div class="field">
+          <label class="field-label" for="bill_city">
+            {{ t('contacts.city') }}
+          </label>
           <InputText
             id="bill_city"
             v-model="modelValue.city"
-            class="billing-form__control"
+            class="field-control"
             :placeholder="t('contacts.fiscalCityPlaceholder')"
           />
         </div>
-        <div class="billing-form__field">
-          <label class="billing-form__label" for="bill_country">{{ t('contacts.country') }}</label>
+
+        <div class="field">
+          <label class="field-label" for="bill_country">
+            {{ t('contacts.country') }}
+          </label>
           <Select
             id="country"
             v-model="modelValue.country"
@@ -270,8 +323,14 @@
             optionLabel="name"
             optionValue="id"
             filter
-            class="billing-form__control"
             :placeholder="t('contacts.select')"
+            class="w-full flex items-center h-[30px] lg:h-[35px]"
+            overlayClass="max-w-[315px] lg:max-w-md"
+            :pt="{
+              label: {
+                class: 'text-[12px]! lg:text-[14px]! ',
+              },
+            }"
             @update:modelValue="
               (val: number | null) => {
                 const n =
@@ -306,21 +365,30 @@
             </template>
           </Select>
         </div>
-        <div class="billing-form__field">
-          <label class="billing-form__label" for="state">{{ t('contacts.state') }}</label>
+
+        <div class="field">
+          <label class="field-label" for="state">
+            {{ t('contacts.state') }}
+          </label>
           <Select
             id="state"
             v-model="modelValue.state"
             :options="[...countryStates]"
             optionLabel="name"
             filter
-            class="billing-form__control"
             :placeholder="t('contacts.select')"
+            class="w-full flex items-center h-[30px] lg:h-[35px]"
+            :pt="{
+              label: {
+                class: 'text-[12px]! lg:text-[14px]! ',
+              },
+            }"
           />
         </div>
       </div>
     </div>
   </section>
+
   <ConfirmDialog :style="{ maxWidth: '350px' }" />
 </template>
 
@@ -613,6 +681,38 @@ export default defineComponent({
       },
       { immediate: true, deep: true },
     );
+
+    watch(
+      () => billingAddress.country,
+      async () => {
+        try {
+          if (billingAddress.country) {
+            countryStates.value = await countryStatesStore.fetchCountryStatesByCountryId(
+              billingAddress.country.id,
+            );
+            const countryStateToSelect = countryStates.value.find(
+              (s) => s.id === billingAddress.state?.id,
+            );
+            if (countryStateToSelect && billingAddress.state) {
+              context.emit('update:billingAddress', {
+                ...billingAddress,
+                state: countryStateToSelect,
+              });
+            } else {
+              context.emit('update:billingAddress', {
+                ...billingAddress,
+                state: undefined,
+              });
+            }
+          }
+        } catch (error) {
+          if (error instanceof Error) {
+            useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), error.message);
+          }
+        }
+      },
+      { immediate: true, deep: true },
+    );
     onBeforeMount(async () => {
       billingAddress.street = props.billingAddress.street;
       billingAddress.city = props.billingAddress.city;
@@ -651,6 +751,7 @@ export default defineComponent({
 .billing-form {
   position: relative;
   padding-top: 1rem;
+
   &::before {
     content: '';
     position: absolute;
@@ -659,51 +760,54 @@ export default defineComponent({
     height: 1px;
     background: #e2e8f0;
   }
+}
 
-  &__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
+.billing-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
 
-  &__field {
-    .billing-form__control {
-      width: 100%;
-    }
-    :deep(.p-inputtext),
-    :deep(.p-select),
-    :deep(.p-select-label),
-    :deep(.p-dropdown),
-    :deep(.p-inputwrapper) {
-      width: 100%;
-      font-size: 12px !important;
-      height: 30px;
-    }
-    :deep(.p-select .p-select-label) {
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
-  }
-  &__field--full {
-    grid-column: 1 / -1;
-  }
-  &__label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #64748b;
-  }
-  &__address-choice {
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .field-control {
+    width: 100%;
+    font-size: 12px !important;
+    height: 30px;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    align-items: center;
   }
 }
 
-.billing-form__address {
+.field-full {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #64748b;
+}
+
+.address-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.billing-address {
   display: grid;
   gap: 8px;
   margin-top: 0.5rem;
+}
+
+.billing-address-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #334155;
 }
 
 .billing-card {
@@ -715,99 +819,82 @@ export default defineComponent({
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #f8fafc;
+  cursor: pointer;
+
   transition:
     border-color 0.15s,
     box-shadow 0.15s,
     background 0.15s;
+}
+
+.billing-card-active {
+  background: #eef4ff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3) inset;
+}
+
+.billing-card-header {
+  display: contents;
   cursor: pointer;
-
-  &__header {
-    display: contents;
-    cursor: pointer;
-  }
-
-  &__body {
-    display: grid;
-    gap: 0.25rem;
-  }
-  &__title {
-    font-weight: 600;
-    color: #334155;
-  }
-  &__subtitle {
-    color: #64748b;
-    line-height: 1.25;
-  }
-
-  &__content {
-    grid-column: 1 / -1;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-  }
-
-  &--active {
-    background: #eef4ff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3) inset;
-  }
 }
 
-.billing-form__other {
-  margin-top: 0.25rem;
-  padding: 1rem;
-  border: 1px dashed #cbd5e1;
-  border-radius: 12px;
-  background: #ffffff;
+.billing-card-body {
+  display: grid;
+  gap: 0.25rem;
 }
+
+.billing-card-title {
+  font-weight: 600;
+  color: #334155;
+}
+
+.billing-card-subtitle {
+  color: #64748b;
+  line-height: 1.25;
+}
+
+.billing-card-content {
+  grid-column: 1 / -1;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
 @media (min-width: 1024px) {
   .billing-form {
     &::before {
       inset-inline: 0;
       background: #fff;
     }
-    .billing-form__grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 16px;
-      row-gap: 12px;
-      align-items: start;
-    }
+  }
 
-    &__address {
-      display: grid;
-      grid-column: 1 / -1;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px 16px;
-      .billing-form__address-title,
-      :deep(.p-message) {
-        grid-column: 1 / -1;
-      }
-    }
-    &__field--full {
-      grid-column: 1 / -1;
-    }
+  .billing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 12px;
+    align-items: start;
+  }
 
-    .billing-card__content {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px 16px;
-    }
-    .billing-card__content .billing-form__field--full {
+  .billing-address {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+
+    .billing-address-title {
       grid-column: 1 / -1;
     }
   }
-}
 
-.billing-form__field {
-  .billing-form__control {
-    width: 100%;
+  .billing-card-content {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
   }
-  :deep(.p-inputtext),
-  :deep(.p-select),
-  :deep(.p-select-label),
-  :deep(.p-dropdown),
-  :deep(.p-inputwrapper) {
-    width: 100%;
+
+  .billing-card-content .field-full {
+    grid-column: 1 / -1;
+  }
+
+  .field .field-control {
     font-size: 14px !important;
     height: 35px;
   }

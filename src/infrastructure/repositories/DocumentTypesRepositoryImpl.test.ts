@@ -53,6 +53,18 @@ describe('DocumentTypesRepositoryImpl.fetchDocumentTypes', () => {
     expect(result).toBe(data);
   });
 
+  it('does not send country param when countryId is null', async () => {
+    const data: DocumentType[] = [];
+    vi.mocked(api.get).mockResolvedValue({ data });
+
+    const result = await repo.fetchDocumentTypes(null as any);
+
+    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/id-number-categories', {
+      params: {},
+    });
+    expect(result).toBe(data);
+  });
+
   it('propagates axios errors for fiscal document types', async () => {
     const err = new Error('axios fail');
     (api.get as any).mockRejectedValue(err);
