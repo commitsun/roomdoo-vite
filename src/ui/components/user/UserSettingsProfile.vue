@@ -1,253 +1,336 @@
 <template>
-  <div>
-    <div class="user-settings-row">
-      <Avatar
-        :label="!imageUrl ? labelAvatar : ''"
-        shape="circle"
-        :image="imageUrl ? imageUrl : ''"
-        style="
-          background-color: #1f89e1;
-          color: #ffffff;
-          width: 90px;
-          height: 90px;
-          min-width: 90px;
-          font-size: 35px;
-        "
-        :pt="{
-          image: {
-            style: 'object-fit: cover; width: 100%; height: 100%;',
-          },
-        }"
-      />
-      <div class="right">
-        <IconField>
-          <InputIcon class="pi pi-upload" style="color: #334155; font-size: 12px" />
-          <FileUpload
-            class="user"
-            mode="basic"
-            :maxFileSize="100000"
-            @select="(e) => $emit('selectAvatar', e)"
-            :auto="true"
-            chooseIcon="-"
-            :chooseLabel="imageUrl ? t('userSettings.changeImage') : t('userSettings.uploadPhoto')"
-            :chooseButtonProps="{
-              class: 'p-button-outlined p-button-secondary',
-              icon: 'pi pi-upload',
-            }"
+  <div class="profile-data">
+    <div class="content">
+      <div class="image-section">
+        <div class="left">
+          <Avatar
+            shape="circle"
+            :label="!imageUrl ? labelAvatar : ''"
+            :image="imageUrl ? imageUrl : ''"
+            class="avatar-image"
             :pt="{
-              root: { 'data-testid': 'fileupload-root' },
-              chooseButton: { 'data-testid': 'file-upload-trigger' },
+              image: {
+                style: 'object-fit: cover; width: 100%; height: 100%;',
+              },
             }"
-            :invalidFileSizeMessage="t('userSettings.fileTooLarge')"
-            :style="{ fontSize: '12px', height: '27px', paddingLeft: '1.5rem' }"
           />
-        </IconField>
-
-        <Button
-          v-if="imageUrl"
-          :label="t('userSettings.removeImage')"
-          severity="secondary"
-          variant="outlined"
-          icon="pi pi-trash"
-          :style="{ marginTop: '0.5rem', height: '27px' }"
-          @click="$emit('update:imageUrl', '')"
-          size="small"
-        />
-        <p>
-          {{
-            t('userSettings.fileTypeSupported', {
-              size: 10,
-            })
-          }}
-        </p>
+        </div>
+        <div class="right">
+          <div class="delete-image">
+            <FileUpload
+              mode="basic"
+              :maxFileSize="maxFileSize"
+              @select="(e) => $emit('selectAvatar', e)"
+              :auto="true"
+              chooseIcon="pi pi-upload"
+              :chooseLabel="
+                imageUrl ? t('userSettings.changeImage') : t('userSettings.uploadPhoto')
+              "
+              :chooseButtonProps="{
+                class: 'p-button-outlined p-button-secondary p-button-sm',
+                style: {
+                  marginBottom: '12px',
+                  height: '27px',
+                  fontSize: '12px',
+                },
+              }"
+              :pt="{
+                root: {
+                  'data-testid': 'fileupload-root',
+                },
+              }"
+              :invalidFileSizeMessage="t('userSettings.fileTooLarge')"
+            />
+          </div>
+          <div class="delete-image">
+            <Button
+              v-if="imageUrl"
+              icon="pi pi-trash"
+              :label="t('userSettings.removeImage')"
+              severity="secondary"
+              variant="outlined"
+              size="small"
+              @click="$emit('update:imageUrl', '')"
+              :pt="{
+                root: {
+                  style: { height: '27px', marginBottom: '12px', fontSize: '12px' },
+                },
+              }"
+            />
+          </div>
+          <p class="feedback-file-type">
+            {{ t('userSettings.fileTypeSupported', { size: maxFileSize / 1000000 }) }}
+          </p>
+        </div>
+      </div>
+      <div class="personal-info-section">
+        <span class="title-section"> {{ t('userSettings.personalInformation') }} </span>
+        <div class="field-group">
+          <div class="field">
+            <label for="name">{{ t('userSettings.firstName') }}</label>
+            <InputText
+              id="name"
+              :modelValue="firstName"
+              @update:modelValue="$emit('update:firstName', $event)"
+            />
+          </div>
+          <div class="field">
+            <label for="lastname">{{ t('userSettings.lastName') }}</label>
+            <InputText
+              id="lastname"
+              :modelValue="lastName"
+              @update:modelValue="$emit('update:lastName', $event)"
+            />
+          </div>
+          <div class="field" v-if="showLastName2">
+            <label for="lastname2">{{ t('userSettings.secondLastName') }}</label>
+            <InputText
+              id="lastname2"
+              :modelValue="secondLastName"
+              @update:modelValue="$emit('update:secondLastName', $event)"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="contact-data-section">
+        <span class="title-section"> {{ t('userSettings.contactData') }} </span>
+        <div class="field-group">
+          <div class="field">
+            <label for="email">{{ t('userSettings.email') }}</label>
+            <InputText
+              id="email"
+              :modelValue="email"
+              @update:modelValue="$emit('update:email', $event)"
+            />
+          </div>
+          <div class="field">
+            <label for="phone">{{ t('userSettings.phone') }}</label>
+            <InputText
+              id="phone"
+              :modelValue="phone"
+              @update:modelValue="$emit('update:phone', $event)"
+            />
+          </div>
+          <div class="field" v-if="availableLocales.length > 1">
+            <label for="language">{{ t('userSettings.language') }}</label>
+            <Select
+              class="user-settings-control"
+              :modelValue="selectedLocale"
+              optionLabel="name"
+              optionValue="code"
+              :options="availableLocales"
+              aria-label="language"
+              @update:modelValue="$emit('update:selectedLocale', $event)"
+            >
+              <template #value="{ value }">
+                <i class="pi pi-globe"></i>
+                {{ availableLocales.find((l) => l.code === value)?.name }}
+              </template>
+            </Select>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="user-settings-grid">
-      <div class="user-settings-section-title">
-        {{ t('userSettings.personalInformation') }}
-      </div>
-      <div class="user-settings-field user-settings-field-full">
-        <label class="user-settings-label" for="firstName">
-          {{ t('userSettings.firstName') }} *
-        </label>
-        <InputText
-          class="user-settings-control"
-          id="firstName"
-          :modelValue="firstName"
-          :style="{ minWidth: '260px' }"
-          @update:modelValue="$emit('update:firstName', $event)"
-        />
-      </div>
-      <div class="user-settings-field" :class="{ 'user-settings-field-full': !showLastName2 }">
-        <label class="user-settings-label" for="lastName">
-          {{ t('userSettings.lastName') }}
-        </label>
-        <InputText
-          class="user-settings-control"
-          id="lastName"
-          :modelValue="lastName"
-          :style="{ minWidth: '260px' }"
-          @update:modelValue="$emit('update:lastName', $event)"
-        />
-      </div>
-      <div class="user-settings-field" v-if="showLastName2">
-        <label class="user-settings-label" for="secondLastName">
-          {{ t('userSettings.secondLastName') }}
-        </label>
-        <InputText
-          class="user-settings-control"
-          id="secondLastName"
-          :modelValue="secondLastName"
-          :style="{ minWidth: '260px' }"
-          @update:modelValue="$emit('update:secondLastName', $event)"
-        />
-      </div>
-    </div>
-
-    <div class="user-settings-grid">
-      <div class="user-settings-section-title">
-        {{ t('userSettings.contactData') }}
-      </div>
-      <div class="user-settings-field user-settings-field-full">
-        <label class="user-settings-label" for="email"> {{ t('userSettings.email') }}* </label>
-        <InputText
-          class="user-settings-control"
-          id="email"
-          :modelValue="email"
-          :style="{ minWidth: '260px' }"
-          @update:modelValue="$emit('update:email', $event)"
-        />
-      </div>
-      <div class="user-settings-field">
-        <label class="user-settings-label" for="phone">
-          {{ t('userSettings.phone') }}
-        </label>
-        <InputText
-          class="user-settings-control"
-          id="phone"
-          :modelValue="phone"
-          :style="{ minWidth: '260px' }"
-          @update:modelValue="$emit('update:phone', $event)"
-        />
-      </div>
-      <div class="user-settings-field" v-if="availableLocales && availableLocales.length > 1">
-        <label class="user-settings-label" for="language">
-          {{ t('userSettings.language') }}
-        </label>
-
-        <IconField>
-          <InputIcon class="pi pi-globe" style="color: #334155" />
-          <Select
-            class="user-settings-control pl-6"
-            :modelValue="selectedLocale"
-            optionLabel="name"
-            optionValue="code"
-            :options="availableLocales"
-            aria-label="language"
-            @update:modelValue="$emit('update:selectedLocale', $event)"
-          />
-        </IconField>
-      </div>
+    <div class="bottom">
+      <Button
+        :label="t('userSettings.cancel')"
+        severity="secondary"
+        variant="outlined"
+        @click="$emit('cancel')"
+      />
+      <Button :label="t('userSettings.save')" @click="$emit('save')" />
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-import { useI18n } from 'vue-i18n';
+<script lang="ts">
+import { computed, defineComponent } from 'vue';
 import Avatar from 'primevue/avatar';
-import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
 import FileUpload from 'primevue/fileupload';
+import Button from 'primevue/button';
+import { useI18n } from 'vue-i18n';
 
-defineProps<{
-  labelAvatar: string;
-  availableLocales: Array<{ code: string; name: string }>;
-  showLastName2: boolean;
+import { useInstanceStore } from '@/infrastructure/stores/instance';
 
-  imageUrl: string;
-  firstName: string;
-  lastName: string;
-  secondLastName: string;
-  email: string;
-  phone: string;
-  selectedLocale: string;
-}>();
-
-const _emit = defineEmits([
-  'update:imageUrl',
-  'update:firstName',
-  'update:lastName',
-  'update:secondLastName',
-  'update:email',
-  'update:phone',
-  'update:selectedLocale',
-  'selectAvatar',
-] as const);
-
-const { t } = useI18n({ useScope: 'global' });
+export default defineComponent({
+  name: 'UserSettingsProfile',
+  components: { Button, Avatar, InputText, Select, FileUpload },
+  props: {
+    showLastName2: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    labelAvatar: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    imageUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
+    secondLastName: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    selectedLocale: {
+      type: String,
+      required: true,
+    },
+  },
+  emits: [
+    'update:firstName',
+    'update:lastName',
+    'update:secondLastName',
+    'update:email',
+    'update:phone',
+    'update:selectedLocale',
+    'update:imageUrl',
+    'selectAvatar',
+    'cancel',
+    'save',
+  ],
+  setup() {
+    const maxFileSize = 10_000_000; // 10 MB
+    const { t } = useI18n();
+    const instanceStore = useInstanceStore();
+    const availableLocales = computed(() => [...(instanceStore.instance?.languages || [])]);
+    return {
+      maxFileSize,
+      t,
+      availableLocales,
+    };
+  },
+});
 </script>
 
-<style scoped lang="scss">
-.user-settings-row {
+<style lang="scss" scoped>
+.profile-data {
   display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
+  flex-direction: column;
+  justify-content: center;
+  height: calc(
+    100svh - #{$height_title_tabs_with_padding_top} - #{$height_title_dialog} - #{$height_footer}
+  );
+  .content {
+    max-height: calc(
+      100svh - #{$height_title_tabs_with_padding_top} - #{$height_title_dialog} - #{$height_footer}
+    );
+    overflow-y: scroll;
+    flex: 1;
 
-.right {
-  p {
-    margin-top: 12px;
-    font-size: 12px;
+    .image-section {
+      display: flex;
+      flex-direction: row;
+      .left {
+        .avatar-image {
+          height: 68px;
+          width: 68px;
+          font-size: 36px;
+          background-color: #1f89e1;
+          color: white;
+        }
+      }
+      .right {
+        margin-left: 12px;
+        .feedback-file-type {
+          font-size: 12px;
+          color: gray;
+        }
+      }
+    }
+    .personal-info-section,
+    .contact-data-section {
+      margin-top: 24px;
+      .title-section {
+        font-weight: bold;
+        font-size: 16px;
+      }
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        .field {
+          margin-top: 16px;
+          display: flex;
+          flex-direction: column;
+          label {
+            margin-bottom: 7px;
+          }
+        }
+      }
+    }
   }
-}
-
-.user-settings-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.user-settings-field {
-  .user-settings-control {
+  .bottom {
     width: 100%;
+    padding-right: 25.5px;
+    padding-top: 17.5px;
+    padding-bottom: 17.5px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 7px;
+    button {
+      height: 33px;
+    }
   }
-}
-
-.user-settings-field-full {
-  grid-column: 1 / -1;
-}
-
-.user-settings-section-title {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 1rem;
-}
-
-.user-settings-label {
-  font-size: 14px;
-  font-weight: 400;
-  margin-bottom: 7px;
-  display: block;
-  color: #64748b;
 }
 
 @media (min-width: 1024px) {
-  .user-settings-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-
-  .user-settings-field {
-    grid-column: auto / span 1;
-  }
-
-  .user-settings-field-full {
-    grid-column: 1 / -1;
+  .profile-data {
+    height: 534px;
+    .content {
+      .image-section {
+        .left {
+          .avatar-image {
+            height: 96px;
+            width: 96px;
+            font-size: 48px;
+          }
+        }
+      }
+      .personal-info-section,
+      .contact-data-section {
+        .field-group {
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 16px;
+          .field {
+            flex: 1 1 0;
+            &:not(:first-child) {
+              margin: 0;
+            }
+          }
+          .field:first-child {
+            flex-basis: 100%;
+          }
+        }
+      }
+    }
   }
 }
 </style>
