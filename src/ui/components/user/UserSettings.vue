@@ -19,7 +19,13 @@
           <span> {{ t('userSettings.securityAndAccess') }} </span>
         </Tab>
       </TabList>
-      <TabPanels class="lg:h-[535px] overflow-y-scroll">
+      <TabPanels
+        :pt="{
+          root: {
+            class: 'tabpanels-root',
+          },
+        }"
+      >
         <TabPanel value="0">
           <UserSettingsProfileTab
             :labelAvatar="labelAvatar"
@@ -40,6 +46,8 @@
             @update:phone="phone = $event"
             @update:selectedLocale="selectedLocale = $event"
             @selectAvatar="onAdvancedUpload"
+            @cancel="handleCancel()"
+            @save="handleUpdateUser()"
           />
         </TabPanel>
         <TabPanel value="1">
@@ -64,7 +72,7 @@
       </TabPanels>
     </Tabs>
 
-    <div class="user-settings-footer-buttons" v-if="activeTab === '0'">
+    <!-- <div class="user-settings-footer-buttons" v-if="activeTab === '0'">
       <Button
         :label="t('userSettings.cancel')"
         severity="secondary"
@@ -76,7 +84,7 @@
         :style="{ width: 'auto', backgroundColor: '#1d4ed8', border: 'none' }"
         @click="updateUser()"
       />
-    </div>
+    </div> -->
 
     <ConfirmDialog :style="{ maxWidth: '380px' }" />
   </div>
@@ -90,7 +98,6 @@ import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
-import Button from 'primevue/button';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from 'primevue/useconfirm';
 import type { FileUploadSelectEvent } from 'primevue/fileupload';
@@ -197,11 +204,15 @@ const handleUpdateUser = async (): Promise<boolean> => {
   }
 };
 
-const updateUser = async (): Promise<void> => {
-  const ok = await handleUpdateUser();
-  if (ok) {
-    dialogRef?.value?.close({ action: 'userUpdated' });
-  }
+// const updateUser = async (): Promise<void> => {
+//   const ok = await handleUpdateUser();
+//   if (ok) {
+//     dialogRef?.value?.close({ action: 'userUpdated' });
+//   }
+// };
+
+const handleCancel = (): void => {
+  dialogRef?.value?.close({ action: 'cancel' });
 };
 
 const handleChangeLogin = async (): Promise<void> => {
@@ -265,9 +276,9 @@ function getSafeString(val: unknown): string {
   return typeof val === 'string' && val.trim() !== '' ? val : '';
 }
 
-const handleCancel = (): void => {
-  dialogRef?.value?.close({ action: 'cancel' });
-};
+// const handleCancel = (): void => {
+//   dialogRef?.value?.close({ action: 'cancel' });
+// };
 
 const handleChangePassword = async (): Promise<void> => {
   if (
@@ -432,6 +443,12 @@ onMounted(() => {
 .user-settings {
   display: flex;
   flex-direction: column;
+  .tabpanels-root {
+    overflow-y: auto;
+    padding: 0;
+    padding-top: 17.5px;
+    scrollbar-gutter: stable;
+  }
 }
 
 .user-settings-footer-buttons {
@@ -444,9 +461,12 @@ onMounted(() => {
 
 @media (min-width: 1024px) {
   .user-settings {
-    width: 640px;
-    height: 640px;
+    width: 503px;
+    height: calc(#{$height_title_tabs} + 542px + #{$height_footer});
     padding-bottom: 17px;
+    .tabpanels-root {
+      padding: 17.5px;
+    }
   }
 
   .user-settings-footer-buttons {
