@@ -119,18 +119,15 @@
         </div>
       </template>
 
-      <!-- Name -->
+      <!-- avatar -->
       <Column
-        field="name"
-        :header="t('contacts.fullName')"
-        :style="{ maxWidth: '350px' }"
+        v-if="!isLoading"
+        field="image"
+        :header="''"
+        headerClass="lg:hidden"
+        bodyClass="lg:hidden"
+        :style="{ maxWidth: '40px' }"
         frozen
-        :showFilterMatchModes="false"
-        :showFilterOperator="false"
-        :showAddButton="false"
-        :showFilterApplyButton="false"
-        filter
-        sortable
         :pt="{
           root: {
             style: {
@@ -140,27 +137,105 @@
           headerCell: {
             style: {
               zIndex: 6,
+              paddingLeft: '0.25rem',
+              paddingRight: '0.25rem',
             },
           },
           bodyCell: {
             style: {
               zIndex: 2,
+              paddingLeft: '0.25rem',
+              paddingRight: '0.25rem',
             },
           },
         }"
       >
         <template #body="{ data }">
           <div class="flex items-center">
-            <img
-              v-if="data.image"
-              :src="data.image"
-              class="mr-2"
-              style="width: 24px; height: 24px; object-fit: scale-down"
-            />
-
             <Avatar
-              v-else
-              :label="firstTwoInitials(data.name)"
+              :image="data.image"
+              :label="!data?.image ? firstTwoInitials(data.name) : ''"
+              shape="circle"
+              :style="{
+                width: '24px',
+                height: '24px',
+                backgroundColor: '#1F89E1',
+                color: 'white',
+                fontSize: '12px',
+              }"
+            />
+          </div>
+        </template>
+      </Column>
+
+      <!-- Name only) -->
+      <Column
+        v-if="!isLoading"
+        field="name"
+        :header="t('contacts.fullName')"
+        headerClass="lg:hidden"
+        bodyClass="lg:hidden"
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
+        :showFilterApplyButton="false"
+        filter
+        sortable
+        :pt="{
+          headerCell: {
+            style: {
+              paddingLeft: '0.25rem',
+            },
+          },
+          bodyCell: {
+            style: {
+              paddingLeft: '0.25rem',
+            },
+          },
+        }"
+      >
+        <template #body="{ data }">
+          <div class="flex items-center">
+            <span class="name">
+              {{ data.name }}
+            </span>
+          </div>
+        </template>
+
+        <template #filter="{ filterModel }">
+          <IconField iconPosition="left">
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filterModel.value"
+              type="text"
+              :placeholder="t('contacts.searchByName')"
+            />
+          </IconField>
+        </template>
+      </Column>
+
+      <!-- Avatar + name -->
+      <Column
+        v-if="!isLoading"
+        field="name"
+        :header="t('contacts.fullName')"
+        class="col-name"
+        headerClass="hidden lg:table-cell"
+        style="max-width: 250px"
+        bodyClass="hidden lg:table-cell"
+        :showFilterMatchModes="false"
+        :showFilterOperator="false"
+        :showAddButton="false"
+        :showFilterApplyButton="false"
+        filter
+        sortable
+        frozen
+      >
+        <template #body="{ data }">
+          <div class="flex items-center">
+            <Avatar
+              :image="data.image"
+              :label="!data?.image ? firstTwoInitials(data.name) : ''"
               class="mr-2"
               shape="circle"
               :style="{
@@ -191,6 +266,7 @@
 
       <!-- Email -->
       <Column
+        v-if="!isLoading"
         field="email"
         :header="t('contacts.email')"
         style="min-width: 200px"
@@ -219,6 +295,7 @@
 
       <!-- Phones -->
       <Column
+        v-if="!isLoading"
         field="phones"
         :header="t('contacts.phone')"
         style="min-width: 220px"
@@ -293,6 +370,7 @@
 
       <!-- Country -->
       <Column
+        v-if="!isLoading"
         field="country"
         :header="t('contacts.country')"
         filter
@@ -739,11 +817,10 @@ export default defineComponent({
   }
   .name {
     display: inline-block;
-    max-width: 280px;
+    width: calc(100% - 32px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 14px;
   }
   .empty-state {
     display: flex;
@@ -763,6 +840,17 @@ export default defineComponent({
         margin-top: 8px;
         margin-bottom: 16px;
       }
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .table-main-content {
+    .col-avatar {
+      display: none !important;
+    }
+    .col-name {
+      max-width: 350px;
     }
   }
 }
