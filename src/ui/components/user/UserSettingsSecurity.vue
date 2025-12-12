@@ -368,6 +368,10 @@ export default defineComponent({
 }
 @media (min-width: 1024px) {
   .security-data {
+    max-height: 600px;
+    .content {
+      max-height: 600px;
+    }
     .bottom {
       display: none;
     }

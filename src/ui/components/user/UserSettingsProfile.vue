@@ -231,7 +231,6 @@ export default defineComponent({
   height: calc(
     100svh - #{$height_title_dialog} - #{$height_title_tabs_with_padding_top} - #{$height_footer}
   );
-  // background-color: lime;
   .content {
     height: calc(
       100svh - #{$height_title_dialog} - #{$height_title_tabs_with_padding_top} - #{$height_footer}
@@ -285,7 +284,7 @@ export default defineComponent({
     background-color: white;
     position: absolute;
     bottom: 17.5px;
-    right: 17.5px;
+    right: 30px;
     height: 50px;
     padding: 0;
     padding-top: 17.5px;
@@ -298,9 +297,12 @@ export default defineComponent({
 
 @media (min-width: 1024px) {
   .profile-data {
+    max-height: 600px;
     .content {
       width: 500px;
       padding-bottom: calc(#{$height_footer} - 17.5px);
+      max-height: 600px;
+
       .image-section {
         .left {
           .avatar-image {
@@ -329,7 +331,7 @@ export default defineComponent({
       }
     }
     .bottom {
-      width: calc(100% - 17.5px);
+      width: calc(100% - 30px);
     }
   }
 }
