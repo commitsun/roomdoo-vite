@@ -228,15 +228,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .profile-data {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   height: calc(
-    100svh - #{$height_title_tabs_with_padding_top} - #{$height_title_dialog} - #{$height_footer}
+    100svh - #{$height_title_dialog} - #{$height_title_tabs_with_padding_top} - #{$height_footer}
   );
+  // background-color: lime;
   .content {
-    max-height: calc(
-      100svh - #{$height_title_tabs_with_padding_top} - #{$height_title_dialog} - #{$height_footer}
+    height: calc(
+      100svh - #{$height_title_dialog} - #{$height_title_tabs_with_padding_top} - #{$height_footer}
     );
     overflow-y: scroll;
     flex: 1;
@@ -284,26 +282,25 @@ export default defineComponent({
   }
   .bottom {
     width: 100%;
-    padding-right: 25.5px;
-    padding-top: 17.5px;
-    padding-bottom: 17.5px;
+    background-color: white;
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 17.5px;
+    right: 17.5px;
+    height: 50px;
+    padding: 0;
+    padding-top: 17.5px;
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
     gap: 7px;
-    button {
-      height: 33px;
-    }
   }
 }
 
 @media (min-width: 1024px) {
   .profile-data {
-    height: 534px;
     .content {
+      width: 500px;
+      padding-bottom: calc(#{$height_footer} - 17.5px);
       .image-section {
         .left {
           .avatar-image {
@@ -330,6 +327,9 @@ export default defineComponent({
           }
         }
       }
+    }
+    .bottom {
+      width: calc(100% - 17.5px);
     }
   }
 }

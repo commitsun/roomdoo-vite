@@ -293,73 +293,81 @@ export default defineComponent({
 </script>
 <style scoped lang="scss">
 .security-data {
-  height: calc(100svh - #{$height_title_tabs_with_padding_top} - #{$height_title_dialog} - 17.5px);
-  .title-section {
-    font-weight: bold;
-    font-size: 16px;
-  }
-  .security-panel {
-    margin-top: 16px;
-    .security-header {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-      .security-header-top {
-        margin-top: 7px;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-      }
-      .user-settings-login-text {
-        margin-bottom: 7px;
-      }
+  height: calc(
+    100svh - #{$height_title_dialog} - #{$height_title_tabs_with_padding_top} - #{$height_footer}
+  );
+
+  .content {
+    height: calc(
+      100svh - #{$height_title_dialog} - #{$height_title_tabs_with_padding_top} - #{$height_footer}
+    );
+    overflow-y: scroll;
+    flex: 1;
+    .title-section {
+      font-weight: bold;
+      font-size: 16px;
     }
-    .security-panel-main {
-      display: flex;
-      flex-direction: column;
-      gap: 17px;
-      .security-panel-field {
+    .security-panel {
+      margin-top: 16px;
+      .security-header {
+        width: 100%;
         display: flex;
         flex-direction: column;
         gap: 7px;
-        margin-top: 0;
+        .security-header-top {
+          margin-top: 7px;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+        .user-settings-login-text {
+          margin-bottom: 7px;
+        }
+      }
+      .security-panel-main {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+        .security-panel-field {
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
+          margin-top: 0;
+        }
+      }
+      &:nth-of-type(1) {
+        margin-bottom: 17.5px;
       }
     }
-    &:nth-of-type(1) {
-      margin-bottom: 17.5px;
+    .security-panel-footer {
+      display: block;
+      padding: 17.5px;
+      padding-top: 0;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 7px;
     }
-  }
-  .security-panel-footer {
-    display: block;
-    padding: 17.5px;
-    padding-top: 0;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 7px;
-  }
-  .bottom {
-    width: 100%;
-    padding-right: 25.5px;
-    padding-top: 17.5px;
-    padding-bottom: 17.5px;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-    gap: 7px;
-    button {
-      height: 33px;
+    .bottom {
+      width: 100%;
+      padding-right: 25.5px;
+      padding-top: 17.5px;
+      padding-bottom: 17.5px;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      gap: 7px;
+      button {
+        height: 33px;
+      }
     }
   }
 }
 @media (min-width: 1024px) {
   .security-data {
-    height: 590px;
-
     .bottom {
       display: none;
     }
