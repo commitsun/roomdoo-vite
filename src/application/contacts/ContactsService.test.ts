@@ -399,34 +399,6 @@ describe('ContactsService.fetchContactById', () => {
   });
 });
 
-describe('ContactsService.fetchContactSchema', () => {
-  let contactsService: ContactsService;
-  let contactsRepoMock: Partial<Record<keyof ContactsRepository, any>>;
-
-  beforeEach(() => {
-    contactsRepoMock = { fetchContactSchema: vi.fn() };
-    contactsService = new ContactsService(contactsRepoMock as ContactsRepository);
-  });
-
-  it('returns contact schema on success', async () => {
-    const schema = {
-      fields: ['lastname2'],
-    };
-    contactsRepoMock.fetchContactSchema.mockResolvedValue(schema);
-
-    const result = await contactsService.fetchContactSchema();
-
-    expect(contactsRepoMock.fetchContactSchema).toHaveBeenCalledTimes(1);
-    expect(result).toBe(schema);
-  });
-
-  it('propagates repository errors', async () => {
-    const err = new Error('boom-contact-schema');
-    contactsRepoMock.fetchContactSchema.mockRejectedValue(err);
-    await expect(contactsService.fetchContactSchema()).rejects.toThrow(err);
-  });
-});
-
 describe('ContactsService.createContact', () => {
   let contactsService: ContactsService;
   let contactsRepoMock: Partial<Record<keyof ContactsRepository, any>>;

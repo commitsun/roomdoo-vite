@@ -261,19 +261,6 @@ describe('ContactRepositoryImpl.fetchContacts', () => {
     expect(vi.mocked(api.get)).toHaveBeenCalledWith('/contacts/123/id-numbers');
     expect(result).toBe(documents);
   });
-
-  it('fetchContactSchema should call GET /contacts/extra-features and return data', async () => {
-    const apiPayload = ['lastname2'];
-    vi.mocked(api.get).mockResolvedValue({ data: apiPayload });
-
-    const result = await repo.fetchContactSchema();
-
-    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/contacts/extra-features');
-
-    expect(result).toEqual({ fields: apiPayload });
-  });
-
   it('propagates axios errors when fetch CONTACTS', async () => {
     // arrange
     const err = new Error('axios fail');

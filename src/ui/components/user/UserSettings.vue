@@ -30,7 +30,7 @@
           <UserSettingsProfile
             :labelAvatar="labelAvatar"
             :availableLocales="availableLocales"
-            :showLastName2="showLastName2 ?? false"
+            :showLastName2="!!showLastName2"
             :imageUrl="imageUrl"
             :firstName="firstName"
             :lastName="lastName"
@@ -149,7 +149,12 @@ const labelAvatar = computed(() => {
 const availableLocales = computed(
   () => [...(instanceStore.instance?.languages || [])] as Array<{ code: string; name: string }>,
 );
-const showLastName2 = computed(() => userStore.userSchemas?.includes('lastname2'));
+const showLastName2 = computed(
+  () =>
+    instanceStore.instance?.dynamicFields.find(
+      (f) => f.field === 'lastname2' && f.source === 'contact',
+    ) ?? false,
+);
 
 const handleUpdateUser = async (): Promise<boolean> => {
   uiStore.startLoading();

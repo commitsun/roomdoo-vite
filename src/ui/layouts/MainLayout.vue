@@ -79,7 +79,6 @@ onBeforeMount(async () => {
     i18n.global.locale.value = userLanguage;
     updatePrimevueLocale(userLanguage);
   }
-  await userStore.fetchUserSchemas();
 });
 </script>
 

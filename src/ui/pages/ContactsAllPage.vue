@@ -210,7 +210,6 @@ export default defineComponent({
 
     const openNewContact = async (): Promise<void> => {
       uiStore.startLoading();
-      await contactsStore.fetchContactSchema();
       try {
         openDialog(ContactDetail, {
           props: { header: t('contacts.new') },

@@ -10,9 +10,10 @@ export const APP_LANGUAGES = [english, spanish, english_GB];
 export class InstanceService {
   constructor(private instanceRepository: InstanceRepository) {}
   async fetchInstance(): Promise<Instance> {
-    let [instance, languages] = await Promise.all([
+    let [instance, languages, dynamicFields] = await Promise.all([
       this.instanceRepository.fetchInstance(),
       this.instanceRepository.fetchLanguages(),
+      this.instanceRepository.fetchDynamicFields(),
     ]);
     const appLanguageCodes = APP_LANGUAGES.map((lang) => lang.code);
     languages = languages.map((lang) => {
@@ -29,6 +30,7 @@ export class InstanceService {
     return {
       ...instance,
       languages,
+      dynamicFields,
     };
   }
 }

@@ -148,7 +148,6 @@ import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useI18n } from 'vue-i18n';
 import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useUIStore } from '@/infrastructure/stores/ui';
-import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { type PartnerInterface } from '@/_legacy/interfaces/PartnerInterface';
 import { type TransactionInterface } from '@/_legacy/interfaces/TransactionInterface';
 
@@ -193,7 +192,6 @@ export default defineComponent({
     const router = useRouter();
     const { fetchPartners } = usePartner();
     const uiStore = useUIStore();
-    const contactsStore = useContactsStore();
     const { openDialog } = useAppDialog();
     const { t } = useI18n();
 
@@ -313,7 +311,6 @@ export default defineComponent({
     const openNewContact = async (): Promise<void> => {
       uiStore.startLoading();
       try {
-        await contactsStore.fetchContactSchema();
         openDialog(ContactDetail, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },

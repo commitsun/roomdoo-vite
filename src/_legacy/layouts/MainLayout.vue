@@ -284,7 +284,6 @@ export default defineComponent({
       const pmsPropertyId = route.params.pmsPropertyId as string;
       if (pmsPropertyId) pmsPropertiesStore.setCurrentPmsPropertyId(parseInt(pmsPropertyId));
       await instanceStore.fetchInstance();
-      await userStore.fetchUserSchemas();
       if (userStore.user?.lang) {
         const userLanguage = userStore.user.lang.replace('_', '-');
         i18n.global.locale.value = userLanguage;
