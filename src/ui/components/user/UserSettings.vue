@@ -27,7 +27,7 @@
         }"
       >
         <TabPanel value="0">
-          <UserSettingsProfileTab
+          <UserSettingsProfile
             :labelAvatar="labelAvatar"
             :availableLocales="availableLocales"
             :showLastName2="showLastName2 ?? false"
@@ -71,21 +71,6 @@
         </TabPanel>
       </TabPanels>
     </Tabs>
-
-    <!-- <div class="user-settings-footer-buttons" v-if="activeTab === '0'">
-      <Button
-        :label="t('userSettings.cancel')"
-        severity="secondary"
-        :style="{ width: 'auto' }"
-        @click="handleCancel()"
-      />
-      <Button
-        :label="t('userSettings.save')"
-        :style="{ width: 'auto', backgroundColor: '#1d4ed8', border: 'none' }"
-        @click="updateUser()"
-      />
-    </div> -->
-
     <ConfirmDialog :style="{ maxWidth: '380px' }" />
   </div>
 </template>
@@ -102,7 +87,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from 'primevue/useconfirm';
 import type { FileUploadSelectEvent } from 'primevue/fileupload';
 
-import UserSettingsProfileTab from './UserSettingsProfile.vue';
+import UserSettingsProfile from './UserSettingsProfile.vue';
 import UserSettingsSecurityTab from './UserSettingsSecurity.vue';
 
 import { useNotificationsStore } from '@/infrastructure/stores/notifications';
@@ -441,43 +426,15 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .user-settings {
-  display: flex;
-  flex-direction: column;
   .tabpanels-root {
-    overflow-y: auto;
     padding: 0;
     padding-top: 17.5px;
-    scrollbar-gutter: stable;
   }
-}
-
-.user-settings-footer-buttons {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  gap: 1rem;
 }
 
 @media (min-width: 1024px) {
   .user-settings {
     width: 503px;
-    height: calc(#{$height_title_tabs} + 542px + #{$height_footer});
-    padding-bottom: 17px;
-    .tabpanels-root {
-      padding: 17.5px;
-    }
-  }
-
-  .user-settings-footer-buttons {
-    height: 87px;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
-    flex-wrap: nowrap;
-    width: auto;
-    padding-bottom: 17px;
-    margin-top: 17px;
   }
 }
 </style>
