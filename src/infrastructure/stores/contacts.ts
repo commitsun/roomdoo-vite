@@ -17,7 +17,6 @@ import type {
   Guest,
   Agency,
   Supplier,
-  ContactSchema,
   ContactDetail,
 } from '@/domain/entities/Contact';
 
@@ -35,7 +34,6 @@ export const useContactsStore = defineStore('contacts', () => {
   const suppliersCount = ref(0);
   const guestsCount = ref(0);
   const customersCount = ref(0);
-  const contactSchema = ref(null as ContactSchema | null);
 
   const fetchContacts = async (
     pagination: Pagination,
@@ -92,11 +90,6 @@ export const useContactsStore = defineStore('contacts', () => {
     return result;
   };
 
-  const fetchContactSchema = async (): Promise<void> => {
-    const result = await contactsService.fetchContactSchema();
-    contactSchema.value = result;
-  };
-
   const createContact = async (contact: Partial<ContactDetail>): Promise<ContactDetail> => {
     const result = await contactsService.createContact(contact);
     return result;
@@ -151,14 +144,12 @@ export const useContactsStore = defineStore('contacts', () => {
     suppliersCount: readonly(suppliersCount),
     guestsCount: readonly(guestsCount),
     customersCount: readonly(customersCount),
-    contactSchema: readonly(contactSchema),
     fetchContacts,
     fetchCustomers,
     fetchGuests,
     fetchAgencies,
     fetchSuppliers,
     fetchContactById,
-    fetchContactSchema,
     createContact,
     updateContactFields,
     checkContactDuplicateByDocument,

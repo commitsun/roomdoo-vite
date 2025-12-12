@@ -122,6 +122,10 @@ const instanceMock = {
     { code: 'en-US', name: 'English (US)' },
     { code: 'es-ES', name: 'Español (ES)' },
   ],
+  dynamicFields: [
+    { field: 'lastname2', source: 'contact' },
+    { field: 'comercial_name', source: 'contact' },
+  ],
 };
 vi.mock('@/infrastructure/stores/instance', () => ({
   useInstanceStore: () => ({ instance: instanceMock }),

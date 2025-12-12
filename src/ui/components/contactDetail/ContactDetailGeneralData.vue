@@ -461,7 +461,6 @@ import { useCountryStatesStore } from '@/infrastructure/stores/countryStates';
 import { useSaleChannelsStore } from '@/infrastructure/stores/saleChannels';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
-import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useAddressStore } from '@/infrastructure/stores/address';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
@@ -508,7 +507,6 @@ export default defineComponent({
     const { t } = useI18n();
     const countriesStore = useCountriesStore();
     const countryStatesStore = useCountryStatesStore();
-    const contactsStore = useContactsStore();
     const instanceStore = useInstanceStore();
     const addressStore = useAddressStore();
     const saleChannelsStore = useSaleChannelsStore();
@@ -520,22 +518,25 @@ export default defineComponent({
     const addressItems = ref([] as { label: string; value: Address }[]);
 
     const countries = computed(() => countriesStore.countries);
-    const contactsStoreSchema = computed(() => contactsStore.contactSchema);
     const languages = computed(() => instanceStore.instance?.languages ?? APP_LANGUAGES);
-    const saleChannels = computed(() =>
-      saleChannelsStore.saleChannels.filter((sc) => sc.type === 'indirect'),
-    );
-
     const showLastName2 = computed(
       () =>
         props.contactType === 'person' &&
-        (contactsStoreSchema.value?.fields ?? []).includes('lastname2'),
+        instanceStore.instance?.dynamicFields.find(
+          (f) => f.field === 'lastname2' && f.source === 'contact',
+        ),
     );
 
     const showComercialName = computed(
       () =>
         props.contactType !== 'person' &&
-        (contactsStoreSchema.value?.fields ?? []).includes('comercial_name'),
+        instanceStore.instance?.dynamicFields.find(
+          (f) => f.field === 'comercial_name' && f.source === 'contact',
+        ),
+    );
+
+    const saleChannels = computed(() =>
+      saleChannelsStore.saleChannels.filter((sc) => sc.type === 'indirect'),
     );
 
     const isValidDate = (d: unknown): d is Date =>

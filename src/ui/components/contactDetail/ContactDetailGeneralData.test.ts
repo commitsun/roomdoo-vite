@@ -186,9 +186,14 @@ vi.mock('@/infrastructure/stores/instance', () => ({
         { code: 'en_GB', name: 'English' },
         { code: 'es_ES', name: 'Español' },
       ],
+      dynamicFields: [
+        { field: 'lastname2', source: 'contact' },
+        { field: 'comercial_name', source: 'contact' },
+      ],
     },
   }),
 }));
+
 const startLoading = vi.fn();
 const stopLoading = vi.fn();
 vi.mock('@/infrastructure/stores/ui', () => ({

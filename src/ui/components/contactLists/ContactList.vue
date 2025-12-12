@@ -810,7 +810,6 @@ export default defineComponent({
     const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
-        await contactsStore.fetchContactSchema();
         const contact = await contactsStore.fetchContactById(contactId);
         if (!contact) {
           uiStore.stopLoading();
