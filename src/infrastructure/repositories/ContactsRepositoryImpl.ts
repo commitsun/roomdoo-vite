@@ -13,7 +13,6 @@ import type {
   GuestDTO,
   Supplier,
   ContactDetail,
-  ContactSchema,
 } from '@/domain/entities/Contact';
 import type { PersonalDocument } from '@/domain/entities/PersonalDocument';
 import type { ContactsRepository } from '@/domain/repositories/ContactsRepository';
@@ -213,12 +212,6 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     const { data } = await api.get<PersonalDocument[]>(url);
     return data;
   }
-  async fetchContactSchema(): Promise<ContactSchema> {
-    const url = '/contacts/extra-features';
-    const { data } = await api.get<string[]>(url);
-    return { fields: data };
-  }
-
   normalizeContactPayload = (contact: Partial<ContactDetail>): Partial<ContactDetail> => {
     const KEY_MAP: Record<string, string> = {
       name: 'name',

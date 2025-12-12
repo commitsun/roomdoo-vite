@@ -7,7 +7,6 @@ import type {
   Guest,
   Supplier,
   ContactDetail,
-  ContactSchema,
 } from '@/domain/entities/Contact';
 import type {
   AgencyFilters,
@@ -51,7 +50,6 @@ export interface ContactsRepository {
   ): Promise<EntityListResponse<Supplier>>;
   fetchContactById(id: number): Promise<ContactDetail>;
   fetchContactPersonalDocuments(contactId: number): Promise<PersonalDocument[]>;
-  fetchContactSchema(): Promise<ContactSchema>;
   createContact(contact: Partial<ContactDetail>): Promise<ContactDetail>;
   updateContactFields(
     contactId: number,

@@ -338,7 +338,6 @@ export default defineComponent({
     const openPartnerForm = async () => {
       uiStore.startLoading();
       try {
-        await contactsStore.fetchContactSchema();
         const contactId = currentFolio.value?.partnerId as number;
         const contact = await contactsStore.fetchContactById(contactId);
         if (contact) {
@@ -367,7 +366,6 @@ export default defineComponent({
     const openNewPartnerForm = async () => {
       uiStore.startLoading();
       try {
-        await contactsStore.fetchContactSchema();
         openDialog(ContactDetail, {
           props: { header: t('contacts.new') },
           onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {

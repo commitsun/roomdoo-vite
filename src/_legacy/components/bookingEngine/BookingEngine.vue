@@ -2312,7 +2312,6 @@ export default defineComponent({
     const openContactDetail = async (): Promise<void> => {
       uiStore.startLoading();
       try {
-        await contactsStore.fetchContactSchema();
         const contactId = currentPartner.value?.id ?? 0;
         const contact = await contactsStore.fetchContactById(contactId);
         if (contact) {
@@ -2340,7 +2339,6 @@ export default defineComponent({
     const openNewContact = async (): Promise<void> => {
       uiStore.startLoading();
       try {
-        await contactsStore.fetchContactSchema();
         openDialog(ContactDetail, {
           props: { header: t('contacts.new') },
           data: { props: { contact: null } },

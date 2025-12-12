@@ -90,7 +90,6 @@ import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useI18n } from 'vue-i18n';
 import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useUIStore } from '@/infrastructure/stores/ui';
-import { useContactsStore } from '@/infrastructure/stores/contacts';
 
 import AutocompleteComponent from '@/_legacy/components/roomdooComponents/AutocompleteComponent.vue';
 import InputText from 'primevue/inputtext';
@@ -108,7 +107,6 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
     const uiStore = useUIStore();
-    const contactsStore = useContactsStore();
     const { openDialog } = useAppDialog();
     const { t } = useI18n();
     const { fetchPartners } = usePartner();
@@ -150,7 +148,6 @@ export default defineComponent({
     const openPartnerForm = async () => {
       uiStore.startLoading();
       try {
-        await contactsStore.fetchContactSchema();
         openDialog(ContactDetail, {
           props: { header: t('contacts.new') },
           onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {

@@ -9,6 +9,5 @@ export interface UserRepository {
   changePassword(currentPassword: string, newPassword: string): Promise<void>;
   refreshToken(): Promise<void>;
   updateUser(user: Partial<User>): Promise<void>;
-  fetchUserSchemas(): Promise<string[]>;
   logout(): void;
 }

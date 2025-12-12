@@ -56,6 +56,7 @@ describe('InstanceLayout', () => {
         { name: 'English', code: 'en' },
         { name: 'Spanish', code: 'es' },
       ],
+      dynamicFields: [{ field: 'lastname2', source: 'contact' }],
     });
 
     renderInstanceLayout(testPinia);
@@ -68,6 +69,7 @@ describe('InstanceLayout', () => {
     vi.spyOn(store, 'instance', 'get').mockReturnValue({
       name: 'Roomdoo Cloud',
       languages: [{ name: 'English', code: 'en' }],
+      dynamicFields: [{ field: 'lastname2', source: 'contact' }],
     });
 
     renderInstanceLayout(testPinia);

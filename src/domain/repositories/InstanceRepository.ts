@@ -4,4 +4,5 @@ import type { Language } from '@/domain/entities/Language';
 export interface InstanceRepository {
   fetchInstance(): Promise<Instance>;
   fetchLanguages(): Promise<Language[]>;
+  fetchDynamicFields(): Promise<{ field: string; source: string }[]>;
 }

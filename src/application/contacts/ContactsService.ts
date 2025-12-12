@@ -9,7 +9,6 @@ import type {
   Agency,
   Contact,
   ContactDetail,
-  ContactSchema,
   Customer,
   Guest,
   Supplier,
@@ -65,10 +64,6 @@ export class ContactsService {
     const documents = await this.contactsRepository.fetchContactPersonalDocuments(id);
     contact.documents = documents;
     return contact;
-  }
-  async fetchContactSchema(): Promise<ContactSchema> {
-    const schema = await this.contactsRepository.fetchContactSchema();
-    return schema;
   }
   async createContact(contact: Partial<ContactDetail>): Promise<ContactDetail> {
     const createdContact = await this.contactsRepository.createContact(contact);

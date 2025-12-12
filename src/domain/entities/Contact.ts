@@ -72,7 +72,3 @@ export interface ContactDetail extends Omit<Contact, 'types' | 'image'> {
   defaultCommission?: number;
   comercial?: string;
 }
-
-export interface ContactSchema {
-  fields: string[];
-}
