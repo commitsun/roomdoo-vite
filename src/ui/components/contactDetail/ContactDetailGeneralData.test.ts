@@ -186,11 +186,15 @@ vi.mock('@/infrastructure/stores/instance', () => ({
         { code: 'en_GB', name: 'English' },
         { code: 'es_ES', name: 'Español' },
       ],
-      dynamicFields: [
-        { field: 'lastname2', source: 'contact' },
-        { field: 'comercial_name', source: 'contact' },
-      ],
     },
+  }),
+}));
+vi.mock('@/infrastructure/stores/extraFeature', () => ({
+  useExtraFeatureStore: () => ({
+    extraFeatures: [
+      { field: 'lastname2', source: 'contact' },
+      { field: 'comercial_name', source: 'contact' },
+    ],
   }),
 }));
 
