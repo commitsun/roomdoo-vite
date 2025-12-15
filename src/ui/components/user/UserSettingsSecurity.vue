@@ -87,6 +87,9 @@
               "
             />
           </div>
+          <Message v-if="loginErrorMessage !== ''" severity="error">
+            {{ loginErrorMessage }}
+          </Message>
         </div>
       </Panel>
       <span class="title-section"> {{ t('userSettings.password') }} </span>
@@ -188,6 +191,9 @@
               @update:modelValue="$emit('update:repeatPassword', $event)"
             />
           </div>
+          <Message v-if="passwordErrorMessage !== ''" severity="error">
+            {{ passwordErrorMessage }}
+          </Message>
         </div>
       </Panel>
     </div>
