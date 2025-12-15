@@ -95,6 +95,7 @@ import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
+import { useExtraFeatureStore } from '@/infrastructure/stores/extraFeature';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import type { User } from '@/domain/entities/User';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
@@ -105,6 +106,7 @@ const confirm = useConfirm();
 
 const userStore = useUserStore();
 const instanceStore = useInstanceStore();
+const extraFeatureStore = useExtraFeatureStore();
 const uiStore = useUIStore();
 const notificationStore = useNotificationsStore();
 const useTextMessageStore = useTextMessagesStore();
@@ -151,7 +153,7 @@ const availableLocales = computed(
 );
 const showLastName2 = computed(
   () =>
-    instanceStore.instance?.dynamicFields.find(
+    extraFeatureStore.extraFeatures.find(
       (f) => f.field === 'lastname2' && f.source === 'contact',
     ) ?? false,
 );
