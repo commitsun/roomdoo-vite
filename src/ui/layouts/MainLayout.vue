@@ -37,6 +37,7 @@ import Drawer from 'primevue/drawer';
 import Sidebar from '@/ui/components/sidebar/Sidebar.vue';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useExtraFeatureStore } from '@/infrastructure/stores/extraFeature';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { i18n } from '@/infrastructure/plugins/i18n';
@@ -48,6 +49,7 @@ const pmsPropertiesStore = usePmsPropertiesStore();
 const instanceStore = useInstanceStore();
 const userStore = useUserStore();
 const uiStore = useUIStore();
+const extraFeatureStore = useExtraFeatureStore();
 
 const isMenuVisible = ref(false);
 const rightDrawerVisible = ref(false);
@@ -79,6 +81,7 @@ onBeforeMount(async () => {
     i18n.global.locale.value = userLanguage;
     updatePrimevueLocale(userLanguage);
   }
+  await extraFeatureStore.fetchExtraFeatures();
 });
 </script>
 
