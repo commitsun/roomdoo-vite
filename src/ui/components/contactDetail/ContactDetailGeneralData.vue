@@ -463,6 +463,7 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useAddressStore } from '@/infrastructure/stores/address';
+import { useExtraFeatureStore } from '@/infrastructure/stores/extraFeature';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 import type { ContactDetail } from '@/domain/entities/Contact';
 import type { CountryState } from '@/domain/entities/CountryState';
@@ -510,6 +511,7 @@ export default defineComponent({
     const instanceStore = useInstanceStore();
     const addressStore = useAddressStore();
     const saleChannelsStore = useSaleChannelsStore();
+    const extraFeatureStore = useExtraFeatureStore();
     const uiStore = useUIStore();
     const useTextMessageStore = useTextMessagesStore();
     const phoneNumber = ref('');
@@ -522,7 +524,7 @@ export default defineComponent({
     const showLastName2 = computed(
       () =>
         props.contactType === 'person' &&
-        instanceStore.instance?.dynamicFields.find(
+        extraFeatureStore.extraFeatures.find(
           (f) => f.field === 'lastname2' && f.source === 'contact',
         ),
     );
@@ -530,7 +532,7 @@ export default defineComponent({
     const showComercialName = computed(
       () =>
         props.contactType !== 'person' &&
-        instanceStore.instance?.dynamicFields.find(
+        extraFeatureStore.extraFeatures.find(
           (f) => f.field === 'comercial_name' && f.source === 'contact',
         ),
     );
