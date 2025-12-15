@@ -15,7 +15,8 @@
     "lint:fix": "eslint . --ext .ts,.tsx,.vue --fix",
     "test": "vitest run --coverage",
     "prettier:check": "prettier --cache --check .",
-    "prettier:write": "prettier --cache --write ."
+    "prettier:write": "prettier --cache --write .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@primeuix/themes": "^1.0.0",
@@ -70,7 +71,9 @@
     "eslint-plugin-security": "3.0.1",
     "eslint-plugin-unused-imports": "4.2.0",
     "eslint-plugin-vue": "10.5.0",
+    "husky": "9.1.7",
     "jsdom": "^26.1.0",
+    "lint-staged": "16.2.7",
     "prettier": "3.6.2",
     "rollup-plugin-visualizer": "6.0.3",
     "sass": "^1.85.1",
