@@ -13,7 +13,6 @@ describe('InstanceService - fetchInstance', () => {
     instanceRepoMock = {
       fetchInstance: vi.fn(),
       fetchLanguages: vi.fn(),
-      fetchDynamicFields: vi.fn(),
     };
     instanceService = new InstanceService(instanceRepoMock as InstanceRepository);
   });
