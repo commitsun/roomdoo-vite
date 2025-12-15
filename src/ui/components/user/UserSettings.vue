@@ -186,6 +186,7 @@ const handleUpdateUser = async (): Promise<boolean> => {
 
     await userStore.updateUser(payload);
     notificationStore.add(t('userSettings.userUpdated'), 'success');
+    dialogRef?.value?.close({ action: 'userUpdated' });
     uiStore.refreshView();
     return true;
   } catch {
@@ -195,13 +196,6 @@ const handleUpdateUser = async (): Promise<boolean> => {
     uiStore.stopLoading();
   }
 };
-
-// const updateUser = async (): Promise<void> => {
-//   const ok = await handleUpdateUser();
-//   if (ok) {
-//     dialogRef?.value?.close({ action: 'userUpdated' });
-//   }
-// };
 
 const handleCancel = (): void => {
   dialogRef?.value?.close({ action: 'cancel' });
@@ -267,10 +261,6 @@ const handleChangeLogin = async (): Promise<void> => {
 function getSafeString(val: unknown): string {
   return typeof val === 'string' && val.trim() !== '' ? val : '';
 }
-
-// const handleCancel = (): void => {
-//   dialogRef?.value?.close({ action: 'cancel' });
-// };
 
 const handleChangePassword = async (): Promise<void> => {
   if (
