@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+set -e
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+step() {
+  printf "${BLUE}› %s${NC}\n" "$1"
+}
+
+ok() {
+  printf "${GREEN}✔ %s${NC}\n" "$1"
+}
+
+fail() {
+  printf "${RED}✖ Failed: %s${NC}\n" "$1"
+  exit 1
+}
+
+run_step() {
+  name="$1"
+  shift
+
+  step "$name"
+  start=$(date +%s)
+
+  "$@" || fail "$name"
+
+  end=$(date +%s)
+  duration=$((end - start))
+
+  ok "$name (${duration}s)"
+  printf "\n"
+}
+
+run_step "Formatting code (Prettier)" npm run prettier:write
+run_step "Checking code style (ESLint)" npm run lint
+run_step "Checking types (TypeScript)" npm run type-check
+
+ok "All checks passed"
