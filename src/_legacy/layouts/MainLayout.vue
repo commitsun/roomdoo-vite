@@ -66,6 +66,7 @@ import { useUserStore } from '@/infrastructure/stores/user';
 import { i18n } from '@/infrastructure/plugins/i18n';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
+import { useExtraFeatureStore } from '@/infrastructure/stores/extraFeature';
 
 const BookingEngine = defineAsyncComponent(
   () => import('@/_legacy/components/bookingEngine/BookingEngine.vue')
@@ -114,6 +115,7 @@ export default defineComponent({
     const uiStore = useUIStore();
     const userStore = useUserStore();
     const instanceStore = useInstanceStore();
+    const extraFeatureStore = useExtraFeatureStore();
 
     const pmsPropertiesStore = usePmsPropertiesStore();
     const showUserSettingsModal = ref(false);
@@ -289,6 +291,7 @@ export default defineComponent({
         i18n.global.locale.value = userLanguage;
         updatePrimevueLocale(userLanguage);
       }
+      await extraFeatureStore.fetchExtraFeatures();
       void store.dispatch('layout/showSpinner', false);
     });
 

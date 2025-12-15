@@ -94,7 +94,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { useInstanceStore } from '@/infrastructure/stores/instance';
 import { useUserStore } from '@/infrastructure/stores/user';
 import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
-import { useExtraFeatureStore } from '@/infrastructure/stores/extraFeature';
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useLegacyStore } from '@/_legacy/utils/useLegacyStore';
@@ -113,7 +112,6 @@ export default defineComponent({
     const instanceStore = useInstanceStore();
     const userStore = useUserStore();
     const pmsPropertiesStore = usePmsPropertiesStore();
-    const extraFeatureStore = useExtraFeatureStore();
     const uiStore = useUIStore();
     const router = useRouter();
     const route = useRoute();
@@ -144,7 +142,6 @@ export default defineComponent({
         await userStore.login(username.value, password.value);
         await useLegacyStore().doVuexLogin(username.value, password.value);
         await pmsPropertiesStore.fetchPmsProperties();
-        await extraFeatureStore.fetchExtraFeatures();
         if (userStore.user) {
           if (route.query.redirect !== undefined && route.query.redirect !== null) {
             redirect = route.query.redirect as string;
