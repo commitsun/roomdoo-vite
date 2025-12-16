@@ -439,6 +439,7 @@ describe('GuestList', () => {
       expect(last?.[1].inHouseOnly).toBeUndefined();
       expect(last?.[2]).toBeUndefined();
       expect(globalInput).toHaveValue('');
+      vi.useRealTimers();
     });
   });
 });
