@@ -121,9 +121,9 @@
 
       <!-- avatar -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="image"
-        :header="''"
+        header="-"
         headerClass="lg:hidden"
         bodyClass="lg:hidden"
         :style="{ maxWidth: '40px' }"
@@ -170,7 +170,7 @@
 
       <!-- Name only) -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="name"
         :header="t('contacts.fullName')"
         headerClass="lg:hidden"
@@ -216,7 +216,7 @@
 
       <!-- Avatar + name -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="name"
         :header="t('contacts.fullName')"
         class="col-name"
@@ -266,7 +266,7 @@
 
       <!-- Email -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="email"
         :header="t('contacts.email')"
         style="min-width: 200px"
@@ -295,7 +295,7 @@
 
       <!-- Phones -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="phones"
         :header="t('contacts.phone')"
         style="min-width: 220px"
@@ -370,7 +370,7 @@
 
       <!-- Country -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="country"
         :header="t('contacts.country')"
         filter
@@ -427,20 +427,16 @@
       </Column>
 
       <template #paginatorstart v-if="numTotalRecords > 0">
-        <div class="contacts-paginator__left">
-          <span class="contacts-paginator__info">
-            {{
-              t('contacts.paginationInfo', {
-                first: firstRecord + 1,
-                last: Math.min(firstRecord + rows, numTotalRecords),
-                total: new Intl.NumberFormat(i18n.global.locale.value, {
-                  useGrouping: true,
-                }).format(numTotalRecords),
-                entities: t('contacts.entities.agency', numTotalRecords),
-              })
-            }}
-          </span>
-        </div>
+        {{
+          t('contacts.paginationInfo', {
+            first: firstRecord + 1,
+            last: Math.min(firstRecord + rows, numTotalRecords),
+            total: new Intl.NumberFormat(i18n.global.locale.value, {
+              useGrouping: true,
+            }).format(numTotalRecords),
+            entities: t('contacts.entities.agency', numTotalRecords),
+          })
+        }}
       </template>
     </DataTable>
   </div>
@@ -803,15 +799,6 @@ export default defineComponent({
       @media (min-width: 1024px) {
         margin-top: 0;
       }
-    }
-  }
-  .tag-contact-type {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    i {
-      font-size: 0.7rem;
-      line-height: 1;
     }
   }
   .name {
