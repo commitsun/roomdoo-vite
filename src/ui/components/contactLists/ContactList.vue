@@ -91,7 +91,7 @@
       </template>
 
       <!-- no results -->
-      <template #empty v-if="!isLoading">
+      <template #empty>
         <div class="empty-state">
           <p class="empty-state__desc">
             {{ total === 0 ? t('contacts.noContactsTitle') : t('contacts.noResultsFoundTitle') }}
@@ -121,9 +121,9 @@
 
       <!-- avatar -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="image"
-        :header="''"
+        header="-"
         headerClass="lg:hidden"
         bodyClass="lg:hidden"
         :style="{ maxWidth: '40px' }"
@@ -170,7 +170,7 @@
 
       <!-- Name only) -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="name"
         :header="t('contacts.fullName')"
         headerClass="lg:hidden"
@@ -216,7 +216,7 @@
 
       <!-- Avatar + name -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="name"
         :header="t('contacts.fullName')"
         class="col-name"
@@ -266,7 +266,7 @@
 
       <!-- Type -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         :header="t('contacts.type')"
         filter
         filterField="type"
@@ -329,7 +329,7 @@
 
       <!-- Email -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="email"
         :header="t('contacts.email')"
         style="min-width: 200px"
@@ -358,7 +358,7 @@
 
       <!-- Phones -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="phones"
         :header="t('contacts.phone')"
         style="min-width: 220px"
@@ -433,7 +433,7 @@
 
       <!-- Country -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="country"
         :header="t('contacts.country')"
         filter

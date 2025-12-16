@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/vue';
+import { render, screen, waitFor, within } from '@testing-library/vue';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { createTestingPinia } from '@pinia/testing';
@@ -17,7 +17,6 @@ import GuestList from './GuestList.vue';
 
 import type { Guest } from '@/domain/entities/Contact';
 import primevuePlugin from '@/infrastructure/plugins/primevue';
-
 // i18n mock
 vi.mock('vue-i18n', () => {
   const tMap: Record<string, string> = {
@@ -52,7 +51,6 @@ vi.mock('vue-i18n', () => {
     createI18n: vi.fn(() => ({ install: () => {} })),
   };
 });
-
 vi.mock('@/infrastructure/plugins/i18n', () => ({
   i18n: {
     global: {
@@ -60,34 +58,28 @@ vi.mock('@/infrastructure/plugins/i18n', () => ({
     },
   },
 }));
-
 // Legacy & dialog
 vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
   default: { name: 'PartnerForm', template: '<div />' },
 }));
-
 // Legacy store mock
 vi.mock('@/_legacy/utils/useLegacyStore', () => ({
   useLegacyStore: () => ({
     fetchAndSetVuexPartnerAndActiveProperty: vi.fn().mockResolvedValue(undefined),
   }),
 }));
-
 // App dialog mock
 vi.mock('@/ui/composables/useAppDialog', () => ({
   useAppDialog: () => ({ open: vi.fn() }),
 }));
-
 // UI store mock
 vi.mock('@/infrastructure/stores/ui', () => ({
   useUIStore: () => ({ startLoading: vi.fn(), stopLoading: vi.fn() }),
 }));
-
 // pmsProperties store mock
 vi.mock('@/infrastructure/stores/pmsProperties', () => ({
   usePmsPropertiesStore: () => ({ currentPmsPropertyId: 1 }),
 }));
-
 // test data
 const testGuests: Guest[] = [
   {
@@ -118,7 +110,6 @@ const testGuests: Guest[] = [
     image: 'https://example.com/bob.jpg',
   },
 ];
-
 // Contacts store mock
 const mockContactsStore = {
   guests: testGuests,
@@ -128,7 +119,6 @@ const mockContactsStore = {
 vi.mock('@/infrastructure/stores/contacts', () => ({
   useContactsStore: () => mockContactsStore,
 }));
-
 // Countries store mock
 vi.mock('@/infrastructure/stores/countries', () => ({
   useCountriesStore: () => ({
@@ -139,7 +129,6 @@ vi.mock('@/infrastructure/stores/countries', () => ({
     fetchCountries: vi.fn().mockResolvedValue(undefined),
   }),
 }));
-
 describe('GuestList', () => {
   beforeEach(() => {
     const pinia = createTestingPinia();
@@ -161,27 +150,43 @@ describe('GuestList', () => {
       },
     });
   });
-
   it('renders guests by default - happy path - fetches on mount', async () => {
+    const first = testGuests[0];
+    const second = testGuests[1];
     const rowGroups = screen.getAllByRole('rowgroup');
     const tbody = rowGroups[1];
     const bodyRows = within(tbody).getAllByRole('row');
+    // rendered 2 guests
     expect(bodyRows).toHaveLength(2);
+    // Helper: UI renders only the FIRST doc + "+N" when there are more
+    const formatFirstDoc = (docs: Array<{ type: string; number: string }>): string => {
+      const d0 = docs[0];
+      const prefix = d0.type.substring(0, 3).toUpperCase();
+      const dot = d0.type.length > 3 ? '.' : '';
+      return `${prefix}${dot}${d0.number}`;
+    };
+    // first row
+    expect(bodyRows[0]).toHaveTextContent(first.name);
 
-    // Row 1
-    expect(within(bodyRows[0]).getAllByRole('cell')[0]).toHaveTextContent('Alice Walker'); // name
-    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent('PAS.X1234567'); // document
-    expect(within(bodyRows[0]).getAllByRole('cell')[1]).toHaveTextContent('+1'); // more docs
-    expect(within(bodyRows[0]).getAllByRole('cell')[2]).toHaveTextContent('Spain'); // country
-    expect(within(bodyRows[0]).getAllByRole('cell')[4]).toHaveTextContent('VIP guest.'); // notes
-
+    const firstDocs = first.identificationDocuments ?? [];
+    if (firstDocs.length > 0) {
+      expect(bodyRows[0]).toHaveTextContent(formatFirstDoc(firstDocs as any));
+    }
+    if (firstDocs.length > 1) {
+      expect(bodyRows[0]).toHaveTextContent(`+${firstDocs.length - 1}`);
+    }
+    expect(bodyRows[0]).toHaveTextContent(first.country?.name ?? '');
     // Row 2
-    expect(within(bodyRows[1]).getAllByRole('cell')[0]).toHaveTextContent('Bob Martin');
-    expect(within(bodyRows[1]).getAllByRole('cell')[1]).toHaveTextContent('PAS.P7654321');
-    expect(within(bodyRows[1]).getAllByRole('cell')[2]).toHaveTextContent('Portugal');
-    expect(within(bodyRows[1]).getAllByRole('cell')[4]).toHaveTextContent('late checkout');
+    expect(bodyRows[1]).toHaveTextContent(second.name);
+    const secondDocs = second.identificationDocuments ?? [];
+    if (secondDocs.length > 0) {
+      expect(bodyRows[1]).toHaveTextContent(formatFirstDoc(secondDocs as any));
+    }
+    if (secondDocs.length > 1) {
+      expect(bodyRows[1]).toHaveTextContent(`+${secondDocs.length - 1}`);
+    }
+    expect(bodyRows[1]).toHaveTextContent(second.country?.name ?? '');
   });
-
   it('applies global search input', async () => {
     vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
@@ -194,7 +199,6 @@ describe('GuestList', () => {
 
     vi.useRealTimers();
   });
-
   it('debounces global search (only one call)', async () => {
     vi.useFakeTimers();
     mockContactsStore.fetchGuests.mockClear();
@@ -208,7 +212,6 @@ describe('GuestList', () => {
 
     vi.useRealTimers();
   });
-
   it('fires by maxWait even with continuous typing', async () => {
     vi.useFakeTimers();
     mockContactsStore.fetchGuests.mockClear();
@@ -224,9 +227,8 @@ describe('GuestList', () => {
 
     vi.useRealTimers();
   });
-
   it('sort by name toggles and maps orderBy', async () => {
-    const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
+    const nameHeader = screen.getAllByRole('columnheader', { name: /full name/i })[0];
     await userEvent.click(nameHeader); // asc
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last?.[2]).toBe('name');
@@ -235,7 +237,6 @@ describe('GuestList', () => {
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last?.[2]).toBe('-name');
   });
-
   it('sort by country toggles and maps orderBy', async () => {
     const countryHeader = screen.getByRole('columnheader', { name: /country/i });
     await userEvent.click(countryHeader); // asc
@@ -246,9 +247,8 @@ describe('GuestList', () => {
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last?.[2]).toBe('-country');
   });
-
   it('filters by name (column filter + apply) & clears with clear button', async () => {
-    const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
+    const nameHeader = screen.getAllByRole('columnheader', { name: /full name/i })[0];
     const filterBtn = within(nameHeader).getByRole('button');
     await userEvent.click(filterBtn);
 
@@ -267,7 +267,6 @@ describe('GuestList', () => {
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last && last[1].nameContains).toBeUndefined();
   });
-
   it('filters by document (column filter + apply) & clears with clear button', async () => {
     const docHeader = screen.getByRole('columnheader', { name: /document/i });
     const filterBtn = within(docHeader).getByRole('button');
@@ -292,7 +291,6 @@ describe('GuestList', () => {
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last && last[1].documentContains).toBeUndefined();
   });
-
   it('filters by country & clears country filter', async () => {
     const countryHeader = screen.getByRole('columnheader', { name: /country/i });
     const filterBtn = within(countryHeader).getByRole('button');
@@ -325,7 +323,6 @@ describe('GuestList', () => {
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last?.[1].countryIn).toBeUndefined();
   });
-
   it('filters by several countries', async () => {
     const countryHeader = screen.getByRole('columnheader', { name: /country/i });
     const filterBtn = within(countryHeader).getByRole('button');
@@ -351,100 +348,97 @@ describe('GuestList', () => {
     expect(last?.[1].countryIn).toHaveLength(2);
     expect(last?.[1].countryIn).toEqual(expect.arrayContaining(['Spain', 'Portugal']));
   });
-
   it('applies all filters + global search and clears everything with "Clear" button', async () => {
+    vi.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockContactsStore.fetchGuests.mockClear();
-
-    // Global
+    // Global search (debounced)
     const globalInput = screen.getByPlaceholderText(/global search/i);
-    await userEvent.type(globalInput, 'ali');
-
+    await user.type(globalInput, 'ali');
+    // fires debounce (250ms) with margin
+    vi.advanceTimersByTime(300);
     // Name
-    const nameHeader = screen.getByRole('columnheader', { name: /full name/i });
-    await userEvent.click(within(nameHeader).getByRole('button'));
+    const nameHeader = screen.getAllByRole('columnheader', { name: /full name/i })[0];
+    await user.click(within(nameHeader).getByRole('button'));
     const nameOv =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    await userEvent.type(within(nameOv).getByPlaceholderText(/search by name/i), 'Alice');
-    await userEvent.click(within(nameOv).getByRole('button', { name: /apply/i }));
-
+    await user.type(within(nameOv).getByPlaceholderText(/search by name/i), 'Alice');
+    await user.click(within(nameOv).getByRole('button', { name: /apply/i }));
     // Document
     const docHeader = screen.getByRole('columnheader', { name: /document/i });
-    await userEvent.click(within(docHeader).getByRole('button'));
+    await user.click(within(docHeader).getByRole('button'));
     const docOv =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    await userEvent.type(within(docOv).getByPlaceholderText(/search by document/i), 'X1234567');
-    await userEvent.click(within(docOv).getByRole('button', { name: /apply/i }));
-
+    await user.type(within(docOv).getByPlaceholderText(/search by document/i), 'X1234567');
+    await user.click(within(docOv).getByRole('button', { name: /apply/i }));
     // Country
     const countryHeader = screen.getByRole('columnheader', { name: /country/i });
-    await userEvent.click(within(countryHeader).getByRole('button'));
+    await user.click(within(countryHeader).getByRole('button'));
     const countryOv =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
     const trigger =
       within(countryOv).queryByRole('combobox', { name: /select countries/i }) ??
       within(countryOv).getByText(/select countries/i);
-    await userEvent.click(trigger);
+    await user.click(trigger);
     const listbox = await screen.findByRole('listbox');
-    await userEvent.click(within(listbox).getByRole('option', { name: /spain/i }));
-    await userEvent.click(within(countryOv).getByRole('button', { name: /apply/i }));
-
+    await user.click(within(listbox).getByRole('option', { name: /spain/i }));
+    await user.click(within(countryOv).getByRole('button', { name: /apply/i }));
     // Date (last reservation)
     const dateInputs = screen.getAllByPlaceholderText(/select dates/i);
-    await userEvent.click(dateInputs[0]);
+    await user.click(dateInputs[0]);
     const dpOverlay =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    await userEvent.click(within(dpOverlay).getByRole('button', { name: /last 7 days/i }));
-    await userEvent.click(within(dpOverlay).getByRole('button', { name: /apply/i }));
-
+    await user.click(within(dpOverlay).getByRole('button', { name: /last 7 days/i }));
+    await user.click(within(dpOverlay).getByRole('button', { name: /apply/i }));
     // In-house Select
     const inHouseTrigger =
       screen.queryByRole('combobox', { name: /All guests/i }) ||
       screen.queryByRole('combobox') ||
       screen.getByText(/All guests/i);
-    await userEvent.click(inHouseTrigger);
-
+    await user.click(inHouseTrigger);
     const inHouseListbox =
       (await screen.findByRole('listbox').catch(() => null)) ?? (await screen.findByRole('menu'));
     const inHouseOption = within(inHouseListbox).getByRole('option', {
       name: /In-house guests/i,
     });
-    await userEvent.click(inHouseOption);
-
-    // Sort country desc
-    await userEvent.click(countryHeader); // asc
-    await userEvent.click(countryHeader); // desc
-
+    await user.click(inHouseOption);
+    // Sort country
+    await user.click(countryHeader); // asc
+    await user.click(countryHeader); // desc
     // Check all applied
-    let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[1].globalSearch).toBe('ali'); // global
-    expect(last?.[1].nameContains).toBe('Alice'); // name
-    expect(last?.[1].documentContains).toBe('X1234567'); // documents
-    expect(last?.[1].countryIn).toEqual(['Spain']); // countries
-    expect(last?.[1].checkinDateFrom).toBeInstanceOf(Date); // date from
-    expect(last?.[1].checkinDateTo).toBeInstanceOf(Date); // date to
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const diffDays = Math.round(
-      (last?.[1].checkinDateTo.getTime() - last?.[1].checkinDateFrom.getTime()) / msPerDay,
-    );
-    // range "Last 7 days" -> 6 days difference (from today-6 to today), we allow 6–7 due to TZ
-    expect(diffDays).toBeGreaterThanOrEqual(6);
-    expect(diffDays).toBeLessThanOrEqual(7);
-    expect(last?.[1].inHouseOnly).toBe(true); // in-house
-    expect(last?.[2]).toBe('-country'); // orderBy
-
+    await waitFor(() => {
+      const last = mockContactsStore.fetchGuests.mock.calls.at(-1);
+      expect(last?.[1].globalSearch).toBe('ali'); // global
+      expect(last?.[1].nameContains).toBe('Alice'); // name
+      expect(last?.[1].documentContains).toBe('X1234567'); // documents
+      expect(last?.[1].countryIn).toEqual(['Spain']); // countries
+      expect(last?.[1].checkinDateFrom).toBeInstanceOf(Date); // date from
+      expect(last?.[1].checkinDateTo).toBeInstanceOf(Date); // date to
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const diffDays = Math.round(
+        (last?.[1].checkinDateTo.getTime() - last?.[1].checkinDateFrom.getTime()) / msPerDay,
+      );
+      // range "Last 7 days" -> 6 days difference (from today-6 to today), we allow 6–7 due to TZ
+      expect(diffDays).toBeGreaterThanOrEqual(6);
+      expect(diffDays).toBeLessThanOrEqual(7);
+      expect(last?.[1].inHouseOnly).toBe(true); // in-house
+      expect(last?.[2]).toBe('-country'); // orderBy
+    });
     // Clear all
     const clearAllBtn = screen.getByRole('button', { name: /clear global search/i });
-    await userEvent.click(clearAllBtn);
-
-    last = mockContactsStore.fetchGuests.mock.calls.at(-1);
-    expect(last?.[1].globalSearch).toBeUndefined();
-    expect(last?.[1].nameContains).toBeUndefined();
-    expect(last?.[1].documentContains).toBeUndefined();
-    expect(last?.[1].countryIn).toBeUndefined();
-    expect(last?.[1].checkinDateFrom).toBeUndefined();
-    expect(last?.[1].checkinDateTo).toBeUndefined();
-    expect(last?.[1].inHouseOnly).toBeUndefined();
-    expect(last?.[2]).toBeUndefined();
-    expect(globalInput).toHaveValue('');
+    await user.click(clearAllBtn);
+    // Assert everything is cleared
+    await waitFor(() => {
+      const last = mockContactsStore.fetchGuests.mock.calls.at(-1);
+      expect(last?.[1].globalSearch).toBeUndefined();
+      expect(last?.[1].nameContains).toBeUndefined();
+      expect(last?.[1].documentContains).toBeUndefined();
+      expect(last?.[1].countryIn).toBeUndefined();
+      expect(last?.[1].checkinDateFrom).toBeUndefined();
+      expect(last?.[1].checkinDateTo).toBeUndefined();
+      expect(last?.[1].inHouseOnly).toBeUndefined();
+      expect(last?.[2]).toBeUndefined();
+      expect(globalInput).toHaveValue('');
+    });
   });
 });

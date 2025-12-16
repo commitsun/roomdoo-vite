@@ -289,9 +289,9 @@
 
       <!-- avatar -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="image"
-        :header="''"
+        header="-"
         headerClass="lg:hidden"
         bodyClass="lg:hidden"
         :style="{ maxWidth: '40px' }"
@@ -338,7 +338,7 @@
 
       <!-- Name only) -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="name"
         :header="t('contacts.fullName')"
         headerClass="lg:hidden"
@@ -384,7 +384,7 @@
 
       <!-- Avatar + name -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="name"
         :header="t('contacts.fullName')"
         class="col-name"
@@ -434,7 +434,7 @@
 
       <!-- Main Document -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="identificationDocuments"
         :header="t('contacts.document')"
         style="min-width: 200px"
@@ -449,8 +449,8 @@
               Array.isArray(data.identificationDocuments) && data.identificationDocuments.length > 0
             "
           >
-            <Tag severity="secondary" class="mr-2">
-              <div class="flex items-center gap-2 px-1">
+            <div class="flex items-center gap-2 px-1">
+              <Tag severity="secondary">
                 <span class="font-bold">
                   {{ data.identificationDocuments[0]?.type.substring(0, 3).toUpperCase()
                   }}{{ data.identificationDocuments[0]?.type.length > 3 ? '.' : '' }}
@@ -458,11 +458,11 @@
                 <span class="font-normal">
                   {{ data.identificationDocuments[0]?.number }}
                 </span>
-              </div>
-            </Tag>
-            <Tag severity="secondary" v-if="data.identificationDocuments.length > 1">
-              <span class="font-normal"> +{{ data.identificationDocuments.length - 1 }} </span>
-            </Tag>
+              </Tag>
+              <Tag severity="secondary" class="my-2" v-if="data.identificationDocuments.length > 1">
+                <span class="font-normal"> +{{ data.identificationDocuments.length - 1 }} </span>
+              </Tag>
+            </div>
           </span>
         </template>
         <template #filter="{ filterModel }">
@@ -476,7 +476,7 @@
 
       <!-- Country -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="country"
         :header="t('contacts.country')"
         filter
@@ -534,7 +534,7 @@
 
       <!-- Last reservation (name) -->
       <Column
-        v-if="!isLoading"
+        v-show="!isLoading"
         field="lastReservationName"
         :header="t('contacts.lastReservation')"
         style="min-width: 180px"
@@ -556,7 +556,7 @@
       <!-- Internal Notes -->
       <Column
         field="internalNotes"
-        v-if="!isLoading"
+        v-show="!isLoading"
         :header="t('contacts.internalNotes')"
         style="max-width: 300px"
       >
