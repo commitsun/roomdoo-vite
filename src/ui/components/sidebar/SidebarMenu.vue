@@ -7,7 +7,7 @@
       class="nav-link"
       :class="{ 'is-active': isActive('dashboard') }"
     >
-      <House :size="14" class="nav-link-icon" />
+      <House :size="18" class="nav-link-icon" />
       <span>{{ t('sidebar.dashboard') }}</span>
     </router-link>
 
@@ -17,7 +17,7 @@
       class="nav-link"
       :class="{ 'is-active': isActive('planning') }"
     >
-      <CalendarDays :size="14" class="nav-link-icon" />
+      <CalendarDays :size="18" class="nav-link-icon" />
       <span>{{ t('sidebar.planning') }}</span>
     </router-link>
 
@@ -27,7 +27,7 @@
       class="nav-link"
       :class="{ 'is-active': isActive('contacts') }"
     >
-      <Users :size="14" class="nav-link-icon" />
+      <Users :size="18" class="nav-link-icon" />
       <span>{{ t('sidebar.contacts.title') }}</span>
     </router-link>
 
@@ -37,7 +37,7 @@
       class="nav-link"
       :class="{ 'is-active': isActive('transactions') }"
     >
-      <Wallet :size="14" class="nav-link-icon" />
+      <Wallet :size="18" class="nav-link-icon" />
       <span>{{ t('sidebar.cashRegister') }}</span>
     </router-link>
 
@@ -47,7 +47,7 @@
       class="nav-link"
       :class="{ 'is-active': isActive('invoices') }"
     >
-      <ReceiptText :size="14" class="nav-link-icon" />
+      <ReceiptText :size="18" class="nav-link-icon" />
       <span>{{ t('sidebar.billing') }}</span>
     </router-link>
 
@@ -57,20 +57,20 @@
       @click="isReportOptionsOpen = !isReportOptionsOpen"
       v-if="pmsPropertyReportLink"
     >
-      <ChartNoAxesCombined :size="14" class="nav-link-icon" />
+      <ChartNoAxesCombined :size="18" class="nav-link-icon" />
       <span>{{ t('sidebar.reportsGroup') }}</span>
       <i class="pi pi-angle-right nav-link-caret" :class="{ 'is-rotated': isReportOptionsOpen }" />
     </div>
     <ul class="submenu" :class="{ 'is-open': isReportOptionsOpen }" v-if="pmsPropertyReportLink">
       <li class="submenu-item">
         <div class="submenu-link" @click="openGenerateReports">
-          <FileChartColumnIncreasing :size="14" class="nav-link-icon" />
+          <FileChartColumnIncreasing :size="18" class="nav-link-icon" />
           <span>{{ t('sidebar.reports') }}</span>
         </div>
       </li>
       <li class="submenu-item">
         <div class="submenu-link" @click="$emit('openLink', pmsPropertyReportLink.id)">
-          <ChartPie :size="14" class="nav-link-icon" />
+          <ChartPie :size="18" class="nav-link-icon" />
           <span>{{ pmsPropertyReportLink.label }}</span>
         </div>
       </li>
@@ -83,7 +83,7 @@
       v-if="!pmsPropertyReportLink"
       @click="openGenerateReports"
     >
-      <FileChartColumnIncreasing :size="14" class="nav-link-icon" />
+      <FileChartColumnIncreasing :size="18" class="nav-link-icon" />
       <span>{{ t('sidebar.reports') }}</span>
     </div>
 
@@ -93,7 +93,7 @@
       v-if="pmsPropertiesLinks.length === 1"
       @click="$emit('openLink', pmsPropertiesLinks[0].id)"
     >
-      <ExternalLink :size="14" class="nav-link-icon" />
+      <ExternalLink :size="18" class="nav-link-icon" />
       <span>{{ pmsPropertiesLinks[0].label }}</span>
     </div>
 
@@ -103,7 +103,7 @@
       @click="isLinkOptionsOpen = !isLinkOptionsOpen"
       v-if="pmsPropertiesLinks.length > 1"
     >
-      <ExternalLink :size="14" class="nav-link-icon" />
+      <ExternalLink :size="18" class="nav-link-icon" />
       <span>{{ t('sidebar.links') }}</span>
       <i class="pi pi-angle-right nav-link-caret" :class="{ 'is-rotated': isLinkOptionsOpen }" />
     </div>
@@ -114,7 +114,7 @@
     >
       <li class="submenu-item" v-for="link in pmsPropertiesLinks" :key="link.id">
         <div class="submenu-link" @click="$emit('openLink', link.id)">
-          <Link :size="14" class="nav-link-icon" />
+          <Link :size="18" class="nav-link-icon" />
           <span>{{ link.label }}</span>
         </div>
       </li>
@@ -243,7 +243,8 @@ export default defineComponent({
     justify-items: center;
     gap: 1rem;
     border-radius: 4px;
-    padding-left: 0.5rem;
+    padding-left: 0.4rem;
+    // border: 1px solid blue;
     position: relative;
     min-width: 0;
     margin-bottom: 10px;

@@ -5,7 +5,7 @@
       v-if="pmsPropertySupportLink"
       @click="$emit('openLink', pmsPropertySupportLink.id)"
     >
-      <Headset :size="14" class="nav-link-icon" />
+      <Headset :size="18" class="nav-link-icon" />
       <span>{{ pmsPropertySupportLink.label }}</span>
     </div>
     <div
@@ -168,7 +168,7 @@ export default defineComponent({
     display: flex;
     gap: 1rem;
     align-items: center;
-    padding: 0 0.5rem;
+    padding: 0 0.4rem;
     overflow-x: hidden;
     min-height: 21px;
     .nav-link-icon {
