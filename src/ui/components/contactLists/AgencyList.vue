@@ -123,7 +123,7 @@
       <Column
         v-show="!isLoading"
         field="image"
-        header="-"
+        header=""
         headerClass="lg:hidden"
         bodyClass="lg:hidden"
         :style="{ maxWidth: '40px' }"
@@ -159,7 +159,7 @@
               :style="{
                 width: '24px',
                 height: '24px',
-                backgroundColor: '#1F89E1',
+                backgroundColor: data.image ? 'white' : '#1F89E1',
                 color: 'white',
                 fontSize: '12px',
               }"
@@ -241,7 +241,7 @@
               :style="{
                 width: '24px',
                 height: '24px',
-                backgroundColor: '#1F89E1',
+                backgroundColor: data.image ? 'white' : '#1F89E1',
                 color: 'white',
                 fontSize: '12px',
               }"

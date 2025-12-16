@@ -410,8 +410,8 @@ describe('AgencyList', () => {
       expect(last?.[1].countryIn).toBeUndefined();
       expect(last?.[1].phonesContains).toBeUndefined();
       expect(last?.[2]).toBeUndefined();
+      expect(globalInput).toHaveValue('');
+      vi.useRealTimers();
     });
-    expect(globalInput).toHaveValue('');
-    vi.useRealTimers();
   });
 });

@@ -291,7 +291,7 @@
       <Column
         v-show="!isLoading"
         field="image"
-        header="-"
+        header=""
         headerClass="lg:hidden"
         bodyClass="lg:hidden"
         :style="{ maxWidth: '40px' }"
@@ -327,7 +327,7 @@
               :style="{
                 width: '24px',
                 height: '24px',
-                backgroundColor: '#1F89E1',
+                backgroundColor: data.image ? 'white' : '#1F89E1',
                 color: 'white',
                 fontSize: '12px',
               }"
@@ -409,7 +409,7 @@
               :style="{
                 width: '24px',
                 height: '24px',
-                backgroundColor: '#1F89E1',
+                backgroundColor: data.image ? 'white' : '#1F89E1',
                 color: 'white',
                 fontSize: '12px',
               }"
@@ -568,20 +568,16 @@
       </Column>
 
       <template #paginatorstart v-if="numTotalRecords > 0">
-        <div class="contacts-paginator__left">
-          <span class="contacts-paginator__info">
-            {{
-              t('contacts.paginationInfo', {
-                first: firstRecord + 1,
-                last: Math.min(firstRecord + rows, numTotalRecords),
-                total: new Intl.NumberFormat(i18n.global.locale.value, {
-                  useGrouping: true,
-                }).format(numTotalRecords),
-                entities: t('contacts.entities.guest', numTotalRecords),
-              })
-            }}
-          </span>
-        </div>
+        {{
+          t('contacts.paginationInfo', {
+            first: firstRecord + 1,
+            last: Math.min(firstRecord + rows, numTotalRecords),
+            total: new Intl.NumberFormat(i18n.global.locale.value, {
+              useGrouping: true,
+            }).format(numTotalRecords),
+            entities: t('contacts.entities.guest', numTotalRecords),
+          })
+        }}
       </template>
     </DataTable>
   </div>
