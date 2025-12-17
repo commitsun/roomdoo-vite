@@ -162,7 +162,7 @@
                 marginLeft: '14px',
                 marginRight: '14px',
                 fontSize: '12px',
-                border: '1px solid var(--p-surface-300, lightgray)',
+                border: `${data.image ? '1px solid var(--p-surface-300, lightgray)' : 'none'}`,
               }"
             />
           </div>
@@ -245,7 +245,7 @@
                 backgroundColor: data.image ? 'white' : '#1F89E1',
                 color: 'white',
                 fontSize: '12px',
-                border: '1px solid var(--p-surface-300, lightgray)',
+                border: `${data.image ? '1px solid var(--p-surface-300, lightgray)' : 'none'}`,
               }"
             />
             <span class="name">
