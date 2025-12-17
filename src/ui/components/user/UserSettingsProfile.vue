@@ -65,7 +65,7 @@
       </div>
       <div class="personal-info-section">
         <span class="title-section"> {{ t('userSettings.personalInformation') }} </span>
-        <div class="field-group">
+        <div class="field-group" :class="{ 'has-lastname2': showLastName2 }">
           <div class="field">
             <label for="name">{{ t('userSettings.firstName') }}</label>
             <InputText
@@ -312,18 +312,50 @@ export default defineComponent({
           }
         }
       }
-      .personal-info-section,
+      .personal-info-section {
+        .field-group {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-top: 16px;
+          .field {
+            margin: 0;
+            min-width: 0;
+            flex: 1 1 calc(50% - 8px);
+          }
+
+          &:not(.has-lastname2) {
+            .field:nth-child(1),
+            .field:nth-child(2) {
+              flex-basis: calc(50% - 8px);
+            }
+          }
+
+          &.has-lastname2 {
+            .field:nth-child(1) {
+              flex-basis: 100%;
+            }
+            .field:nth-child(2),
+            .field:nth-child(3) {
+              flex-basis: calc(50% - 8px);
+            }
+          }
+        }
+      }
       .contact-data-section {
         .field-group {
           flex-direction: row;
           flex-wrap: wrap;
           gap: 16px;
+
           .field {
             flex: 1 1 0;
             &:not(:first-child) {
               margin: 0;
             }
           }
+
           .field:first-child {
             flex-basis: 100%;
           }
