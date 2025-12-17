@@ -294,7 +294,7 @@
         header=""
         headerClass="lg:hidden"
         bodyClass="lg:hidden"
-        :style="{ maxWidth: '40px' }"
+        :style="{ maxWidth: '52px' }"
         frozen
         :pt="{
           root: {
@@ -305,15 +305,13 @@
           headerCell: {
             style: {
               zIndex: 6,
-              paddingLeft: '0.25rem',
-              paddingRight: '0.25rem',
+              padding: '0',
             },
           },
           bodyCell: {
             style: {
               zIndex: 2,
-              paddingLeft: '0.25rem',
-              paddingRight: '0.25rem',
+              padding: '0',
             },
           },
         }"
@@ -329,6 +327,8 @@
                 height: '24px',
                 backgroundColor: data.image ? 'white' : '#1F89E1',
                 color: 'white',
+                marginLeft: '14px',
+                marginRight: '14px',
                 fontSize: '12px',
               }"
             />
