@@ -1,7 +1,7 @@
 <template>
   <div class="layout-container" v-if="activeUser && activeProperty">
     <Sidebar :menuOpen="isMenuOpen" />
-    <div class="overlay" @click="closeLeftDrawer" v-if="leftDrawerExpanded" />
+    <div class="overlay" @click="closeLeftDrawer" v-if="isMenuOpen" />
     <div class="main-container" :class="rightDrawerExpanded ? 'main-container-shrinked' : ''">
       <router-view :key="viewKey" @openLeftDrawer="openLeftDrawer()" />
     </div>
@@ -248,6 +248,10 @@ export default defineComponent({
         void store.dispatch('layout/rightDrawerDisplayed', false);
         void store.dispatch('layout/changeRightDrawerContent', 'FoliosList');
       }
+    });
+    watch(() => route.path, () => {
+      console.log(route.path);
+      isMenuOpen.value = false;
     });
 
     onBeforeMount(async () => {

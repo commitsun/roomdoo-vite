@@ -1,7 +1,11 @@
 <template>
   <div class="main-content">
     <div class="header">
-      <h1>{{ t('contacts.title') }}</h1>
+      <div class="left">
+        <Menu :size="24" class="icon" @click="$emit('showMenu')" />
+
+        <h1>{{ t('contacts.title') }}</h1>
+      </div>
       <Button :label="t('contacts.new')" icon="pi pi-plus" @click="openNewContact()" />
     </div>
     <Tabs v-model:value="activeTab" class="tabs" lazy>
@@ -101,7 +105,7 @@ import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Badge from 'primevue/badge';
-import { Users, UserCheck, BedDouble, Store, Package } from 'lucide-vue-next';
+import { Users, UserCheck, BedDouble, Store, Package, Menu } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
 import ContactList from '@/ui/components/contactLists/ContactList.vue';
@@ -133,6 +137,7 @@ export default defineComponent({
     Users,
     UserCheck,
     BedDouble,
+    Menu,
     Store,
     Package,
   },
@@ -253,8 +258,6 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .main-content {
-  padding: 1.1rem;
-  padding: 18px 18px 14px 18px;
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
@@ -263,7 +266,13 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
+    padding: 1rem;
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
   }
   .tabs {
     flex: 1;
@@ -271,7 +280,7 @@ export default defineComponent({
     flex-direction: column;
     overflow: hidden;
     .p-tablist {
-      border-radius: 12px 12px 0 0;
+      border-radius: 12px 0 0 0;
       border-bottom: 1px solid #ccc;
       background-color: #fff;
     }
@@ -289,6 +298,25 @@ export default defineComponent({
         height: 100%;
         overflow-y: hidden;
         overflow-x: auto;
+      }
+    }
+  }
+}
+@media (min-width: 1024px) {
+  .main-content {
+    padding: 18px;
+    .header {
+      padding: 0;
+      margin-bottom: 1rem;
+      .left {
+        .icon {
+          display: none;
+        }
+      }
+    }
+    .tabs {
+      .p-tablist {
+        border-radius: 12px 12px 0 0;
       }
     }
   }
