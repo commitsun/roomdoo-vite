@@ -418,6 +418,12 @@ export default defineComponent({
     watch(contactType, () => {
       activeTab.value = '0';
       activePanel.value = null;
+      if (contactForm.id === 0) {
+        contactForm.firstname = '';
+        contactForm.lastname = '';
+        contactForm.lastname2 = '';
+        contactForm.name = '';
+      }
       resetUiErrors();
     });
 
