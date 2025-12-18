@@ -1,4 +1,4 @@
-import { computed, reactive, type ComputedRef, type Ref } from 'vue';
+import { computed, reactive, watch, type ComputedRef, type Ref } from 'vue';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 
@@ -125,6 +125,86 @@ export const useContactDetailErrors = (
 
     uiErrors.documents = uiErrors.documents.map((r) => ({ ...r }));
   };
+
+  const clearGeneralError = (key: keyof GeneralErrors): void => {
+    if (uiErrors.general?.[key] !== undefined) {
+      delete (uiErrors.general as GeneralErrors)[key];
+    }
+  };
+
+  const clearDocError = (index: number, key: keyof DocumentRowError): void => {
+    const row = uiErrors.documents[index];
+    if (row === undefined || row[key] === undefined) {
+      return;
+    }
+
+    const next = { ...(row ?? {}) };
+    delete next[key];
+
+    uiErrors.documents.splice(index, 1, next);
+  };
+
+  const payload = computed(() => buildPayloadToValidate());
+
+  watch(
+    () => payload.value.name,
+    (nv, ov) => {
+      if (nv !== ov) {
+        clearGeneralError('name');
+      }
+    },
+  );
+
+  watch(
+    () => payload.value.saleChannelId,
+    (nv, ov) => {
+      if (nv !== ov) {
+        clearGeneralError('saleChannelId');
+      }
+    },
+  );
+
+  watch(
+    () =>
+      payload.value.documents.map((d) => ({
+        countryCode: d.countryCode,
+        documentTypeCode: d.documentTypeCode,
+        documentTypeName: d.documentTypeName,
+        number: d.number,
+      })),
+    (nextDocs, prevDocs) => {
+      const max = Math.max(nextDocs.length, prevDocs?.length ?? 0);
+
+      for (let i = 0; i < max; i++) {
+        const n = nextDocs[i];
+        const p = prevDocs?.[i];
+
+        if (n === undefined) {
+          if (uiErrors.documents[i] !== undefined) {
+            uiErrors.documents.splice(i, 1);
+          }
+          continue;
+        }
+        if (p === undefined || p === null) {
+          continue;
+        }
+
+        if (n.countryCode !== p.countryCode) {
+          clearDocError(i, 'country');
+        }
+        if (
+          n.documentTypeCode !== p.documentTypeCode ||
+          n.documentTypeName !== p.documentTypeName
+        ) {
+          clearDocError(i, 'category');
+        }
+        if (n.number !== p.number) {
+          clearDocError(i, 'number');
+        }
+      }
+    },
+    { deep: false },
+  );
 
   return {
     validate,
