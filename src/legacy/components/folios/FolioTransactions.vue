@@ -73,7 +73,7 @@
               <AppButton
                 class="btn-print-down-payment-invoice btn"
                 size="small"
-                v-if="charge.downPaymentInvoiceId !== 0"
+                v-if="charge.downPaymentInvoiceId !== null"
                 :href="printDownPaymentInvoice(charge?.downPaymentInvoiceId ?? 0)"
                 target="_blank"
                 @click.stop
@@ -85,7 +85,7 @@
                 class="btn-create-down-payment-invoice btn"
                 size="small"
                 v-if="
-                  showCreateDownPaymentInvoiceBtn(charge.date) && charge.downPaymentInvoiceId === 0
+                  showCreateDownPaymentInvoiceBtn(charge.date) && charge.downPaymentInvoiceId === null
                 "
                 @click.stop="openDownPaymentDialog(charge)"
               >
@@ -137,7 +137,7 @@
               <AppButton
                 class="btn-print-down-payment-invoice btn"
                 size="small"
-                v-if="refund.downPaymentInvoiceId !== 0"
+                v-if="refund.downPaymentInvoiceId !== null"
                 :href="printDownPaymentInvoice(refund?.downPaymentInvoiceId ?? 0)"
                 target="_blank"
                 @click.stop
@@ -148,7 +148,7 @@
                 class="btn-create-down-payment-invoice btn"
                 size="small"
                 v-if="
-                  showCreateDownPaymentInvoiceBtn(refund.date) && refund.downPaymentInvoiceId === 0
+                  showCreateDownPaymentInvoiceBtn(refund.date) && refund.downPaymentInvoiceId === null
                 "
                 @click.stop="openDownPaymentDialog(refund)"
               >
