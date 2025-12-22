@@ -44,7 +44,7 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
       `/reservations/p/${payload.reservationId}/reservation-lines/${reservationLineId}`,
       {
         roomId: payload.roomId,
-      }
+      },
     );
   },
   async updateReservationRoom(context, payload: PayloadChangeRoomInterface) {
@@ -147,6 +147,12 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
         partnerId: payload.partnerId,
       };
     }
+    if (payload.partnerRequests !== undefined && payload.partnerRequests !== null) {
+      send = {
+        ...send,
+        partnerRequests: payload.partnerRequests,
+      };
+    }
     return api.patch(`/reservations/p/${payload.reservationId}`, send);
   },
 
@@ -160,7 +166,7 @@ const actions: ActionTree<ReservationStateInterface, StateInterface> = {
 
   async updateReservationPartnerRequests(
     context,
-    payload: { reservationId: number; partnerRequests: string }
+    payload: { reservationId: number; partnerRequests: string },
   ) {
     return api.patch(`/reservations/p/${payload.reservationId}`, payload);
   },
