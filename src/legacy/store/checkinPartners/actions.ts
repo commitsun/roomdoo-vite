@@ -58,25 +58,25 @@ const actions: ActionTree<CheckinPartnerStateInterface, StateInterface> = {
 
   async onBoardCheckinPartner(
     context,
-    payload: { reservationId: number; checkinPartnerId: number }
+    payload: { reservationId: number; checkinPartnerId: number },
   ) {
     return api.patch(
-      `/reservations/p/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}?actionOnBoard=true`
+      `/reservations/p/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}?actionOnBoard=true`,
     );
   },
 
   async deleteCheckinPartner(
     context,
-    payload: { reservationId: number; checkinPartnerId: number }
+    payload: { reservationId: number; checkinPartnerId: number },
   ) {
     return api.delete(
-      `/reservations/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}`
+      `/reservations/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}`,
     );
   },
 
   async fetchPdfCheckin(context, payload: { reservationId: number; checkinPartnerId: number }) {
     return api.get(
-      `/reservations/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}/checkin-report`
+      `/reservations/${payload.reservationId}/checkin-partners/${payload.checkinPartnerId}/checkin-report`,
     );
   },
   async fetchPdfAllCheckins(context, reservationId: number) {

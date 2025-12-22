@@ -3,15 +3,15 @@
     <div
       class="checkin-partner-existing-title"
       :class="[!isBodyOpen ? 'title-closed-body' : '', isFromStart ? 'bottom-rounded-corners' : '']"
-      @click="isBodyOpen = !isBodyOpen"
+      @click="isUnknownGuest ? null : (isBodyOpen = !isBodyOpen)"
       :style="{
-        cursor: isCollapsible ? 'pointer' : 'default',
+        cursor: isCollapsible && !isUnknownGuest ? 'pointer' : 'default',
         backgroundColor: checkinPartnerState ? headerStateColor(checkinPartnerState) : '#F0FCFF',
         paddingLeft: isCollapsible ? '0' : '0.5rem',
       }"
     >
       <CustomIcon
-        v-if="isCollapsible && checkinPartnerState !== undefined"
+        v-if="isCollapsible && checkinPartnerState !== undefined && isUnknownGuest === false"
         imagePath="/app-images/dropdown.svg"
         :color="stateColor(checkinPartnerState)"
         width="12px"
@@ -25,10 +25,10 @@
             checkinPartnerIndex === 0
               ? $t('ordinal_1')
               : checkinPartnerIndex === 1
-              ? $t('ordinal_2')
-              : checkinPartnerIndex === 2
-              ? $t('ordinal_3')
-              : $t('ordinal_4')
+                ? $t('ordinal_2')
+                : checkinPartnerIndex === 2
+                  ? $t('ordinal_3')
+                  : $t('ordinal_4')
           }}
         </sup>
         {{ $t('completed') }}
@@ -42,12 +42,24 @@
         {{ firstname }}
         {{ lastname }} {{ lastname2 }}
       </span>
+      <span class="checkin-partner-unknown" v-else-if="isUnknownGuest">
+        <span class="checkin-partner-unknown-text"> Huésped desconocido </span>
+        <CustomIcon
+          imagePath="/app-images/icon-edit.svg"
+          color="#2563eb"
+          width="18px"
+          height="18px"
+          tabindex="1"
+          @click.stop="openNameDialog()"
+          class="cursor-pointer"
+        />
+      </span>
       <span class="checkin-partner-existing-name" v-else>
         {{ documentNumber }}
       </span>
 
       <span
-        v-if="checkinPartnerState !== undefined"
+        v-if="checkinPartnerState !== undefined && !isUnknownGuest"
         class="checkin-partner-existing-state"
         :style="{
           color: `${stateColor(checkinPartnerState)}`,
@@ -58,7 +70,7 @@
         {{ state(checkinPartnerState) }}
       </span>
       <CustomIcon
-        v-if="isFromDrawer"
+        v-if="isFromDrawer && !isUnknownGuest"
         imagePath="/app-images/three-dots-white.svg"
         :color="stateColor(checkinPartnerState ?? '')"
         width="25px"
@@ -254,7 +266,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, computed, reactive, markRaw } from 'vue';
+import { useStore } from '@/legacy/store';
+import { dialogService } from '@/legacy/services/DialogService';
+import CheckinPartnerNameForm from '@/legacy/components/checkinPartners/CheckinPartnerNameForm.vue';
+
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import { useI18n } from 'vue-i18n';
 
@@ -360,13 +376,24 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
+    const store = useStore();
 
     const isBodyOpen = ref(true);
     const openCheckinMenu = ref(false);
     const doCheckinButton = ref<HTMLButtonElement | null>(null);
     const tooltip = ref<HTMLDivElement | null>(null);
     const showTooltip = ref(false);
+    const partnerNameEditable = reactive({ firstname: '', lastname: '', lastname2: '' });
 
+    const isUnknownGuest = computed(() => {
+      return (
+        props.isFromDrawer &&
+        (props.checkinPartnerState === 'draft' || props.checkinPartnerState === 'dummy') &&
+        !props.firstname &&
+        !props.lastname &&
+        !props.lastname2
+      );
+    });
     const state = (checkinState: string) => {
       if (checkinState === 'precheckin') {
         return t('pending_arrival');
@@ -414,6 +441,57 @@ export default defineComponent({
       }
     };
 
+    const openNameDialog = () => {
+      const checkinPartnerId =
+        store.state.checkinPartners.checkinpartners[props.checkinPartnerIndex].id;
+      dialogService.open({
+        header: 'Añadir nombre del huésped',
+        content: markRaw(CheckinPartnerNameForm),
+        props: { partnerNameEditable },
+        onAccept: async () => {
+          void store.dispatch('layout/showSpinner', true);
+          try {
+            if (
+              partnerNameEditable.firstname ||
+              partnerNameEditable.lastname ||
+              partnerNameEditable.lastname2
+            ) {
+              await store.dispatch('checkinPartners/updateCheckinPartner', {
+                reservationId: store.state.reservations.currentReservation?.id,
+                id: checkinPartnerId,
+                firstname: partnerNameEditable.firstname,
+                lastname: partnerNameEditable.lastname,
+                lastname2: partnerNameEditable.lastname2,
+              });
+              await store.dispatch(
+                'checkinPartners/fetchCheckinPartners',
+                store.state.reservations.currentReservation?.id,
+              );
+            } else {
+              dialogService.open({
+                header: 'Error',
+                content: 'Debe ingresar al menos un nombre o apellido para el huésped desconocido.',
+                btnAccept: 'Aceptar',
+              });
+            }
+          } catch (error) {
+            dialogService.open({
+              header: 'Error',
+              content: 'Algo ha ido mal',
+              btnAccept: 'Ok',
+            });
+          } finally {
+            void store.dispatch('layout/showSpinner', false);
+            partnerNameEditable.firstname = '';
+            partnerNameEditable.lastname = '';
+            partnerNameEditable.lastname2 = '';
+          }
+        },
+        btnAccept: 'Guardar',
+        btnCancel: 'Cancelar',
+      });
+    };
+
     onMounted(() => {
       if (props.isCollapsible) {
         isBodyOpen.value = false;
@@ -426,6 +504,8 @@ export default defineComponent({
       stateColor,
       copyDocumentNumberToClipboard,
       hideTooltip,
+      openNameDialog,
+      isUnknownGuest,
       isBodyOpen,
       doCheckinButton,
       openCheckinMenu,
@@ -480,6 +560,19 @@ export default defineComponent({
       overflow: hidden;
       white-space: nowrap;
       max-width: 45%;
+    }
+    .checkin-partner-unknown {
+      font-size: 12px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      max-width: 60%;
+      display: flex;
+      align-items: center;
+      margin-left: calc(0.5rem + 12px);
+      .checkin-partner-unknown-text {
+        margin-right: 5px;
+      }
     }
     .checkin-partner-existing-state {
       font-size: 12px;
@@ -580,7 +673,9 @@ export default defineComponent({
         right: 30px;
         font-weight: bold;
         font-size: 15px;
-        transition: transform 0.3s ease, opacity 0.3s ease;
+        transition:
+          transform 0.3s ease,
+          opacity 0.3s ease;
         transform: translateY(100%);
         visibility: hidden;
         opacity: 0;
@@ -716,6 +811,7 @@ export default defineComponent({
         }
       }
       .checkin-partner-existing-name,
+      .checkin-partner-unknown,
       .checkin-partner-existing-state {
         font-size: 14px;
       }
