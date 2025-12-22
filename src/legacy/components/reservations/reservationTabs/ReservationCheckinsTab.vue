@@ -91,7 +91,8 @@
               <div
                 v-if="
                   allCheckinPartners.some(
-                    (el) => el.checkinPartnerState !== 'dummy' && el.checkinPartnerState !== 'draft'
+                    (el) =>
+                      el.checkinPartnerState !== 'dummy' && el.checkinPartnerState !== 'draft',
                   )
                 "
                 @click="printAllCheckins()"
@@ -102,7 +103,8 @@
               <div
                 v-if="
                   allCheckinPartners.some(
-                    (el) => el.checkinPartnerState !== 'dummy' && el.checkinPartnerState !== 'draft'
+                    (el) =>
+                      el.checkinPartnerState !== 'dummy' && el.checkinPartnerState !== 'draft',
                   )
                 "
                 @click="viewAllCheckinsPDF()"
@@ -132,7 +134,7 @@
     </div>
     <div class="card-wrap">
       <CheckinCardFlow
-        v-for="checkinPartner in checkinPartners.filter((cp) => cp.checkinPartnerState !== 'dummy')"
+        v-for="checkinPartner in allCheckinPartners"
         class="checkin-card-flow"
         :key="checkinPartner.id"
         :firstname="checkinPartner.firstname"
@@ -144,13 +146,14 @@
         :documentTypeName="documentType(checkinPartner.documentType)"
         :documentNumber="checkinPartner.documentNumber"
         :checkinPartnerState="checkinPartner.checkinPartnerState"
+        :checkinPartnerIndex="allCheckinPartners.indexOf(checkinPartner)"
         :isExistingCheckinPartnerMandatoryDataComplete="
           checkinMandatoryDataComplete(
             checkinPartner,
             checkinPartner.documentType === DOCUMENT_TYPE_DNI,
             checkinPartner.documentType === DOCUMENT_TYPE_NIE,
 
-            checkinPartner.countryId === NATIONALITY_CODE_SPAIN
+            checkinPartner.countryId === NATIONALITY_CODE_SPAIN,
           )
         "
         :isCheckinToday="isCheckinToday(checkinPartner)"
@@ -172,7 +175,6 @@
 </template>
 <script lang="ts">
 import { defineComponent, computed, onMounted, ref, type Ref, markRaw } from 'vue';
-import type { AxiosResponse } from 'axios';
 import { useRouter } from 'vue-router';
 
 import type { CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
@@ -180,7 +182,7 @@ import type { CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartner
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import PrivateCheckinFlow from '@/legacy/components/checkinFlow/PrivateCheckinFlow.vue';
 import ReservationSegmentation from '@/legacy/components/reservations/ReservationSegmentation.vue';
-import CheckinPartnerForm from '@/legacy/components/partners/PartnerForm.vue';
+import CheckinPartnerForm from '@/legacy/components/checkinPartners/CheckinPartnerForm.vue';
 import CheckinCardFlow from '@/legacy/components/checkinFlow/CheckinCardFlow.vue';
 import ReservationModifyAdultsAndChildren from '@/legacy/components/reservations/ReservationModifyAdultsAndChildren.vue';
 
@@ -208,15 +210,15 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const NATIONALITY_CODE_SPAIN = store.state.countries.countries.find(
-      (el) => el.code === 'ES'
+      (el) => el.code === 'ES',
     )?.id;
 
     const DOCUMENT_TYPE_DNI = store.state.documentType.documentType.find(
-      (el) => el.code === 'D'
+      (el) => el.code === 'D',
     )?.id;
 
     const DOCUMENT_TYPE_NIE = store.state.documentType.documentType.find(
-      (el) => el.code === 'N'
+      (el) => el.code === 'N',
     )?.id;
 
     const isCheckinFlowStepperOpen = ref(false);
@@ -243,21 +245,21 @@ export default defineComponent({
       store.state.checkinPartners.checkinpartners.filter(
         (checkinPartner) =>
           checkinPartner.checkinPartnerState !== 'dummy' &&
-          checkinPartner.checkinPartnerState !== 'cancelled'
-      )
+          checkinPartner.checkinPartnerState !== 'cancelled',
+      ),
     );
 
     const checkinPartnerToAdd = computed(() =>
       store.state.checkinPartners.checkinpartners.find(
-        (checkinPartner) => checkinPartner.checkinPartnerState === 'dummy'
-      )
+        (checkinPartner) => checkinPartner.checkinPartnerState === 'dummy',
+      ),
     );
 
     const segmentationName = computed(
       () =>
         store.state.categories.categories.find(
-          (category) => category.id === reservation.value?.segmentationId
-        )?.name
+          (category) => category.id === reservation.value?.segmentationId,
+        )?.name,
     );
 
     const closeCheckinFlow = () => {
@@ -294,7 +296,7 @@ export default defineComponent({
         (store.state.reservations.currentReservation?.stateCode === 'onboard' ||
           store.state.reservations.currentReservation?.stateCode === 'departure_delayed') &&
         allCheckinPartners.value.some(
-          (checkinPartner) => checkinPartner.checkinPartnerState === 'onboard'
+          (checkinPartner) => checkinPartner.checkinPartnerState === 'onboard',
         )
       ) {
         return true;
@@ -322,11 +324,11 @@ export default defineComponent({
         await Promise.all([
           store.dispatch(
             'reservations/fetchReservation',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           ),
           store.dispatch(
             'checkinPartners/fetchCheckinPartners',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           ),
         ]);
         if (router.currentRoute.value.name === 'planning') {
@@ -358,11 +360,11 @@ export default defineComponent({
           store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id),
           store.dispatch(
             'reservations/fetchReservation',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           ),
           store.dispatch(
             'checkinPartners/fetchCheckinPartners',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           ),
         ]);
         if (router.currentRoute.value.name === 'planning') {
@@ -479,7 +481,7 @@ export default defineComponent({
         content: markRaw(ReservationModifyAdultsAndChildren),
         props: {
           maxCapacity: store.state.rooms.rooms.find(
-            (el) => el.id === reservation.value?.preferredRoomId
+            (el) => el.id === reservation.value?.preferredRoomId,
           )?.capacity,
           isOpenFromGeneralTab: true,
           adults: reservation.value?.adults,
@@ -560,7 +562,7 @@ export default defineComponent({
         checkinPartners.value.every(
           (checkinPartner) =>
             checkinPartner.checkinPartnerState === 'draft' ||
-            checkinPartner.checkinPartnerState === 'dummy'
+            checkinPartner.checkinPartnerState === 'dummy',
         )
       ) {
         btnLabel = 'Iniciar check-in';
@@ -572,7 +574,7 @@ export default defineComponent({
         checkinPartners.value.some(
           (checkinPartner) =>
             checkinPartner.checkinPartnerState !== 'draft' &&
-            checkinPartner.checkinPartnerState !== 'dummy'
+            checkinPartner.checkinPartnerState !== 'dummy',
         )
       ) {
         btnLabel = 'Asistente de check-in';
@@ -603,7 +605,7 @@ export default defineComponent({
         // eslint-disable-next-line
         (el) => {
           el = false;
-        }
+        },
       );
     };
 
@@ -613,7 +615,7 @@ export default defineComponent({
         // eslint-disable-next-line
         (el) => {
           el = false;
-        }
+        },
       );
     };
 
@@ -635,7 +637,7 @@ export default defineComponent({
       try {
         await store.dispatch(
           'checkinPartners/fetchCheckinPartners',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         isCheckinPartnerCardOpen.value = checkinPartners.value.map(() => false);
         openCheckinsMenu.value = checkinPartners.value.map(() => false);
