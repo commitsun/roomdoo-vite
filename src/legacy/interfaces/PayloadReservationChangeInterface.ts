@@ -17,4 +17,5 @@ export interface PayloadReservationChangeInterface {
   partnerEmail?: string;
   partnerPhone?: string;
   partnerId?: number;
+  partnerRequests?: string;
 }

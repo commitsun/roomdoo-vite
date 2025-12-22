@@ -95,7 +95,7 @@
             <span class="text-bold">
               {{
                 reservationLineDate(
-                  addDayToDate(reservationLines[reservationLines.length - 1].date as Date)
+                  addDayToDate(reservationLines[reservationLines.length - 1].date as Date),
                 )
               }}
             </span>
@@ -171,12 +171,20 @@
       </div>
     </div>
   </div>
-  <div class="partner-requests" v-if="currentReservation?.partnerRequests">
+  <div class="partner-requests">
     <div class="partner-requests-title">
-      <img src="/app-images/icon-voice-over.svg" />
-      <span>Peticiones especiales del cliente</span>
+      <div class="partner-request-title-left">
+        <img src="/app-images/icon-voice-over.svg" />
+        <span>Peticiones especiales del cliente</span>
+      </div>
+      <div class="partner-requests-title-right">
+        <span v-if="!currentReservation?.partnerRequests" @click="openPartnerRequests()">
+          Añadir
+        </span>
+        <span v-else @click="openPartnerRequests()"> Editar </span>
+      </div>
     </div>
-    <div class="partner-requests-body">
+    <div class="partner-requests-body" v-if="currentReservation?.partnerRequests">
       {{ currentReservation?.partnerRequests }}
     </div>
   </div>
@@ -188,6 +196,7 @@ import { defineComponent, computed, onMounted, ref, markRaw } from 'vue';
 import { type ReservationLineInterface } from '@/legacy/interfaces/ReservationLineInterface';
 import ReservationRoomChanges from '@/legacy/components/reservations/ReservationRoomChanges.vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
+import ReservationPartnerRequests from '@/legacy/components/reservations/ReservationPartnerRequests.vue';
 import { useStore } from '@/legacy/store';
 import { dialogService } from '@/legacy/services/DialogService';
 
@@ -217,7 +226,7 @@ export default defineComponent({
       const lines = reservationLines.value;
 
       const sortedLines = lines.sort(
-        (a, b) => (a.date as Date).getTime() - (b.date as Date).getTime()
+        (a, b) => (a.date as Date).getTime() - (b.date as Date).getTime(),
       );
 
       for (let i = 0; i < sortedLines.length; i += 1) {
@@ -228,7 +237,7 @@ export default defineComponent({
           currentGroup.length === 0 ||
           line.roomId !== prevLine.roomId ||
           !Math.round(
-            Math.abs(((line.date as Date).getTime() - (prevLine.date as Date).getTime()) / oneDay)
+            Math.abs(((line.date as Date).getTime() - (prevLine.date as Date).getTime()) / oneDay),
           )
         ) {
           if (currentGroup.length > 0) {
@@ -262,7 +271,7 @@ export default defineComponent({
     const extraBedsAmount = () =>
       store.state.services.services.reduce((count, service) => {
         const matchingBeds = store.state.extraBeds.extraBeds.filter(
-          (extraBed) => extraBed.id === service.productId
+          (extraBed) => extraBed.id === service.productId,
         );
         return count + matchingBeds.length;
       }, 0);
@@ -324,9 +333,17 @@ export default defineComponent({
         onClose: async () => {
           await store.dispatch(
             'reservations/fetchReservationWizardState',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           );
         },
+      });
+    };
+
+    const openPartnerRequests = () => {
+      dialogService.open({
+        iconHeader: '/app-images/icon-voice-over.svg',
+        header: 'Editar peticiones especiales del cliente',
+        content: markRaw(ReservationPartnerRequests),
       });
     };
 
@@ -372,6 +389,7 @@ export default defineComponent({
       reservationLineDate,
       toggleShowRoomsDialog,
       addDayToDate,
+      openPartnerRequests,
     };
   },
 });
@@ -537,10 +555,33 @@ export default defineComponent({
     border-radius: 10px 10px 0px 0px;
     height: 30px;
     font-weight: bold;
-    img {
-      width: 17px;
-      height: 17px;
-      margin: 0 7px;
+    .partner-request-title-left {
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      padding-left: 10px;
+      img {
+        width: 17px;
+        height: 17px;
+        margin: 0 7px;
+      }
+    }
+    .partner-requests-title-right {
+      display: flex;
+      align-items: center;
+      margin-right: 12px;
+      span {
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        text-align: center;
+        padding: 0 0.5rem;
+        cursor: pointer;
+        &:hover {
+          background-color: #c8c8c8;
+          color: white;
+          font-weight: bold;
+        }
+      }
     }
   }
   .partner-requests-body {
