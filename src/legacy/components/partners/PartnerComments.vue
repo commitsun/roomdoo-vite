@@ -1,8 +1,8 @@
 <template>
   <div class="content">
-    <AppTextarea v-model="internalComments" rows="6" autoResize class="textarea" />
+    <AppTextarea v-model="partnerComments" rows="6" autoResize class="textarea" />
     <div class="buttons-panel">
-      <AppButton class="btn" label="Guardar" size="small" @click="saveInternalNotes" />
+      <AppButton class="btn" label="Guardar" size="small" @click="savePartnerComments" />
       <AppButton
         class="btn"
         @click="$emit('close')"
@@ -21,6 +21,16 @@ import { useStore } from '@/legacy/store';
 import { dialogService } from '@/legacy/services/DialogService';
 
 export default defineComponent({
+  props: {
+    partnerId: {
+      type: Number,
+      required: true,
+    },
+    partnerComment: {
+      type: String,
+      required: false,
+    },
+  },
   components: {
     AppTextarea: Textarea,
     AppButton: Button,
@@ -28,17 +38,16 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
 
-    const internalComments = ref('');
+    const partnerComments = ref('');
 
-    const saveInternalNotes = async () => {
+    const savePartnerComments = async () => {
       void store.dispatch('layout/showSpinner', true);
 
       try {
-        await store.dispatch('folios/updateFolio', {
-          folioId: store.state.folios.currentFolio?.id,
-          internalComment: internalComments.value,
+        await store.dispatch('partners/updatePartner', {
+          id: props.partnerId,
+          comment: partnerComments.value,
         });
-        await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
       } catch {
         dialogService.open({
           header: 'Error',
@@ -52,12 +61,12 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      internalComments.value = store.state.folios.currentFolio?.internalComment || '';
+      partnerComments.value = props.partnerComment || '';
     });
 
     return {
-      internalComments,
-      saveInternalNotes,
+      partnerComments,
+      savePartnerComments,
     };
   },
 });
