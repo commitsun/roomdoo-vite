@@ -33,7 +33,56 @@
         </div>
       </div>
     </div>
-    <div class="data-reservation-first-row">
+    <div class="data-reservation-first-row" v-if="currentReservation?.reservationType !== 'out'">
+      <div class="left">
+        <CustomIcon
+          imagePath="/app-images/user-attributes.svg"
+          color="primary"
+          width="18px"
+          height="18px"
+        />
+        <span class="ml-2"> Cliente de la reserva </span>
+      </div>
+    </div>
+    <div class="data-reservation-row">
+      <span class="reservation-title"> Nombre del cliente </span>
+      <span class="reservation-data partner-name">
+        <span class="partner-name-text" v-if="!isPartnerNameInputShowing">
+          {{ currentReservation?.partnerName }}
+        </span>
+        <input
+          :size="Math.max(newPartnerName.length - 11, 1)"
+          v-else
+          type="text"
+          v-model="newPartnerName"
+          class="partner-name-input"
+          ref="partnerInput"
+        />
+        <CustomIcon
+          v-if="isPartnerNameInputShowing"
+          imagePath="/app-images/icon-save.svg"
+          color="#2563eb"
+          width="18px"
+          height="18px"
+          class="cursor-pointer"
+          @click="savePartnerName()"
+        />
+        <CustomIcon
+          :imagePath="
+            !isPartnerNameInputShowing ? '/app-images/icon-edit.svg' : '/app-images/icon-close.svg'
+          "
+          color="#2563eb"
+          :width="!isPartnerNameInputShowing ? '16px' : '14px'"
+          :height="!isPartnerNameInputShowing ? '16px' : '14px'"
+          class="cursor-pointer"
+          @click="togglePartnerNameInput()"
+        />
+      </span>
+    </div>
+    <div
+      class="data-reservation-first-row"
+      :class="{ 'reservation-first-row-less-margin': isPartnerNameInputShowing }"
+    >
       <div class="left">
         <img src="/app-images/icon-calendar-blue.svg" class="icon-calendar" />
         <span>
@@ -138,7 +187,7 @@
         v-if="currentReservation"
         :style="`background-color: ${getReservationColor(
           currentReservation,
-          currentFolio?.pendingAmount || 0
+          currentFolio?.pendingAmount || 0,
         )}`"
       >
         {{ reservationStateText(currentReservation) }}
@@ -241,6 +290,9 @@ export default defineComponent({
     const showWizardState = ref(false);
     const showSegmentationModal = ref(false);
     const pricelistName = ref('');
+    const isPartnerNameInputShowing = ref(false);
+    const newPartnerName = ref('');
+    const partnerInput = ref<HTMLInputElement | null>(null);
 
     const currentFolio = computed(() => store.state.folios.currentFolio);
     const currentReservations = computed(() => store.state.reservations.reservations);
@@ -249,7 +301,8 @@ export default defineComponent({
     const wizardState = computed(() => store.state.reservations.reservationsWizardState);
 
     const agencyName = computed(
-      () => store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.name
+      () =>
+        store.state.agencies.agencies.find((el) => el.id === currentFolio.value?.agencyId)?.name,
     );
 
     const getDateFormat = (date: string | Date | undefined) => {
@@ -314,7 +367,7 @@ export default defineComponent({
       let saleChannel: string | undefined = '';
       if (store.state.saleChannels.saleChannels && currentReservation.value?.saleChannelId) {
         saleChannel = store.state.saleChannels.saleChannels.find(
-          (el) => el.id === currentReservation.value?.saleChannelId
+          (el) => el.id === currentReservation.value?.saleChannelId,
         )?.name;
       }
       return saleChannel;
@@ -322,7 +375,7 @@ export default defineComponent({
 
     const getReservationColor = (
       onGoingReservation: ReservationInterface | null,
-      folioPendingAmount: number
+      folioPendingAmount: number,
     ) => {
       let result;
       if (onGoingReservation) {
@@ -449,7 +502,7 @@ export default defineComponent({
             onClose: async () => {
               await store.dispatch(
                 'reservations/fetchReservationWizardState',
-                store.state.reservations.currentReservation?.id
+                store.state.reservations.currentReservation?.id,
               );
             },
           });
@@ -516,7 +569,7 @@ export default defineComponent({
           try {
             const response = (await store.dispatch(
               'folios/fetchFolioMailData',
-              payload
+              payload,
             )) as AxiosResponse<{ bodyMail: string; subject: string }>;
             if (response.data) {
               if (response.data.bodyMail) {
@@ -607,8 +660,51 @@ export default defineComponent({
       }
       await store.dispatch(
         'reservations/fetchReservationWizardState',
-        store.state.reservations.currentReservation?.id
+        store.state.reservations.currentReservation?.id,
       );
+    };
+
+    const savePartnerName = async () => {
+      if (currentReservation.value) {
+        if (
+          newPartnerName.value === '' ||
+          currentReservation.value.partnerName === newPartnerName.value
+        ) {
+          isPartnerNameInputShowing.value = false;
+          newPartnerName.value = currentReservation.value.partnerName || '';
+          return;
+        }
+        void store.dispatch('layout/showSpinner', true);
+        try {
+          await store.dispatch('reservations/updateReservation', {
+            reservationId: currentReservation.value.id,
+            partnerName: newPartnerName.value,
+          });
+          await store.dispatch(
+            'reservations/fetchReservation',
+            store.state.reservations.currentReservation?.id,
+          );
+          await store.dispatch(
+            'reservations/fetchReservationWizardState',
+            store.state.reservations.currentReservation?.id,
+          );
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+          isPartnerNameInputShowing.value = false;
+        } catch {
+          dialogService.open({
+            header: 'Error',
+            content: 'No se ha podido guardar el nombre del cliente',
+            btnAccept: 'Ok',
+          });
+        } finally {
+          void store.dispatch('layout/showSpinner', false);
+        }
+      }
     };
 
     const wizardStateButtonText = () => {
@@ -620,7 +716,7 @@ export default defineComponent({
         }
         if (code === 'splitted_with_availability') {
           const roomTypeClassName = store.state.roomTypeClasses.roomTypeClasses.find(
-            (rtc) => rtc.id === currentReservation.value?.roomTypeClassId
+            (rtc) => rtc.id === currentReservation.value?.roomTypeClassId,
           )?.name;
           if (roomTypeClassName) {
             text = `Unificar ${roomTypeClassName}`;
@@ -674,16 +770,16 @@ export default defineComponent({
         await store.dispatch('services/deleteService', serviceIsCancelPenalty.id);
         await store.dispatch(
           'reservations/fetchReservationWizardState',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         await store.dispatch(
           'reservations/fetchReservation',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
         await store.dispatch(
           'services/fetchServices',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         showDeleteCancelPenalty.value = false;
       }
@@ -700,11 +796,18 @@ export default defineComponent({
         onClose: async () => {
           await store.dispatch(
             'reservations/fetchReservationWizardState',
-            store.state.reservations.currentReservation?.id
+            store.state.reservations.currentReservation?.id,
           );
         },
         onAccept: (result?: unknown) => context.emit('setTabValue', 'room'),
       });
+    };
+
+    const togglePartnerNameInput = () => {
+      isPartnerNameInputShowing.value = !isPartnerNameInputShowing.value;
+      if (!isPartnerNameInputShowing.value) {
+        newPartnerName.value = currentReservation.value?.partnerName || '';
+      }
     };
 
     watch(wizardState, () => {
@@ -715,28 +818,36 @@ export default defineComponent({
       }
     });
 
+    watch(isPartnerNameInputShowing, () => {
+      if (isPartnerNameInputShowing.value) {
+        setTimeout(() => {
+          partnerInput.value?.focus();
+        }, 100);
+      }
+    });
+
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
       const pricelist = store.state.pricelists.pricelists.find(
-        (el) => el.id === currentReservation.value?.pricelistId
+        (el) => el.id === currentReservation.value?.pricelistId,
       );
       if (pricelist) {
         pricelistName.value = pricelist.name;
       } else if (currentReservation.value?.pricelistId) {
         await store.dispatch(
           'pricelists/fetchRestrictedPricelist',
-          currentReservation.value?.pricelistId
+          currentReservation.value?.pricelistId,
         );
         pricelistName.value = store.state.pricelists.restrictedPricelist?.name ?? '';
       }
       try {
         await store.dispatch(
           'reservations/fetchReservationWizardState',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
         await store.dispatch(
           'services/fetchServices',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
       } catch {
         dialogService.open({
@@ -747,6 +858,7 @@ export default defineComponent({
       } finally {
         void store.dispatch('layout/showSpinner', false);
       }
+      newPartnerName.value = currentReservation.value?.partnerName || '';
     });
 
     return {
@@ -768,6 +880,11 @@ export default defineComponent({
       showWizardState,
       showSegmentationModal,
       pricelistName,
+      isPartnerNameInputShowing,
+      newPartnerName,
+      partnerInput,
+      togglePartnerNameInput,
+      savePartnerName,
       toggleShowRoomsDialog,
       getDateFormat,
       getAgencyName,
@@ -864,6 +981,9 @@ export default defineComponent({
       }
     }
   }
+  .reservation-first-row-less-margin {
+    margin-top: calc(1.5rem - 2px) !important;
+  }
   .data-reservation-row {
     display: flex;
     justify-content: space-between;
@@ -873,6 +993,28 @@ export default defineComponent({
     .reservation-data {
       margin-right: 1.4rem;
       font-weight: bold;
+    }
+    .partner-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-right: 10px;
+      .partner-name-text {
+        max-width: 195px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .partner-name-input {
+        border-bottom: 1px solid #2563eb;
+        color: #2563eb;
+        margin-bottom: 1px;
+        max-width: 195px;
+        width: auto;
+        &:focus {
+          outline: none;
+        }
+      }
     }
     .reservation-data-state {
       color: white;
@@ -994,6 +1136,12 @@ export default defineComponent({
       }
       .reservation-data-nights {
         margin-right: 2rem !important;
+      }
+      .partner-name {
+        .partner-name-input,
+        .partner-name-text {
+          max-width: 370px;
+        }
       }
     }
     hr {
