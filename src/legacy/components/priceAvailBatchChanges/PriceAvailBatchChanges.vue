@@ -11,6 +11,7 @@
           dateFormat="dd/mm/yy"
           placeholder="DD/MM/YYYY"
           size="small"
+          :minDate="new Date()"
           :maxDate="dateTo || undefined"
         />
       </div>
@@ -24,7 +25,12 @@
           dateFormat="dd/mm/yy"
           placeholder="DD/MM/YYYY"
           size="small"
-          :minDate="dateFrom || undefined"
+          :minDate="dateFrom || new Date()"
+          :maxDate="
+            dateFrom
+              ? new Date(dateFrom.getFullYear() + 2, dateFrom.getMonth(), dateFrom.getDate())
+              : undefined
+          "
         />
       </div>
     </div>
@@ -672,7 +678,7 @@ export default defineComponent({
           thursdayToggle.value === false &&
           fridayToggle.value === false &&
           saturdayToggle.value === false &&
-          sundayToggle.value === false)
+          sundayToggle.value === false),
     );
 
     const setAllDays = (value: boolean) => {
@@ -754,7 +760,7 @@ export default defineComponent({
           (el.getDay() === 3 && wednesdayToggle.value) ||
           (el.getDay() === 4 && thursdayToggle.value) ||
           (el.getDay() === 5 && fridayToggle.value) ||
-          (el.getDay() === 6 && saturdayToggle.value)
+          (el.getDay() === 6 && saturdayToggle.value),
       );
 
       if (applyOn.value.code === 'availabilityPlan') {
