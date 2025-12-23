@@ -286,11 +286,16 @@
           <div
             class="internal-comment-title"
             :class="!isInternalCommentOpened ? 'internal-comment-title-closed' : ''"
-            @click="toggleInternalComment()"
+            @click="
+              currentFolio?.internalComment ? toggleInternalComment() : openInternalComments()
+            "
           >
             <div class="internal-comment-title-left">
               <img src="/app-images/pin.svg" />
-              <span v-if="currentFolio?.reservationType !== 'out'">
+              <span
+                v-if="currentFolio?.reservationType !== 'out'"
+                class="internal-comment-title-left-text"
+              >
                 Notas y comentarios internos
               </span>
               <span v-else> Descripción fuera de venta </span>
@@ -316,6 +321,53 @@
                 class="internal-comment-more"
                 @click="openInternalComments()"
                 v-if="isInternalCommentOpened"
+              >
+                Ver más
+              </div>
+            </div>
+          </transition>
+        </div>
+        <div
+          class="partner-notes"
+          v-if="currentFolio?.reservationType !== 'out'"
+          :style="isPartnerNotesOpened ? 'box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.49);' : ''"
+        >
+          <div
+            class="internal-comment-title"
+            :class="!isPartnerNotesOpened ? 'internal-comment-title-closed' : ''"
+            @click="partner?.comment ? togglePartnerNotes() : openPartnerNotes()"
+          >
+            <div class="internal-comment-title-left">
+              <CustomIcon
+                imagePath="/app-images/diary.svg"
+                width="18px"
+                height="18px"
+                color="#FFB900"
+                class="icon"
+              />
+              <span class="internal-comment-title-left-text">
+                Notas y comentarios del cliente
+              </span>
+            </div>
+            <div class="internal-comment-title-right">
+              <span v-if="!partner?.comment" @click="openPartnerNotes()" @click.stop> Añadir </span>
+              <span v-else @click="openPartnerNotes()" @click.stop> Editar </span>
+              <img
+                v-if="partner?.comment"
+                :class="isPartnerNotesOpened ? 'dropdown-img-up' : 'dropdown-img'"
+                src="/app-images/arrow-left-black.svg"
+              />
+            </div>
+          </div>
+          <transition name="accordion-transition" mode="out-in">
+            <div class="internal-comment-content" v-if="isPartnerNotesOpened">
+              <div class="internal-comment-text-drawer" v-if="isPartnerNotesOpened">
+                {{ partner?.comment }}
+              </div>
+              <div
+                class="internal-comment-more"
+                @click="openPartnerNotes()"
+                v-if="isPartnerNotesOpened"
               >
                 Ver más
               </div>
@@ -492,6 +544,7 @@ import { type ReservationInterface } from '@/legacy/interfaces/ReservationInterf
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import { useStore } from '@/legacy/store';
 import FolioInternalComments from '@/legacy/components/folios/FolioInternalComments.vue';
+import PartnerComments from '@/legacy/components/partners/PartnerComments.vue';
 import ReservationComponent from '@/legacy/components/reservations/ReservationComponent.vue';
 import ReservationDetail from '@/legacy/components/reservations/ReservationDetail.vue';
 import FolioInfo from '@/legacy/components/folios/FolioInfo.vue';
@@ -515,6 +568,7 @@ import {
 import { dialogService } from '@/legacy/services/DialogService';
 import type { roomTypeClassesInterface } from '@/legacy/interfaces/roomTypeClassesInterface';
 import type { FolioInterface } from '@/legacy/interfaces/FolioInterface';
+import type { PartnerInterface } from '@/legacy/interfaces/PartnerInterface';
 
 export default defineComponent({
   components: {
@@ -538,6 +592,7 @@ export default defineComponent({
       today.setHours(0, 0, 0, 0);
       return today;
     };
+    const partner: Ref<PartnerInterface | null> = ref(null);
     const currentFolio = computed(() => store.state.folios.currentFolio);
     const reservation = computed(() => store.state.reservations.currentReservation);
     const currentReservations = computed(() => store.state.reservations.reservations);
@@ -597,7 +652,7 @@ export default defineComponent({
     const isReservationBlockedModalOpen = ref(false);
 
     const isInternalCommentOpened = currentFolio.value?.internalComment ? ref(true) : ref(false);
-    const internalComments: Ref<string | undefined> = ref('');
+    const isPartnerNotesOpened = partner.value?.comment ? ref(true) : ref(false);
     const scrollable: Ref<HTMLElement | null> = ref(null);
     const isBatchChangesDialog = ref(false);
     const reservationsMappedForBatchChanges = ref([] as BatchChangesInterface[]);
@@ -659,23 +714,20 @@ export default defineComponent({
       store.state.roomTypeClasses.roomTypeClasses.find((el) => el.id === parseInt(classId, 10))
         ?.imageUrl ?? '';
 
-    const saveInternalNotes = async () => {
-      await store.dispatch('folios/updateFolio', {
-        folioId: store.state.folios.currentFolio?.id,
-        internalComment: internalComments.value,
-      });
-      await store.dispatch('folios/fetchFolio', store.state.folios.currentFolio?.id);
-      if (currentFolio.value?.internalComment) {
-        isInternalCommentOpened.value = true;
-      } else {
-        isInternalCommentOpened.value = false;
-      }
-    };
-
     const toggleInternalComment = () => {
       scrollEnabled.value = false;
       if (currentFolio.value?.internalComment) {
         isInternalCommentOpened.value = !isInternalCommentOpened.value;
+        setTimeout(() => {
+          scrollEnabled.value = true;
+        }, 500);
+      }
+    };
+
+    const togglePartnerNotes = () => {
+      scrollEnabled.value = false;
+      if (partner.value?.comment) {
+        isPartnerNotesOpened.value = !isPartnerNotesOpened.value;
         setTimeout(() => {
           scrollEnabled.value = true;
         }, 500);
@@ -1029,6 +1081,9 @@ export default defineComponent({
       if (isInternalCommentOpened.value && currentScrollPos > scrollPosition.value) {
         isInternalCommentOpened.value = false;
       }
+      if (isPartnerNotesOpened.value && currentScrollPos > scrollPosition.value) {
+        isPartnerNotesOpened.value = false;
+      }
       scrollPosition.value = currentScrollPos;
     };
 
@@ -1042,8 +1097,33 @@ export default defineComponent({
     const openInternalComments = () => {
       dialogService.open({
         iconHeader: '/app-images/pin.svg',
-        header: 'Editar notas y comentarios internos',
+        header: currentFolio.value?.internalComment
+          ? 'Editar notas y comentarios internos'
+          : 'Añadir notas y comentarios internos',
         content: markRaw(FolioInternalComments),
+      });
+    };
+
+    const openPartnerNotes = () => {
+      dialogService.open({
+        iconHeader: '/app-images/diary.svg',
+        header: partner.value?.comment
+          ? 'Editar notas y comentarios del cliente'
+          : 'Añadir notas y comentarios del cliente',
+        content: markRaw(PartnerComments),
+        props: {
+          partnerId: partner.value?.id,
+          partnerComment: partner.value?.comment,
+        },
+        onClose: async () => {
+          await store.dispatch('partners/fetchCurrentPartner', currentFolio.value?.partnerId);
+          partner.value = store.state.partners.currentPartner;
+          if (partner.value?.comment) {
+            isPartnerNotesOpened.value = true;
+          } else {
+            isPartnerNotesOpened.value = false;
+          }
+        },
       });
     };
 
@@ -1053,11 +1133,15 @@ export default defineComponent({
 
     watch(currentFolio, () => {
       scrollable.value?.scrollTo(0, 0);
-      internalComments.value = currentFolio.value?.internalComment;
       if (currentFolio.value?.internalComment) {
         isInternalCommentOpened.value = true;
       } else {
         isInternalCommentOpened.value = false;
+      }
+      if (partner.value?.comment) {
+        isPartnerNotesOpened.value = true;
+      } else {
+        isPartnerNotesOpened.value = false;
       }
     });
 
@@ -1071,7 +1155,13 @@ export default defineComponent({
     onMounted(async () => {
       await store.dispatch('reservations/fetchReservations', currentFolio.value?.id);
       if (currentFolio.value?.partnerId) {
-        void store.dispatch('partners/fetchCurrentPartner', currentFolio.value?.partnerId);
+        await store.dispatch('partners/fetchCurrentPartner', currentFolio.value?.partnerId);
+        partner.value = store.state.partners.currentPartner;
+        if (partner.value?.comment) {
+          isPartnerNotesOpened.value = true;
+        } else {
+          isPartnerNotesOpened.value = false;
+        }
       }
       if (reservation.value) {
         setTabValue('reservations');
@@ -1084,7 +1174,6 @@ export default defineComponent({
         setTabValue('folioCheckins');
         void store.dispatch('layout/setMoveToGuestsTab', false);
       }
-      internalComments.value = currentFolio.value?.internalComment;
     });
 
     return {
@@ -1094,7 +1183,7 @@ export default defineComponent({
       currentRoomTypeClasses,
       saleChannelName,
       isInternalCommentOpened,
-      internalComments,
+      isPartnerNotesOpened,
       partnerDialog,
       showEditPartnerModal,
       agencyName,
@@ -1110,6 +1199,8 @@ export default defineComponent({
       isSomeItemMenu,
       isReservationBlockedModalOpen,
       computedFolioClass,
+      partner,
+      togglePartnerNotes,
       today,
       isSomeFolioReservationBlocked,
       isAllowedAddRooms,
@@ -1118,7 +1209,6 @@ export default defineComponent({
       isAllowedCancelReservations,
       setCurrentreservation,
       backToFolioList,
-      saveInternalNotes,
       folioHeaderBackgroundColorStyle,
       folioCreateDate,
       folioStateText,
@@ -1141,6 +1231,7 @@ export default defineComponent({
       openDetailTab,
       getOutOfServiceTypeName,
       openInternalComments,
+      openPartnerNotes,
     };
   },
 });
@@ -1571,7 +1662,8 @@ export default defineComponent({
       background-color: white;
       margin-bottom: 0.5rem;
       padding: 14px 9px 0 9px;
-      .internal-comment {
+      .internal-comment,
+      .partner-notes {
         display: flex;
         flex-direction: column;
         border-radius: 10px;
@@ -1595,6 +1687,9 @@ export default defineComponent({
             }
             span {
               font-size: 14px;
+            }
+            .internal-comment-title-left-text {
+              margin-top: 2px;
             }
           }
           .internal-comment-title-right {
@@ -1656,6 +1751,17 @@ export default defineComponent({
               background-color: #c8c8c8;
               color: white;
               font-weight: bold;
+            }
+          }
+        }
+      }
+      .partner-notes {
+        margin-top: 1rem;
+        .internal-comment-title {
+          height: 32px !important;
+          .internal-comment-title-left {
+            .icon {
+              margin: 8px 6px 8px 11px;
             }
           }
         }
@@ -2032,7 +2138,8 @@ export default defineComponent({
         // margin-bottom: .5rem;
         padding: 18px 20px 0 20px;
         width: 100%;
-        .internal-comment {
+        .internal-comment,
+        .partner-notes {
           display: flex;
           flex-direction: column;
           border-radius: 10px;
@@ -2087,6 +2194,17 @@ export default defineComponent({
                 background-color: #c8c8c8;
                 color: white;
                 font-weight: bold;
+              }
+            }
+          }
+        }
+        .partner-notes {
+          margin-top: 1rem;
+          .internal-comment-title {
+            height: 32px !important;
+            .internal-comment-title-left {
+              .icon {
+                margin: 0 1rem 0 1.5rem;
               }
             }
           }
