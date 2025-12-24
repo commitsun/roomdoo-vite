@@ -262,7 +262,7 @@ describe('GuestList', () => {
     let last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last && last[1].nameContains).toBe('Alice');
 
-    const clearBtn = within(overlay).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
     expect(last && last[1].nameContains).toBeUndefined();
@@ -285,7 +285,7 @@ describe('GuestList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);
@@ -317,7 +317,7 @@ describe('GuestList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchGuests.mock.calls.at(-1);

@@ -23,6 +23,7 @@ import primevuePlugin from '@/infrastructure/plugins/primevue';
 vi.mock('vue-i18n', () => {
   const tMap: Record<string, string> = {
     'contacts.globalSearch': 'Global search',
+    'contacts.cancel': 'Cancel',
     'contacts.clear': 'Clear',
     'contacts.fullName': 'Full name',
     'contacts.email': 'Email',
@@ -228,7 +229,7 @@ describe('AgencyList', () => {
     let last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
     expect(last && last[1].nameContains).toBe('Globex');
 
-    const clearBtn = within(overlay).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
     last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
     expect(last && last[1].nameContains).toBeUndefined();
@@ -251,7 +252,7 @@ describe('AgencyList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
@@ -275,7 +276,7 @@ describe('AgencyList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchAgencies.mock.calls.at(-1);
@@ -307,7 +308,7 @@ describe('AgencyList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     last = mockContactsStore.fetchAgencies.mock.calls.at(-1);

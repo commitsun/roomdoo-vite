@@ -381,6 +381,13 @@
             />
           </IconField>
         </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
+        </template>
       </Column>
 
       <!-- Avatar + name -->
@@ -432,6 +439,13 @@
             />
           </IconField>
         </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
+        </template>
       </Column>
 
       <!-- Main Document -->
@@ -472,6 +486,13 @@
             v-model="filterModel.value"
             type="text"
             :placeholder="t('contacts.searchByDocument')"
+          />
+        </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
           />
         </template>
       </Column>
@@ -532,6 +553,13 @@
             </template>
           </MultiSelect>
         </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
+        </template>
       </Column>
 
       <!-- Last reservation (name) -->
@@ -540,9 +568,8 @@
         field="lastReservationName"
         :header="t('contacts.lastReservation')"
         style="min-width: 180px"
-        >xxº
+      >
         <template #body="{ data }">
-          <!-- <span>{{ data.lastReservationDate }}</span> -->
           <span>
             {{
               new Intl.DateTimeFormat(i18n.global.locale.value, {
@@ -901,16 +928,29 @@ export default defineComponent({
       }
     };
 
+    // remove specific filter
+    const removeFilter = (
+      filterModel: { value: unknown },
+      filterCallback: (value?: unknown) => void,
+    ): void => {
+      if (filterModel.value !== null) {
+        filterModel.value = null;
+        filterCallback();
+      }
+    };
+
     // clear phone filter
     const onClearPhoneFilter = (
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
       applyFilter: () => void,
     ): void => {
-      phoneFilterDraft.value = '';
-      filterModel.value = null;
-      filterCallback();
-      applyFilter?.();
+      if (filterModel.value !== null) {
+        phoneFilterDraft.value = '';
+        filterModel.value = null;
+        filterCallback();
+        applyFilter?.();
+      }
     };
 
     // apply phone filter
@@ -992,6 +1032,12 @@ export default defineComponent({
       countryOptions,
       isFilter,
       isSorting,
+      datePickerRefMobile,
+      datePickerRefDesktop,
+      dates,
+      minDate,
+      maxDate,
+      inHouseSelection,
       handlePageChange,
       handleFilterChange,
       handleSortChange,
@@ -1003,18 +1049,13 @@ export default defineComponent({
       onGlobalQueryInput,
       firstTwoInitials,
       clearGlobalQuery,
-      datePickerRefMobile,
-      datePickerRefDesktop,
-      dates,
-      minDate,
-      maxDate,
+      removeFilter,
       setToday,
       setLast7Days,
       setLast30Days,
       setThisMonth,
       clearDateFilter,
       apply,
-      inHouseSelection,
       fetchIfDatesCleared,
     };
   },
