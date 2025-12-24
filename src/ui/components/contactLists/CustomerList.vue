@@ -213,6 +213,13 @@
             />
           </IconField>
         </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
+        </template>
       </Column>
 
       <!-- Avatar + name -->
@@ -264,6 +271,13 @@
             />
           </IconField>
         </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
+        </template>
       </Column>
 
       <!-- VAT -->
@@ -290,6 +304,13 @@
             v-model="filterModel.value"
             type="text"
             :placeholder="t('contacts.searchByVat')"
+          />
+        </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
           />
         </template>
       </Column>
@@ -320,6 +341,13 @@
               :placeholder="t('contacts.searchByEmail')"
             />
           </IconField>
+        </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
         </template>
       </Column>
 
@@ -453,6 +481,13 @@
               </div>
             </template>
           </MultiSelect>
+        </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
         </template>
       </Column>
 
@@ -754,16 +789,29 @@ export default defineComponent({
       }
     };
 
+    // remove specific filter
+    const removeFilter = (
+      filterModel: { value: unknown },
+      filterCallback: (value?: unknown) => void,
+    ): void => {
+      if (filterModel.value !== null) {
+        filterModel.value = null;
+        filterCallback();
+      }
+    };
+
     // clear phone filter
     const onClearPhoneFilter = (
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
       applyFilter: () => void,
     ): void => {
-      phoneFilterDraft.value = '';
-      filterModel.value = null;
-      filterCallback();
-      applyFilter?.();
+      if (filterModel.value !== null) {
+        phoneFilterDraft.value = '';
+        filterModel.value = null;
+        filterCallback();
+        applyFilter?.();
+      }
     };
 
     // apply phone filter
@@ -831,6 +879,7 @@ export default defineComponent({
       countryOptions,
       isFilter,
       isSorting,
+      currency,
       handlePageChange,
       handleFilterChange,
       handleSortChange,
@@ -842,7 +891,7 @@ export default defineComponent({
       onGlobalQueryInput,
       firstTwoInitials,
       clearGlobalQuery,
-      currency,
+      removeFilter,
     };
   },
 });

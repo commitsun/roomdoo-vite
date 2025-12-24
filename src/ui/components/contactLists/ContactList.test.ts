@@ -306,7 +306,7 @@ describe('ContactList', () => {
     expect(last && last[1].nameContains).toBe('Jane'); // [page, rows, global, name, email, type, countries, orderBy]
 
     // open filter again and click clear button
-    const clearBtn = within(filterOverlay).getByRole('button', { name: /clear/i });
+    const clearBtn = within(filterOverlay).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     // get last call to fetchContacts and check name arg is cleared
@@ -340,7 +340,7 @@ describe('ContactList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     // get last call to fetchContacts and check type arg is cleared
@@ -395,7 +395,7 @@ describe('ContactList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     // get last call to fetchContacts and check email arg is cleared
@@ -424,7 +424,7 @@ describe('ContactList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     // get last call to fetchContacts and check phone arg is cleared
@@ -458,7 +458,7 @@ describe('ContactList', () => {
     await userEvent.click(filterBtn);
     const overlay2 =
       (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
-    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
     await userEvent.click(clearBtn);
 
     // get last call to fetchContacts and check country arg is cleared

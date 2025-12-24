@@ -213,6 +213,13 @@
             />
           </IconField>
         </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
+        </template>
       </Column>
 
       <!-- Avatar + name -->
@@ -264,6 +271,13 @@
             />
           </IconField>
         </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
+        </template>
       </Column>
 
       <!-- Email -->
@@ -292,6 +306,13 @@
               :placeholder="t('contacts.searchByEmail')"
             />
           </IconField>
+        </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
         </template>
       </Column>
 
@@ -355,8 +376,8 @@
             <div class="flex justify-between">
               <Button
                 size="small"
-                variant="outlined"
-                :label="t('contacts.clear')"
+                class="p-button-secondary !text-sm"
+                :label="t('contacts.cancel')"
                 @click="onClearPhoneFilter(filterModel, filterCallback, applyFilter)"
               />
               <Button
@@ -425,6 +446,13 @@
               </div>
             </template>
           </MultiSelect>
+        </template>
+        <template #filterclear="{ filterModel, filterCallback }">
+          <Button
+            class="p-button-secondary !text-sm"
+            :label="t('contacts.cancel')"
+            @click="removeFilter(filterModel, filterCallback)"
+          />
         </template>
       </Column>
 
@@ -685,16 +713,29 @@ export default defineComponent({
       }
     };
 
+    // remove single filter
+    const removeFilter = (
+      filterModel: { value: unknown },
+      filterCallback: (value?: unknown) => void,
+    ): void => {
+      if (filterModel.value !== null) {
+        filterModel.value = null;
+        filterCallback();
+      }
+    };
+
     // clear phone filter
     const onClearPhoneFilter = (
       filterModel: { value: unknown },
       filterCallback: (value?: unknown) => void,
       applyFilter: () => void,
     ): void => {
-      phoneFilterDraft.value = '';
-      filterModel.value = null;
-      filterCallback();
-      applyFilter?.();
+      if (filterModel.value !== null) {
+        phoneFilterDraft.value = '';
+        filterModel.value = null;
+        filterCallback();
+        applyFilter?.();
+      }
     };
 
     // apply phone filter
@@ -772,6 +813,7 @@ export default defineComponent({
       onGlobalQueryInput,
       firstTwoInitials,
       clearGlobalQuery,
+      removeFilter,
     };
   },
 });
