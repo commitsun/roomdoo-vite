@@ -329,7 +329,7 @@
         </div>
         <div
           class="partner-notes"
-          v-if="currentFolio?.reservationType !== 'out'"
+          v-if="partner && currentFolio?.reservationType !== 'out'"
           :style="isPartnerNotesOpened ? 'box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.49);' : ''"
         >
           <div
@@ -345,9 +345,7 @@
                 color="#FFB900"
                 class="icon"
               />
-              <span class="internal-comment-title-left-text">
-                Notas y comentarios del cliente
-              </span>
+              <span class="internal-comment-title-left-text"> Notas internas del cliente </span>
             </div>
             <div class="internal-comment-title-right">
               <span v-if="!partner?.comment" @click="openPartnerNotes()" @click.stop> Añadir </span>
@@ -1108,8 +1106,8 @@ export default defineComponent({
       dialogService.open({
         iconHeader: '/app-images/diary.svg',
         header: partner.value?.comment
-          ? 'Editar notas y comentarios del cliente'
-          : 'Añadir notas y comentarios del cliente',
+          ? 'Editar internas del cliente'
+          : 'Añadir internas del cliente',
         content: markRaw(PartnerComments),
         props: {
           partnerId: partner.value?.id,
