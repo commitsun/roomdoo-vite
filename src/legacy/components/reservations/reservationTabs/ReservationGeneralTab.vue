@@ -51,17 +51,21 @@
           {{ currentReservation?.partnerName }}
         </span>
         <input
-          :size="Math.max(newPartnerName.length - 11, 1)"
           v-else
+          ref="partnerInput"
           type="text"
           v-model="newPartnerName"
           class="partner-name-input"
-          ref="partnerInput"
         />
+
+        <span ref="partnerMirror" class="partner-name-mirror">
+          {{ newPartnerName || ' ' }}
+        </span>
+
         <CustomIcon
           v-if="isPartnerNameInputShowing"
-          imagePath="/app-images/icon-save.svg"
-          color="#2563eb"
+          imagePath="/app-images/icon-checkin.svg"
+          color="#1d4ed8"
           width="18px"
           height="18px"
           class="cursor-pointer"
@@ -71,7 +75,7 @@
           :imagePath="
             !isPartnerNameInputShowing ? '/app-images/icon-edit.svg' : '/app-images/icon-close.svg'
           "
-          color="#2563eb"
+          color="#1d4ed8"
           :width="!isPartnerNameInputShowing ? '16px' : '14px'"
           :height="!isPartnerNameInputShowing ? '16px' : '14px'"
           class="cursor-pointer"
@@ -293,6 +297,7 @@ export default defineComponent({
     const isPartnerNameInputShowing = ref(false);
     const newPartnerName = ref('');
     const partnerInput = ref<HTMLInputElement | null>(null);
+    const partnerMirror = ref<HTMLSpanElement | null>(null);
 
     const currentFolio = computed(() => store.state.folios.currentFolio);
     const currentReservations = computed(() => store.state.reservations.reservations);
@@ -818,13 +823,28 @@ export default defineComponent({
       }
     });
 
-    watch(isPartnerNameInputShowing, () => {
-      if (isPartnerNameInputShowing.value) {
-        setTimeout(() => {
-          partnerInput.value?.focus();
-        }, 100);
-      }
+    watch(isPartnerNameInputShowing, (isShowing) => {
+      if (!isShowing) return;
+
+      requestAnimationFrame(() => {
+        if (!partnerInput.value || !partnerMirror.value) return;
+
+        const width = partnerMirror.value.offsetWidth;
+        partnerInput.value.style.width = `${width + 2}px`;
+        partnerInput.value.focus();
+      });
     });
+
+    watch(
+      newPartnerName,
+      () => {
+        requestAnimationFrame(() => {
+          if (!partnerInput.value || !partnerMirror.value) return;
+          partnerInput.value.style.width = `${partnerMirror.value.offsetWidth + 2}px`;
+        });
+      },
+      { immediate: true },
+    );
 
     onMounted(async () => {
       void store.dispatch('layout/showSpinner', true);
@@ -883,6 +903,7 @@ export default defineComponent({
       isPartnerNameInputShowing,
       newPartnerName,
       partnerInput,
+      partnerMirror,
       togglePartnerNameInput,
       savePartnerName,
       toggleShowRoomsDialog,
@@ -1006,14 +1027,26 @@ export default defineComponent({
         overflow: hidden;
       }
       .partner-name-input {
-        border-bottom: 1px solid #2563eb;
-        color: #2563eb;
+        border-bottom: 1px solid #1d4ed8;
+        color: #1d4ed8;
         margin-bottom: 1px;
-        max-width: 195px;
         width: auto;
+        max-width: 195px;
+
+        font: inherit;
+        letter-spacing: inherit;
+
         &:focus {
           outline: none;
         }
+      }
+      .partner-name-mirror {
+        position: absolute;
+        visibility: hidden;
+        white-space: pre;
+        font: inherit;
+        letter-spacing: inherit;
+        padding: 0;
       }
     }
     .reservation-data-state {
