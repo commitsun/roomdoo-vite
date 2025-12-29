@@ -4,7 +4,9 @@
       <div class="item">
         <span>
           {{ t('document_country') }}
-          <span class="asterisk" v-if="!isUnderFourteen"> * </span>
+          <span class="asterisk asterisk-checkin" v-if="!isUnderFourteen && isCheckinAllowed">
+            *
+          </span>
         </span>
         <AutocompleteComponent
           class="input"
@@ -36,7 +38,9 @@
       <div class="item">
         <span>
           {{ t('document_type_title') }}
-          <span class="asterisk" v-if="!isUnderFourteen"> * </span>
+          <span class="asterisk asterisk-checkin" v-if="!isUnderFourteen && isCheckinAllowed">
+            *
+          </span>
         </span>
         <CustomSelect
           class="input"
@@ -46,7 +50,7 @@
               .filter(
                 (dt) =>
                   dt.countryIds.length === 0 ||
-                  dt.countryIds.includes(editingCheckinPartner?.documentCountryId ?? 0)
+                  dt.countryIds.includes(editingCheckinPartner?.documentCountryId ?? 0),
               )
               .map((dt) => ({
                 id: dt.id,
@@ -68,7 +72,9 @@
       <div class="item item-2">
         <span>
           {{ t('document_number_short') }}
-          <span class="asterisk" v-if="!isUnderFourteen"> * </span>
+          <span class="asterisk asterisk-checkin" v-if="!isUnderFourteen && isCheckinAllowed">
+            *
+          </span>
         </span>
         <InputText
           isUpperCase
@@ -94,10 +100,11 @@
         <span>
           {{ t('support_number_title') }}
           <span
-            class="asterisk"
+            class="asterisk asterisk-checkin"
             v-if="
-              editingCheckinPartner.documentType === DOCUMENT_TYPE_DNI ||
-              editingCheckinPartner.documentType === DOCUMENT_TYPE_NIE
+              isCheckinAllowed &&
+              (editingCheckinPartner.documentType === DOCUMENT_TYPE_DNI ||
+                editingCheckinPartner.documentType === DOCUMENT_TYPE_NIE)
             "
           >
             *
@@ -114,6 +121,11 @@
           @input="
             validatorCheckin.editingCheckinPartner.documentSupportNumber.$reset();
             validatorCheckin.editingCheckinPartner.documentSupportNumber.$reset();
+          "
+          @blur="
+            editingCheckinPartner.documentSupportNumber
+              ? validatorCheckin.editingCheckinPartner.documentSupportNumber.$touch()
+              : null
           "
           :isError="
             validatorCheckin.editingCheckinPartner.documentSupportNumber.$error ||
@@ -132,7 +144,8 @@
       <div class="item item-5">
         <span>
           {{ t('first_name') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-save">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <InputText
           class="input"
@@ -149,7 +162,7 @@
       <div class="item item-6">
         <span>
           {{ t('last_name') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <InputText
           class="input"
@@ -166,7 +179,10 @@
       <div class="item item-7">
         <span>
           {{ t('second_last_name') }}
-          <span class="asterisk" v-if="editingCheckinPartner.documentType === DOCUMENT_TYPE_DNI">
+          <span
+            class="asterisk asterisk-checkin"
+            v-if="isCheckinAllowed && editingCheckinPartner.documentType === DOCUMENT_TYPE_DNI"
+          >
             *
           </span>
         </span>
@@ -187,22 +203,27 @@
       <div class="item item-9">
         <span>
           {{ t('birthdate_title') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
-        <InputDate
+        <DatePicker
           class="input"
-          :includeCalendar="true"
           v-model="editingCheckinPartner.birthdate"
-          @badFormatting="badFormattingBirthdate = $event"
-          @input="
-            validatorCheckin.editingCheckinPartner.birthdate.$reset();
-            validatorCheckin.editingCheckinPartner.birthdate.$reset();
+          :show-icon="true"
+          date-format="dd/mm/yy"
+          @input="validatorCheckin.editingCheckinPartner.birthdate.$reset()"
+          @blur="
+            editingCheckinPartner.birthdate
+              ? validatorCheckin.editingCheckinPartner.birthdate.$touch()
+              : null
           "
-          :isError="
-            badFormattingBirthdate ||
-            validatorCheckin.editingCheckinPartner.birthdate.$error ||
-            validatorCheckin.editingCheckinPartner.birthdate.$error
-          "
+          :maxDate="new Date()"
+          :minDate="new Date(new Date().setFullYear(new Date().getFullYear() - 120))"
+          :class="{
+            'p-invalid':
+              badFormattingBirthdate ||
+              validatorCheckin.editingCheckinPartner.birthdate.$error ||
+              validatorCheckin.editingCheckinPartner.birthdate.$error,
+          }"
         />
         <div class="error-message">
           <span v-if="badFormattingBirthdate"> Formato de fecha no válido </span>
@@ -215,7 +236,7 @@
       <div class="item item-10">
         <span>
           {{ t('nationality') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <AutocompleteComponent
           class="input"
@@ -247,7 +268,7 @@
       <div class="item item-8">
         <span>
           {{ t('gender') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <CustomSelect
           class="input"
@@ -281,7 +302,7 @@
       <div class="item" v-if="isUnderAge">
         <span>
           {{ t('responsible_adult_label') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <AutocompleteComponent
           class="input"
@@ -305,7 +326,7 @@
       <div class="item" v-if="isUnderAge">
         <span>
           {{ t('kinship_relationship') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <CustomSelect
           class="input"
@@ -334,6 +355,11 @@
           class="input"
           v-model="editingCheckinPartner.email"
           @input="validatorCheckin.editingCheckinPartner.email.$reset()"
+          @blur="
+            editingCheckinPartner.email
+              ? validatorCheckin.editingCheckinPartner.email.$touch()
+              : null
+          "
           :isError="validatorCheckin.editingCheckinPartner.email.$error"
         />
         <div class="error-message">
@@ -353,7 +379,7 @@
       <div class="item item-13 residence-street">
         <span>
           {{ t('street') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <InputText
           class="input"
@@ -370,7 +396,7 @@
       <div class="item item-14 residence-zip">
         <span>
           {{ t('zip_code') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <InputText
           class="input"
@@ -390,7 +416,7 @@
       <div class="item item-16">
         <span>
           {{ t('country') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <AutocompleteComponent
           class="input"
@@ -422,7 +448,7 @@
       <div class="item item-17" v-if="residenceStates.length > 0">
         <span>
           {{ t('province') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <AutocompleteComponent
           class="input"
@@ -452,7 +478,7 @@
       <div class="item item-15">
         <span>
           {{ t('city') }}
-          <span class="asterisk">*</span>
+          <span class="asterisk asterisk-checkin" v-if="isCheckinAllowed">*</span>
         </span>
         <InputText
           class="input"
@@ -466,6 +492,10 @@
           </span>
         </div>
       </div>
+    </div>
+    <div class="required-legend" v-if="isCheckinAllowed">
+      <span class="asterisk asterisk-checkin">* Obligatorio para marcar llegada</span>
+      <span class="asterisk asterisk-save">* Obligatorio para guardar</span>
     </div>
     <div class="footer">
       <div class="left">
@@ -502,7 +532,7 @@
               editingCheckinPartner.documentType === DOCUMENT_TYPE_DNI,
               editingCheckinPartner.documentType === DOCUMENT_TYPE_NIE,
 
-              editingCheckinPartner.countryId === COUNTRY_ID_SPAIN
+              editingCheckinPartner.countryId === COUNTRY_ID_SPAIN,
             ) && validatorCheckin.$error === false
           "
           @click="validateAndPrintCheckin()"
@@ -561,9 +591,10 @@ import { defineComponent, type Ref, ref, computed, onMounted, onUnmounted, watch
 import { required, email, helpers, requiredIf, minValue } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
+import DatePicker from 'primevue/datepicker';
+
 import CustomSelect from '@/legacy/components/roomdooComponents/CustomSelect.vue';
 import InputText from '@/legacy/components/roomdooComponents/InputText.vue';
-import InputDate from '@/legacy/components/roomdooComponents/InputDate.vue';
 import AutocompleteComponent from '@/legacy/components/roomdooComponents/AutocompleteComponent.vue';
 import CustomButton from '@/legacy/components/roomdooComponents/CustomButton.vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
@@ -577,10 +608,10 @@ export default defineComponent({
   components: {
     CustomSelect,
     InputText,
-    InputDate,
     AutocompleteComponent,
     CustomButton,
     CustomIcon,
+    DatePicker,
   },
   props: {
     checkinPartner: {
@@ -624,11 +655,11 @@ export default defineComponent({
     const selectedRelationShip = ref(0);
 
     const DOCUMENT_TYPE_DNI = store.state.documentType.documentType.find(
-      (dt) => dt.code === 'D'
+      (dt) => dt.code === 'D',
     )?.id;
 
     const DOCUMENT_TYPE_NIE = store.state.documentType.documentType.find(
-      (dt) => dt.code === 'N'
+      (dt) => dt.code === 'N',
     )?.id;
 
     const COUNTRY_ID_SPAIN = store.state.countries.countries.find((c) => c.code === 'ES')?.id;
@@ -644,20 +675,20 @@ export default defineComponent({
       store.state.folios.adultsInFolio.map((el) => ({
         value: el.id ?? 0,
         name: el.name ?? '',
-      }))
+      })),
     );
 
     const validDocumentNumber = (documentNumber: string) => {
       let rdo = true;
       if (editingCheckinPartner.value?.documentType) {
         const documentTypeCode = documentTypes.value.find(
-          (dt) => dt.id === editingCheckinPartner.value?.documentType
+          (dt) => dt.id === editingCheckinPartner.value?.documentType,
         )?.code;
         if (documentTypeCode && documentNumber && documentNumber.length > 0) {
           rdo = validateDocumentNumber(
             documentTypeCode,
             documentNumber,
-            editingCheckinPartner.value?.documentCountryId
+            editingCheckinPartner.value?.documentCountryId,
           );
         }
       }
@@ -676,7 +707,7 @@ export default defineComponent({
       ) {
         rdo = validateSupportNumber(
           editingCheckinPartner.value?.documentSupportNumber,
-          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE ? 'N' : 'D'
+          editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE ? 'N' : 'D',
         );
       }
       return rdo;
@@ -698,7 +729,7 @@ export default defineComponent({
           el.documentType === editingCheckinPartner.value?.documentType &&
           el.id !== editingCheckinPartner.value?.id &&
           documentNumber !== '' &&
-          editingCheckinPartner.value?.documentType !== 0
+          editingCheckinPartner.value?.documentType !== 0,
       );
       if (item) {
         result = false;
@@ -756,15 +787,15 @@ export default defineComponent({
         documentNumber: {
           required: helpers.withMessage(
             t('document_number_required'),
-            requiredIf(!isUnderFourteen.value)
+            requiredIf(!isUnderFourteen.value),
           ),
           validDocumentNumber: helpers.withMessage(
             t('invalid_document_number'),
-            validDocumentNumber
+            validDocumentNumber,
           ),
           isDuplicateCheckinPartner: helpers.withMessage(
             t('guest_reservation_exists'),
-            isDuplicateCheckinPartner
+            isDuplicateCheckinPartner,
           ),
         },
         documentSupportNumber: {
@@ -772,12 +803,12 @@ export default defineComponent({
             t('support_number_required'),
             requiredIf(
               editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI ||
-                editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE
-            )
+                editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_NIE,
+            ),
           ),
           validSupportNumber: helpers.withMessage(
             t('invalid_support_number'),
-            validateEditingCheckinPartnerSupportNumber
+            validateEditingCheckinPartnerSupportNumber,
           ),
         },
         firstname: {
@@ -789,7 +820,7 @@ export default defineComponent({
         lastname2: {
           required: helpers.withMessage(
             t('second_last_name_required'),
-            requiredIf(editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI)
+            requiredIf(editingCheckinPartner.value?.documentType === DOCUMENT_TYPE_DNI),
           ),
         },
         gender: {
@@ -824,7 +855,7 @@ export default defineComponent({
         relationship: {
           required: helpers.withMessage(
             t('kinship_relationship_required'),
-            requiredIf(isUnderAge.value)
+            requiredIf(isUnderAge.value),
           ),
         },
         nationality: {
@@ -897,15 +928,30 @@ export default defineComponent({
     };
 
     const validateAndSaveCheckinPartner = async () => {
-      validatorCheckin.value.$touch();
-      if (!validatorCheckin.value.$error && editingCheckinPartner.value) {
+      if (
+        !validatorCheckin.value.editingCheckinPartner.documentNumber.validDocumentNumber.$invalid &&
+        !validatorCheckin.value.editingCheckinPartner.documentSupportNumber.validSupportNumber
+          .$invalid &&
+        !validatorCheckin.value.editingCheckinPartner.email.$invalid
+      ) {
+        validatorCheckin.value.editingCheckinPartner.$reset();
+      }
+
+      validatorCheckin.value.editingCheckinPartner.firstname.$touch();
+      if (
+        !validatorCheckin.value.editingCheckinPartner.firstname.$error &&
+        !validatorCheckin.value.editingCheckinPartner.documentNumber.$error &&
+        !validatorCheckin.value.editingCheckinPartner.documentSupportNumber.$error &&
+        !validatorCheckin.value.editingCheckinPartner.email.$error &&
+        editingCheckinPartner.value
+      ) {
         await saveCheckinPartner(editingCheckinPartner.value);
         context.emit('continueCheckinFlowFromForm');
+        context.emit('close');
       }
     };
 
     const validateAndDoCheckin = async () => {
-      validatorCheckin.value.$touch();
       validatorCheckin.value.$touch();
       if (!validatorCheckin.value.$error && editingCheckinPartner.value) {
         if (
@@ -916,6 +962,7 @@ export default defineComponent({
         } else {
           await doCheckin(editingCheckinPartner.value);
           context.emit('continueCheckinFlowFromForm');
+          context.emit('close');
         }
       }
     };
@@ -1009,7 +1056,8 @@ export default defineComponent({
           if (
             documentTypes.value
               .filter(
-                (dt) => !dt.countryIds.includes(editingCheckinPartner.value?.documentCountryId ?? 0)
+                (dt) =>
+                  !dt.countryIds.includes(editingCheckinPartner.value?.documentCountryId ?? 0),
               )
               .map((dt) => ({
                 id: dt.id,
@@ -1045,7 +1093,7 @@ export default defineComponent({
             void store.dispatch('layout/showSpinner', false);
           }
         }
-      }
+      },
     );
 
     watch(
@@ -1054,7 +1102,7 @@ export default defineComponent({
         if (editingCheckinPartner.value && !isLoadingData.value) {
           resetDocumentCountryIdDependantData();
         }
-      }
+      },
     );
 
     watch(
@@ -1063,7 +1111,7 @@ export default defineComponent({
         if (editingCheckinPartner.value && editingCheckinPartner.value.documentNumber !== '') {
           validatorCheckin.value.editingCheckinPartner.documentNumber.$touch();
         }
-      }
+      },
     );
 
     watch(selectedRelationShip, () => {
@@ -1184,6 +1232,24 @@ export default defineComponent({
       color: red;
       font-size: 12px;
       margin-bottom: 1rem;
+    }
+  }
+  .required-legend {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 12px;
+    opacity: 0.85;
+    margin-bottom: 0.5rem;
+  }
+  .asterisk {
+    font-weight: bold;
+
+    &.asterisk-save {
+      color: #f59e0b;
+    }
+
+    &.asterisk-checkin {
+      color: #ed4a1c;
     }
   }
   .footer {

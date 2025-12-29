@@ -158,7 +158,13 @@
         "
         :isCheckinToday="isCheckinToday(checkinPartner)"
         :isSegmentation="reservation?.segmentationId ? true : false"
-        isCollapsible
+        :isCollapsible="
+          Boolean(
+            checkinPartner.nationality ||
+              checkinPartner.birthdate ||
+              (checkinPartner.documentType && checkinPartner.documentNumber),
+          )
+        "
         @printCheckin="printCheckin(checkinPartner)"
         @viewPDFCheckin="viewCheckinPDF(checkinPartner)"
         @doCheckin="performDoCheckin(checkinPartner)"
@@ -423,6 +429,9 @@ export default defineComponent({
 
     const setActiveCheckinPartnerAndDisplayForm = (checkinPartner: CheckinPartnerInterface) => {
       activeCheckinPartner.value = checkinPartner;
+      if (activeCheckinPartner.value.documentNumber === null) {
+        activeCheckinPartner.value.documentNumber = '';
+      }
       isFormDisplayed.value = true;
       dialogService.open({
         header: `${checkinPartner.name}`,
