@@ -2,7 +2,13 @@
   <div class="checkin-partner-existing">
     <div
       class="checkin-partner-existing-title"
-      :class="[!isBodyOpen ? 'title-closed-body' : '', isFromStart ? 'bottom-rounded-corners' : '']"
+      :class="[
+        !isBodyOpen ||
+        (isFromDrawer && !countryName && !age && !documentNumber && !documentTypeName)
+          ? 'title-closed-body'
+          : '',
+        isFromStart || isUnknownGuest ? 'bottom-rounded-corners' : '',
+      ]"
       @click="isUnknownGuest ? null : (isBodyOpen = !isBodyOpen)"
       :style="{
         cursor: isCollapsible && !isUnknownGuest ? 'pointer' : 'default',
@@ -36,7 +42,10 @@
       <span
         class="checkin-partner-existing-name"
         v-else-if="
-          firstname && lastname && firstname !== '#' && lastname !== '#' && lastname2 !== '#'
+          (firstname || lastname || lastname2) &&
+          firstname !== '#' &&
+          lastname !== '#' &&
+          lastname2 !== '#'
         "
       >
         {{ firstname }}
@@ -50,7 +59,7 @@
           width="18px"
           height="18px"
           tabindex="1"
-          @click.stop="openNameDialog()"
+          @click.stop="openCheckinPartnerDialog()"
           class="cursor-pointer"
         />
       </span>
@@ -76,6 +85,7 @@
         width="25px"
         height="25px"
         tabindex="1"
+        class="cursor-pointer"
         @click.stop="openCheckinMenu = !openCheckinMenu"
         @blur="openCheckinMenu = false"
       />
@@ -93,10 +103,7 @@
           </div>
           <div
             @mousedown.stop="$emit('displayForm')"
-            v-if="
-              isCheckinToday &&
-              (checkinPartnerState === 'precheckin' || checkinPartnerState === 'draft')
-            "
+            v-if="checkinPartnerState === 'precheckin' || checkinPartnerState === 'draft'"
           >
             <span>{{ $t('edit_guest') }}</span>
           </div>
@@ -112,7 +119,7 @@
     <Transition name="accordion-transition">
       <div
         class="card-content"
-        v-if="(isCollapsible && isBodyOpen) || (!isCollapsible && !isFromStart)"
+        v-if="(isCollapsible && isBodyOpen) || (!isCollapsible && !isFromStart && !isFromDrawer)"
       >
         <div
           class="data-reservation-row"
@@ -269,8 +276,7 @@
 import { defineComponent, ref, onMounted, computed, reactive, markRaw } from 'vue';
 import { useStore } from '@/legacy/store';
 import { dialogService } from '@/legacy/services/DialogService';
-import CheckinPartnerNameForm from '@/legacy/components/checkinPartners/CheckinPartnerNameForm.vue';
-
+import CheckinPartnerForm from '@/legacy/components/checkinPartners/CheckinPartnerForm.vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import { useI18n } from 'vue-i18n';
 
@@ -383,7 +389,6 @@ export default defineComponent({
     const doCheckinButton = ref<HTMLButtonElement | null>(null);
     const tooltip = ref<HTMLDivElement | null>(null);
     const showTooltip = ref(false);
-    const partnerNameEditable = reactive({ firstname: '', lastname: '', lastname2: '' });
 
     const isUnknownGuest = computed(() => {
       return (
@@ -441,54 +446,15 @@ export default defineComponent({
       }
     };
 
-    const openNameDialog = () => {
-      const checkinPartnerId =
-        store.state.checkinPartners.checkinpartners[props.checkinPartnerIndex].id;
+    const openCheckinPartnerDialog = () => {
+      const checkinPartner = store.state.checkinPartners.checkinpartners[props.checkinPartnerIndex];
+      checkinPartner.documentNumber = props.documentNumber || '';
       dialogService.open({
-        header: 'Añadir nombre del huésped',
-        content: markRaw(CheckinPartnerNameForm),
-        props: { partnerNameEditable },
-        onAccept: async () => {
-          void store.dispatch('layout/showSpinner', true);
-          try {
-            if (
-              partnerNameEditable.firstname ||
-              partnerNameEditable.lastname ||
-              partnerNameEditable.lastname2
-            ) {
-              await store.dispatch('checkinPartners/updateCheckinPartner', {
-                reservationId: store.state.reservations.currentReservation?.id,
-                id: checkinPartnerId,
-                firstname: partnerNameEditable.firstname,
-                lastname: partnerNameEditable.lastname,
-                lastname2: partnerNameEditable.lastname2,
-              });
-              await store.dispatch(
-                'checkinPartners/fetchCheckinPartners',
-                store.state.reservations.currentReservation?.id,
-              );
-            } else {
-              dialogService.open({
-                header: 'Error',
-                content: 'Debe ingresar al menos un nombre o apellido para el huésped desconocido.',
-                btnAccept: 'Aceptar',
-              });
-            }
-          } catch (error) {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
-            });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-            partnerNameEditable.firstname = '';
-            partnerNameEditable.lastname = '';
-            partnerNameEditable.lastname2 = '';
-          }
+        header: `${checkinPartner.name}`,
+        content: markRaw(CheckinPartnerForm),
+        props: {
+          checkinPartner,
         },
-        btnAccept: 'Guardar',
-        btnCancel: 'Cancelar',
       });
     };
 
@@ -504,7 +470,7 @@ export default defineComponent({
       stateColor,
       copyDocumentNumberToClipboard,
       hideTooltip,
-      openNameDialog,
+      openCheckinPartnerDialog,
       isUnknownGuest,
       isBodyOpen,
       doCheckinButton,
