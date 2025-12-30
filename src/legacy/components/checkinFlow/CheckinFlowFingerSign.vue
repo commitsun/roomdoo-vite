@@ -1,18 +1,16 @@
 <template>
   <div class="container-sign" @keydown.esc="$emit('closeCheckinFlow')" tabindex="0">
     <div class="prev-title">
-      {{
-        $t('guest_data_title', { index: currentIndexCheckin + 1 })
-      }}
+      {{ $t('guest_data_title', { index: currentIndexCheckin + 1 }) }}
       <sup>
         {{
           currentIndexCheckin === 0
             ? $t('ordinal_1')
             : currentIndexCheckin === 1
-            ? $t('ordinal_2')
-            : currentIndexCheckin === 2
-            ? $t('ordinal_3')
-            : $t('ordinal_other')
+              ? $t('ordinal_2')
+              : currentIndexCheckin === 2
+                ? $t('ordinal_3')
+                : $t('ordinal_other')
         }}
       </sup>
       {{ $t('guest') }}
@@ -25,7 +23,16 @@
       <span class="title-text"> {{ $t('sign_title') }} </span>
     </div>
     <div class="step-subtitle" v-if="!isPreCheckin">
-      {{ $t('sign_by', { name: checkinPartner.firstname + ' ' + checkinPartner.lastname + ' ' + checkinPartner.lastname2 }) }}
+      {{
+        $t('sign_by', {
+          name:
+            checkinPartner.firstname +
+            ' ' +
+            checkinPartner.lastname +
+            ' ' +
+            checkinPartner.lastname2,
+        })
+      }}
     </div>
 
     <div class="content">
@@ -37,11 +44,22 @@
                 {{ $t('sign_file', { reference: reservationReference, room: roomTypeName }) }}
               </div>
               <div class="title" v-else>
-                {{ $t('sign_file', { reference: currentReservation?.name, room: getCurrentRoomName() }) }}
+                {{
+                  $t('sign_file', {
+                    reference: currentReservation?.name,
+                    room: getCurrentRoomName(),
+                  })
+                }}
               </div>
             </div>
             <div class="field">
-              <div class="label">{{ $t('total_amount', { amount: isPreCheckin ? reservationAmount : currentFolio?.amountTotal }) }}</div>
+              <div class="label">
+                {{
+                  $t('total_amount', {
+                    amount: isPreCheckin ? reservationAmount : currentFolio?.amountTotal,
+                  })
+                }}
+              </div>
             </div>
             <br />
             <div class="field">
@@ -70,16 +88,25 @@
             </div>
             <div class="field" v-if="checkinPartner.birthdate !== null">
               <div class="data">
-                {{ $t('birthdate_label', {
-                  birthdate: checkinPartner.birthdate?.toLocaleDateString('es-ES', {
-                    year: 'numeric', month: '2-digit', day: '2-digit'
+                {{
+                  $t('birthdate_label', {
+                    birthdate: checkinPartner.birthdate?.toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                    }),
                   })
-                }) }}
+                }}
               </div>
             </div>
             <div class="field" v-if="documentTypeName() !== ''">
               <div class="data">
-                {{ $t('document_label', { type: documentTypeName(), number: checkinPartner.documentNumber }) }}
+                {{
+                  $t('document_label', {
+                    type: documentTypeName(),
+                    number: checkinPartner.documentNumber,
+                  })
+                }}
               </div>
             </div>
             <div class="field" v-if="genderName() !== ''">
@@ -89,20 +116,28 @@
             </div>
             <div class="field">
               <div class="data">
-                {{ $t('checkin_date', {
-                  date: checkin.toLocaleDateString('es-ES', {
-                    year: 'numeric', month: '2-digit', day: '2-digit'
+                {{
+                  $t('checkin_date', {
+                    date: checkin.toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                    }),
                   })
-                }) }}
+                }}
               </div>
             </div>
             <div class="field">
               <div class="data">
-                {{ $t('checkout_date', {
-                  date: checkout.toLocaleDateString('es-ES', {
-                    year: 'numeric', month: '2-digit', day: '2-digit'
+                {{
+                  $t('checkout_date', {
+                    date: checkout.toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                    }),
                   })
-                }) }}
+                }}
               </div>
             </div>
           </div>
@@ -125,13 +160,19 @@
       <div class="second-row">
         <div class="wrapper">
           <div class="signature-title">
-            {{ $t('signed_by', {
-              name: `${checkinPartner.firstname} ${checkinPartner.lastname} ${checkinPartner.lastname2}`,
-              city: activeProperty?.city,
-              datetime: new Date().toLocaleTimeString('es-ES', {
-                year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+            {{
+              $t('signed_by', {
+                name: `${checkinPartner.firstname} ${checkinPartner.lastname} ${checkinPartner.lastname2}`,
+                city: activeProperty?.city,
+                datetime: new Date().toLocaleTimeString('es-ES', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
               })
-            }) }}
+            }}
           </div>
           <VueSignaturePad
             class="signature-pad"
@@ -151,11 +192,7 @@
           <button class="clear-btn" @click="clearSignature()">{{ $t('retry') }}</button>
         </div>
       </div>
-      <button
-        class="save-btn"
-        :class="{ disabled: base64Data === '' }"
-        @click="base64Data !== '' ? persistCheckinPartner() : false"
-      >
+      <button class="save-btn" @click="persistCheckinPartner()">
         {{ $t('accept_and_continue') }}
       </button>
       <br />
@@ -163,14 +200,12 @@
   </div>
 </template>
 
-
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted } from 'vue';
 import { VueSignaturePad } from '@selemondev/vue3-signature-pad';
 import { useStore } from '@/legacy/store';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
 import { useI18n } from 'vue-i18n';
-
 
 export default defineComponent({
   components: {
@@ -237,7 +272,7 @@ export default defineComponent({
     const getCurrentRoomName = () => {
       let roomName = '';
       const roomReservation = store.state.rooms.rooms.find(
-        (room) => room.id === currentReservation.value?.preferredRoomId
+        (room) => room.id === currentReservation.value?.preferredRoomId,
       );
       if (roomReservation) {
         roomName = roomReservation.name;
@@ -248,7 +283,7 @@ export default defineComponent({
     const documentTypeName = () => {
       let result = '';
       const documentType = store.state.documentType.documentType.find(
-        (document) => document.id === props.checkinPartner.documentType
+        (document) => document.id === props.checkinPartner.documentType,
       );
       if (documentType) {
         result = documentType.documentType;

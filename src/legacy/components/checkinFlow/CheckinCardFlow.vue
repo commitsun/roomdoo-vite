@@ -182,7 +182,7 @@
             {{ $t('copy') }}
           </div>
         </div>
-        <div v-else-if="isPreCheckin" class="data-reservation-row">
+        <div v-else-if="isExistingCheckinPartner" class="data-reservation-row">
           <div class="reservation-title">{{ $t('guest_data_exists') }}</div>
         </div>
         <div class="buttons">

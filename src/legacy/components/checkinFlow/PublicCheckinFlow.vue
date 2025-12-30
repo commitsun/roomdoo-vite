@@ -19,8 +19,8 @@
             :partnerName="precheckinInfo?.folioPartnerName ?? ''"
             :reservationCode="precheckinInfo?.reservations[0].reservationReference ?? ''"
             :nights="precheckinInfo?.reservations[0].nights ?? 0"
-            :checkin="(precheckinInfo?.reservations[0].checkin as Date)"
-            :checkout="(precheckinInfo?.reservations[0].checkout as Date)"
+            :checkin="precheckinInfo?.reservations[0].checkin as Date"
+            :checkout="precheckinInfo?.reservations[0].checkout as Date"
             :adults="precheckinInfo?.reservations[0].adults ?? 0"
             :children="precheckinInfo?.reservations[0].children ?? 0"
             @next="nextStep()"
@@ -30,7 +30,7 @@
             <template #checkin-flow-card>
               <CheckinCardFlow
                 v-for="(checkinPartner, cpIndex) in publicCheckinPartners.filter(
-                  (el) => el.checkinPartnerState !== 'draft' && el.checkinPartnerState !== 'dummy'
+                  (el) => el.checkinPartnerState !== 'draft' && el.checkinPartnerState !== 'dummy',
                 )"
                 :key="checkinPartner.id"
                 :checkinPartnerIndex="cpIndex"
@@ -47,7 +47,7 @@
                     activeCheckinPartner,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE,
-                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN
+                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN,
                   )
                 "
               />
@@ -191,7 +191,13 @@
             v-model="activeCheckinPartner.documentSupportNumber"
             @next="nextStep()"
             :currentIndexCheckin="currentIndexCheckin"
-            :documentType="activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI ? 'D' : activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE ? 'N' : ''"
+            :documentType="
+              activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI
+                ? 'D'
+                : activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE
+                  ? 'N'
+                  : ''
+            "
             :step="currentStepNumber"
             @setIsAllowedNextStep="isAllowedNextStep = $event"
           />
@@ -356,7 +362,7 @@
                     activeCheckinPartner,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE,
-                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN
+                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN,
                   )
                 "
                 :checkinSignature="activeCheckinPartner.signature"
@@ -513,7 +519,7 @@ export default defineComponent({
 
     const currentIndexCheckin = computed(() => {
       const index = publicCheckinPartners.value.findIndex(
-        (el) => el.id === activeCheckinPartner.value.id
+        (el) => el.id === activeCheckinPartner.value.id,
       );
       return index;
     });
@@ -627,33 +633,33 @@ export default defineComponent({
       store.state.documentType.documentType.find((el) => el.id === documentTypeId)?.documentType;
 
     const NATIONALITY_CODE_SPAIN = store.state.countries.countries.find(
-      (el) => el.code === 'ES'
+      (el) => el.code === 'ES',
     )?.id;
 
     const DOCUMENT_TYPE_DNI = store.state.documentType.documentType.find(
-      (el) => el.code === 'D'
+      (el) => el.code === 'D',
     )?.id;
 
     const DOCUMENT_TYPE_NIE = store.state.documentType.documentType.find(
-      (el) => el.code === 'N'
+      (el) => el.code === 'N',
     )?.id;
 
     const nextCheckinPartnerToComplete = () => {
       currentStepNumber.value = 1;
       // active partner index
       const index = publicCheckinPartners.value.findIndex(
-        (el) => el.id === activeCheckinPartner.value.id
+        (el) => el.id === activeCheckinPartner.value.id,
       );
 
       // next dummy with greater index
       let nextActiveCheckinPartner = publicCheckinPartners.value.find(
-        (value, i) => value.checkinPartnerState === 'dummy' && i > index
+        (value, i) => value.checkinPartnerState === 'dummy' && i > index,
       );
 
       // next draft with greater index
       if (!nextActiveCheckinPartner) {
         nextActiveCheckinPartner = publicCheckinPartners.value.find(
-          (value, i) => value.checkinPartnerState === 'draft' && i > index
+          (value, i) => value.checkinPartnerState === 'draft' && i > index,
         );
       }
 
@@ -661,7 +667,7 @@ export default defineComponent({
       if (!nextActiveCheckinPartner) {
         nextActiveCheckinPartner = publicCheckinPartners.value.find(
           (value) =>
-            value.checkinPartnerState === 'dummy' && value.id !== activeCheckinPartner.value.id
+            value.checkinPartnerState === 'dummy' && value.id !== activeCheckinPartner.value.id,
         );
       }
 
@@ -669,7 +675,7 @@ export default defineComponent({
       if (!nextActiveCheckinPartner) {
         nextActiveCheckinPartner = publicCheckinPartners.value.find(
           (value) =>
-            value.checkinPartnerState === 'draft' && value.id !== activeCheckinPartner.value.id
+            value.checkinPartnerState === 'draft' && value.id !== activeCheckinPartner.value.id,
         );
       }
 
@@ -978,7 +984,7 @@ export default defineComponent({
         currentStep.value = 'feedback';
       } else if (currentStep.value === 'feedback') {
         const numCheckinPartnersDraftOrDummy = publicCheckinPartners.value.filter(
-          (cp) => cp.checkinPartnerState === 'dummy' || cp.checkinPartnerState === 'draft'
+          (cp) => cp.checkinPartnerState === 'dummy' || cp.checkinPartnerState === 'draft',
         ).length;
         if (numCheckinPartnersDraftOrDummy > 0) {
           nextCheckinPartnerToComplete();
@@ -1221,7 +1227,7 @@ export default defineComponent({
         //          null, it means that the ocr process failed
         if (
           Object.values(checkinPartnerOcr.value).every(
-            (field) => field === null || field === '' || field === 0
+            (field) => field === null || field === '' || field === 0,
           )
         ) {
           dialogService.open({
@@ -1298,7 +1304,7 @@ export default defineComponent({
       () => activeCheckinPartner.value.countryId,
       async (value) => {
         await store.dispatch('countryStates/fetchCountryStates', value);
-      }
+      },
     );
 
     onMounted(() => {
@@ -1306,6 +1312,7 @@ export default defineComponent({
         publicCheckinPartners.value.push({
           ...DEFAULT_CHECKIN_PARTNER_VALUES,
           ...el,
+          reservationId,
         });
       });
     });
