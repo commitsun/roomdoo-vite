@@ -55,7 +55,7 @@
                         ((el.serviceLine?.priceUnit ?? 0) -
                           (el.serviceLine?.priceUnit ?? 0) *
                             ((el.serviceLine?.discount ?? 0) / 100)) *
-                        (el.serviceLine?.quantity ?? 0)
+                        (el.serviceLine?.quantity ?? 0),
                     )
                     .reduce((a, b) => a + b, 0)
                     .toFixed(2)
@@ -234,7 +234,7 @@
                     servicePriceDiscountFromPercentage(
                       serviceIndex,
                       item.serviceLine?.discount ?? 0,
-                      item.date
+                      item.date,
                     )
                   "
                 />
@@ -246,7 +246,7 @@
                     servicePercentageDiscountFromPrice(
                       serviceIndex,
                       item.serviceLine?.discountPrice ?? 0,
-                      item.date
+                      item.date,
                     )
                   "
                 />
@@ -266,7 +266,7 @@
         size="small"
         severity="secondary"
         class="button"
-        @click="$emit('close')"
+        @click="cancelChanges()"
       />
     </div>
   </div>
@@ -279,7 +279,7 @@ import Button from 'primevue/button';
 
 import { type ServiceInterface } from '@/legacy/interfaces/ServiceInterface';
 import { type ServiceLineInterface } from '@/legacy/interfaces/ServiceLineInterface';
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { defineComponent, ref, onMounted, computed, watch } from 'vue';
 
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
 import utilsDates, { localeSpain } from '@/legacy/utils/dates';
@@ -338,13 +338,38 @@ export default defineComponent({
 
     const boardServices = computed(() =>
       store.state.boardServices.boardServices.filter(
-        (el) => el.roomTypeId === currentReservation.value?.roomTypeId
-      )
+        (el) => el.roomTypeId === currentReservation.value?.roomTypeId,
+      ),
     );
 
     const currentReservationServices = computed(() =>
-      store.state.services.services.filter((el) => !el.isBoardService)
+      store.state.services.services.filter((el) => !el.isBoardService),
     );
+
+    const changedServiceLines = computed(() => {
+      const out: Array<{ serviceId?: number; line: ServiceLineInterface }> = [];
+      calendarDatesByService.value.forEach((svc) => {
+        svc.items.forEach((it) => {
+          const sl = it.serviceLine as any;
+          if (!sl) {
+            return;
+          }
+
+          if (sl.virtual && sl.quantity === 0) {
+            return;
+          }
+
+          const orig = sl.originalQuantity;
+          const changed = orig === undefined ? true : sl.quantity !== orig;
+
+          if (changed) {
+            out.push({ serviceId: svc.serviceId, line: it.serviceLine! });
+          }
+        });
+      });
+
+      return out;
+    });
 
     const dateStartMonth = () => {
       let result = '';
@@ -368,14 +393,14 @@ export default defineComponent({
     const servicePercentageDiscountFromPrice = (
       serviceIndex: number,
       newPriceDiscount: number,
-      date: Date
+      date: Date,
     ) => {
       const item = calendarDatesByService.value[serviceIndex]?.items.find(
-        (el) => el.date.getTime() === date.getTime()
+        (el) => el.date.getTime() === date.getTime(),
       );
       if (item && item.serviceLine) {
         item.serviceLine.discount = parseFloat(
-          ((newPriceDiscount * 100) / item.serviceLine.priceUnit).toFixed(2)
+          ((newPriceDiscount * 100) / item.serviceLine.priceUnit).toFixed(2),
         );
       }
     };
@@ -383,15 +408,15 @@ export default defineComponent({
     const servicePriceDiscountFromPercentage = (
       serviceIndex: number,
       newPercentageDiscount: number,
-      date: Date
+      date: Date,
     ) => {
       const item = calendarDatesByService.value[serviceIndex]?.items.find(
-        (el) => el.date.getTime() === date.getTime()
+        (el) => el.date.getTime() === date.getTime(),
       );
 
       if (item && item.serviceLine) {
         item.serviceLine.discountPrice = parseFloat(
-          ((newPercentageDiscount * item.serviceLine.priceUnit) / 100).toFixed(2)
+          ((newPercentageDiscount * item.serviceLine.priceUnit) / 100).toFixed(2),
         );
       }
     };
@@ -493,21 +518,21 @@ export default defineComponent({
               });
             });
           } else {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
             await store.dispatch('prices/fetchPrices', {
               pmsPropertyId: activeProperty.value?.id,
               pricelistId: activePricelistId.value?.id,
               productId,
-              dateFrom: today,
-              dateTo: today,
+              dateFrom: store.state.reservations.currentReservation?.checkout as Date,
+              dateTo: store.state.reservations.currentReservation?.checkout as Date,
             });
             quantityHeader += quantity;
             items.push({
-              date: today,
+              date: store.state.reservations.currentReservation?.checkout as Date,
               serviceLine: {
-                priceUnit: priceByDate(today)?.price ?? 0,
-                date: today,
+                priceUnit:
+                  priceByDate(store.state.reservations.currentReservation?.checkout as Date)
+                    ?.price ?? 0,
+                date: store.state.reservations.currentReservation?.checkout as Date,
                 quantity,
                 discount: 0,
               },
@@ -554,7 +579,7 @@ export default defineComponent({
           .find((el) => el.serviceId === serviceId)
           ?.items.forEach((el) => {
             const lineState = serviceState.serviceLines.find(
-              (line) => el.date.getDate() === new Date(line.date).getDate()
+              (line) => el.date.getDate() === new Date(line.date).getDate(),
             );
             if (lineState) {
               el.serviceLine = {
@@ -586,6 +611,22 @@ export default defineComponent({
       calendarDatesByService.value.splice(serviceIndex, 1);
     };
 
+    const toMidnight = (d: Date) => {
+      const x = new Date(d);
+      x.setHours(0, 0, 0, 0);
+      return x;
+    };
+
+    const padToWeek = (start: Date, end: Date) => {
+      const s = new Date(start);
+      const e = new Date(end);
+      const daysBefore = s.getDay() === 0 ? 6 : s.getDay() - 1;
+      const daysAfter = e.getDay() === 0 ? 0 : 6 - (e.getDay() - 1);
+      s.setDate(s.getDate() - daysBefore);
+      e.setDate(e.getDate() + daysAfter);
+      return { start: s, end: e };
+    };
+
     const buildCalendarDatesByService = () => {
       store.state.services.services
         .filter((el) => !el.isBoardService)
@@ -597,7 +638,7 @@ export default defineComponent({
             el.serviceLines.every(
               (val) =>
                 val.priceUnit === el.serviceLines[0].priceUnit &&
-                val.discount === el.serviceLines[0].discount
+                val.discount === el.serviceLines[0].discount,
             )
           ) {
             priceForAllLines = el.serviceLines[0].priceUnit;
@@ -607,48 +648,62 @@ export default defineComponent({
             discountForAllLines = 0;
           }
 
-          const times = el.serviceLines.map((sl) => new Date(sl.date).getTime());
-          const startDate = new Date(Math.min(...times));
-          const endDate = new Date(Math.max(...times));
-
-          let daysBeforeCheckin;
-          let daysAfterCheckout;
-
-          if (startDate.getDay() === 0) {
-            daysBeforeCheckin = 6;
-          } else {
-            daysBeforeCheckin = startDate.getDay() - 1;
-          }
-          if (endDate.getDay() === 0) {
-            daysAfterCheckout = 0;
-          } else {
-            daysAfterCheckout = 6 - (endDate.getDay() - 1);
-          }
-          startDate.setDate(startDate.getDate() - daysBeforeCheckin);
-          endDate.setDate(endDate.getDate() + daysAfterCheckout);
-
           const serviceDates: CalendarItemInterface[] = [];
           const product = products.value.find((p) => p.id === el.productId);
 
           if (product?.perDay) {
+            const checkin = toMidnight(
+              new Date(store.state.reservations.currentReservation?.checkin as any),
+            );
+            const checkout = toMidnight(
+              new Date(store.state.reservations.currentReservation?.checkout as any),
+            );
+
+            const consumedOn = (product as any)?.consumedOn ?? 'before';
+
+            let startDate = new Date(checkin);
+            let endDate = new Date(checkout);
+
+            ({ start: startDate, end: endDate } = padToWeek(startDate, endDate));
+
+            const extraEditableDay =
+              consumedOn === 'after' ? checkin.getTime() : checkout.getTime();
+
             utilsDates.getDatesRange(startDate, endDate).forEach((date) => {
-              const serviceLine = el.serviceLines.find(
-                (sl) => new Date(sl.date).getDate() === new Date(date).getDate()
+              const day = toMidnight(new Date(date));
+              const dayTs = day.getTime();
+
+              let serviceLine = el.serviceLines.find(
+                (sl) => toMidnight(new Date(sl.date)).getTime() === dayTs,
               );
 
               if (serviceLine) {
                 serviceLine.discountPrice = (serviceLine.discount / 100) * serviceLine.priceUnit;
+                (serviceLine as any).originalQuantity = serviceLine.quantity;
               }
-              serviceDates.push({
-                date,
-                serviceLine,
-              });
+
+              if (
+                !serviceLine &&
+                (dayTs === extraEditableDay ||
+                  (dayTs > checkin.getTime() && dayTs < checkout.getTime()))
+              ) {
+                const basePrice = priceForAllLines ?? 0;
+                serviceLine = {
+                  date: new Date(day),
+                  quantity: 0,
+                  priceUnit: basePrice,
+                  discount: discountForAllLines ?? 0,
+                  discountPrice: ((discountForAllLines ?? 0) / 100) * basePrice,
+                };
+                (serviceLine as any).originalQuantity = 0;
+                (serviceLine as any).virtual = true;
+              }
+
+              serviceDates.push({ date: day, serviceLine });
             });
           } else {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
             serviceDates.push({
-              date: today,
+              date: store.state.reservations.currentReservation?.checkout as Date,
               serviceLine: el.serviceLines[0],
             });
           }
@@ -685,7 +740,7 @@ export default defineComponent({
         await Promise.all(
           calendarServicesToRemove.value.map(async (el) => {
             await store.dispatch('services/deleteService', el);
-          })
+          }),
         );
 
         await Promise.all(
@@ -695,7 +750,11 @@ export default defineComponent({
               const serviceLines: ServiceLineInterface[] = [];
               if (el.viewMode === 'calendar') {
                 el.items.forEach((i) => {
-                  if (i.serviceLine) {
+                  if (
+                    (i.serviceLine &&
+                      changedServiceLines.value.find((sl) => sl.line === i.serviceLine)) ||
+                    i.serviceLine?.id
+                  ) {
                     serviceLines.push({
                       priceUnit: i.serviceLine.priceUnit,
                       discount: i.serviceLine.discount,
@@ -706,7 +765,11 @@ export default defineComponent({
                 });
               } else if (el.viewMode === 'modify') {
                 el.items.forEach((i) => {
-                  if (i.serviceLine) {
+                  if (
+                    (i.serviceLine &&
+                      changedServiceLines.value.find((sl) => sl.line === i.serviceLine)) ||
+                    i.serviceLine?.id
+                  ) {
                     if (el.perDay) {
                       serviceLines.push({
                         priceUnit: el.priceForAllLines ?? 0,
@@ -738,7 +801,7 @@ export default defineComponent({
                   serviceLines,
                 });
               }
-            })
+            }),
         );
         await Promise.all([
           store.dispatch('folios/fetchFolio', currentFolio.value?.id),
@@ -758,13 +821,27 @@ export default defineComponent({
       }
     };
 
+    const cancelChanges = async () => {
+      if (changedServiceLines.value.length > 0) {
+        void store.dispatch('layout/showSpinner', true);
+        await store.dispatch('services/fetchServices', currentReservation.value?.id);
+        void store.dispatch('layout/showSpinner', false);
+      }
+      context.emit('close');
+    };
+
     onMounted(() => {
       if (currentReservation.value?.boardServiceId) {
         boardServiceSelected.value = currentReservation.value.boardServiceId;
       }
       buildCalendarDatesByService();
       if (props.serviceIndex !== undefined && props.serviceIndex > -1) {
-        perDayServiceView(props.serviceIndex);
+        const svc = calendarDatesByService.value[props.serviceIndex];
+        if (svc?.perDay) {
+          perDayServiceView(props.serviceIndex);
+        } else {
+          calendarDatesByService.value[props.serviceIndex].viewMode = 'modify';
+        }
       }
     });
 
@@ -794,6 +871,7 @@ export default defineComponent({
       perDayServiceView,
       buildCalendarDatesByService,
       saveChanges,
+      cancelChanges,
     };
   },
 });
@@ -976,7 +1054,7 @@ export default defineComponent({
 }
 @media (min-width: 1024px) {
   .main-container {
-    width: 700px;
+    width: 750px;
     .board-service {
       .select {
         width: auto;
@@ -988,6 +1066,7 @@ export default defineComponent({
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: 0.5rem;
         }
         .extra-service-calendar {
           .day-name {
