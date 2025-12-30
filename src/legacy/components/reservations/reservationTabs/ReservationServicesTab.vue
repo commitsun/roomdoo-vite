@@ -156,6 +156,9 @@
         v-for="(service, indexServices) in services"
         :key="service.id"
         class="extra-service-container-inner"
+        :class="
+          !toggleServiceLines[indexServices] ? 'extra-service-container-inner-no-padding' : ''
+        "
       >
         <div
           class="extra-service-title"
@@ -302,21 +305,21 @@ export default defineComponent({
     const currentReservation = computed(() => store.state.reservations.currentReservation);
 
     const itemsAutocompleteServices = computed(() =>
-      store.state.products.products.map((el) => ({ value: el.id, name: el.name }))
+      store.state.products.products.map((el) => ({ value: el.id, name: el.name })),
     );
 
     const boardServices = computed(() =>
-      store.state.services.services.filter((service) => service.isBoardService)
+      store.state.services.services.filter((service) => service.isBoardService),
     );
 
     const reservationServices = computed(() =>
-      store.state.services.services.filter((service) => !service.isBoardService)
+      store.state.services.services.filter((service) => !service.isBoardService),
     );
 
     const agencyName = computed(
       () =>
         store.state.agencies.agencies.find((el) => el.id === currentReservation.value?.agencyId)
-          ?.name
+          ?.name,
     );
 
     const boardServiceAmountTotal = () => {
@@ -329,7 +332,7 @@ export default defineComponent({
 
     const boardServiceName = () =>
       store.state.boardServices.boardServices.find(
-        (el) => el.id === currentReservation.value?.boardServiceId
+        (el) => el.id === currentReservation.value?.boardServiceId,
       )?.name;
 
     const getDayOfWeek = (date: Date) => {
@@ -422,18 +425,18 @@ export default defineComponent({
             items.push(serviceLine as ServiceLineInterface);
           });
         } else {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
           await store.dispatch('prices/fetchPrices', {
             pmsPropertyId: store.state.properties.activeProperty?.id,
             pricelistId: currentReservation.value?.pricelistId,
             productId,
-            dateFrom: today,
-            dateTo: today,
+            dateFrom: store.state.reservations.currentReservation?.checkout as Date,
+            dateTo: store.state.reservations.currentReservation?.checkout as Date,
           });
           items.push({
-            priceUnit: priceByDate(today)?.price ?? 0,
-            date: today,
+            priceUnit:
+              priceByDate(store.state.reservations.currentReservation?.checkout as Date)?.price ??
+              0,
+            date: store.state.reservations.currentReservation?.checkout as Date,
             quantity,
             discount: 0,
           });
@@ -480,7 +483,7 @@ export default defineComponent({
               store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
               store.dispatch(
                 'reservationLines/fetchReservationLines',
-                currentReservation.value?.id
+                currentReservation.value?.id,
               ),
               store.dispatch('services/fetchServices', currentReservation.value?.id),
             ]);
@@ -513,7 +516,7 @@ export default defineComponent({
               store.dispatch('reservations/fetchReservation', currentReservation.value?.id),
               store.dispatch(
                 'reservationLines/fetchReservationLines',
-                currentReservation.value?.id
+                currentReservation.value?.id,
               ),
               store.dispatch('services/fetchServices', currentReservation.value?.id),
             ]);
@@ -599,7 +602,7 @@ export default defineComponent({
       try {
         await store.dispatch(
           'services/fetchServices',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         );
       } catch {
         dialogService.open({
@@ -997,6 +1000,9 @@ export default defineComponent({
         transition: transform 0.2s ease;
       }
     }
+  }
+  .extra-service-container-inner-no-padding {
+    padding-bottom: 0;
   }
   .extra-service-title {
     display: flex;
