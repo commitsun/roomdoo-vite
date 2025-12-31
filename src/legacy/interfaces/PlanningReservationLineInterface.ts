@@ -22,4 +22,5 @@ export interface PlanningReservationLineInterface {
   isReselling: boolean;
   children: number;
   isWarningToInvoice: boolean;
+  precheckinStatus: string;
 }

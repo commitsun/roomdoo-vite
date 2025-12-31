@@ -350,13 +350,23 @@
                           }`
                         }}
                       </div>
-                      <img
+                      <CustomIcon
+                        :imagePath="
+                          day.reservationLines[0].adults > 1
+                            ? '/app-images/icon-users-light-blue.svg'
+                            : '/app-images/icon-user-light-blue.svg'
+                        "
+                        width="12px"
+                        height="12px"
+                        :color="reservationIconColor(day.reservationLines[0])"
+                      />
+                      <!-- <img
                         :src="
                           day.reservationLines[0].adults > 1
                             ? '/app-images/icon-users-light-blue.svg'
                             : '/app-images/icon-user-light-blue.svg'
                         "
-                      />
+                      /> -->
                     </div>
                   </div>
                   <div class="second" v-if="day.reservationLines[0].pendingPayment > 0">
@@ -1031,6 +1041,16 @@ export default defineComponent({
       return result;
     };
 
+    const reservationIconColor = (reservationLine: PlanningReservationLineInterface) => {
+      let result = '#C1EDF7';
+      if (reservationLine.precheckinStatus === 'completed') {
+        result = '#00913F';
+      } else if (reservationLine.precheckinStatus === 'partial') {
+        result = '#7A6FF0';
+      }
+      return result;
+    };
+
     const openReservation = async (
       event: MouseEvent,
       selectedFolioId: number,
@@ -1256,6 +1276,7 @@ export default defineComponent({
             isReselling: rls.isReselling,
             children: rls.children,
             isWarningToInvoice: rls.isWarningToInvoice,
+            precheckinStatus: rls.precheckinStatus,
           });
           dateTemp.setDate(dateTemp.getDate() + 1);
         });
@@ -1618,6 +1639,7 @@ export default defineComponent({
       reservationLinesSelected,
       dropAtEmptyDate,
       dropAtBusyDate,
+      reservationIconColor,
     };
   },
 });
