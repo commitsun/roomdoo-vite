@@ -21,4 +21,5 @@ export interface PlanningReservationLineInterface {
   closureReasonId: number;
   isReselling: boolean;
   children: number;
+  isWarningToInvoice: boolean;
 }

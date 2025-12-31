@@ -18,6 +18,7 @@ export interface PropertyInterface {
   simpleOutColor: string | null;
   simpleInColor: string | null;
   simpleFutureColor: string | null;
+  warningToInvoiceColor: string | null;
   defaultPricelistId: number | null;
   defaultAvailabilityPlanId: number | null;
   language: string;
