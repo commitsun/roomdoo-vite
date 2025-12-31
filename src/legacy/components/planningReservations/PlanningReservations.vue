@@ -235,7 +235,8 @@
               class="dummy"
               v-for="(date, index) in planning[0].dates.filter(
                 (el) =>
-                  el.date.getTime() >= dateStart.getTime() && el.date.getTime() <= dateEnd.getTime()
+                  el.date.getTime() >= dateStart.getTime() &&
+                  el.date.getTime() <= dateEnd.getTime(),
               )"
               :key="index"
               :class="classDate(date.date)"
@@ -251,7 +252,8 @@
               class="cell-planning"
               v-for="day in room.dates.filter(
                 (el) =>
-                  el.date.getTime() >= dateStart.getTime() && el.date.getTime() <= dateEnd.getTime()
+                  el.date.getTime() >= dateStart.getTime() &&
+                  el.date.getTime() <= dateEnd.getTime(),
               )"
               :key="`${day.date.getTime()}-${room.roomId}`"
               :class="classDate(day.date)"
@@ -285,7 +287,7 @@
                   openReservation(
                     $event,
                     day.reservationLines ? day.reservationLines[0].folioId : 0,
-                    day.reservationLines ? day.reservationLines[0].reservationId : 0
+                    day.reservationLines ? day.reservationLines[0].reservationId : 0,
                   )
                 "
                 v-if="day.reservationLines && day.reservationLines.length > 0"
@@ -329,10 +331,10 @@
                           day.reservationLines.length === 1
                             ? `${140}px`
                             : day.reservationLines.length === 2
-                            ? `${210}px`
-                            : day.reservationLines.length === 3
-                            ? `${360}px`
-                            : 'none'
+                              ? `${210}px`
+                              : day.reservationLines.length === 3
+                                ? `${360}px`
+                                : 'none'
                         }`,
                       }"
                     >
@@ -454,7 +456,7 @@
                       day.reservationLines ? day.reservationLines[0].reservationId : 0,
                       day.reservationLines ?? [],
                       index,
-                      reservationLine.partnerName
+                      reservationLine.partnerName,
                     )
                   "
                   @mousedown="
@@ -462,7 +464,7 @@
                       $event,
                       reservationLine.reservationId,
                       reservationLineIndex,
-                      day.reservationLines ?? []
+                      day.reservationLines ?? [],
                     )
                   "
                 ></div>
@@ -561,7 +563,7 @@ export default defineComponent({
     const selectedReservation = computed(() => store.state.reservations.currentReservation);
 
     const dateStartMonth = computed(
-      () => localeValue.value.months[store.state.planning.dateStart.getMonth()]
+      () => localeValue.value.months[store.state.planning.dateStart.getMonth()],
     );
 
     const roomShortName = (roomId: number) => {
@@ -577,7 +579,7 @@ export default defineComponent({
       const room = store.state.rooms.rooms.find((el) => el.id === roomId);
       if (room && room.roomAmenityIds) {
         const amenities = store.state.amenities.amenities.filter(
-          (el) => el.addInRoomName && room.roomAmenityIds?.includes(el.id)
+          (el) => el.addInRoomName && room.roomAmenityIds?.includes(el.id),
         );
         return amenities.find((el) => el.addInRoomName)?.defaultCode ?? '';
       }
@@ -825,16 +827,16 @@ export default defineComponent({
                 nextLineSplitted: line.nextLineSplitted,
                 reservationId: line.reservationId,
                 reservationLineId: line.id,
-              }))
+              })),
             )
-            .reduce((a, b) => a.concat(b), [])
+            .reduce((a, b) => a.concat(b), []),
         )
         .filter((el) => el.length > 0)
         .reduce((a, b) => a.concat(b), []);
 
       // unique reservation ids
       const reservationIds = Array.from(
-        new Set(reservationIdsAndLines.map((el) => el.reservationId))
+        new Set(reservationIdsAndLines.map((el) => el.reservationId)),
       );
 
       if (reservationIds) {
@@ -850,7 +852,7 @@ export default defineComponent({
           reservationLinesSameReservationId.forEach((line, index) => {
             if (line.nextLineSplitted) {
               const previousColor = splittedReservationsBorders.value.find(
-                (b) => b.reservationId === line.reservationId
+                (b) => b.reservationId === line.reservationId,
               )?.color;
 
               splittedReservationsBorders.value.push({
@@ -871,13 +873,13 @@ export default defineComponent({
           const divLinesFrom = reservationLinesDivs.value
             .map((el) => el as HTMLDivElement)
             .filter(
-              (el) => el && el.id === `${border.reservationId}-${border.reservationLineIdFrom}`
+              (el) => el && el.id === `${border.reservationId}-${border.reservationLineIdFrom}`,
             );
 
           const divLinesTo = reservationLinesDivs.value
             .map((el) => el as HTMLDivElement)
             .filter(
-              (el) => el && el.id === `${border.reservationId}-${border.reservationLineIdTo}`
+              (el) => el && el.id === `${border.reservationId}-${border.reservationLineIdTo}`,
             );
           if (mainSvg.value) {
             const offsetXSvg = (mainSvg.value as HTMLElement).getBoundingClientRect().x;
@@ -919,7 +921,7 @@ export default defineComponent({
 
     const splittedReservationColor = (line: PlanningReservationLineInterface): string => {
       const border = splittedReservationsBorders.value.find(
-        (el) => el.reservationId === line.reservationId
+        (el) => el.reservationId === line.reservationId,
       );
       if (border) {
         return border.color;
@@ -971,14 +973,16 @@ export default defineComponent({
       let result = '';
       result =
         store.state.roomClosureReasons.roomClosureReasons.find(
-          (el) => el.id === line.closureReasonId
+          (el) => el.id === line.closureReasonId,
         )?.name ?? '';
       return result;
     };
 
     const reservationColor = (reservation: PlanningReservationLineInterface) => {
       let result;
-
+      if (reservation.isWarningToInvoice) {
+        return store.state.properties.activeProperty?.warningToInvoiceColor;
+      }
       if (store.state.properties.activeProperty?.colorOptionConfig === 'advanced') {
         if (reservation.state === 'confirm' || reservation.state === 'arrival_delayed') {
           result = store.state.properties.activeProperty?.confirmedReservationColor;
@@ -1030,7 +1034,7 @@ export default defineComponent({
     const openReservation = async (
       event: MouseEvent,
       selectedFolioId: number,
-      selectedReservationId: number
+      selectedReservationId: number,
     ) => {
       if (store.state.reservations.currentReservation?.id === selectedReservationId) {
         console.log('Already selected reservation');
@@ -1113,7 +1117,7 @@ export default defineComponent({
             context.emit('hidePricelist');
           }
           oldWidth = window.innerWidth;
-        })
+        }),
       );
     };
 
@@ -1145,7 +1149,7 @@ export default defineComponent({
       evt: MouseEvent,
       reservationId: number,
       reservationLineIndexSlice: number,
-      reservationLines: PlanningReservationLineInterface[]
+      reservationLines: PlanningReservationLineInterface[],
     ) => {
       reservationIdSelected.value = reservationId;
       reservationLineIndexSelected.value = reservationLineIndexSlice;
@@ -1169,19 +1173,19 @@ export default defineComponent({
       let result = true;
       // initial date of reservation moved
       const initialDateOfReservationAfterMove = new Date(
-        targetDate.getTime() - ONE_DAY_IN_MS * reservationLineIndexSelected.value
+        targetDate.getTime() - ONE_DAY_IN_MS * reservationLineIndexSelected.value,
       );
 
       // end date of reservation moved
       const endDateOfReservationAfterMove = new Date(
         initialDateOfReservationAfterMove.getTime() +
-          ONE_DAY_IN_MS * (reservationLinesSelected.value.length - 1)
+          ONE_DAY_IN_MS * (reservationLinesSelected.value.length - 1),
       );
 
       // dates to be checked if they're empty
       const rangeDatesChanging = utilsDates.getDatesRange(
         initialDateOfReservationAfterMove,
-        endDateOfReservationAfterMove
+        endDateOfReservationAfterMove,
       );
 
       rangeDatesChanging.forEach((l) => {
@@ -1189,7 +1193,7 @@ export default defineComponent({
           (rl) =>
             rl.date.getTime() === l.getTime() &&
             rl.roomId === targetRoomId &&
-            rl.reservationId !== reservationIdSelected.value
+            rl.reservationId !== reservationIdSelected.value,
         );
         if (match) {
           result = false;
@@ -1251,6 +1255,7 @@ export default defineComponent({
             priceDayTotalServices: 0,
             isReselling: rls.isReselling,
             children: rls.children,
+            isWarningToInvoice: rls.isWarningToInvoice,
           });
           dateTemp.setDate(dateTemp.getDate() + 1);
         });
@@ -1283,7 +1288,7 @@ export default defineComponent({
         movementForward
           ? targetDateToCheckIfOut.getDate() +
               (reservationLinesSelected.value.length - 1 - reservationLineIndexSelected.value)
-          : targetDateToCheckIfOut.getDate() - reservationLineIndexSelected.value
+          : targetDateToCheckIfOut.getDate() - reservationLineIndexSelected.value,
       );
       // check if it is in range dates
       if (
@@ -1361,11 +1366,11 @@ export default defineComponent({
               if (store.state.reservations.currentReservation) {
                 void store.dispatch(
                   'reservations/fetchReservation',
-                  store.state.reservations.currentReservation.id
+                  store.state.reservations.currentReservation.id,
                 );
                 void store.dispatch(
                   'reservationLines/fetchReservationLines',
-                  store.state.reservations.currentReservation.id
+                  store.state.reservations.currentReservation.id,
                 );
               }
             } catch {
@@ -1389,7 +1394,7 @@ export default defineComponent({
       reservationId: number,
       reservationLines: PlanningReservationLineInterface[],
       reservationLineIndex: number,
-      partnerName: string
+      partnerName: string,
     ) => {
       if (hasLinesOutOfRange()) {
         dialogService.open({
@@ -1437,11 +1442,11 @@ export default defineComponent({
               if (store.state.reservations.currentReservation) {
                 void store.dispatch(
                   'reservations/fetchReservation',
-                  store.state.reservations.currentReservation.id
+                  store.state.reservations.currentReservation.id,
                 );
                 void store.dispatch(
                   'reservationLines/fetchReservationLines',
-                  store.state.reservations.currentReservation.id
+                  store.state.reservations.currentReservation.id,
                 );
               }
             } catch {
@@ -1532,7 +1537,7 @@ export default defineComponent({
                 btnCancel: 'Cancelar',
                 onClose: () => resolve(true),
                 onAccept: () => resolve(false),
-              })
+              }),
             )
           ) {
             selectedDate.value = oldValue;
@@ -1550,7 +1555,7 @@ export default defineComponent({
       },
       {
         flush: 'post', // the method run after html is changed
-      }
+      },
     );
 
     onMounted(() => {
