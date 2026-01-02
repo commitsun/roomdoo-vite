@@ -33,6 +33,10 @@ const actions: ActionTree<RoomsStateInterface, StateInterface> = {
 
     return api.get(`/rooms${params}`);
   },
+
+  async updateRoom(context, room: { id: number; data: Partial<RoomsStateInterface['rooms'][0]> }) {
+    return api.patch(`/rooms/p/${room.id}`, room.data);
+  },
 };
 
 export default actions;

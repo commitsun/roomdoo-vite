@@ -427,7 +427,7 @@ export default defineComponent({
       () =>
         (store.state.layout.showing === 'NewFolioStep1' ||
           store.state.layout.showing === 'NewFolioStep2') &&
-        rightDrawerExpanded.value
+        rightDrawerExpanded.value,
     );
 
     const activeUser = computed(() => store.state.user.activeUser);
@@ -459,25 +459,25 @@ export default defineComponent({
     const activePricelistId = computed(() => store.state.pricelists.activePricelist?.id);
 
     const activePricelist = computed(() =>
-      store.state.pricelists.dailyPricelists.find((el) => el.id === activePricelistId.value)
+      store.state.pricelists.dailyPricelists.find((el) => el.id === activePricelistId.value),
     );
 
     const activeAvailabilityPlan = computed(() =>
       store.state.availabilityPlans.availabilityPlans.find(
-        (el) => el.id === store.state.availabilityPlans.activeAvailabilityPlan?.id
-      )
+        (el) => el.id === store.state.availabilityPlans.activeAvailabilityPlan?.id,
+      ),
     );
 
     const numReservationsToAssign = computed(
-      () => store.state.notifications.numReservationsToAssign
+      () => store.state.notifications.numReservationsToAssign,
     );
 
     const sortedProperties = computed(() => {
       const result = store.state.properties.properties.filter(
-        (el) => el.id !== activeUser.value?.defaultPropertyId
+        (el) => el.id !== activeUser.value?.defaultPropertyId,
       );
       const defaultProperty = store.state.properties.properties.find(
-        (el) => el.id === activeUser.value?.defaultPropertyId
+        (el) => el.id === activeUser.value?.defaultPropertyId,
       );
       if (defaultProperty) {
         result.unshift(defaultProperty);
@@ -486,11 +486,11 @@ export default defineComponent({
     });
 
     const optionsRoomTypes = computed(() =>
-      store.state.roomTypes.roomTypes.map((el) => ({ id: el.id, name: el.name }))
+      store.state.roomTypes.roomTypes.map((el) => ({ id: el.id, name: el.name })),
     );
 
     const optionsRoomTypeClasses = computed(() =>
-      store.state.roomTypeClasses.roomTypeClasses.map((el) => ({ id: el.id, name: el.name }))
+      store.state.roomTypeClasses.roomTypeClasses.map((el) => ({ id: el.id, name: el.name })),
     );
 
     const numFiltersApplied = computed(() => {
@@ -502,7 +502,7 @@ export default defineComponent({
     });
 
     const dateStartMonth = computed(
-      () => localeValue.value.months[store.state.planning.dateStart.getMonth()]
+      () => localeValue.value.months[store.state.planning.dateStart.getMonth()],
     );
 
     const title = computed(() => {
@@ -564,16 +564,16 @@ export default defineComponent({
       finishLoadingData.value = false;
       void store.dispatch(
         'notifications/fetchNotificationsReservationsToAssign',
-        activeProperty.value?.id
+        activeProperty.value?.id,
       );
       void store.dispatch(
         'saleChannels/fetchSaleChannels',
-        store.state.properties.activeProperty?.id
+        store.state.properties.activeProperty?.id,
       );
       void store.dispatch('products/fetchProducts', store.state.properties.activeProperty?.id);
       void store.dispatch(
         'boardServices/fetchBoardServices',
-        store.state.properties.activeProperty?.id
+        store.state.properties.activeProperty?.id,
       );
       void store.dispatch('agencies/fetchAgencies', store.state.properties.activeProperty?.id);
       void store.dispatch('accountJournals/fetchAccountJournals', {
@@ -590,7 +590,7 @@ export default defineComponent({
         }),
         store.dispatch(
           'availabilityPlans/fetchAvailabilityPlans',
-          store.state.properties.activeProperty?.id
+          store.state.properties.activeProperty?.id,
         ),
         store.dispatch('amenities/fetchAmenities', store.state.properties.activeProperty?.id),
         store.dispatch('roomTypeClasses/fetchRoomTypeClasses', activeProperty.value?.id),
@@ -601,11 +601,11 @@ export default defineComponent({
       await store.dispatch('planning/setFilteredRoomIds', []);
 
       const pricelist = store.state.pricelists.pricelists.find(
-        (el) => el.id === store.state.properties.activeProperty?.defaultPricelistId
+        (el) => el.id === store.state.properties.activeProperty?.defaultPricelistId,
       );
       await store.dispatch('pricelists/setActivePricelist', pricelist);
       const availabilityPlan = store.state.availabilityPlans.availabilityPlans.find(
-        (el) => el.id === store.state.pricelists.activePricelist?.defaultAvailabilityPlanId
+        (el) => el.id === store.state.pricelists.activePricelist?.defaultAvailabilityPlanId,
       );
       await store.dispatch('availabilityPlans/setActiveAvailabilityPlan', availabilityPlan);
       await refreshPlanning();
@@ -672,7 +672,7 @@ export default defineComponent({
 
     const scrollToAndWait = (
       element: HTMLElement | null,
-      position: number
+      position: number,
     ): Promise<void> | null => {
       if (element === null) {
         return new Promise<void>((resolve) => {
@@ -705,7 +705,7 @@ export default defineComponent({
                 btnCancel: 'Cancelar',
                 onClose: () => resolve(true),
                 onAccept: () => resolve(false),
-              })
+              }),
             )
           ) {
             return;
@@ -736,11 +736,11 @@ export default defineComponent({
         await Promise.all([
           scrollToAndWait(
             refPlanningPricelists.value,
-            (refPlanningPricelists.value?.scrollLeft ?? 0) - 140
+            (refPlanningPricelists.value?.scrollLeft ?? 0) - 140,
           ),
           scrollToAndWait(
             refPlanningHeader.value,
-            (refPlanningHeader.value?.scrollLeft ?? 0) - 140
+            (refPlanningHeader.value?.scrollLeft ?? 0) - 140,
           ),
           scrollToAndWait(refPlanningBody.value, (refPlanningBody.value?.scrollLeft ?? 0) - 140),
         ]);
@@ -765,7 +765,7 @@ export default defineComponent({
                 btnCancel: 'Cancelar',
                 onClose: () => resolve(true),
                 onAccept: () => resolve(false),
-              })
+              }),
             )
           ) {
             return;
@@ -795,11 +795,11 @@ export default defineComponent({
         await Promise.all([
           scrollToAndWait(
             refPlanningPricelists.value,
-            (refPlanningPricelists.value?.scrollLeft ?? 0) + 140
+            (refPlanningPricelists.value?.scrollLeft ?? 0) + 140,
           ),
           scrollToAndWait(
             refPlanningHeader.value,
-            (refPlanningHeader.value?.scrollLeft ?? 0) + 140
+            (refPlanningHeader.value?.scrollLeft ?? 0) + 140,
           ),
           scrollToAndWait(refPlanningBody.value, (refPlanningBody.value?.scrollLeft ?? 0) + 140),
         ]);
@@ -820,7 +820,7 @@ export default defineComponent({
               btnCancel: 'Cancelar',
               onClose: () => resolve(true),
               onAccept: () => resolve(false),
-            })
+            }),
           )
         ) {
           return;
@@ -974,7 +974,7 @@ export default defineComponent({
         try {
           await store.dispatch(
             'pricelists/setActivePricelist',
-            pricelists.value.find((el) => el.id === selectedPricelistId.value)
+            pricelists.value.find((el) => el.id === selectedPricelistId.value),
           );
           await store.dispatch('planning/fetchPlanningPricesRules', {
             dateStart: store.state.planning.dateStart,
@@ -1000,7 +1000,7 @@ export default defineComponent({
         void store.dispatch('layout/showSpinner', true);
         await store.dispatch(
           'availabilityPlans/setActiveAvailabilityPlan',
-          availabilityPlans.value.find((el) => el.id === selectedAvailabilityPlanId.value)
+          availabilityPlans.value.find((el) => el.id === selectedAvailabilityPlanId.value),
         );
         await store.dispatch('planning/fetchPlanning', {
           dateStart: store.state.planning.dateStart,
@@ -1047,7 +1047,7 @@ export default defineComponent({
               selectedRoomTypeClasses.value.length === 0) &&
             ((selectedCapacities.value.includes(el.capacity) && el.capacity !== 5) ||
               (selectedCapacities.value.includes(5) && el.capacity >= 5) ||
-              selectedCapacities.value.length === 0)
+              selectedCapacities.value.length === 0),
         )
         .map((el) => el.id);
       if (roomIds.length > 0) {
@@ -1590,7 +1590,6 @@ export default defineComponent({
   .index-container {
     .header {
       background-color: #f8f8f8;
-      padding-left: 40px;
       padding-right: 82px;
       margin-left: 1rem;
       box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.17);

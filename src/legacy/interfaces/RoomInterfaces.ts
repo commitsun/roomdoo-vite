@@ -9,4 +9,5 @@ export interface RoomInterface {
   extraBedsAllowed: number;
   roomAmenityIds: number[] | null;
   roomAmenityInName: string;
+  cleaningStatus: string;
 }
