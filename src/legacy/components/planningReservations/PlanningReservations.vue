@@ -174,32 +174,66 @@
                   {{ roomAmenityDefaultCode(room.roomId)?.substring(0, 4) }}
                 </span>
               </div>
-              <div class="room-capacity">
-                <div class="capacity-number">
-                  {{ roomCapacity(room.roomId) }}
+              <div class="room-right">
+                <div class="room-capacity">
+                  <div class="capacity-number">
+                    {{ roomCapacity(room.roomId) }}
+                  </div>
+                  <CustomIcon
+                    class="capacity-image-mobile"
+                    color="#B3B3B3"
+                    width="12px"
+                    height="12px"
+                    :imagePath="
+                      roomCapacity(room.roomId) > 1
+                        ? '/app-images/icon-users-light-blue.svg'
+                        : '/app-images/icon-user-light-blue.svg'
+                    "
+                  />
+                  <CustomIcon
+                    class="capacity-image"
+                    color="#B3B3B3"
+                    width="20px"
+                    height="20px"
+                    :imagePath="
+                      roomCapacity(room.roomId) > 1
+                        ? '/app-images/icon-users-light-blue.svg'
+                        : '/app-images/icon-user-light-blue.svg'
+                    "
+                  />
                 </div>
-                <CustomIcon
-                  class="capacity-image-mobile"
-                  color="#B3B3B3"
-                  width="12px"
-                  height="12px"
-                  :imagePath="
-                    roomCapacity(room.roomId) > 1
-                      ? '/app-images/icon-users-light-blue.svg'
-                      : '/app-images/icon-user-light-blue.svg'
-                  "
-                />
-                <CustomIcon
-                  class="capacity-image"
-                  color="#B3B3B3"
-                  width="20px"
-                  height="20px"
-                  :imagePath="
-                    roomCapacity(room.roomId) > 1
-                      ? '/app-images/icon-users-light-blue.svg'
-                      : '/app-images/icon-user-light-blue.svg'
-                  "
-                />
+                <div class="room-state-wrapper">
+                  <div
+                    class="room-state"
+                    :class="getRoomState(room.roomId)"
+                    @click="toggleRoomStateMenu(room.roomId, $event)"
+                    @blur="openRoomId = null"
+                    role="button"
+                    tabindex="0"
+                  ></div>
+
+                  <div
+                    v-if="openRoomId === room.roomId"
+                    class="room-state-menu"
+                    :class="menuPlacement"
+                    :style="{ top: menuPosition.top + 'px', left: menuPosition.left + 'px' }"
+                  >
+                    <button
+                      class="room-state-option clean"
+                      @mousedown="selectState(room.roomId, 'clean')"
+                    >
+                      <span class="dot clean"></span>
+                      Limpia
+                    </button>
+                    <button
+                      class="room-state-option dirty"
+                      @mousedown="selectState(room.roomId, 'dirty')"
+                    >
+                      <span class="dot dirty"></span>
+                      Sucia
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -360,13 +394,6 @@
                         height="12px"
                         :color="reservationIconColor(day.reservationLines[0])"
                       />
-                      <!-- <img
-                        :src="
-                          day.reservationLines[0].adults > 1
-                            ? '/app-images/icon-users-light-blue.svg'
-                            : '/app-images/icon-user-light-blue.svg'
-                        "
-                      /> -->
                     </div>
                   </div>
                   <div class="second" v-if="day.reservationLines[0].pendingPayment > 0">
@@ -539,8 +566,16 @@ export default defineComponent({
   },
   emits: ['updateSelectedDate', 'hidePricelist', 'moveOneDayForward', 'moveOneDayBackward'],
   setup(props, context) {
+    const MENU_GAP = 6;
+    const MENU_HEIGHT = 135;
     const store = useStore();
     const { refreshPlanning } = usePlanning();
+
+    const openRoomId = ref<number | null>(null);
+
+    const roomStateById = ref<Record<number, string>>({});
+    const menuPosition = ref({ top: 0, left: 0 });
+    const menuPlacement = ref<'down' | 'up'>('down');
 
     const colorList = ['blue', 'blueviolet', 'lime', 'gold', 'fuchsia', 'olive'];
     let oldWidth = window.innerWidth;
@@ -773,6 +808,39 @@ export default defineComponent({
         result += ' full-cell';
       }
       return result;
+    };
+
+    const getRoomState = (roomId: number): string => {
+      return store.state.rooms.rooms.find((el) => el.id === roomId)?.cleaningStatus ?? 'clean';
+    };
+
+    const toggleRoomStateMenu = (roomId: number, ev: MouseEvent) => {
+      if (openRoomId.value === roomId) {
+        openRoomId.value = null;
+        return;
+      }
+
+      const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect();
+
+      let top = rect.bottom + MENU_GAP;
+      const left = rect.left;
+
+      if (top + MENU_HEIGHT > window.innerHeight) {
+        top = rect.top - MENU_HEIGHT - MENU_GAP;
+        menuPlacement.value = 'up';
+      } else {
+        menuPlacement.value = 'down';
+      }
+
+      menuPosition.value = { top, left };
+      openRoomId.value = roomId;
+    };
+
+    const selectState = async (roomId: number, next: string) => {
+      roomStateById.value = { ...roomStateById.value, [roomId]: next };
+      openRoomId.value = null;
+      await store.dispatch('rooms/updateRoom', { id: roomId, data: { cleaningStatus: next } });
+      await store.dispatch('rooms/fetchRooms', activeProperty.value?.id);
     };
 
     const widthReservationInfoDesktop = (lines: PlanningReservationLineInterface[]) => {
@@ -1044,9 +1112,9 @@ export default defineComponent({
     const reservationIconColor = (reservationLine: PlanningReservationLineInterface) => {
       let result = '#C1EDF7';
       if (reservationLine.precheckinStatus === 'completed') {
-        result = '#00913F';
+        result = '#50B648';
       } else if (reservationLine.precheckinStatus === 'partial') {
-        result = '#7A6FF0';
+        result = '#6D5BD0';
       }
       return result;
     };
@@ -1057,7 +1125,6 @@ export default defineComponent({
       selectedReservationId: number,
     ) => {
       if (store.state.reservations.currentReservation?.id === selectedReservationId) {
-        console.log('Already selected reservation');
         event.stopPropagation();
         return;
       }
@@ -1640,6 +1707,12 @@ export default defineComponent({
       dropAtEmptyDate,
       dropAtBusyDate,
       reservationIconColor,
+      selectState,
+      getRoomState,
+      toggleRoomStateMenu,
+      openRoomId,
+      menuPosition,
+      menuPlacement,
     };
   },
 });
@@ -1892,6 +1965,7 @@ export default defineComponent({
     .bottom-left {
       min-width: $left_column_mobile_width;
       border-right: 1px solid #d0d0d0;
+      position: relative;
       overflow-x: scroll;
       overflow-y: hidden;
       .bottom-left-content {
@@ -1948,16 +2022,87 @@ export default defineComponent({
               margin-left: 0.2rem;
             }
           }
-          .room-capacity {
-            color: #b3b3b3;
+          .room-right {
             display: flex;
-            align-items: center;
-            top: 85%;
-            .capacity-image-mobile {
-              margin-left: 0.2rem;
+            justify-content: space-between;
+
+            .room-capacity {
+              color: #b3b3b3;
+              display: flex;
+              align-items: center;
+              top: 85%;
+              .capacity-image-mobile {
+                margin-left: 0.2rem;
+              }
+              .capacity-image {
+                display: none;
+              }
             }
-            .capacity-image {
-              display: none;
+            .room-state-wrapper {
+              display: inline-flex;
+              align-items: center;
+              position: relative;
+            }
+
+            .room-state {
+              margin-right: 1.8rem;
+              border-radius: 50%;
+              width: 16px;
+              height: 16px;
+              cursor: pointer;
+              border: 1px solid #d1d5db;
+              &:focus {
+                outline: 1px solid $primary;
+              }
+            }
+
+            .room-state.clean {
+              background: #ffffff;
+            }
+            .room-state.dirty {
+              background: #ef4444;
+            }
+
+            .room-state-menu {
+              position: fixed;
+              z-index: 99999;
+              top: 35px;
+              left: 40px;
+              background: white;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+              padding: 6px;
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+              min-width: 200px;
+            }
+
+            .room-state-option {
+              width: 100%;
+              display: flex;
+              gap: 10px;
+              padding: 8px 10px;
+              border: 0;
+              background: transparent;
+              cursor: pointer;
+              border-radius: 6px;
+              font-size: 14px;
+              &:hover {
+                background: #f3f4f6;
+              }
+            }
+
+            .dot {
+              width: 18px;
+              height: 18px;
+              border-radius: 50%;
+              border: 1px solid #d1d5db;
+            }
+            .dot.clean {
+              background: #ffffff;
+            }
+            .dot.dirty {
+              background: #ef4444;
+              border-color: #ef4444;
             }
           }
         }
@@ -2313,7 +2458,7 @@ export default defineComponent({
         min-width: $left_column_desktop_width;
         border-right: 2px solid #d9d9d9;
         .top-left-content {
-          padding-left: 2.5rem;
+          padding-left: 1.5rem;
 
           .left {
             flex-direction: column;
@@ -2417,7 +2562,7 @@ export default defineComponent({
       .bottom-left {
         width: 235px;
         border-right: 2px solid #d9d9d9;
-        padding-left: 2.5rem;
+        padding-left: 1.5rem;
         &::-webkit-scrollbar:horizontal {
           height: 0;
           width: 0;
@@ -2434,7 +2579,7 @@ export default defineComponent({
           .room-left {
             height: $cell_desktop_height;
             font-size: 17px;
-            padding-right: 2.5rem;
+            padding-right: 1.5rem;
             .line {
               display: none;
             }
@@ -2462,6 +2607,17 @@ export default defineComponent({
                 .capacity-image-mobile {
                   display: none;
                 }
+              }
+              .room-right {
+                align-items: center;
+              }
+              .room-state {
+                margin-left: 1rem;
+                margin-right: 0;
+              }
+              .room-state-option {
+                font-size: 16px;
+                align-items: center;
               }
             }
             &:last-child {

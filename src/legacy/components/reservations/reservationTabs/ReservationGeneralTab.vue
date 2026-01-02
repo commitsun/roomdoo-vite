@@ -643,6 +643,7 @@ export default defineComponent({
               toCheckout: true,
             });
             await store.dispatch('reservations/fetchReservation', currentReservation.value?.id);
+            await store.dispatch('rooms/fetchRooms', store.state.properties.activeProperty?.id);
             if (router.currentRoute.value.name === 'planning') {
               await store.dispatch('planning/fetchPlanning', {
                 dateStart: store.state.planning.dateStart,
