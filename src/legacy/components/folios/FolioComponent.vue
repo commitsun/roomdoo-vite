@@ -1106,8 +1106,8 @@ export default defineComponent({
       dialogService.open({
         iconHeader: '/app-images/diary.svg',
         header: partner.value?.comment
-          ? 'Editar internas del cliente'
-          : 'Añadir internas del cliente',
+          ? 'Editar notas internas del cliente'
+          : 'Añadir notas internas del cliente',
         content: markRaw(PartnerComments),
         props: {
           partnerId: partner.value?.id,
