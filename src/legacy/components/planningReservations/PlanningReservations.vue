@@ -567,7 +567,7 @@ export default defineComponent({
   emits: ['updateSelectedDate', 'hidePricelist', 'moveOneDayForward', 'moveOneDayBackward'],
   setup(props, context) {
     const MENU_GAP = 6;
-    const MENU_HEIGHT = 135;
+    const MENU_HEIGHT = 100;
     const store = useStore();
     const { refreshPlanning } = usePlanning();
 
@@ -576,6 +576,7 @@ export default defineComponent({
     const roomStateById = ref<Record<number, string>>({});
     const menuPosition = ref({ top: 0, left: 0 });
     const menuPlacement = ref<'down' | 'up'>('down');
+    const roomStateEl = ref<HTMLElement | null>(null);
 
     const colorList = ['blue', 'blueviolet', 'lime', 'gold', 'fuchsia', 'olive'];
     let oldWidth = window.innerWidth;
@@ -815,8 +816,13 @@ export default defineComponent({
     };
 
     const toggleRoomStateMenu = (roomId: number, ev: MouseEvent) => {
+      const target = ev.currentTarget as HTMLElement | null;
+      roomStateEl.value = target;
+
       if (openRoomId.value === roomId) {
         openRoomId.value = null;
+        roomStateEl.value?.blur?.();
+        roomStateEl.value = null;
         return;
       }
 
@@ -834,6 +840,17 @@ export default defineComponent({
 
       menuPosition.value = { top, left };
       openRoomId.value = roomId;
+    };
+
+    const closeRoomStateMenuOnScroll = () => {
+      if (openRoomId.value !== null) {
+        openRoomId.value = null;
+
+        if (roomStateEl.value?.isConnected) {
+          roomStateEl.value.blur();
+        }
+        roomStateEl.value = null;
+      }
     };
 
     const selectState = async (roomId: number, next: string) => {
@@ -1648,10 +1665,14 @@ export default defineComponent({
 
     onMounted(() => {
       window.addEventListener('resize', onScreenResize);
+      bottomLeft.value?.addEventListener('scroll', closeRoomStateMenuOnScroll, {
+        passive: true,
+      });
     });
 
     onUnmounted(() => {
       window.removeEventListener('resize', onScreenResize);
+      bottomLeft.value?.removeEventListener('scroll', closeRoomStateMenuOnScroll);
     });
 
     return {
