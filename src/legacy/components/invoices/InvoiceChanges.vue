@@ -322,7 +322,7 @@
                   {{
                     amountInvoiceLineTotal(
                       invoiceLine.id ?? 0,
-                      invoiceLine.saleLineId ?? 0
+                      invoiceLine.saleLineId ?? 0,
                     ).toFixed(2)
                   }}
                   €
@@ -468,6 +468,7 @@ import type { PartnerInterface } from '@/legacy/interfaces/PartnerInterface';
 
 import { useStore } from '@/legacy/store';
 import { usePartner } from '@/legacy/utils/usePartner';
+import { useRouter } from 'vue-router';
 
 import CustomButton from '@/legacy/components/roomdooComponents/CustomButton.vue';
 import CustomIcon from '@/legacy/components/roomdooComponents/CustomIcon.vue';
@@ -515,6 +516,7 @@ export default defineComponent({
     // composables
     const store = useStore();
     const { fetchPartners } = usePartner();
+    const router = useRouter();
     // refs
     const isSimplifiedInvoice = ref(false);
     const saleLinesToSend = ref([] as FolioSaleLineInterface[]);
@@ -573,7 +575,7 @@ export default defineComponent({
 
     const checkMinimumPartnerData = (partner: PartnerInterface) => {
       const partnerCountryCode = store.state.countries.countries.find(
-        (el) => el.id === partner.countryId
+        (el) => el.id === partner.countryId,
       )?.code;
       if (
         !partner?.name ||
@@ -600,7 +602,7 @@ export default defineComponent({
             await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.countryId);
             partnerStateName.value =
               store.state.countryStates.countryStates.find(
-                (el) => el.id === partnerToAdd.value?.stateId
+                (el) => el.id === partnerToAdd.value?.stateId,
               )?.name ?? '';
           } catch {
             dialogService.open({
@@ -633,7 +635,7 @@ export default defineComponent({
               .normalize('NFKD')
               .replace(/[^\w]/g, '')
               .toLowerCase()
-              .indexOf(name.normalize('NFKD').replace(/[^\w]/g, '').toLowerCase()) > -1
+              .indexOf(name.normalize('NFKD').replace(/[^\w]/g, '').toLowerCase()) > -1,
         );
       }
     };
@@ -644,7 +646,7 @@ export default defineComponent({
         if (store.state.folios.currentFolio?.partnerId) {
           await store.dispatch(
             'partners/fetchCurrentPartner',
-            store.state.folios.currentFolio.partnerId
+            store.state.folios.currentFolio.partnerId,
           );
           partners.value.push(store.state.partners.currentPartner ?? ({} as PartnerInterface));
         }
@@ -655,7 +657,7 @@ export default defineComponent({
               if (reservation.partnerId) {
                 await store.dispatch('partners/fetchCurrentPartner', reservation.partnerId);
                 partners.value.push(
-                  store.state.partners.currentPartner ?? ({} as PartnerInterface)
+                  store.state.partners.currentPartner ?? ({} as PartnerInterface),
                 );
               }
               await store.dispatch('checkinPartners/fetchCheckinPartners', reservation.id);
@@ -664,18 +666,18 @@ export default defineComponent({
                   if (checkinPartner.partnerId) {
                     await store.dispatch('partners/fetchCurrentPartner', checkinPartner.partnerId);
                     partners.value.push(
-                      store.state.partners.currentPartner ?? ({} as PartnerInterface)
+                      store.state.partners.currentPartner ?? ({} as PartnerInterface),
                     );
                   }
-                }
+                },
               );
 
               await Promise.all(fetchPartnerPromises);
-            })
+            }),
           );
         }
         partners.value = partners.value.filter(
-          (partner, index, self) => index === self.findIndex((t) => t.id === partner.id)
+          (partner, index, self) => index === self.findIndex((t) => t.id === partner.id),
         );
         itemsAutocompleteCustomer.value = partners.value.map((el) => ({
           value: el.id,
@@ -823,11 +825,11 @@ export default defineComponent({
         noMinimumPartnerDataError.value ||
         (props.isRenderSaleLines &&
           saleLinesToSend.value.some(
-            (el, index) => el.name === '' && isLineRemoved.value[index]
+            (el, index) => el.name === '' && isLineRemoved.value[index],
           )) ||
         (props.isRenderInvoiceLines &&
           invoiceLinesToSend.value.some(
-            (el, index) => el.name === '' && isLineRemoved.value[index]
+            (el, index) => el.name === '' && isLineRemoved.value[index],
           ))
         //
       ) {
@@ -878,8 +880,16 @@ export default defineComponent({
           };
           await store.dispatch('folios/updateFolioInvoice', payload);
         }
-        void store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
-        void store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
+        await store.dispatch('folios/fetchFolioSaleLines', folio.value?.id);
+        await store.dispatch('folios/fetchFolioInvoices', folio.value?.id);
+        if (router.currentRoute.value.name === 'planning') {
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+        }
         context.emit('update:invoiceDialog', false);
         context.emit('close');
       } catch {
@@ -897,7 +907,7 @@ export default defineComponent({
       const saleLine = saleLinesToInvoice.value.find((el) => el.id === saleLineId);
       if (saleLine) {
         const saleLineSectionToAdd = saleLinesToInvoice.value.find(
-          (el) => el.displayType === 'line_section' && el.sectionId === saleLine.sectionId
+          (el) => el.displayType === 'line_section' && el.sectionId === saleLine.sectionId,
         );
         if (saleLineSectionToAdd) {
           const newInvoiceLineSection: InvoiceLineInterface = {
@@ -911,7 +921,7 @@ export default defineComponent({
             discount: saleLineSectionToAdd.discount,
           };
           const existsLineSectionInInvoice = invoiceLinesToSend.value.find(
-            (el) => el.saleLineId === saleLineSectionToAdd.id
+            (el) => el.saleLineId === saleLineSectionToAdd.id,
           );
           if (!existsLineSectionInInvoice) {
             invoiceLinesToSend.value.push(newInvoiceLineSection);
@@ -922,17 +932,17 @@ export default defineComponent({
               el.sectionId === saleLineSectionToAdd.sectionId &&
               el.displayType !== 'line_note' &&
               el.id !== saleLineSectionToAdd.id &&
-              el.id !== saleLine.id
+              el.id !== saleLine.id,
           );
           if (!hasAnotherLineInSection) {
             saleLinesToInvoice.value.splice(
               saleLinesToInvoice.value.findIndex((el) => el.id === saleLineSectionToAdd.id),
-              1
+              1,
             );
           }
         }
         const saleLineNoteToAdd = saleLinesToInvoice.value.find(
-          (el) => el.displayType === 'line_note' && el.sectionId === saleLine.sectionId
+          (el) => el.displayType === 'line_note' && el.sectionId === saleLine.sectionId,
         );
         if (saleLineNoteToAdd) {
           const newInvoiceLineNote: InvoiceLineInterface = {
@@ -946,7 +956,7 @@ export default defineComponent({
             discount: saleLineNoteToAdd.discount,
           };
           const existsLineNoteInInvoice = invoiceLinesToSend.value.find(
-            (el) => el.saleLineId === saleLineNoteToAdd.id
+            (el) => el.saleLineId === saleLineNoteToAdd.id,
           );
           if (!existsLineNoteInInvoice) {
             invoiceLinesToSend.value.push(newInvoiceLineNote);
@@ -957,12 +967,12 @@ export default defineComponent({
               el.sectionId === saleLineNoteToAdd.sectionId &&
               el.displayType !== 'line_section' &&
               el.id !== saleLineNoteToAdd.id &&
-              el.id !== saleLine.id
+              el.id !== saleLine.id,
           );
           if (!hasAnotherLineInSection) {
             saleLinesToInvoice.value.splice(
               saleLinesToInvoice.value.findIndex((el) => el.id === saleLineNoteToAdd.id),
-              1
+              1,
             );
           }
         }
@@ -980,7 +990,7 @@ export default defineComponent({
         isLineRemoved.value.push(true);
         saleLinesToInvoice.value.splice(
           saleLinesToInvoice.value.findIndex((el) => el.id === saleLineId),
-          1
+          1,
         );
       }
     };
@@ -1108,7 +1118,7 @@ export default defineComponent({
           if (!el) {
             pendingToInvoice.value += amountInvoiceLineTotal(
               invoiceLinesToSend.value[index].id ?? 0,
-              invoiceLinesToSend.value[index].saleLineId ?? 0
+              invoiceLinesToSend.value[index].saleLineId ?? 0,
             );
           } else {
             let difference = 0;
@@ -1157,7 +1167,7 @@ export default defineComponent({
             await store.dispatch('countryStates/fetchCountryStates', partnerToAdd.value.countryId);
             partnerStateName.value =
               store.state.countryStates.countryStates.find(
-                (el) => el.id === partnerToAdd.value?.stateId
+                (el) => el.id === partnerToAdd.value?.stateId,
               )?.name ?? '';
           } catch {
             dialogService.open({
@@ -1210,7 +1220,7 @@ export default defineComponent({
         }
         getPendingAmount();
       },
-      { deep: true }
+      { deep: true },
     );
 
     watch(
@@ -1225,7 +1235,7 @@ export default defineComponent({
         }
         getPendingAmount();
       },
-      { deep: true }
+      { deep: true },
     );
 
     watch(
@@ -1240,7 +1250,7 @@ export default defineComponent({
         }
         getPendingAmount();
       },
-      { deep: true }
+      { deep: true },
     );
 
     watch(partnersList, () => {
@@ -1321,11 +1331,11 @@ export default defineComponent({
                   if (partnerToAdd.value.stateId) {
                     await store.dispatch(
                       'countryStates/fetchCountryStates',
-                      partnerToAdd.value.countryId
+                      partnerToAdd.value.countryId,
                     );
                     partnerStateName.value =
                       store.state.countryStates.countryStates.find(
-                        (el) => el.id === partnerToAdd.value?.stateId
+                        (el) => el.id === partnerToAdd.value?.stateId,
                       )?.name ?? '';
                   }
                 }
