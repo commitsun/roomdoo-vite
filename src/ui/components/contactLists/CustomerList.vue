@@ -411,8 +411,8 @@
             <div class="flex justify-between">
               <Button
                 size="small"
-                variant="outlined"
-                :label="t('contacts.clear')"
+                class="p-button-secondary !text-sm"
+                :label="t('contacts.cancel')"
                 @click="onClearPhoneFilter(filterModel, filterCallback, applyFilter)"
               />
               <Button
