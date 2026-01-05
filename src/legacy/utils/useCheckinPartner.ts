@@ -66,6 +66,14 @@ export function useCheckinPartner() {
         await store.dispatch('checkinPartners/updateCheckinPartner', checkinPartner);
         await store.dispatch('checkinPartners/fetchCheckinPartners', checkinPartner.reservationId);
         await store.dispatch('reservations/fetchReservation', checkinPartner.reservationId);
+        if (router.currentRoute.value.name === 'planning') {
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+        }
       }
     } catch {
       dialogService.open({
@@ -94,7 +102,7 @@ export function useCheckinPartner() {
     try {
       const response = (await store.dispatch(
         'checkinPartners/fetchPdfAllCheckins',
-        store.state.reservations.currentReservation?.id
+        store.state.reservations.currentReservation?.id,
       )) as AxiosResponse<{ binary: string }>;
       if (response.data && response.data) {
         const content = base64ToArrayBuffer(`${response.data.binary}`);
@@ -180,7 +188,7 @@ export function useCheckinPartner() {
       void store.dispatch('layout/showSpinner', true);
       const response = (await store.dispatch(
         'checkinPartners/fetchPdfAllCheckins',
-        store.state.reservations.currentReservation?.id
+        store.state.reservations.currentReservation?.id,
       )) as AxiosResponse<{ binary: string }>;
       if (response.data) {
         const content = base64ToArrayBuffer(`${response.data.binary}`);
@@ -213,11 +221,11 @@ export function useCheckinPartner() {
         store.dispatch('reservations/fetchReservation', checkinPartner.reservationId),
         store.dispatch(
           'checkinPartners/fetchCheckinPartners',
-          store.state.reservations.currentReservation?.id
+          store.state.reservations.currentReservation?.id,
         ),
         store.dispatch(
           'checkinPartners/fetchFolioCheckinPartners',
-          store.state.folios.currentFolio?.id
+          store.state.folios.currentFolio?.id,
         ),
       ]);
       if (router.currentRoute.value.name === 'planning') {
@@ -262,8 +270,8 @@ export function useCheckinPartner() {
               reservationId,
               checkinPartnerId: checkinPartner.id,
             });
-          }
-        )
+          },
+        ),
       );
       await store.dispatch('reservations/fetchReservation', reservationId);
       await store.dispatch('checkinPartners/fetchCheckinPartners', reservationId);
@@ -289,7 +297,7 @@ export function useCheckinPartner() {
   const validateDocumentNumber = (
     documentType: string,
     documentNumber: string,
-    documentCountryId: number
+    documentCountryId: number,
   ) => {
     let result = true;
     if (
@@ -316,7 +324,7 @@ export function useCheckinPartner() {
   const checkSpanishDocument = (
     partner: CheckinPartnerInterface,
     isDNI: boolean,
-    isNIE: boolean
+    isNIE: boolean,
   ): boolean => {
     if (!isDNI && !isNIE) return true;
     if (isDNI) return Boolean(partner.documentSupportNumber && partner.lastname2);
@@ -326,7 +334,7 @@ export function useCheckinPartner() {
 
   const checkSpanishResidence = (
     partner: CheckinPartnerInterface,
-    livesInSpain: boolean
+    livesInSpain: boolean,
   ): boolean => {
     const result = !livesInSpain || (!!partner.countryState && partner.countryState !== 0);
     return result;
@@ -336,7 +344,7 @@ export function useCheckinPartner() {
     partner: CheckinPartnerInterface,
     isDNI: boolean,
     isNIE: boolean,
-    livesInSpain: boolean
+    livesInSpain: boolean,
   ): boolean => {
     let isUnderFourteen = false;
     let isUnderEighteen = false;
@@ -369,7 +377,7 @@ export function useCheckinPartner() {
             partner.documentType !== 0 &&
             partner.documentNumber)) &&
         checkSpanishDocument(partner, isDNI, isNIE) &&
-        checkSpanishResidence(partner, livesInSpain)
+        checkSpanishResidence(partner, livesInSpain),
     );
     return result;
   };

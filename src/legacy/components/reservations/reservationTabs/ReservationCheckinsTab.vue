@@ -416,6 +416,14 @@ export default defineComponent({
           store.dispatch('reservations/fetchReservation', reservation.value?.id),
           store.dispatch('checkinPartners/fetchCheckinPartners', reservation.value?.id),
         ]);
+        if (router.currentRoute.value.name === 'planning') {
+          await store.dispatch('planning/fetchPlanning', {
+            dateStart: store.state.planning.dateStart,
+            dateEnd: store.state.planning.dateEnd,
+            propertyId: store.state.properties.activeProperty?.id,
+            availabilityPlanId: store.state.availabilityPlans.activeAvailabilityPlan?.id,
+          });
+        }
       } catch {
         dialogService.open({
           header: 'Error',
