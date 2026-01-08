@@ -3,7 +3,7 @@
     <div class="top">
       <img src="/app-images/icon-check-blue.svg" class="check-icon" />
       <div class="checkin-name">
-        {{ currentCheckinName }}
+        {{ currentCheckinName.replace('null', '') }}
       </div>
     </div>
     <div class="icons">
@@ -28,7 +28,7 @@
               checkinPartners.every(
                 (checkinPartner) =>
                   checkinPartner.checkinPartnerState === 'onboard' ||
-                  checkinPartner.checkinPartnerState === 'precheckin'
+                  checkinPartner.checkinPartnerState === 'precheckin',
               )
             "
           >
@@ -84,8 +84,8 @@ export default defineComponent({
         props.checkinPartners.filter(
           (checkinPartner) =>
             checkinPartner.checkinPartnerState === 'draft' ||
-            checkinPartner.checkinPartnerState === 'dummy'
-        ).length
+            checkinPartner.checkinPartnerState === 'dummy',
+        ).length,
     );
     const getIconColor = (checkinPartner: CheckinPartnerInterface) => {
       let color = 'rgba(0, 128, 0, 0.66)';

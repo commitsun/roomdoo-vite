@@ -23,7 +23,7 @@
           class="btn-checkin-manage-link"
           :class="{ 'btn-checkin-manage': isCheckinTodayButton }"
           v-else
-          @click="isCheckinFlowStepperOpen = true"
+          @click="openCheckinFlow()"
         >
           <img v-if="isCheckinTodayButton" src="/app-images/check-mark.svg" />
           <span>
@@ -170,13 +170,19 @@
         @doCheckin="performDoCheckin(checkinPartner)"
         @displayForm="setActiveCheckinPartnerAndDisplayForm(checkinPartner)"
         @removeCheckinPartner="setActiveCheckinPartnerAndRemove(checkinPartner)"
+        @selectActiveCheckinPartner="openCheckinFlowAndSelectActiveCheckinPartner(checkinPartner)"
         isFromDrawer
       />
     </div>
   </div>
   <div class="checkin-flow-overlay" v-if="isCheckinFlowStepperOpen" />
   <Transition name="checkin-flow-transition">
-    <PrivateCheckinFlow @closeCheckinFlow="closeCheckinFlow()" v-if="isCheckinFlowStepperOpen" />
+    <PrivateCheckinFlow
+      @closeCheckinFlow="closeCheckinFlow()"
+      v-if="isCheckinFlowStepperOpen"
+      :isOpenInEntryTypeStep="isOpenInEntryTypeStep"
+      :activeCheckinPartner="activeCheckinPartner"
+    />
   </Transition>
 </template>
 <script lang="ts">
@@ -237,6 +243,7 @@ export default defineComponent({
     const isCheckinMenuOpen = ref(false);
     const showSegmentationModal = ref(false);
     const showAdultsModal = ref(false);
+    const isOpenInEntryTypeStep = ref(false);
 
     const checkinPartnerSegmentation: Ref<CheckinPartnerInterface | null> = ref(null);
     const activeCheckinPartner: Ref<CheckinPartnerInterface | null> = ref(null);
@@ -267,6 +274,20 @@ export default defineComponent({
           (category) => category.id === reservation.value?.segmentationId,
         )?.name,
     );
+
+    const openCheckinFlow = () => {
+      activeCheckinPartner.value = null;
+      isOpenInEntryTypeStep.value = false;
+      isCheckinFlowStepperOpen.value = true;
+    };
+
+    const openCheckinFlowAndSelectActiveCheckinPartner = (
+      checkinPartner: CheckinPartnerInterface,
+    ) => {
+      activeCheckinPartner.value = checkinPartner;
+      isOpenInEntryTypeStep.value = true;
+      isCheckinFlowStepperOpen.value = true;
+    };
 
     const closeCheckinFlow = () => {
       isCheckinFlowStepperOpen.value = false;
@@ -699,6 +720,7 @@ export default defineComponent({
       activeCheckinPartner,
       isFormDisplayed,
       isCheckinTodayButton,
+      isOpenInEntryTypeStep,
       isCheckinToday,
       setActiveCheckinPartnerAndDisplayForm,
       closeCheckinFlow,
@@ -728,6 +750,8 @@ export default defineComponent({
       showSegmentation,
       checkinMandatoryDataComplete,
       printCheckin,
+      openCheckinFlow,
+      openCheckinFlowAndSelectActiveCheckinPartner,
     };
   },
 });
