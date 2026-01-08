@@ -386,13 +386,16 @@
                       </div>
                       <CustomIcon
                         :imagePath="
-                          day.reservationLines[0].adults > 1
-                            ? '/app-images/icon-users-light-blue.svg'
-                            : '/app-images/icon-user-light-blue.svg'
+                          day.reservationLines[0].precheckinStatus === 'completed'
+                            ? '/app-images/person_check.svg'
+                            : day.reservationLines[0].precheckinStatus === 'partial'
+                              ? '/app-images/person_edit.svg'
+                              : '/app-images/person_off.svg'
                         "
-                        width="12px"
-                        height="12px"
-                        :color="reservationIconColor(day.reservationLines[0])"
+                        width="17px"
+                        height="17px"
+                        color="#FFFFFF"
+                        style="margin-bottom: 2px"
                       />
                     </div>
                   </div>
