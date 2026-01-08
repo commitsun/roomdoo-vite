@@ -946,7 +946,7 @@ export default defineComponent({
         editingCheckinPartner.value
       ) {
         await saveCheckinPartner(editingCheckinPartner.value);
-        context.emit('continueCheckinFlowFromForm');
+        context.emit('continueCheckinFlowFromForm', editingCheckinPartner.value);
         context.emit('close');
       }
     };
@@ -961,7 +961,7 @@ export default defineComponent({
           context.emit('moveToSegmentation', editingCheckinPartner.value);
         } else {
           await doCheckin(editingCheckinPartner.value);
-          context.emit('continueCheckinFlowFromForm');
+          context.emit('continueCheckinFlowFromForm', editingCheckinPartner.value);
           context.emit('close');
         }
       }

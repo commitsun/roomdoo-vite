@@ -59,7 +59,7 @@
           width="18px"
           height="18px"
           tabindex="1"
-          @click.stop="openCheckinPartnerDialog()"
+          @click.stop="$emit('selectActiveCheckinPartner')"
           class="cursor-pointer"
         />
       </span>
@@ -102,7 +102,7 @@
             <span>{{ $t('view_checkin') }}</span>
           </div>
           <div
-            @mousedown.stop="$emit('displayForm')"
+            @mousedown.stop="$emit('selectActiveCheckinPartner')"
             v-if="checkinPartnerState === 'precheckin' || checkinPartnerState === 'draft'"
           >
             <span>{{ $t('edit_guest') }}</span>
@@ -446,18 +446,6 @@ export default defineComponent({
       }
     };
 
-    const openCheckinPartnerDialog = () => {
-      const checkinPartner = store.state.checkinPartners.checkinpartners[props.checkinPartnerIndex];
-      checkinPartner.documentNumber = props.documentNumber || '';
-      dialogService.open({
-        header: `${checkinPartner.name}`,
-        content: markRaw(CheckinPartnerForm),
-        props: {
-          checkinPartner,
-        },
-      });
-    };
-
     onMounted(() => {
       if (props.isCollapsible) {
         isBodyOpen.value = false;
@@ -470,7 +458,6 @@ export default defineComponent({
       stateColor,
       copyDocumentNumberToClipboard,
       hideTooltip,
-      openCheckinPartnerDialog,
       isUnknownGuest,
       isBodyOpen,
       doCheckinButton,
@@ -535,7 +522,7 @@ export default defineComponent({
       max-width: 60%;
       display: flex;
       align-items: center;
-      margin-left: calc(0.5rem + 12px);
+      margin-left: 0.5rem;
       .checkin-partner-unknown-text {
         margin-right: 5px;
       }

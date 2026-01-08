@@ -18,13 +18,13 @@
             v-if="isFormDisplayed"
             :checkinPartner="activeCheckinPartner"
             class="checkin-partner-form"
-            @continueCheckinFlowFromForm="continueCheckinFlowFromForm()"
+            @continueCheckinFlowFromForm="continueCheckinFlowFromForm"
             @moveToSegmentation="closeFormAndMoveToSegmentation($event)"
           />
           <CheckinFlowFingerSign
             v-else-if="isFingerSignDisplayed"
-            :checkin="(currentReservation?.checkin as Date)"
-            :checkout="(currentReservation?.checkout as Date)"
+            :checkin="currentReservation?.checkin as Date"
+            :checkout="currentReservation?.checkout as Date"
             :roomTypeName="currentReservation?.roomTypeName ?? ''"
             :cardexWarning="activeProperty?.cardexWarning ?? ''"
             :reservationAmount="currentReservation?.priceTotal ?? 0"
@@ -45,8 +45,8 @@
             :partnerName="currentReservation?.partnerName ?? ''"
             :reservationCode="currentReservation?.name ?? ''"
             :nights="currentReservation?.nights ?? 0"
-            :checkin="(currentReservation?.checkin as Date)"
-            :checkout="(currentReservation?.checkout as Date)"
+            :checkin="currentReservation?.checkin as Date"
+            :checkout="currentReservation?.checkout as Date"
             :adults="currentReservation?.adults ?? 0"
             :children="currentReservation?.children ?? 0"
             :segmentationId="currentReservation?.segmentationId ?? 0"
@@ -59,7 +59,7 @@
               <CheckinCardFlow
                 class="checkin-card-flow"
                 v-for="(checkinPartner, index) in checkinPartners.filter(
-                  (cp) => cp.checkinPartnerState !== 'dummy'
+                  (cp) => cp.checkinPartnerState !== 'dummy',
                 )"
                 :key="checkinPartner.id"
                 :firstname="checkinPartner.firstname"
@@ -77,7 +77,7 @@
                     checkinPartner,
                     checkinPartner.documentType === DOCUMENT_TYPE_DNI,
                     checkinPartner.documentType === DOCUMENT_TYPE_NIE,
-                    checkinPartner.countryId === NATIONALITY_CODE_SPAIN
+                    checkinPartner.countryId === NATIONALITY_CODE_SPAIN,
                   )
                 "
                 :isCheckinToday="isCheckinToday(checkinPartner)"
@@ -202,7 +202,7 @@
                     activeCheckinPartner,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE,
-                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN
+                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN,
                   )
                 "
                 :isCheckinToday="isCheckinToday(activeCheckinPartner)"
@@ -304,7 +304,7 @@
                     activeCheckinPartner,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE,
-                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN
+                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN,
                   )
                 "
                 :isCheckinToday="isCheckinToday(activeCheckinPartner)"
@@ -323,7 +323,13 @@
             @next="nextStep()"
             @closeCheckinFlow="closeCheckinFlow()"
             :currentIndexCheckin="currentIndexCheckin"
-            :documentType="activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI ? 'D' : activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE ? 'N' : ''"
+            :documentType="
+              activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI
+                ? 'D'
+                : activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE
+                  ? 'N'
+                  : ''
+            "
             @setIsAllowedNextStep="setIsAllowedNextStep($event)"
             :step="currentStepNumber"
             @persistCheckinPartner="persistCheckinPartner"
@@ -477,7 +483,7 @@
                     activeCheckinPartner,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_DNI,
                     activeCheckinPartner.documentType === DOCUMENT_TYPE_NIE,
-                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN
+                    activeCheckinPartner.countryId === NATIONALITY_CODE_SPAIN,
                   )
                 "
                 :isCheckinToday="isCheckinToday(activeCheckinPartner)"
@@ -521,7 +527,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, computed, type Ref, watch } from 'vue';
+import { defineComponent, ref, computed, type Ref, watch, onMounted } from 'vue';
 import { type CheckinPartnerInterface } from '@/legacy/interfaces/CheckinPartnerInterface';
 import { useI18n } from 'vue-i18n';
 
@@ -588,6 +594,17 @@ type TypeStep =
   | 'feedback';
 
 export default defineComponent({
+  props: {
+    isOpenInEntryTypeStep: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    activeCheckinPartner: {
+      type: Object as () => CheckinPartnerInterface | null,
+      required: false,
+    },
+  },
   components: {
     CheckinFlowStart,
     ReservationSegmentation,
@@ -626,17 +643,17 @@ export default defineComponent({
     const currentAfterEnterHandler = ref<(() => void) | null>(null);
     // constant for country spain
     const NATIONALITY_CODE_SPAIN = store.state.countries.countries.find(
-      (el) => el.code === 'ES'
+      (el) => el.code === 'ES',
     )?.id;
 
     // constant for document type DNI
     const DOCUMENT_TYPE_DNI = store.state.documentType.documentType.find(
-      (el) => el.code === 'D'
+      (el) => el.code === 'D',
     )?.id;
 
     // constant for document type NIE
     const DOCUMENT_TYPE_NIE = store.state.documentType.documentType.find(
-      (el) => el.code === 'N'
+      (el) => el.code === 'N',
     )?.id;
 
     // checkin partner common methods
@@ -684,7 +701,7 @@ export default defineComponent({
 
     const currentIndexCheckin = computed(() => {
       const index = store.state.checkinPartners.checkinpartners.findIndex(
-        (el) => el.id === activeCheckinPartner.value.id
+        (el) => el.id === activeCheckinPartner.value.id,
       );
       return index;
     });
@@ -715,7 +732,7 @@ export default defineComponent({
         responsibleCheckinPartnerId: cp.responsibleCheckinPartnerId ?? 0,
         signature: cp.signature ?? '',
         zip: cp.zip ?? '',
-      }))
+      })),
     );
 
     const roomTypeName = computed(() => {
@@ -723,7 +740,7 @@ export default defineComponent({
       if (currentReservation.value?.roomTypeId) {
         result =
           store.state.roomTypes.roomTypes.find(
-            (rt) => rt.id === currentReservation.value?.roomTypeId
+            (rt) => rt.id === currentReservation.value?.roomTypeId,
           )?.name ?? '';
       }
       return result;
@@ -831,7 +848,7 @@ export default defineComponent({
         isFingerSignDisplayed.value = false;
       }
       let currentIndex = checkinPartners.value.findIndex(
-        (el) => el.id === activeCheckinPartner.value.id
+        (el) => el.id === activeCheckinPartner.value.id,
       );
       if (currentIndex !== -1) {
         currentIndex += 1;
@@ -860,32 +877,32 @@ export default defineComponent({
 
       // active partner index
       const index = checkinPartners.value.findIndex(
-        (el) => el.id === activeCheckinPartner.value.id
+        (el) => el.id === activeCheckinPartner.value.id,
       );
 
       // next dummy with greater index
       let nextActiveCheckinPartner = checkinPartners.value.find(
-        (value, i) => value.checkinPartnerState === 'dummy' && i > index
+        (value, i) => value.checkinPartnerState === 'dummy' && i > index,
       );
 
       // next draft with greater index
       if (!nextActiveCheckinPartner) {
         nextActiveCheckinPartner = checkinPartners.value.find(
-          (value, i) => value.checkinPartnerState === 'draft' && i > index
+          (value, i) => value.checkinPartnerState === 'draft' && i > index,
         );
       }
 
       // next dummy
       if (!nextActiveCheckinPartner) {
         nextActiveCheckinPartner = checkinPartners.value.find(
-          (value) => value.checkinPartnerState === 'dummy'
+          (value) => value.checkinPartnerState === 'dummy',
         );
       }
 
       // next draft
       if (!nextActiveCheckinPartner) {
         nextActiveCheckinPartner = checkinPartners.value.find(
-          (value) => value.checkinPartnerState === 'draft'
+          (value) => value.checkinPartnerState === 'draft',
         );
       }
 
@@ -1021,7 +1038,7 @@ export default defineComponent({
       } else if (currentStep.value === 'gender') {
         const someAddressExists = store.state.checkinPartners.checkinpartners.find(
           (el) =>
-            el.countryId && el.residenceStreet && el.zip && el.residenceCity && el.countryState
+            el.countryId && el.residenceStreet && el.zip && el.residenceCity && el.countryState,
         );
         if (someAddressExists) {
           currentStep.value = 'addressOptions';
@@ -1046,7 +1063,7 @@ export default defineComponent({
         currentStep.value = 'feedback';
       } else if (currentStep.value === 'feedback') {
         const numCheckinPartnersDraftOrPrecheckin = checkinPartners.value.filter(
-          (cp) => cp.checkinPartnerState === 'dummy' || cp.checkinPartnerState === 'draft'
+          (cp) => cp.checkinPartnerState === 'dummy' || cp.checkinPartnerState === 'draft',
         ).length;
         if (numCheckinPartnersDraftOrPrecheckin > 0) {
           nextCheckinPartnerToComplete();
@@ -1073,7 +1090,7 @@ export default defineComponent({
       } else if (currentStep.value === 'residenceCountry') {
         const someAddressExists = store.state.checkinPartners.checkinpartners.find(
           (el) =>
-            el.countryId && el.residenceStreet && el.zip && el.residenceCity && el.countryState
+            el.countryId && el.residenceStreet && el.zip && el.residenceCity && el.countryState,
         );
         if (someAddressExists) {
           currentStep.value = 'addressOptions';
@@ -1168,7 +1185,8 @@ export default defineComponent({
     };
 
     // used in form
-    const continueCheckinFlowFromForm = () => {
+    const continueCheckinFlowFromForm = (checkinPartner: CheckinPartnerInterface) => {
+      activeCheckinPartner.value = checkinPartner;
       continueCheckinFlow();
       documentImageBase64Back.value = '';
       documentImageBase64Front.value = '';
@@ -1326,7 +1344,7 @@ export default defineComponent({
         //          null, it means that the ocr process failed
         if (
           Object.values(checkinPartnerOcr.value).every(
-            (field) => field === null || field === '' || field === 0
+            (field) => field === null || field === '' || field === 0,
           )
         ) {
           dialogService.open({
@@ -1366,6 +1384,14 @@ export default defineComponent({
         activeCheckinPartner.value = {
           ...(DEFAULT_CHECKIN_PARTNER_VALUES as CheckinPartnerInterface),
         };
+      }
+    });
+
+    onMounted(() => {
+      if (props.isOpenInEntryTypeStep && props.activeCheckinPartner) {
+        currentStep.value = 'entryType';
+        props.activeCheckinPartner.documentNumber = props.activeCheckinPartner.documentNumber || '';
+        setActiveCheckinPartner(props.activeCheckinPartner);
       }
     });
 
