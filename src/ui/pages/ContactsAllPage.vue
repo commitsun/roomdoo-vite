@@ -78,19 +78,49 @@
       </TabList>
       <TabPanels>
         <TabPanel value="all">
-          <ContactList :total="numContacts" :isLoadingPage="isLoadingPage" />
+          <SharedContactList
+            type="contact"
+            :total="numContacts"
+            :isLoadingPage="isLoadingPage"
+            :contacts="contactsStore.contacts"
+            :fetchAction="contactsStore.fetchContacts"
+          />
         </TabPanel>
         <TabPanel value="customers">
-          <CustomerList :total="numCustomers" :isLoadingPage="isLoadingPage" />
+          <SharedContactList
+            type="customer"
+            :total="numCustomers"
+            :isLoadingPage="isLoadingPage"
+            :contacts="contactsStore.customers"
+            :fetchAction="contactsStore.fetchCustomers"
+          />
         </TabPanel>
         <TabPanel value="guests">
-          <GuestList :total="numGuests" :isLoadingPage="isLoadingPage" />
+          <SharedContactList
+            type="guest"
+            :total="numGuests"
+            :isLoadingPage="isLoadingPage"
+            :contacts="contactsStore.guests"
+            :fetchAction="contactsStore.fetchGuests"
+          />
         </TabPanel>
         <TabPanel value="agencies">
-          <AgencyList :total="numAgencies" :isLoadingPage="isLoadingPage" />
+          <SharedContactList
+            type="agency"
+            :total="numAgencies"
+            :isLoadingPage="isLoadingPage"
+            :contacts="contactsStore.agencies"
+            :fetchAction="contactsStore.fetchAgencies"
+          />
         </TabPanel>
         <TabPanel value="suppliers">
-          <SupplierList :total="numSuppliers" :isLoadingPage="isLoadingPage" />
+          <SharedContactList
+            type="supplier"
+            :total="numSuppliers"
+            :isLoadingPage="isLoadingPage"
+            :contacts="contactsStore.suppliers"
+            :fetchAction="contactsStore.fetchSuppliers"
+          />
         </TabPanel>
       </TabPanels>
     </Tabs>
@@ -108,11 +138,7 @@ import Badge from 'primevue/badge';
 import { Users, UserCheck, BedDouble, Store, Package, Menu } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
-import ContactList from '@/ui/components/contactLists/ContactList.vue';
-import CustomerList from '@/ui/components/contactLists/CustomerList.vue';
-import GuestList from '@/ui/components/contactLists/GuestList.vue';
-import SupplierList from '@/ui/components/contactLists/SupplierList.vue';
-import AgencyList from '@/ui/components/contactLists/AgencyList.vue';
+import SharedContactList from '@/ui/components/contactLists/SharedContactList.vue';
 import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useUserStore } from '@/infrastructure/stores/user';
@@ -129,11 +155,7 @@ export default defineComponent({
     TabPanels,
     TabPanel,
     Badge,
-    ContactList,
-    CustomerList,
-    GuestList,
-    SupplierList,
-    AgencyList,
+    SharedContactList,
     Users,
     UserCheck,
     BedDouble,
@@ -251,6 +273,8 @@ export default defineComponent({
       numGuests,
       numAgencies,
       numSuppliers,
+      // Store to pass refs
+      contactsStore,
     };
   },
 });
