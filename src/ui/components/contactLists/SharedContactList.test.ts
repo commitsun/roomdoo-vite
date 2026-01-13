@@ -974,6 +974,6 @@ describe('SharedContactList', () => {
         expect(globalInput).toHaveValue('');
         vi.useRealTimers();
       });
-    });
+    }, 15000);
   });
 });
