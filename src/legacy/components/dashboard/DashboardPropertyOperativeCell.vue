@@ -13,27 +13,31 @@
       </div>
 
       <div class="select-day">
-        <CustomSelect
-          iconDropdown="app-images/dropdown.svg"
-          :options="dateOptions"
-          v-model="dateOptionsSelected"
-          :optionsMarginTop="2"
-          :textBold="true"
-          :text2Bold="false"
-          focusable
+        <DatePicker
+          v-model="selectedDate"
+          dateFormat="dd/mm/yy"
+          :manualInput="false"
+          inputClass="w-full"
+          class="w-full cursor-pointer"
+          showIcon
+          fluid
+          iconDisplay="input"
         />
       </div>
     </div>
     <div
       class="yesterday-info"
-      v-if="dateOptionsSelected === 1 && pendingReservations[0]?.pendingArrivalReservations > 0"
+      v-if="
+        selectedDate.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0) &&
+        todayPendingYesterdayReservations > 0
+      "
       @click="openYesterdayPendingReservations()"
     >
       <div>
         <img src="/app-images/warning.svg" />
-        {{ pendingReservations[0]?.pendingArrivalReservations }}
-        reserva{{ pendingReservations[0]?.pendingArrivalReservations === 1 ? '' : 's' }} pendiente{{
-          pendingReservations[0]?.pendingArrivalReservations === 1 ? '' : 's'
+        {{ todayPendingYesterdayReservations }}
+        reserva{{ todayPendingYesterdayReservations === 1 ? '' : 's' }} pendiente{{
+          todayPendingYesterdayReservations === 1 ? '' : 's'
         }}
         de ayer ({{ yesterdayStr }})
       </div>
@@ -48,26 +52,21 @@
         </div>
         <div
           class="pending"
-          v-if="pendingReservations[dateOptionsSelected]?.pendingArrivalReservations !== 0"
+          v-if="pendingArrivalReservations !== 0"
           @click="openPendingCheckinReservations()"
         >
-          {{ pendingReservations[dateOptionsSelected]?.pendingArrivalReservations }} por llegar
+          {{ pendingArrivalReservations }} por llegar
         </div>
         <div class="all-completed" v-else>Completado</div>
         <div
           class="completed"
-          @click="
-            openCompletedCheckinReservations(
-              pendingReservations[dateOptionsSelected]?.completedArrivalReservations
-            )
-          "
+          @click="openCompletedCheckinReservations(completedArrivalReservations)"
           :class="{
-            'click-disabled':
-              pendingReservations[dateOptionsSelected]?.completedArrivalReservations === 0,
+            'click-disabled': completedArrivalReservations === 0,
           }"
         >
-          {{ pendingReservations[dateOptionsSelected]?.completedArrivalReservations }} completado{{
-            pendingReservations[dateOptionsSelected]?.completedArrivalReservations === 1 ? '' : 's'
+          {{ completedArrivalReservations }} completado{{
+            completedArrivalReservations === 1 ? '' : 's'
           }}
         </div>
       </div>
@@ -78,30 +77,21 @@
         </div>
         <div
           class="pending"
-          v-if="pendingReservations[dateOptionsSelected]?.pendingDepartureReservations !== 0"
+          v-if="pendingDepartureReservations !== 0"
           @click="openPendingCheckoutReservations()"
         >
-          {{ pendingReservations[dateOptionsSelected]?.pendingDepartureReservations }} por salir
+          {{ pendingDepartureReservations }} por salir
         </div>
         <div class="all-completed" v-else>Completado</div>
         <div
           class="completed"
           :class="{
-            'click-disabled':
-              pendingReservations[dateOptionsSelected]?.completedDepartureReservations === 0,
+            'click-disabled': completedDepartureReservations === 0,
           }"
-          @click="
-            openCompletedCheckoutReservations(
-              pendingReservations[dateOptionsSelected]?.completedDepartureReservations
-            )
-          "
+          @click="openCompletedCheckoutReservations(completedDepartureReservations)"
         >
-          {{ pendingReservations[dateOptionsSelected]?.completedDepartureReservations }}
-          completado{{
-            pendingReservations[dateOptionsSelected]?.completedDepartureReservations === 1
-              ? ''
-              : 's'
-          }}
+          {{ completedDepartureReservations }}
+          completado{{ completedDepartureReservations === 1 ? '' : 's' }}
         </div>
       </div>
     </div>
@@ -109,14 +99,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, onUnmounted } from 'vue';
+import { defineComponent, computed, ref, onUnmounted, watch, onMounted } from 'vue';
 import { useStore } from '@/legacy/store';
 import CustomSelect from '@/legacy/components/roomdooComponents/CustomSelect.vue';
 import { dialogService } from '@/legacy/services/DialogService';
+import DatePicker from 'primevue/datepicker';
 
 export default defineComponent({
   components: {
     CustomSelect,
+    DatePicker,
   },
   setup() {
     const store = useStore();
@@ -147,10 +139,23 @@ export default defineComponent({
       { id: 2, text: 'Mañana', text2: `(${tomorrowStr})` },
     ];
     const dateOptionsSelected = ref(1);
+    const selectedDate = ref<Date>(today);
+    const todayPendingYesterdayReservations = ref(0);
 
     const activeProperty = computed(() => store.state.properties.activeProperty);
     const pendingReservations = computed(() => store.state.dashboard.pendingReservations);
-
+    const pendingArrivalReservations = computed(
+      () => store.state.dashboard.pendingReservations[0]?.pendingArrivalReservations,
+    );
+    const pendingDepartureReservations = computed(
+      () => store.state.dashboard.pendingReservations[0]?.pendingDepartureReservations,
+    );
+    const completedArrivalReservations = computed(
+      () => store.state.dashboard.pendingReservations[0]?.completedArrivalReservations,
+    );
+    const completedDepartureReservations = computed(
+      () => store.state.dashboard.pendingReservations[0]?.completedDepartureReservations,
+    );
     const openYesterdayPendingReservations = async () => {
       void store.dispatch('layout/showSpinner', true);
       try {
@@ -174,13 +179,14 @@ export default defineComponent({
       void store.dispatch('layout/showSpinner', true);
       try {
         await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        if (dateOptionsSelected.value === 1) {
-          await store.dispatch('layout/setRightDrawerFilter', 'todayPendingCheckins');
-        } else {
-          await store.dispatch('layout/setRightDrawerFilter', 'tomorrowPendingCheckins');
-        }
+        await store.dispatch('layout/setRightDrawerFilter', 'isFromDashboard');
         await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+
+        await store.dispatch('folios/fetchFolios', {
+          propertyId: activeProperty.value?.id,
+          checkinDate: selectedDate.value,
+          pendingCheckin: true,
+        });
         void store.dispatch('layout/rightDrawerDisplayed', true);
       } catch {
         dialogService.open({
@@ -198,13 +204,14 @@ export default defineComponent({
       void store.dispatch('layout/showSpinner', true);
       try {
         await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        if (dateOptionsSelected.value === 1) {
-          await store.dispatch('layout/setRightDrawerFilter', 'todayCompletedCheckins');
-        } else {
-          return;
-        }
+        await store.dispatch('layout/setRightDrawerFilter', 'isFromDashboard');
         await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+
+        await store.dispatch('folios/fetchFolios', {
+          propertyId: activeProperty.value?.id,
+          checkinDate: selectedDate.value,
+          completedCheckin: true,
+        });
         void store.dispatch('layout/rightDrawerDisplayed', true);
       } catch {
         dialogService.open({
@@ -221,13 +228,14 @@ export default defineComponent({
       void store.dispatch('layout/showSpinner', true);
       try {
         await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        if (dateOptionsSelected.value === 1) {
-          await store.dispatch('layout/setRightDrawerFilter', 'todayPendingCheckouts');
-        } else {
-          await store.dispatch('layout/setRightDrawerFilter', 'tomorrowPendingCheckouts');
-        }
+        await store.dispatch('layout/setRightDrawerFilter', 'isFromDashboard');
         await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+
+        await store.dispatch('folios/fetchFolios', {
+          propertyId: activeProperty.value?.id,
+          checkoutDate: selectedDate.value,
+          pendingCheckout: true,
+        });
         void store.dispatch('layout/rightDrawerDisplayed', true);
       } catch {
         dialogService.open({
@@ -245,13 +253,14 @@ export default defineComponent({
       void store.dispatch('layout/showSpinner', true);
       try {
         await store.dispatch('layout/rightDrawerDisplayed', false);
-        await store.dispatch('layout/setRightDrawerFilter', '');
-        if (dateOptionsSelected.value === 1) {
-          await store.dispatch('layout/setRightDrawerFilter', 'todayCompletedCheckouts');
-        } else {
-          await store.dispatch('layout/setRightDrawerFilter', 'tomorrowCompletedCheckouts');
-        }
+        await store.dispatch('layout/setRightDrawerFilter', 'isFromDashboard');
         await store.dispatch('layout/changeRightDrawerContent', 'FolioList');
+
+        await store.dispatch('folios/fetchFolios', {
+          propertyId: activeProperty.value?.id,
+          checkoutDate: selectedDate.value,
+          completedCheckout: true,
+        });
         void store.dispatch('layout/rightDrawerDisplayed', true);
       } catch {
         dialogService.open({
@@ -264,6 +273,36 @@ export default defineComponent({
       }
     };
 
+    const fetchPendingReservations = async () => {
+      if (
+        selectedDate.value instanceof Date &&
+        selectedDate.value.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0)
+      ) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        await store.dispatch('dashboard/fetchPendingReservations', {
+          pmsPropertyId: activeProperty.value?.id,
+          dateFrom: yesterday,
+          dateTo: yesterday,
+        });
+        todayPendingYesterdayReservations.value = pendingArrivalReservations.value;
+      }
+      await store.dispatch('dashboard/fetchPendingReservations', {
+        pmsPropertyId: activeProperty.value?.id,
+        dateFrom: selectedDate.value,
+        dateTo: selectedDate.value,
+      });
+    };
+
+    watch(selectedDate, async () => {
+      fetchPendingReservations();
+    });
+
+    onMounted(async () => {
+      fetchPendingReservations();
+    });
+
     onUnmounted(() => {
       void store.dispatch('layout/setRightDrawerFilter', '');
     });
@@ -274,6 +313,12 @@ export default defineComponent({
       dateOptions,
       pendingReservations,
       yesterdayStr,
+      selectedDate,
+      pendingArrivalReservations,
+      pendingDepartureReservations,
+      completedArrivalReservations,
+      completedDepartureReservations,
+      todayPendingYesterdayReservations,
       openYesterdayPendingReservations,
       openPendingCheckinReservations,
       openCompletedCheckinReservations,

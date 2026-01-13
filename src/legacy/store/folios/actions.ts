@@ -30,6 +30,34 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
         .padStart(2, '0')}-${payload.dateEnd.getDate().toString().padStart(2, '0')}`;
       params += `&dateFrom=${from}&dateTo=${to}`;
     }
+    if (payload.checkinDate) {
+      const checkinDate = `${payload.checkinDate.getFullYear()}-${(
+        payload.checkinDate.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}-${payload.checkinDate.getDate().toString().padStart(2, '0')}`;
+      params += `&checkinDate=${checkinDate}`;
+    }
+    if (payload.checkoutDate) {
+      const checkoutDate = `${payload.checkoutDate.getFullYear()}-${(
+        payload.checkoutDate.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}-${payload.checkoutDate.getDate().toString().padStart(2, '0')}`;
+      params += `&checkoutDate=${checkoutDate}`;
+    }
+    if (payload.pendingCheckin) {
+      params += `&pendingCheckin=${payload.pendingCheckin}`;
+    }
+    if (payload.pendingCheckout) {
+      params += `&pendingCheckout=${payload.pendingCheckout}`;
+    }
+    if (payload.completedCheckin) {
+      params += `&completedCheckin=${payload.completedCheckin}`;
+    }
+    if (payload.completedCheckout) {
+      params += `&completedCheckout=${payload.completedCheckout}`;
+    }
     if (payload.filter || payload.filterByState) {
       if (payload.filter) {
         params += `&filter=${payload.filter}`;
@@ -165,7 +193,7 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
       partnerEmail: string;
       partnerPhone: string;
       partnerId: number;
-    }
+    },
   ) {
     return api.patch(`/folios/p/${payload.folioId}`, payload);
   },
@@ -193,13 +221,13 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
   },
   async cancelFolioReservations(
     context,
-    payload: { folioId: number; cancelReservations: boolean }
+    payload: { folioId: number; cancelReservations: boolean },
   ) {
     return api.patch(`/folios/p/${payload.folioId}`, payload);
   },
   async confirmFolioReservations(
     context,
-    payload: { folioId: number; confirmReservations: boolean }
+    payload: { folioId: number; confirmReservations: boolean },
   ) {
     return api.patch(`/folios/p/${payload.folioId}`, payload);
   },
@@ -245,7 +273,7 @@ const actions: ActionTree<FoliosStateInterface, StateInterface> = {
     payload: {
       folioId: number;
       reservations: ReservationInterface[];
-    }
+    },
   ) {
     payload.reservations.forEach((res: ReservationInterface) => {
       res.reservationLines?.forEach((line) => {
