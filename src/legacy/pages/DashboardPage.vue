@@ -661,11 +661,11 @@ export default defineComponent({
     const overnights = computed(() => store.state.dashboard.overnights);
     const occupiedRooms = computed(() => store.state.dashboard.linearGraphOccupancy);
     const occupiedRoomsComparative = computed(
-      () => store.state.dashboard.linearGraphOccupancyComparative
+      () => store.state.dashboard.linearGraphOccupancyComparative,
     );
     const dailyBillings = computed(() => store.state.dashboard.linearGraphBilling);
     const dailyBillingsComparative = computed(
-      () => store.state.dashboard.linearGraphBillingComparative
+      () => store.state.dashboard.linearGraphBillingComparative,
     );
     const cancelledOvernights = computed(() => store.state.dashboard.cancelledOvernights);
     const overbookings = computed(() => store.state.dashboard.overbookings);
@@ -700,11 +700,11 @@ export default defineComponent({
         store.dispatch('products/fetchProducts', store.state.properties.activeProperty?.id),
         store.dispatch(
           'notifications/fetchNotificationsReservationsToAssign',
-          activeProperty.value?.id
+          activeProperty.value?.id,
         ),
         store.dispatch(
           'boardServices/fetchBoardServices',
-          store.state.properties.activeProperty?.id
+          store.state.properties.activeProperty?.id,
         ),
         store.dispatch('accountJournals/fetchAccountJournals', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
@@ -718,7 +718,7 @@ export default defineComponent({
         }),
         store.dispatch(
           'availabilityPlans/fetchAvailabilityPlans',
-          store.state.properties.activeProperty?.id
+          store.state.properties.activeProperty?.id,
         ),
         store.dispatch('amenities/fetchAmenities', store.state.properties.activeProperty?.id),
         store.dispatch('saleChannels/fetchSaleChannels', store.state.properties.activeProperty?.id),
@@ -731,13 +731,8 @@ export default defineComponent({
         }),
         store.dispatch(
           'dashboard/fetchNumLastReceivedFolios',
-          store.state.properties.activeProperty?.id
+          store.state.properties.activeProperty?.id,
         ),
-        store.dispatch('dashboard/fetchPendingReservations', {
-          pmsPropertyId: store.state.properties.activeProperty?.id,
-          dateFrom: yesterday,
-          dateTo: tomorrow,
-        }),
         store.dispatch('dashboard/fetchStateRooms', {
           pmsPropertyId: store.state.properties.activeProperty?.id,
           dateFrom: yesterday,
@@ -804,11 +799,11 @@ export default defineComponent({
         }),
       ]);
       const pricelist = store.state.pricelists.pricelists.find(
-        (el) => el.id === store.state.properties.activeProperty?.defaultPricelistId
+        (el) => el.id === store.state.properties.activeProperty?.defaultPricelistId,
       );
       await store.dispatch('pricelists/setActivePricelist', pricelist);
       const availabilityPlan = store.state.availabilityPlans.availabilityPlans.find(
-        (el) => el.id === store.state.pricelists.activePricelist?.defaultAvailabilityPlanId
+        (el) => el.id === store.state.pricelists.activePricelist?.defaultAvailabilityPlanId,
       );
       await store.dispatch('availabilityPlans/setActiveAvailabilityPlan', availabilityPlan);
     };

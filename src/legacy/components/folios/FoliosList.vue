@@ -444,7 +444,8 @@ export default defineComponent({
           };
           if (
             store.state.layout.rightDrawerFilter === '' ||
-            store.state.layout.rightDrawerFilter !== 'overbookingReservations'
+            (store.state.layout.rightDrawerFilter !== 'overbookingReservations' &&
+              store.state.layout.rightDrawerFilter !== 'isFromDashboard')
           ) {
             await store.dispatch('folios/fetchFolios', payload);
           }
