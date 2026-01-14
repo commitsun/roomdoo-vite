@@ -100,7 +100,7 @@ describe('ContactsAllPage (tabs)', () => {
           Package,
         },
         stubs: {
-          SharedContactList: { template: '<div />' },
+          ContactList: { template: '<div />' },
         },
       },
     });

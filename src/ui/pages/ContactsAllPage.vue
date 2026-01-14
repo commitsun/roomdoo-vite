@@ -78,7 +78,7 @@
       </TabList>
       <TabPanels>
         <TabPanel value="all">
-          <SharedContactList
+          <ContactList
             type="contact"
             :total="numContacts"
             :isLoadingPage="isLoadingPage"
@@ -88,7 +88,7 @@
           />
         </TabPanel>
         <TabPanel value="customers">
-          <SharedContactList
+          <ContactList
             type="customer"
             :total="numCustomers"
             :isLoadingPage="isLoadingPage"
@@ -98,7 +98,7 @@
           />
         </TabPanel>
         <TabPanel value="guests">
-          <SharedContactList
+          <ContactList
             type="guest"
             :total="numGuests"
             :isLoadingPage="isLoadingPage"
@@ -108,7 +108,7 @@
           />
         </TabPanel>
         <TabPanel value="agencies">
-          <SharedContactList
+          <ContactList
             type="agency"
             :total="numAgencies"
             :isLoadingPage="isLoadingPage"
@@ -118,7 +118,7 @@
           />
         </TabPanel>
         <TabPanel value="suppliers">
-          <SharedContactList
+          <ContactList
             type="supplier"
             :total="numSuppliers"
             :isLoadingPage="isLoadingPage"
@@ -143,7 +143,7 @@ import Badge from 'primevue/badge';
 import { Users, UserCheck, BedDouble, Store, Package, Menu } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 
-import SharedContactList from '@/ui/components/contactLists/SharedContactList.vue';
+import ContactList from '@/ui/components/contactLists/ContactList.vue';
 import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useUserStore } from '@/infrastructure/stores/user';
@@ -160,7 +160,7 @@ export default defineComponent({
     TabPanels,
     TabPanel,
     Badge,
-    SharedContactList,
+    ContactList,
     Users,
     UserCheck,
     BedDouble,

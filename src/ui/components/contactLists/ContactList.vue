@@ -903,7 +903,7 @@ const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v
 type ListType = 'contact' | 'customer' | 'guest' | 'supplier' | 'agency';
 
 export default defineComponent({
-  name: 'SharedContactList',
+  name: 'ContactList',
   components: {
     DataTable,
     Column,

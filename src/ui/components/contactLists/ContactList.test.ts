@@ -16,7 +16,7 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import ToggleSwitch from 'primevue/toggleswitch';
 
-import SharedContactList from './SharedContactList.vue';
+import ContactList from './ContactList.vue';
 
 import type { Supplier, Customer, Agency, Guest, Contact } from '@/domain/entities/Contact';
 import primevuePlugin from '@/infrastructure/plugins/primevue';
@@ -271,7 +271,7 @@ vi.mock('@/infrastructure/stores/countries', () => ({
   }),
 }));
 
-describe('SharedContactList', () => {
+describe('ContactList', () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
@@ -280,7 +280,7 @@ describe('SharedContactList', () => {
   describe('Supplier type', () => {
     beforeEach(() => {
       const pinia = createTestingPinia();
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           type: 'supplier',
           isLoadingPage: false,
@@ -357,7 +357,7 @@ describe('SharedContactList', () => {
   describe('Customer type', () => {
     beforeEach(() => {
       const pinia = createTestingPinia();
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           type: 'customer',
           isLoadingPage: false,
@@ -439,7 +439,7 @@ describe('SharedContactList', () => {
   describe('Agency type', () => {
     beforeEach(() => {
       const pinia = createTestingPinia();
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           total: testAgencies.length,
           type: 'agency',
@@ -492,7 +492,7 @@ describe('SharedContactList', () => {
   describe('Guest type', () => {
     beforeEach(() => {
       const pinia = createTestingPinia();
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           type: 'guest',
           total: testGuests.length,
@@ -585,7 +585,7 @@ describe('SharedContactList', () => {
   describe('Contact type', () => {
     beforeEach(() => {
       const pinia = createTestingPinia();
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           total: testContacts.length,
           isLoadingPage: false,
@@ -680,7 +680,7 @@ describe('SharedContactList', () => {
   describe('Common functionality', () => {
     beforeEach(() => {
       const pinia = createTestingPinia();
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           type: 'supplier',
           isLoadingPage: false,
@@ -987,7 +987,7 @@ describe('SharedContactList', () => {
       const pinia = createTestingPinia();
       const mockFetch = vi.fn().mockResolvedValue(undefined);
 
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           type: 'supplier',
           isLoadingPage: false,
@@ -1036,7 +1036,7 @@ describe('SharedContactList', () => {
       const pinia = createTestingPinia();
       const mockFetch = vi.fn().mockResolvedValue(undefined);
 
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           type: 'supplier',
           isLoadingPage: false,
@@ -1084,7 +1084,7 @@ describe('SharedContactList', () => {
       const pinia = createTestingPinia();
       const mockFetch = vi.fn().mockResolvedValue(undefined);
 
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           type: 'supplier',
           isLoadingPage: false,
@@ -1131,7 +1131,7 @@ describe('SharedContactList', () => {
       const pinia = createTestingPinia();
       const mockFetch = vi.fn().mockResolvedValue(undefined);
 
-      render(SharedContactList, {
+      render(ContactList, {
         props: {
           type: 'supplier',
           isLoadingPage: false,
