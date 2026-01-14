@@ -1180,8 +1180,6 @@ export default defineComponent({
       if (!props.isLoadingPage) {
         isLoading.value = true;
       }
-
-      // Build filters payload based on type
       const payloadFilters = buildFiltersPayload();
 
       try {
@@ -1194,16 +1192,6 @@ export default defineComponent({
         if (id !== currentRequest.value) {
           return;
         }
-
-        // Update local total records based on store count logic
-        // Since props.total is passed, we might rely on that, but usually there's a reactivity delay.
-        // The original code accessed store.XCount derived from the fetch.
-        // We will assume 'total' prop updates reactively or we need a way to know the result count.
-        // Actually, the original code did: numTotalRecords.value = contactsStore.contactsCount;
-        // We can watch props.total or just update it here if we had access to the store count directly.
-        // Better yet, we can use props.total directly in the template and pagination logic,
-        // but the table needs `totalRecords` for pagination calculation.
-        // We will update numTotalRecords from props.total in a watcher or computed.
       } finally {
         if (id === currentRequest.value) {
           isLoading.value = false;
@@ -1232,6 +1220,8 @@ export default defineComponent({
       () => {
         const len = globalQuery.value.length;
         if (len >= 3 || len === 0) {
+          page.value = 1;
+          firstRecord.value = 0;
           void fetchNow();
         }
       },
@@ -1287,6 +1277,7 @@ export default defineComponent({
       if (e.filters !== null) {
         filters.value = { ...filters.value, ...e.filters } as typeof filters.value;
         page.value = 1;
+        firstRecord.value = 0;
         await fetchNow();
       }
     };
@@ -1344,9 +1335,6 @@ export default defineComponent({
     const openContactDetail = async (contactId: number): Promise<void> => {
       uiStore.startLoading();
       try {
-        // Need to fetch specific type? Original code used `fetchContactById` for ContactList
-        // but `fetchContactById` seems to work for all types since they share IDs/structure nicely.
-        // Let's assume `fetchContactById` works for all.
         const contact = await contactsStore.fetchContactById(contactId);
         if (!contact) {
           uiStore.stopLoading();
@@ -1397,7 +1385,6 @@ export default defineComponent({
       dates.value = null;
     };
     const apply = (): void => {
-      // Date picker handles v-model, just trigger fetch
       void fetchNow();
       if (datePickerRefMobile.value !== null) {
         datePickerRefMobile.value.overlayVisible = false;
@@ -1413,20 +1400,7 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      // Initial fetch logic. Original code fetched on mount of pages OR components.
-      // The parent Page calls fetchAllContacts on mount.
-      // The individual components also had `onMounted(fetchNow)`.
-      // We should be careful to avoid double fetching if parent is managing it.
-      // However, this component is designed to be self-contained for paging/filtering.
-      // We can trigger an initial fetch here.
-      await Promise.all([
-        countriesStore.fetchCountries(),
-        // We might skip auto-fetch if data is passed via props, but the architecture seems to be
-        // "Load Page" -> "Fetch All Counts" -> "Tabs render" -> "Tabs fetch their own data on mount/interaction"
-        // Actually, the Page fetches initial counts, but the LISTS fetch grid data.
-        // So yes, we fetch here.
-        fetchNow(),
-      ]);
+      await Promise.all([countriesStore.fetchCountries(), fetchNow()]);
     });
 
     return {
@@ -1481,6 +1455,8 @@ export default defineComponent({
       // components prime
       datePickerRefMobile,
       datePickerRefDesktop,
+
+      page,
     };
   },
 });
