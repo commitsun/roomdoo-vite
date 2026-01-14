@@ -83,6 +83,7 @@
             :total="numContacts"
             :isLoadingPage="isLoadingPage"
             :contacts="contactsStore.contacts"
+            :numTotalRecords="contactsStore.contactsCount"
             :fetchAction="contactsStore.fetchContacts"
           />
         </TabPanel>
@@ -92,6 +93,7 @@
             :total="numCustomers"
             :isLoadingPage="isLoadingPage"
             :contacts="contactsStore.customers"
+            :numTotalRecords="contactsStore.customersCount"
             :fetchAction="contactsStore.fetchCustomers"
           />
         </TabPanel>
@@ -101,6 +103,7 @@
             :total="numGuests"
             :isLoadingPage="isLoadingPage"
             :contacts="contactsStore.guests"
+            :numTotalRecords="contactsStore.guestsCount"
             :fetchAction="contactsStore.fetchGuests"
           />
         </TabPanel>
@@ -110,6 +113,7 @@
             :total="numAgencies"
             :isLoadingPage="isLoadingPage"
             :contacts="contactsStore.agencies"
+            :numTotalRecords="contactsStore.agenciesCount"
             :fetchAction="contactsStore.fetchAgencies"
           />
         </TabPanel>
@@ -119,6 +123,7 @@
             :total="numSuppliers"
             :isLoadingPage="isLoadingPage"
             :contacts="contactsStore.suppliers"
+            :numTotalRecords="contactsStore.suppliersCount"
             :fetchAction="contactsStore.fetchSuppliers"
           />
         </TabPanel>
