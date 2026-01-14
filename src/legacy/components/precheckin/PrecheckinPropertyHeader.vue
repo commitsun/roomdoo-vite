@@ -214,7 +214,7 @@ export default defineComponent({
     position: absolute;
     top: 20px;
     left: 15px;
-    z-index: 1;
+    z-index: 25;
     width: 130px;
     height: 40px;
     display: flex;
