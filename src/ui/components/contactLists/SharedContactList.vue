@@ -60,7 +60,7 @@
     >
       <!-- header -->
       <template #header>
-        <div class="table-header debug-box" :class="{ 'lime-bg': type !== 'contact' }">
+        <div class="table-header">
           <IconField>
             <InputIcon class="pi pi-search" />
             <InputText
@@ -283,7 +283,7 @@
             severity="secondary"
             variant="outlined"
             icon="pi pi-filter-slash"
-            :label="t('contacts.restoreFilters') || 'Limpiar filtros'"
+            :label="t('contacts.restoreFilters')"
             class="empty-state__btn"
             @click="clearAll"
           />
@@ -864,7 +864,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, type Ref, watch, type PropType } from 'vue';
+import { computed, defineComponent, onMounted, ref, type Ref, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import DataTable, {
@@ -941,6 +941,10 @@ export default defineComponent({
       type: Function,
       required: true,
     },
+    numTotalRecords: {
+      type: Number,
+      required: true,
+    },
   },
   setup(props) {
     // stores
@@ -962,7 +966,6 @@ export default defineComponent({
     // pagination
     const rowsPerPageOptions = [50, 100, 200];
     const firstRecord = ref(0);
-    const numTotalRecords = ref(0);
     const page = ref(1);
     const rows = ref(50);
 
@@ -1208,15 +1211,6 @@ export default defineComponent({
       }
     };
 
-    // Watch total prop to update local state
-    watch(
-      () => props.total,
-      (newVal) => {
-        numTotalRecords.value = newVal;
-      },
-      { immediate: true },
-    );
-
     // get color for contact type tag
     const colorContactType = (contactType: string): string => {
       switch (contactType) {
@@ -1380,36 +1374,37 @@ export default defineComponent({
     const setToday = (): void => {
       const todayDate = new Date();
       dates.value = [todayDate, todayDate];
-      void fetchNow();
     };
     const setLast7Days = (): void => {
       const todayDate = new Date();
       const last7 = new Date();
       last7.setDate(todayDate.getDate() - 7);
       dates.value = [last7, todayDate];
-      void fetchNow();
     };
     const setLast30Days = (): void => {
       const todayDate = new Date();
       const last30 = new Date();
       last30.setDate(todayDate.getDate() - 30);
       dates.value = [last30, todayDate];
-      void fetchNow();
     };
     const setThisMonth = (): void => {
       const todayDate = new Date();
       const firstDay = new Date(todayDate.getFullYear(), todayDate.getMonth(), 1);
       const lastDay = new Date(todayDate.getFullYear(), todayDate.getMonth() + 1, 0);
       dates.value = [firstDay, lastDay];
-      void fetchNow();
     };
     const clearDateFilter = (): void => {
       dates.value = null;
-      void fetchNow();
     };
     const apply = (): void => {
       // Date picker handles v-model, just trigger fetch
       void fetchNow();
+      if (datePickerRefMobile.value !== null) {
+        datePickerRefMobile.value.overlayVisible = false;
+      }
+      if (datePickerRefDesktop.value !== null) {
+        datePickerRefDesktop.value.overlayVisible = false;
+      }
     };
     const fetchIfDatesCleared = (): void => {
       if (!dates.value) {
@@ -1440,7 +1435,6 @@ export default defineComponent({
       rowsPerPageOptions,
       isLoading,
       firstRecord,
-      numTotalRecords,
       rows,
       phoneFilterDraft,
       globalQuery,
@@ -1516,6 +1510,15 @@ export default defineComponent({
     .select {
       margin-top: 1rem;
       width: 100%;
+    }
+  }
+  .tag-contact-type {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    i {
+      font-size: 0.7rem;
+      line-height: 1;
     }
   }
   .name {

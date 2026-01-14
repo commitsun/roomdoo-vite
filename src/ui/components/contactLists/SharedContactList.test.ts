@@ -286,6 +286,7 @@ describe('SharedContactList', () => {
           isLoadingPage: false,
           total: testSuppliers.length,
           contacts: testSuppliers,
+          numTotalRecords: testSuppliers.length,
           fetchAction: mockContactsStore.fetchSuppliers,
         },
         global: {
@@ -362,6 +363,7 @@ describe('SharedContactList', () => {
           isLoadingPage: false,
           total: testCustomers.length,
           contacts: testCustomers,
+          numTotalRecords: testCustomers.length,
           fetchAction: mockContactsStore.fetchCustomers,
         },
         global: {
@@ -442,6 +444,7 @@ describe('SharedContactList', () => {
           total: testAgencies.length,
           type: 'agency',
           contacts: testAgencies,
+          numTotalRecords: testAgencies.length,
           isLoadingPage: false,
           fetchAction: mockContactsStore.fetchAgencies,
         },
@@ -495,6 +498,7 @@ describe('SharedContactList', () => {
           total: testGuests.length,
           isLoadingPage: false,
           contacts: testGuests,
+          numTotalRecords: testGuests.length,
           fetchAction: mockContactsStore.fetchGuests,
         },
         global: {
@@ -586,6 +590,7 @@ describe('SharedContactList', () => {
           total: testContacts.length,
           isLoadingPage: false,
           contacts: testContacts,
+          numTotalRecords: testContacts.length,
           type: 'contact',
           fetchAction: mockContactsStore.fetchContacts,
         },
@@ -681,6 +686,7 @@ describe('SharedContactList', () => {
           isLoadingPage: false,
           total: testSuppliers.length,
           contacts: testSuppliers,
+          numTotalRecords: testSuppliers.length,
           fetchAction: mockContactsStore.fetchSuppliers,
         },
         global: {
