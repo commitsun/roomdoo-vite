@@ -295,6 +295,15 @@ export default defineComponent({
       });
     };
 
+    watch(
+      () => activeProperty.value?.id,
+      (newId, oldId) => {
+        if (!newId || newId === oldId) return;
+        fetchPendingReservations();
+      },
+      { immediate: true },
+    );
+
     watch(selectedDate, async () => {
       fetchPendingReservations();
     });
