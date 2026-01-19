@@ -299,7 +299,7 @@ export default defineComponent({
   .profile-data {
     max-height: 600px;
     .content {
-      width: 500px;
+      width: 510px;
       padding-bottom: calc(#{$height_footer} - 17.5px);
       max-height: 600px;
 

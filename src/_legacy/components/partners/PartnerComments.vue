@@ -17,8 +17,8 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import Textarea from 'primevue/textarea';
 import Button from 'primevue/button';
-import { useStore } from '@/legacy/store';
-import { dialogService } from '@/legacy/services/DialogService';
+import { useStore } from '@/_legacy/store';
+import { dialogService } from '@/_legacy/services/DialogService';
 
 export default defineComponent({
   props: {

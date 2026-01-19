@@ -92,7 +92,6 @@
             (v) => (modelValue.birthdate = v instanceof Date || v === null ? v : null)
           "
           showIcon
-          dateFormat="dd/mm/yy"
           :maxDate="new Date()"
           :placeholder="t('contacts.datePlaceholder')"
           class="w-full h-[30px] lg:h-[35px]"

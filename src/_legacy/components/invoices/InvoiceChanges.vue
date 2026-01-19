@@ -473,7 +473,6 @@ import type { PartnerInterface } from '@/_legacy/interfaces/PartnerInterface';
 
 import { useStore } from '@/_legacy/store';
 import { usePartner } from '@/_legacy/utils/usePartner';
-import { useRouter } from 'vue-router';
 
 import CustomButton from '@/_legacy/components/roomdooComponents/CustomButton.vue';
 import CustomIcon from '@/_legacy/components/roomdooComponents/CustomIcon.vue';
@@ -529,7 +528,6 @@ export default defineComponent({
     // composables
     const store = useStore();
     const { fetchPartners } = usePartner();
-    const router = useRouter();
     const uiStore = useUIStore();
     const contactsStore = useContactsStore();
     const { openDialog } = useAppDialog();
@@ -803,9 +801,9 @@ export default defineComponent({
             onClose: async ({ data }: { data?: { refresh?: boolean; action?: string } } = {}) => {
               if (data?.refresh === true || data?.action === 'saved') {
                 contact = await contactsStore.fetchContactById(contactId);
-                 if (contact) {
+                if (contact) {
                   addPartnerToInvoice(contact);
-                 }
+                }
               }
             },
           });
@@ -832,7 +830,6 @@ export default defineComponent({
               if (newContactId) {
                 const contact = await contactsStore.fetchContactById(newContactId);
                 if (contact) {
-                  console.log('New contact added with id:', newContactId);
                   addPartnerToInvoice(contact);
                   isSearchPartnerOpened.value = true;
                 }
@@ -1406,7 +1403,6 @@ export default defineComponent({
         }
         if (invoice?.partnerId) {
           void store.dispatch('layout/showSpinner', true);
-          try {
           const foundedContact = await contactsStore.fetchContactById(invoice?.partnerId);
           await store
             .dispatch('partners/fetchCurrentPartner', invoice?.partnerId)
@@ -1425,16 +1421,8 @@ export default defineComponent({
                     )?.name ?? '';
                 }
               }
-            }
-          } catch {
-            dialogService.open({
-              header: 'Error',
-              content: 'Algo ha ido mal',
-              btnAccept: 'Ok',
             });
-          } finally {
-            void store.dispatch('layout/showSpinner', false);
-          }
+          void store.dispatch('layout/showSpinner', false);
         }
         if (invoice?.date) {
           invoiceDate.value = invoice?.date;
