@@ -30,7 +30,7 @@ if (import.meta.env.DEV) {
 
 const api: AxiosInstance = axios.create({
   baseURL: endPoint,
-  withCredentials: true,
+  withCredentials: false,
 });
 
 api.interceptors.request.use((config) => {

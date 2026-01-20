@@ -21,7 +21,7 @@ if (import.meta.env.DEV) {
 
 const api: AxiosInstance = axios.create({
   baseURL: endPoint,
-  withCredentials: true,
+  withCredentials: false,
 });
 // Internal flag to track if the refresh token request is in progress
 let isRefreshing = false;

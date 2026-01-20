@@ -7,6 +7,10 @@ export function useLegacyStore() {
     await store.dispatch('user/login', { email, password });
   };
 
+  const recoverCookies = () => {
+    store.dispatch('user/recoverCookies');
+  };
+
   const removeVuexAndOldCookiesUser = () => {
     store.dispatch('user/reset');
   };
@@ -35,6 +39,7 @@ export function useLegacyStore() {
 
   return {
     doVuexLogin,
+    recoverCookies,
     removeVuexAndOldCookiesUser,
     fetchAndSetVuexPartnerAndActiveProperty,
     removeVuexPartner,
