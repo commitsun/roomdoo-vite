@@ -610,6 +610,7 @@
 
       <!-- Email -->
       <Column
+        v-if="type !== 'guest'"
         v-show="!isLoading"
         field="email"
         :header="t('contacts.email')"
@@ -646,6 +647,7 @@
 
       <!-- Phones -->
       <Column
+        v-if="type !== 'guest'"
         v-show="!isLoading"
         field="phones"
         :header="t('contacts.phone')"
