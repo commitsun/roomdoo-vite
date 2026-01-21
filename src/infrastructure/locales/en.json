@@ -19,10 +19,13 @@
     "clear": "Clear",
     "commission": "Commission",
     "company": "Company",
+    "confirm": "Confirm",
     "confirmMessage": "Do you want to view the contact? Unsaved changes will be lost.",
     "confirmTitle": "Confirm navigation",
     "contact": "Contact",
     "contactData": "Contact data",
+    "changeContactTypeMessage": "Switching will result in the loss of some individual-specific data. Common data will be preserved.",
+    "changeContactTypeTitle": "Change from individual to company?",
     "country": "Country",
     "customers": "Customers",
     "datePicker": {

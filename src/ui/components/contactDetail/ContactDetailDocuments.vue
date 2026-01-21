@@ -230,7 +230,7 @@
       </Message>
     </div>
 
-    <ConfirmDialog :style="{ maxWidth: '350px' }" />
+    <ConfirmDialog group="documents" :style="{ maxWidth: '350px' }" />
   </section>
 </template>
 
@@ -499,6 +499,7 @@ export default defineComponent({
       }
 
       confirm.require({
+        group: 'documents',
         message: t('contacts.confirmMessage'),
         header: t('contacts.confirmTitle'),
         icon: 'pi pi-exclamation-triangle',
