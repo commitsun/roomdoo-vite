@@ -2,7 +2,7 @@
   <section class="documents-form" :class="{ 'is-empty': !hasDocuments && !hasDraftDoc }">
     <div class="no-documents-container" v-if="!hasDocuments && !hasDraftDoc">
       <div class="no-documents">
-        <IdCard :size="40" color="#64748B" />
+        <IdCard :size="40" color="#64748B" stroke-width="1.5" />
         <span class="no-documents-text">{{ t('contacts.noDocuments') }}</span>
         <Button
           :label="t('contacts.addDocument')"
