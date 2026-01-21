@@ -24,8 +24,8 @@
     "confirmTitle": "Confirmar navegación",
     "contact": "Contacto",
     "contactData": "Datos de contacto",
-    "changeContactTypeMessage": "Al cambiar, se perderán algunos datos específicos de particular. Los datos comunes se mantendrán.",
-    "changeContactTypeTitle": "¿Cambiar de particular a empresa?",
+    "changeContactTypeMessage": "Al cambiar, se perderán algunos datos específicos de {fromType}. Los datos comunes se mantendrán.",
+    "changeContactTypeTitle": "¿Cambiar de {fromType} a {toType}?",
     "country": "País",
     "customers": "Clientes",
     "datePicker": {

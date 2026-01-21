@@ -499,10 +499,20 @@ export default defineComponent({
       const value = val as 'person' | 'company' | 'agency';
 
       if (hasContactSpecificData()) {
+        const fromTypeLabel =
+          contactTypeOptions.value
+            .find((opt) => opt.value === contactType.value)
+            ?.label.toLowerCase() ?? '';
+        const toTypeLabel =
+          contactTypeOptions.value.find((opt) => opt.value === value)?.label.toLowerCase() ?? '';
+
         confirm.require({
           group: 'contactType',
-          message: t('contacts.changeContactTypeMessage'),
-          header: t('contacts.changeContactTypeTitle'),
+          message: t('contacts.changeContactTypeMessage', { fromType: fromTypeLabel }),
+          header: t('contacts.changeContactTypeTitle', {
+            fromType: fromTypeLabel,
+            toType: toTypeLabel,
+          }),
           icon: 'pi pi-exclamation-triangle',
           rejectProps: { label: t('contacts.cancel'), severity: 'secondary', outlined: true },
           acceptProps: { label: t('contacts.confirm') },

@@ -24,8 +24,8 @@
     "confirmTitle": "Confirm navigation",
     "contact": "Contact",
     "contactData": "Contact data",
-    "changeContactTypeMessage": "Switching will result in the loss of some individual-specific data. Common data will be preserved.",
-    "changeContactTypeTitle": "Change from individual to company?",
+    "changeContactTypeMessage": "Switching will result in the loss of some {fromType}-specific data. Common data will be preserved.",
+    "changeContactTypeTitle": "Change from {fromType} to {toType}?",
     "country": "Country",
     "customers": "Customers",
     "datePicker": {
