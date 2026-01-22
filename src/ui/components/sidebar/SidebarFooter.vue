@@ -14,7 +14,25 @@
       @click="toggleUserMenu"
       aria-haspopup="true"
     >
-      <Menu appendTo="self" :model="userItems" ref="refUserMenu" id="overlay_menu" :popup="true" />
+      <Menu
+        appendTo="self"
+        :model="userItems"
+        ref="refUserMenu"
+        id="overlay_menu"
+        :popup="true"
+        :pt="{
+          itemContent: {
+            style: {
+              color: '#334155',
+            },
+          },
+          itemIcon: {
+            style: {
+              color: '#334155',
+            },
+          },
+        }"
+      />
       <div class="avatar-container">
         <Avatar
           v-if="user?.avatar"
@@ -42,7 +60,7 @@
         <div class="user-mail">{{ user?.email }}</div>
       </div>
       <div class="icon-right">
-        <ChevronsUpDown :size="14" />
+        <ChevronsUpDown :size="18" />
       </div>
     </div>
   </div>
@@ -171,8 +189,9 @@ export default defineComponent({
     padding: 0 0.4rem;
     overflow-x: hidden;
     min-height: 21px;
+    height: 35px;
+    border-radius: 4px;
     .nav-link-icon {
-      color: #acacac;
       min-width: 14px;
       flex-shrink: 0;
     }
@@ -183,13 +202,8 @@ export default defineComponent({
       text-overflow: ellipsis;
     }
     &:hover {
+      background-color: #f1f5f9;
       cursor: pointer;
-      .nav-link-icon {
-        color: black;
-      }
-      span {
-        font-weight: bold;
-      }
     }
   }
   .user {

@@ -244,14 +244,12 @@ export default defineComponent({
     gap: 1rem;
     border-radius: 4px;
     padding-left: 0.4rem;
-    // border: 1px solid blue;
     position: relative;
     min-width: 0;
     margin-bottom: 10px;
     cursor: pointer;
     user-select: none;
     height: 35px;
-    color: #1e293b;
     padding-right: 14px;
 
     // icon

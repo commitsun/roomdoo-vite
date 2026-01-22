@@ -19,7 +19,6 @@
           style: {
             height: '38px',
             width: '235px',
-            color: 'red',
           },
         },
         header: {
@@ -201,11 +200,10 @@ export default defineComponent({
       }
     }
     &.is-open {
-      // border: 1px solid var(--p-select-border-color);
       box-shadow: var(--p-select-shadow);
       background-color: #eff6ff;
       span {
-        color: black;
+        color: $color_sidebar;
       }
     }
   }
