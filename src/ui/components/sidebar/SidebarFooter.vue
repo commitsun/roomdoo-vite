@@ -21,14 +21,38 @@
         id="overlay_menu"
         :popup="true"
         :pt="{
-          itemContent: {
+          root: {
+            style: {
+              padding: '0.25rem',
+              borderRadius: '10px',
+              boxShadow: '0 6px 18px rgba(15, 23, 42, 0.08)',
+            },
+          },
+          menu: {
+            style: {
+              padding: 0,
+            },
+          },
+          itemLink: {
+            style: {
+              padding: '0.75rem 0.9rem',
+              borderRadius: '8px',
+            },
+          },
+          itemLabel: {
             style: {
               color: '#334155',
             },
           },
           itemIcon: {
             style: {
+              marginRight: '0.6rem',
               color: '#334155',
+            },
+          },
+          separator: {
+            style: {
+              margin: '0.25rem 0',
             },
           },
         }"
@@ -113,39 +137,33 @@ export default defineComponent({
     const isUserMenuVisible = computed(() => refUserMenu.value?.overlayVisible);
     const userItems = computed(() => [
       {
-        label: t('sidebar.options'),
-        items: [
-          {
-            label: t('sidebar.settings'),
-            icon: 'pi pi-cog',
-            command: (): void => {
-              context.emit('hide');
-              openDialog(UserSettings, {
-                props: { header: t('sidebar.userSettings') },
-                onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
-                  if (data?.action === 'userUpdated') {
-                    uiStore.refreshView();
-                  }
-                  if (data?.action === 'doLogout') {
-                    userStore.logout();
-                    useLegacyStore().removeVuexAndOldCookiesUser();
-                    void router.push({ name: 'login' });
-                  }
-                },
-              });
+        label: t('sidebar.settings'),
+        icon: 'pi pi-cog',
+        command: (): void => {
+          context.emit('hide');
+          openDialog(UserSettings, {
+            props: { header: t('sidebar.userSettings') },
+            onClose: ({ data }: { data?: { refresh?: boolean; action?: string } }) => {
+              if (data?.action === 'userUpdated') {
+                uiStore.refreshView();
+              }
+              if (data?.action === 'doLogout') {
+                userStore.logout();
+                useLegacyStore().removeVuexAndOldCookiesUser();
+                void router.push({ name: 'login' });
+              }
             },
-          },
-          {
-            label: t('sidebar.logout'),
-            icon: 'pi pi-sign-out',
-            command: (): void => {
-              userStore.logout();
-              //TODO: remove with legacy
-              useLegacyStore().removeVuexAndOldCookiesUser();
-              void router.push({ name: 'login' });
-            },
-          },
-        ],
+          });
+        },
+      },
+      {
+        label: t('sidebar.logout'),
+        icon: 'pi pi-sign-out',
+        command: (): void => {
+          userStore.logout();
+          useLegacyStore().removeVuexAndOldCookiesUser();
+          void router.push({ name: 'login' });
+        },
       },
     ]);
 
