@@ -108,6 +108,7 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .sidebar {
+  color: $color_sidebar;
   font-size: 14px;
   padding: 1rem 0;
   position: absolute;
