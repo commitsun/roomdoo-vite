@@ -489,6 +489,7 @@
               </span>
             </template>
           </Tag>
+          <div v-if="data.types.length === 0">-</div>
         </template>
 
         <template #filter="{ filterModel }">
@@ -541,6 +542,7 @@
               {{ data.vat }}
             </span>
           </Tag>
+          <div v-else>-</div>
         </template>
         <template #filter="{ filterModel }">
           <InputText
@@ -591,6 +593,7 @@
               </Tag>
             </div>
           </span>
+          <div v-else>-</div>
         </template>
         <template #filter="{ filterModel }">
           <InputText
@@ -623,7 +626,10 @@
         sortable
       >
         <template #body="{ data }">
-          {{ data.email }}
+          <span v-if="data.email">
+            {{ data.email }}
+          </span>
+          <div v-else>-</div>
         </template>
 
         <template #filter="{ filterModel }">
@@ -659,34 +665,16 @@
         :showApplyButton="false"
         :showClearButton="false"
         :filterMenuStyle="{ padding: '0.75rem 0.75rem 0.25rem' }"
-        :pt="{
-          bodyCell: {
-            style: {
-              padding: '0',
-            },
-          },
-        }"
       >
         <template #body="{ data }">
           <template v-for="(phone, index) in data.phones" :key="`${phone.type}-${index}`">
-            <Chip
-              :label="phone.number"
-              :icon="phone.type === 'phone' ? 'pi pi-phone' : 'pi pi-mobile'"
-              :pt="{
-                root: {
-                  style: {
-                    fontSize: '12px',
-                    marginBottom: '4px',
-                    paddingTop: '2px',
-                    paddingBottom: '2px',
-                    paddingLeft: '6px',
-                    paddingRight: '6px',
-                    backgroundColor: 'transparent',
-                  },
-                },
-              }"
-            />
+            <div class="phone-content" v-if="phone">
+              <Phone v-if="phone.type === 'phone'" :size="14" />
+              <Smartphone v-else :size="14" />
+              {{ phone.number }}
+            </div>
           </template>
+          <div v-if="data.phones.length === 0">-</div>
         </template>
 
         <template #filter="{ filterModel, filterCallback, applyFilter }">
@@ -736,12 +724,13 @@
         sortable
       >
         <template #body="{ data }">
-          <div class="flex items-center gap-2 h-full">
-            <div v-if="data.country">
+          <div class="flex items-center gap-2 h-full" v-if="data.country">
+            <div>
               <CountryFlag :country="data.country?.code ?? ''" size="normal" shadow />
             </div>
-            <div v-if="data.country">{{ data.country.name }}</div>
+            <div>{{ data.country.name }}</div>
           </div>
+          <div v-else>-</div>
         </template>
 
         <template #filter="{ filterModel }">
@@ -804,6 +793,7 @@
               }).format(new Date(data.lastReservationDate))
             }}
           </span>
+          <div v-else>-</div>
         </template>
       </Column>
 
@@ -814,7 +804,16 @@
         field="totalInvoiced"
         :header="t('contacts.totalInvoiced')"
         style="min-width: 150px"
-        :bodyStyle="{ textAlign: 'right' }"
+        :pt="{
+          bodyCell: { style: { textAlign: 'right' } },
+
+          // header: el th + el contenedor flex interno
+          headerCell: { style: { textAlign: 'right' } },
+          columnHeaderContent: { style: { justifyContent: 'flex-end' } },
+
+          // opcional: asegura que el texto también “se vaya” a la derecha
+          columnTitle: { style: { textAlign: 'right' } },
+        }"
         :showFilterMatchModes="false"
         :showFilterOperator="false"
         :showAddButton="false"
@@ -822,15 +821,18 @@
         filter
       >
         <template #body="{ data }">
-          {{
-            new Intl.NumberFormat(i18n.global.locale.value, {
-              style: 'currency',
-              currency: currency,
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-              useGrouping: true,
-            }).format(Number(data.totalInvoiced ?? 0))
-          }}
+          <span v-if="data.totalInvoiced !== null && data.totalInvoiced !== undefined">
+            {{
+              new Intl.NumberFormat(i18n.global.locale.value, {
+                style: 'currency',
+                currency: currency,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+                useGrouping: true,
+              }).format(Number(data.totalInvoiced ?? 0))
+            }}
+          </span>
+          <div v-else>-</div>
         </template>
       </Column>
 
@@ -843,9 +845,14 @@
         style="max-width: 300px"
       >
         <template #body="{ data }">
-          <span v-if="data.internalNotes" class="ellipsis-2" :title="data.internalNotes">
-            {{ data.internalNotes }}
+          <span
+            v-if="data.internalNotes"
+            v-html="data.internalNotes"
+            class="ellipsis-2"
+            :title="data.internalNotes"
+          >
           </span>
+          <div v-else>-</div>
         </template>
       </Column>
 
@@ -887,6 +894,7 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import DatePicker from 'primevue/datepicker';
 import { FilterMatchMode } from '@primevue/core/api';
+import { Phone, Smartphone } from 'lucide-vue-next';
 
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
@@ -907,6 +915,8 @@ type ListType = 'contact' | 'customer' | 'guest' | 'supplier' | 'agency';
 export default defineComponent({
   name: 'ContactList',
   components: {
+    Phone,
+    Smartphone,
     DataTable,
     Column,
     Tag,
@@ -1505,6 +1515,13 @@ export default defineComponent({
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .phone-content {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    font-size: 12px;
   }
   .empty-state {
     display: flex;
