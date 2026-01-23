@@ -19,6 +19,7 @@ import type {
   Supplier,
   ContactDetail,
 } from '@/domain/entities/Contact';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 const contactsRepository = new ContactsRepositoryImpl();
 
@@ -60,7 +61,17 @@ export const useContactsStore = defineStore('contacts', () => {
     filters?: GuestFilters,
     orderBy?: string,
   ): Promise<void> => {
-    const result = await contactsService.fetchGuests(pagination, filters, orderBy);
+    const pmsPropertiesStore = usePmsPropertiesStore();
+    const effectiveFilters = { ...filters };
+
+    if (
+      pmsPropertiesStore.currentPmsPropertyId !== null &&
+      pmsPropertiesStore.currentPmsPropertyId !== undefined
+    ) {
+      effectiveFilters.pmsPropertyId = pmsPropertiesStore.currentPmsPropertyId;
+    }
+
+    const result = await contactsService.fetchGuests(pagination, effectiveFilters, orderBy);
     guests.value = result.items;
     guestsCount.value = result.count;
   };

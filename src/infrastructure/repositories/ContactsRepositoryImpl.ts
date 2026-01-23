@@ -24,6 +24,7 @@ const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v
 
 function buildQueryParamsFromFilters(opts: {
   globalSearch?: string;
+  pmsPropertyId?: number;
   nameContains?: string;
   documentContains?: string;
   emailContains?: string;
@@ -40,6 +41,9 @@ function buildQueryParamsFromFilters(opts: {
   // Scalars — only set when non-empty string
   if (isNonEmptyString(opts.globalSearch)) {
     params.set('globalSearch', opts.globalSearch.trim());
+  }
+  if (typeof opts.pmsPropertyId === 'number') {
+    params.set('pmsPropertyId', String(opts.pmsPropertyId));
   }
   if (isNonEmptyString(opts.nameContains)) {
     params.set('name', opts.nameContains.trim());

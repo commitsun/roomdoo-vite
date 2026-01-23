@@ -580,6 +580,23 @@ describe('ContactList', () => {
       last = mockContactsStore.fetchGuests.mock.calls.at(-1);
       expect(last && last[1].documentContains).toBeUndefined();
     });
+
+    it('includes pmsPropertyId in filters', async () => {
+      // Trigger a fetch to checking filters
+      const docHeader = screen.getByRole('columnheader', { name: /document/i });
+      const filterBtn = within(docHeader).getByRole('button');
+      await userEvent.click(filterBtn);
+
+      const overlay =
+        (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+      const docInput = within(overlay).getByPlaceholderText(/search by document/i);
+      await userEvent.type(docInput, 'REF123');
+      const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
+      await userEvent.click(applyBtn);
+
+      const last = mockContactsStore.fetchGuests.mock.calls.at(-1);
+      expect(last && last[1].pmsPropertyId).toBe('prop-1');
+    });
   });
 
   describe('Contact type', () => {

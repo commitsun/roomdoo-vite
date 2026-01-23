@@ -18,6 +18,7 @@ export interface CustomerFilters extends BaseFilters {
 }
 
 export interface GuestFilters extends BaseFilters {
+  pmsPropertyId?: number;
   documentContains?: string;
   inHouseOnly?: boolean;
   checkinDateFrom?: Date;

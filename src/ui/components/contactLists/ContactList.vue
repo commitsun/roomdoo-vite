@@ -61,24 +61,63 @@
       <!-- header -->
       <template #header>
         <div class="table-header">
-          <IconField>
-            <InputIcon class="pi pi-search" />
-            <InputText
-              v-model="globalQuery"
-              :placeholder="t('contacts.globalSearch')"
-              @input="onGlobalQueryInput"
-              :aria-label="t('contacts.globalSearch')"
-              style="width: 100%; min-width: 240px"
-            />
-            <InputIcon
-              class="pi pi-times"
-              @click="clearGlobalQuery"
-              v-if="globalQuery && globalQuery.length >= 3"
-            />
-          </IconField>
+          <div class="global-search">
+            <label for="global-search-input" class="global-search__label">
+              <span v-if="type === 'contact'">
+                {{
+                  t('contacts.globalSearchLabel', {
+                    entity: t('contacts.entities.contact', 2),
+                  })
+                }}
+              </span>
+              <span v-else-if="type === 'customer'">
+                {{
+                  t('contacts.globalSearchLabel', {
+                    entity: t('contacts.entities.customer', 2),
+                  })
+                }}
+              </span>
+              <span v-else-if="type === 'guest'">
+                {{
+                  t('contacts.globalSearchLabel', {
+                    entity: t('contacts.entities.guest', 2),
+                  })
+                }}
+              </span>
+              <span v-else-if="type === 'supplier'">
+                {{
+                  t('contacts.globalSearchLabel', {
+                    entity: t('contacts.entities.supplier', 2),
+                  })
+                }}
+              </span>
+              <span v-else-if="type === 'agency'">
+                {{
+                  t('contacts.globalSearchLabel', {
+                    entity: t('contacts.entities.agency', 2),
+                  })
+                }}
+              </span>
+            </label>
+            <IconField class="global-search__field">
+              <InputIcon class="pi pi-search" />
+              <InputText
+                id="global-search-input"
+                v-model="globalQuery"
+                :placeholder="t('contacts.globalSearch')"
+                @input="onGlobalQueryInput"
+                :aria-label="t('contacts.globalSearch')"
+              />
+              <InputIcon
+                class="pi pi-times"
+                @click="clearGlobalQuery"
+                v-if="globalQuery && globalQuery.length >= 3"
+              />
+            </IconField>
+          </div>
 
           <!-- Guest specific date picker -->
-          <template v-if="type === 'guest'">
+          <div class="date-range-container" v-if="type === 'guest'">
             <DatePicker
               ref="datePickerRefMobile"
               v-model="dates"
@@ -150,14 +189,17 @@
                       size="small"
                       :label="t('contacts.datePicker.apply')"
                       severity="primary"
-                      @click="apply()"
+                      @click="applyDateRangeFilters()"
                     />
                   </div>
                 </div>
               </template>
             </DatePicker>
-
+            <label for="datepicker-range" class="date-range__label">
+              {{ t('contacts.datePicker.label') }}
+            </label>
             <DatePicker
+              id="datepicker-range"
               ref="datePickerRefDesktop"
               v-model="dates"
               class="datepicker-desktop"
@@ -173,6 +215,7 @@
               :numberOfMonths="2"
               :inputStyle="{ width: '100%' }"
               :showButtonBar="false"
+              iconDisplay="input"
               @value-change="fetchIfDatesCleared()"
             >
               <template #footer>
@@ -227,25 +270,31 @@
                       size="small"
                       :label="t('contacts.datePicker.apply')"
                       severity="primary"
-                      @click="apply()"
+                      @click="applyDateRangeFilters()"
                     />
                   </div>
                 </div>
               </template>
             </DatePicker>
+          </div>
 
-            <Select
-              v-model="inHouseSelection"
-              class="select"
-              :options="[
-                { name: t('contacts.allGuests'), code: 'all' },
-                { name: t('contacts.inHouseGuests'), code: 'inHouse' },
-              ]"
-              optionLabel="name"
-              optionValue="code"
-              @change="fetchNow"
-            />
-          </template>
+          <div class="fast-filter" v-if="type === 'guest'">
+            <label for="in-house-select" class="fast-filter__label">
+              {{ t('contacts.quickFilter') }}
+            </label>
+
+            <ToggleButton
+              v-model="inHouseNow"
+              :onLabel="t('contacts.inHouseGuests')"
+              :offLabel="t('contacts.inHouseGuests')"
+              :aria-label="t('contacts.inHouseGuests')"
+              @click="void fetchNow()"
+            >
+              <template #icon>
+                <House :size="14" />
+              </template>
+            </ToggleButton>
+          </div>
 
           <Button
             icon="pi pi-filter-slash"
@@ -347,6 +396,7 @@
         :header="t('contacts.fullName')"
         headerClass="lg:hidden"
         bodyClass="lg:hidden"
+        style="max-width: 180px"
         :showFilterMatchModes="false"
         :showFilterOperator="false"
         :showAddButton="false"
@@ -885,16 +935,16 @@ import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import Chip from 'primevue/chip';
 import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
 import MultiSelect from 'primevue/multiselect';
 import CountryFlag from 'vue-country-flag-next';
 import Button from 'primevue/button';
+import ToggleButton from 'primevue/togglebutton';
 import Avatar from 'primevue/avatar';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import DatePicker from 'primevue/datepicker';
 import { FilterMatchMode } from '@primevue/core/api';
-import { Phone, Smartphone } from 'lucide-vue-next';
+import { Phone, Smartphone, House } from 'lucide-vue-next';
 
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
@@ -917,14 +967,15 @@ export default defineComponent({
   components: {
     Phone,
     Smartphone,
+    House,
     DataTable,
     Column,
     Tag,
     Chip,
     InputText,
-    Select,
     MultiSelect,
     Button,
+    ToggleButton,
     IconField,
     InputIcon,
     Avatar,
@@ -1017,7 +1068,8 @@ export default defineComponent({
     const dates: Ref<[Date, Date] | [Date] | null> = ref(null);
     const minDate = ref();
     const maxDate = ref();
-    const inHouseSelection = ref('all');
+
+    const inHouseNow = ref(false);
 
     const currency = computed(
       () =>
@@ -1061,7 +1113,7 @@ export default defineComponent({
           common ||
           isNonEmptyString(f.identificationDocuments.value) ||
           (Array.isArray(dates.value) && dates.value.length > 0) ||
-          inHouseSelection.value === 'inHouse'
+          inHouseNow.value
         );
       }
       return common;
@@ -1157,7 +1209,8 @@ export default defineComponent({
           Array.isArray(dates.value) && dates.value.length > 1 && dates.value[1] instanceof Date
             ? dates.value[1]
             : undefined,
-        inHouseOnly: inHouseSelection.value === 'inHouse' ? true : undefined,
+        inHouseOnly: inHouseNow.value ? true : undefined,
+        pmsPropertyId: pmsPropertiesStore.currentPmsPropertyId,
       };
     };
 
@@ -1251,7 +1304,7 @@ export default defineComponent({
       phoneFilterDraft.value = '';
 
       // Reset specialized filters
-      inHouseSelection.value = 'all';
+      inHouseNow.value = false;
       dates.value = null;
 
       filters.value = {
@@ -1326,6 +1379,8 @@ export default defineComponent({
         filterModel.value = null;
         filterCallback();
         applyFilter?.();
+      } else {
+        filterCallback();
       }
     };
 
@@ -1375,28 +1430,33 @@ export default defineComponent({
       const todayDate = new Date();
       dates.value = [todayDate, todayDate];
     };
+
     const setLast7Days = (): void => {
       const todayDate = new Date();
       const last7 = new Date();
       last7.setDate(todayDate.getDate() - 7);
       dates.value = [last7, todayDate];
     };
+
     const setLast30Days = (): void => {
       const todayDate = new Date();
       const last30 = new Date();
       last30.setDate(todayDate.getDate() - 30);
       dates.value = [last30, todayDate];
     };
+
     const setThisMonth = (): void => {
       const todayDate = new Date();
       const firstDay = new Date(todayDate.getFullYear(), todayDate.getMonth(), 1);
       const lastDay = new Date(todayDate.getFullYear(), todayDate.getMonth() + 1, 0);
       dates.value = [firstDay, lastDay];
     };
+
     const clearDateFilter = (): void => {
       dates.value = null;
     };
-    const apply = (): void => {
+
+    const applyDateRangeFilters = (): void => {
       void fetchNow();
       if (datePickerRefMobile.value !== null) {
         datePickerRefMobile.value.overlayVisible = false;
@@ -1405,6 +1465,7 @@ export default defineComponent({
         datePickerRefDesktop.value.overlayVisible = false;
       }
     };
+
     const fetchIfDatesCleared = (): void => {
       if (!dates.value) {
         void fetchNow();
@@ -1435,7 +1496,7 @@ export default defineComponent({
       dates,
       minDate,
       maxDate,
-      inHouseSelection,
+      inHouseNow,
       currency,
       getNoResultsTitle,
       getNoResultsMessage,
@@ -1461,7 +1522,7 @@ export default defineComponent({
       setLast30Days,
       setThisMonth,
       clearDateFilter,
-      apply,
+      applyDateRangeFilters,
       fetchIfDatesCleared,
 
       // components prime
@@ -1483,21 +1544,47 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     width: 100%;
-    .pi-times {
-      cursor: pointer;
+    .global-search {
+      label {
+        margin-left: var(--p-inputtext-padding-x);
+        font-size: var(--floatlabel-active-font-size, 10.5px);
+        margin-bottom: 7px;
+        display: none;
+      }
+    }
+    .date-range-container {
+      label {
+        margin-left: var(--p-inputtext-padding-x);
+        font-size: var(--floatlabel-active-font-size, 10.5px);
+        margin-bottom: 7px;
+        display: none;
+      }
+      .datepicker-desktop {
+        display: none;
+      }
+      .datepicker-mobile {
+        margin-top: 1rem;
+      }
+    }
+    .fast-filter {
+      label {
+        margin-left: var(--p-inputtext-padding-x);
+        font-size: var(--floatlabel-active-font-size, 10.5px);
+        margin-bottom: 7px;
+        display: none;
+      }
+      .select {
+        width: 100%;
+      }
+    }
+    .global-search,
+    .date-range-container {
+      .pi-times {
+        cursor: pointer;
+      }
     }
     .button {
       margin-top: 1rem;
-    }
-    .datepicker-desktop {
-      display: none;
-    }
-    .datepicker-mobile {
-      margin-top: 1rem;
-    }
-    .select {
-      margin-top: 1rem;
-      width: 100%;
     }
   }
   .tag-contact-type {
@@ -1576,19 +1663,33 @@ export default defineComponent({
   .table-main-content {
     .table-header {
       flex-direction: row;
-      .datepicker-mobile {
-        display: none;
+
+      gap: 1px;
+      align-items: flex-end;
+      .global-search {
+        label {
+          display: block;
+        }
       }
-      .datepicker-desktop {
+      .date-range-container {
         margin-left: 1rem;
-        width: 265px;
-        display: flex;
+        label {
+          display: block;
+        }
+        .datepicker-desktop {
+          display: flex;
+        }
+        .datepicker-mobile {
+          display: none;
+        }
       }
-      .select {
-        margin-top: 0;
+      .fast-filter {
         margin-left: 1rem;
-        width: 220px;
+        label {
+          display: block;
+        }
       }
+
       .button {
         margin-top: 0;
         margin-left: 1rem;
