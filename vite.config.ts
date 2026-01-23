@@ -57,6 +57,13 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       port: 3000,
       proxy: {
+        // BookAI Chatter API - must be before generic /api
+        '/api/v1/chatter': {
+          target:
+            env.ROOMDOO_BOOKAI_API_URL?.replace('/api', '') || 'https://bookai.predev.roomdoo.com',
+          changeOrigin: true,
+          secure: false,
+        },
         '/api': {
           target: env.ROOMDOO_API_URL,
           changeOrigin: true,

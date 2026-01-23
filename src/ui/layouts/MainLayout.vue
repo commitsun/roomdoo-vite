@@ -60,7 +60,6 @@ export default defineComponent({
     );
 
     onBeforeMount(async () => {
-      await useLegacyStore().recoverCookies();
       await instanceStore.fetchInstance();
       await pmsPropertiesStore.fetchPmsProperties();
       await useLegacyStore().fetchPmsProperties();

@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import { type Ref, computed, onMounted, ref, watch } from 'vue';
 import Select from 'primevue/select';
-import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 import { Globe } from 'lucide-vue-next';
 
 import { i18n } from '@/infrastructure/plugins/i18n';
@@ -58,7 +58,7 @@ import { useUIStore } from '@/infrastructure/stores/ui';
 import { updatePrimevueLocale } from '@/infrastructure/plugins/primevue';
 import { APP_LANGUAGES } from '@/application/instance/InstanceService';
 
-const router = useRouter();
+const toast = useToast();
 const instanceStore = useInstanceStore();
 const uiStore = useUIStore();
 
@@ -102,7 +102,13 @@ onMounted(async () => {
       instanceImage.value = url;
     }
   } catch {
-    await router.push({ name: 'instance-not-found' });
+    toast.add({
+      severity: 'error',
+      summary: i18n.global.t('error.connectionError'),
+      detail: i18n.global.t('error.connectionErrorDetail'),
+      life: 8000,
+      closable: true,
+    });
   } finally {
     uiStore.stopLoading();
   }

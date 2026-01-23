@@ -1,0 +1,490 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor, within } from '@testing-library/vue';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom/vitest';
+import { createTestingPinia } from '@pinia/testing';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Tag from 'primevue/tag';
+import Chip from 'primevue/chip';
+import InputText from 'primevue/inputtext';
+import Select from 'primevue/select';
+import MultiSelect from 'primevue/multiselect';
+import CountryFlag from 'vue-country-flag-next';
+import Button from 'primevue/button';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+
+import CustomerList from './CustomerList.vue';
+
+import type { Customer } from '@/domain/entities/Contact';
+import primevuePlugin from '@/infrastructure/plugins/primevue';
+// i18n mock
+vi.mock('vue-i18n', () => {
+  const tMap: Record<string, string> = {
+    'contacts.globalSearch': 'Global search',
+    'contacts.clear': 'Clear',
+    'contacts.fullName': 'Full name',
+    'contacts.vat': 'VAT',
+    'contacts.email': 'Email',
+    'contacts.phone': 'Phone',
+    'contacts.country': 'Country',
+    'contacts.totalInvoiced': 'Total invoiced',
+    'contacts.searchByName': 'Search by name',
+    'contacts.searchByEmail': 'Search by email',
+    'contacts.searchByVat': 'Search by VAT',
+    'contacts.searchByPhone': 'Search by phone',
+    'contacts.searchByCountry': 'Select countries',
+  };
+  return {
+    useI18n: () => ({
+      t: (k: string) => tMap[k] ?? k,
+    }),
+    createI18n: vi.fn(() => ({ install: () => {} })),
+  };
+});
+// i18n plugin mock (locale)
+vi.mock('@/infrastructure/plugins/i18n', () => ({
+  i18n: {
+    global: {
+      locale: { value: 'es-ES' },
+    },
+  },
+}));
+// TODO: remove when legacy components are removed
+vi.mock('@/_legacy/components/partners/PartnerForm.vue', () => ({
+  default: { name: 'PartnerForm', template: '<div />' },
+}));
+// TODO: remove when legacy stores are removed
+vi.mock('@/_legacy/utils/useLegacyStore', () => ({
+  useLegacyStore: () => ({
+    fetchAndSetVuexPartnerAndActiveProperty: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+// App dialog mock
+vi.mock('@/ui/composables/useAppDialog', () => ({
+  useAppDialog: () => ({ open: vi.fn() }),
+}));
+// test data
+const testCustomers: Customer[] = [
+  {
+    id: 1,
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    vat: 'US123456789',
+    phones: [],
+    country: { code: 'US', name: 'United States', id: 1 },
+    totalInvoiced: 1500,
+    image: '',
+  },
+  {
+    id: 2,
+    name: 'Jane Smith',
+    email: 'jane.smith@example.com',
+    vat: 'CA987654321',
+    phones: [{ number: '555-123-4567', type: 'mobile' }],
+    country: { code: 'CA', name: 'Canada', id: 2 },
+    totalInvoiced: 2500,
+    image: '',
+  },
+];
+// Contacts store mock
+const mockContactsStore = {
+  customers: testCustomers,
+  customersCount: testCustomers.length,
+  fetchCustomers: vi.fn().mockResolvedValue(undefined),
+};
+vi.mock('@/infrastructure/stores/contacts', () => ({
+  useContactsStore: () => mockContactsStore,
+}));
+// Countries store mock
+vi.mock('@/infrastructure/stores/countries', () => ({
+  useCountriesStore: () => ({
+    countries: [
+      { id: 1, name: 'United States', code: 'US' },
+      { id: 2, name: 'Canada', code: 'CA' },
+    ],
+    fetchCountries: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+// PMS Properties store mock
+vi.mock('@/infrastructure/stores/pmsProperties', () => ({
+  usePmsPropertiesStore: () => ({
+    currentPmsPropertyId: 'prop-1',
+    pmsProperties: [{ id: 'prop-1', currency: { code: 'EUR' } }],
+  }),
+}));
+describe('CustomerList', () => {
+  beforeEach(() => {
+    const pinia = createTestingPinia();
+    render(CustomerList, {
+      props: { total: testCustomers.length },
+      global: {
+        plugins: [pinia, [primevuePlugin, { ripple: false }]],
+        components: {
+          DataTable,
+          Column,
+          Tag,
+          Chip,
+          InputText,
+          Select,
+          MultiSelect,
+          Button,
+          IconField,
+          InputIcon,
+          CountryFlag,
+        },
+      },
+    });
+  });
+  it('renders customers by default - happy path - fetches on mount', async () => {
+    const first = testCustomers[0];
+    const second = testCustomers[1];
+
+    const rowGroups = screen.getAllByRole('rowgroup');
+    const tbody = rowGroups[1];
+    const bodyRows = within(tbody).getAllByRole('row');
+
+    // renders 2 customers
+    expect(bodyRows).toHaveLength(2);
+
+    // row 1
+    expect(bodyRows[0]).toHaveTextContent(first.name);
+    expect(bodyRows[0]).toHaveTextContent(first.vat);
+    expect(bodyRows[0]).toHaveTextContent(first.email ?? '');
+    expect(bodyRows[0]).toHaveTextContent(first.country?.name ?? '');
+    first.phones?.forEach((phone) => {
+      expect(bodyRows[0]).toHaveTextContent(phone.number);
+    });
+    const expected1 = new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: true,
+    })
+      .format(Number(first.totalInvoiced))
+      .replace(/\u00A0/g, ' ');
+    expect(bodyRows[0]).toHaveTextContent(expected1);
+
+    // row 2
+    expect(bodyRows[1]).toHaveTextContent(second.name);
+    expect(bodyRows[1]).toHaveTextContent(second.vat);
+    expect(bodyRows[1]).toHaveTextContent(second.email ?? '');
+    expect(bodyRows[1]).toHaveTextContent(second.country?.name ?? '');
+    second.phones?.forEach((phone) => {
+      expect(bodyRows[1]).toHaveTextContent(phone.number);
+    });
+    const expected2 = new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: true,
+    })
+      .format(Number(second.totalInvoiced))
+      .replace(/\u00A0/g, ' ');
+    expect(bodyRows[1]).toHaveTextContent(expected2);
+
+    // fetchCustomers called on mount
+    expect(mockContactsStore.fetchCustomers).toHaveBeenCalledTimes(1);
+  });
+  it('applies global search input', async () => {
+    vi.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const input = screen.getByPlaceholderText(/global search/i);
+    await user.type(input, 'John');
+    vi.advanceTimersByTime(300);
+
+    const last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last && last[1].globalSearch).toBe('John');
+
+    vi.useRealTimers();
+  });
+  it('debounces global search (only one call)', async () => {
+    vi.useFakeTimers();
+    mockContactsStore.fetchCustomers.mockClear();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const input = screen.getByPlaceholderText(/global search/i);
+    await user.type(input, 'John');
+
+    expect(mockContactsStore.fetchCustomers).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(250);
+    expect(mockContactsStore.fetchCustomers).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
+  it('fires by maxWait even with continuous typing', async () => {
+    vi.useFakeTimers();
+    mockContactsStore.fetchCustomers.mockClear();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    const input = screen.getByPlaceholderText(/global search/i);
+    await user.type(input, 'abc');
+    vi.advanceTimersByTime(2900);
+    await user.type(input, 'def');
+    vi.advanceTimersByTime(200); // 3100 > maxWait
+
+    expect(mockContactsStore.fetchCustomers).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
+  it('sort by name toggles and maps orderBy', async () => {
+    const nameHeader = screen.getAllByRole('columnheader', { name: /full name/i })[0];
+    await userEvent.click(nameHeader); // asc
+    let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[2]).toBe('name');
+    await userEvent.click(nameHeader); // desc
+    last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[2]).toBe('-name');
+  });
+  it('sort by email toggles and maps orderBy', async () => {
+    const emailHeader = screen.getByRole('columnheader', { name: /email/i });
+    await userEvent.click(emailHeader); // asc
+    let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[2]).toBe('email');
+
+    await userEvent.click(emailHeader); // desc
+    last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[2]).toBe('-email');
+  });
+  it('sort by country toggles and maps orderBy', async () => {
+    const countryHeader = screen.getByRole('columnheader', { name: /country/i });
+    await userEvent.click(countryHeader); // asc
+    let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[2]).toBe('country');
+
+    await userEvent.click(countryHeader); // desc
+    last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[2]).toBe('-country');
+  });
+  it('filters by name (column filter + apply) & clear input after click clear button', async () => {
+    const nameHeader = screen.getAllByRole('columnheader', { name: /full name/i })[0];
+    const filterBtn = within(nameHeader).getByRole('button');
+    await userEvent.click(filterBtn);
+
+    const overlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const nameInput = within(overlay).getByPlaceholderText(/search by name/i);
+    await userEvent.type(nameInput, 'John');
+    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
+    await userEvent.click(applyBtn);
+
+    let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last && last[1].nameContains).toBe('John');
+
+    const clearBtn = within(overlay).getByRole('button', { name: /Cancel/i });
+    await userEvent.click(clearBtn);
+    last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last && last[1].nameContains).toBeUndefined();
+  });
+  it('filters by vat (column filter + apply) & clear input after click clear button', async () => {
+    const vatHeader = screen.getByRole('columnheader', { name: /vat/i });
+    const filterBtn = within(vatHeader).getByRole('button');
+    await userEvent.click(filterBtn);
+
+    const overlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const vatInput = within(overlay).getByPlaceholderText(/search by vat/i);
+    await userEvent.type(vatInput, 'US123456789');
+    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
+    await userEvent.click(applyBtn);
+
+    let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last && last[1].vatContains).toBe('US123456789');
+
+    const clearBtn = within(overlay).getByRole('button', { name: /Cancel/i });
+    await userEvent.click(clearBtn);
+    last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last && last[1].vatContains).toBeUndefined();
+  });
+  it('filters by email (column filter + apply) & clears with clear button', async () => {
+    const emailHeader = screen.getByRole('columnheader', { name: /email/i });
+    const filterBtn = within(emailHeader).getByRole('button');
+    await userEvent.click(filterBtn);
+
+    const overlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const emailInput = within(overlay).getByPlaceholderText(/search by email/i);
+    await userEvent.type(emailInput, 'john.doe@example.com');
+    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
+    await userEvent.click(applyBtn);
+
+    let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[1].emailContains).toBe('john.doe@example.com');
+
+    await userEvent.click(filterBtn);
+    const overlay2 =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
+    await userEvent.click(clearBtn);
+
+    last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[1].emailContains).toBeUndefined();
+  });
+  it('filters by phone (column filter + apply) & clears with clear button', async () => {
+    const phoneHeader = screen.getByRole('columnheader', { name: /phone/i });
+    const filterBtn = within(phoneHeader).getByRole('button');
+    await userEvent.click(filterBtn);
+
+    const overlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const phoneInput = within(overlay).getByPlaceholderText(/search by phone/i);
+    await userEvent.type(phoneInput, '555');
+    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
+    await userEvent.click(applyBtn);
+
+    let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[1].phonesContains).toBe('555');
+
+    await userEvent.click(filterBtn);
+    const overlay2 =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const clearBtn = within(overlay2).getByRole('button', { name: /clear/i });
+    await userEvent.click(clearBtn);
+
+    last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[1].phonesContains).toBeUndefined();
+  });
+  it('filters by country & clears country filter', async () => {
+    const countryHeader = screen.getByRole('columnheader', { name: /country/i });
+    const filterBtn = within(countryHeader).getByRole('button');
+    await userEvent.click(filterBtn);
+
+    const overlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const trigger =
+      within(overlay).queryByRole('combobox', { name: /select countries/i }) ??
+      within(overlay).getByText(/select countries/i);
+    await userEvent.click(trigger);
+
+    const listbox = await screen.findByRole('listbox');
+    const usOption = within(listbox).getByRole('option', { name: /united states/i });
+    await userEvent.click(usOption);
+
+    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
+    await userEvent.click(applyBtn);
+
+    let last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[1].countryIn).toEqual(['United States']);
+
+    // clear
+    await userEvent.click(filterBtn);
+    const overlay2 =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const clearBtn = within(overlay2).getByRole('button', { name: /Cancel/i });
+    await userEvent.click(clearBtn);
+
+    last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[1].countryIn).toBeUndefined();
+  });
+  it('filters by several countries', async () => {
+    const countryHeader = screen.getByRole('columnheader', { name: /country/i });
+    const filterBtn = within(countryHeader).getByRole('button');
+    await userEvent.click(filterBtn);
+
+    const overlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const trigger =
+      within(overlay).queryByRole('combobox', { name: /select countries/i }) ??
+      within(overlay).getByText(/select countries/i);
+    await userEvent.click(trigger);
+
+    const listbox = await screen.findByRole('listbox');
+    const usOption = within(listbox).getByRole('option', { name: /united states/i });
+    const canadaOption = within(listbox).getByRole('option', { name: /canada/i });
+    await userEvent.click(usOption);
+    await userEvent.click(canadaOption);
+
+    const applyBtn = within(overlay).getByRole('button', { name: /apply/i });
+    await userEvent.click(applyBtn);
+
+    const last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+    expect(last?.[1].countryIn).toHaveLength(2);
+    expect(last?.[1].countryIn).toEqual(expect.arrayContaining(['United States', 'Canada']));
+  });
+  it('applies all filters + global search and clears everything with "Clear all" button', async () => {
+    vi.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    mockContactsStore.fetchCustomers.mockClear();
+    // Global search (debounced)
+    const globalInput = screen.getByPlaceholderText(/global search/i);
+    await user.type(globalInput, 'global');
+    // fires debounce (250ms) with marginal
+    vi.advanceTimersByTime(250);
+    // Name
+    const nameHeader = screen.getAllByRole('columnheader', { name: /full name/i })[0];
+    await user.click(within(nameHeader).getByRole('button'));
+    const nameOverlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    await user.type(within(nameOverlay).getByPlaceholderText(/search by name/i), 'John');
+    await user.click(within(nameOverlay).getByRole('button', { name: /apply/i }));
+    // Vat
+    const vatHeader = screen.getByRole('columnheader', { name: /vat/i });
+    await user.click(within(vatHeader).getByRole('button'));
+    const vatOverlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    await user.type(within(vatOverlay).getByPlaceholderText(/search by vat/i), 'US123456789');
+    await user.click(within(vatOverlay).getByRole('button', { name: /apply/i }));
+    // Email
+    const emailHeader = screen.getByRole('columnheader', { name: /email/i });
+    await user.click(within(emailHeader).getByRole('button'));
+    const emailOverlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    await user.type(
+      within(emailOverlay).getByPlaceholderText(/search by email/i),
+      'john.doe@example.com',
+    );
+    await user.click(within(emailOverlay).getByRole('button', { name: /apply/i }));
+    // Phone
+    const phoneHeader = screen.getByRole('columnheader', { name: /phone/i });
+    await user.click(within(phoneHeader).getByRole('button'));
+    const phoneOverlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    await user.type(within(phoneOverlay).getByPlaceholderText(/search by phone/i), '555');
+    await user.click(within(phoneOverlay).getByRole('button', { name: /apply/i }));
+    // Country
+    const countryHeader = screen.getByRole('columnheader', { name: /country/i });
+    await user.click(within(countryHeader).getByRole('button'));
+    const countryOverlay =
+      (await screen.findByRole('dialog').catch(() => null)) ?? (await screen.findByRole('menu'));
+    const countryTrigger =
+      within(countryOverlay).queryByRole('combobox', { name: /select countries/i }) ??
+      within(countryOverlay).getByText(/select countries/i);
+    await user.click(countryTrigger);
+    const listboxCountry = await screen.findByRole('listbox');
+    await user.click(within(listboxCountry).getByRole('option', { name: /united states/i }));
+    await user.click(within(countryOverlay).getByRole('button', { name: /apply/i }));
+    // sort by country
+    await user.click(countryHeader); // asc
+    await user.click(countryHeader); // desc
+    // Assert in a stable way: wait for a call with ALL the expected params
+    await waitFor(() => {
+      const last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+      expect(last?.[1].globalSearch).toBe('global');
+      expect(last?.[1].nameContains).toBe('John');
+      expect(last?.[1].emailContains).toBe('john.doe@example.com');
+      expect(last?.[1].vatContains).toBe('US123456789');
+      expect(last?.[1].countryIn).toEqual(['United States']);
+      expect(last?.[1].phonesContains).toBe('555');
+      expect(last?.[2]).toBe('-country');
+    });
+    // Clear all (header button)
+    const clearAllBtn = screen.getByRole('button', { name: /clear global search/i });
+    await user.click(clearAllBtn);
+    // Assert everything is cleared
+    await waitFor(() => {
+      const last = mockContactsStore.fetchCustomers.mock.calls.at(-1);
+      expect(last?.[1].globalSearch).toBeUndefined();
+      expect(last?.[1].nameContains).toBeUndefined();
+      expect(last?.[1].emailContains).toBeUndefined();
+      expect(last?.[1].vatContains).toBeUndefined();
+      expect(last?.[1].countryIn).toBeUndefined();
+      expect(last?.[1].phonesContains).toBeUndefined();
+      expect(last?.[2]).toBeUndefined();
+      expect(globalInput).toHaveValue('');
+      vi.useRealTimers();
+    });
+  });
+});

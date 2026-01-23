@@ -19,13 +19,10 @@
     "clear": "Limpiar",
     "commission": "Comisión",
     "company": "Empresa",
-    "confirm": "Confirmar",
     "confirmMessage": "¿Deseas ver el contacto? Se perderán los cambios no guardados.",
     "confirmTitle": "Confirmar navegación",
     "contact": "Contacto",
     "contactData": "Datos de contacto",
-    "changeContactTypeMessage": "Al cambiar, se perderán algunos datos específicos de {fromType}. Los datos comunes se mantendrán.",
-    "changeContactTypeTitle": "¿Cambiar de {fromType} a {toType}?",
     "country": "País",
     "customers": "Clientes",
     "datePicker": {
@@ -186,6 +183,8 @@
   },
   "error": {
     "accept": "Aceptar",
+    "connectionError": "Error de conexión",
+    "connectionErrorDetail": "No se pudo conectar con Roomdoo. Comprueba tu conexión e inténtalo de nuevo.",
     "internalError": "Ha ocurrido un error interno.",
     "requestError": "Se ha producido un error en la solicitud.",
     "sessionExpiredContent": "Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.",
@@ -274,11 +273,154 @@
     "title": "Restablecer contraseña",
     "unableToResetPassword": "No se ha podido restablecer la contraseña"
   },
+  "chat": {
+    "aiAssistant": "Asistente IA",
+    "aiAssistedLabel": "Asistente IA con Intervención de Hotel",
+    "aiHelp": {
+      "cancel": "Cancelar",
+      "deactivateHint": "Si prefieres responder tú directamente, puedes desactivarme.",
+      "edit": "Editar",
+      "inputPlaceholder": "Escribe la información que necesito...",
+      "interventionRequired": "Se requiere intervención del hotel",
+      "noInfo": "No tengo suficiente información para responder esta consulta.",
+      "previewTitle": "Respuesta preparada",
+      "send": "Enviar al huésped",
+      "title": "Necesito tu ayuda",
+      "willPrepareResponse": "Una vez que lo sepa, te preparo la respuesta para enviar al huésped."
+    },
+    "aiIndicator": {
+      "active": "El asistente interno está activo"
+    },
+    "internalConversation": {
+      "divider": "El asistente interno está activo",
+      "title": "Necesito tu ayuda",
+      "guestAsked": "El huésped preguntó:",
+      "aiWelcome": "Dime la respuesta y prepararé un mensaje para el huésped.",
+      "inputPlaceholder": "Escribe la información que necesito...",
+      "proposedResponse": "Respuesta propuesta",
+      "resolved": "Conversación resuelta",
+      "cancelled": "Conversación cancelada",
+      "messageSent": "El mensaje ha sido enviado al huésped.",
+      "sendToGuest": "Enviar al huésped",
+      "editResponse": "Editar",
+      "cancelEdit": "Cancelar",
+      "refinePlaceholder": "Escribe para ajustar la respuesta..."
+    },
+    "internal": {
+      "needHelp": "Necesito tu ayuda",
+      "infoNotAvailable": "Información no disponible",
+      "aiSuggestionIntro": "Genial te sugiero la siguiente respuesta para el huésped, si la apruebas se la envío:",
+      "edit": "Editar",
+      "sendToGuest": "Enviar al huésped",
+      "inputPlaceholder": "Indícame la información para preparar la respuesta"
+    },
+    "bookAI": {
+      "assistant": "BookAI",
+      "subtitle": "Tu asistente inteligente de hotel",
+      "online": "En linea",
+      "inputPlaceholder": "Pregunta lo que quieras al asistente interno",
+      "settings": "Configuracion",
+      "responses": {
+        "welcome": "Hola! Soy BookAI, tu asistente inteligente. Puedo ayudarte con:\n\n- Consultas de huespedes y preguntas sobre reservas\n- Generar sugerencias de respuesta\n- Analizar patrones de conversacion\n- Proporcionar recomendaciones\n\nEn que puedo ayudarte hoy?",
+        "reservation": "Perfecto! Puedes decirme cual seria la respuesta correcta en ese caso? Asi la guardo para futuras consultas.",
+        "checkin": "Anotado! A partir de ahora, cuando un huesped pregunte por un check-in temprano, respondere con esa informacion. Quieres que agregue una version mas corta y amable para WhatsApp?",
+        "guest": "Entendido! He guardado esa respuesta. La proxima vez que un huesped haga una consulta similar, utilizare esta informacion. Necesitas que te ayude con algo mas?",
+        "help": "Estoy aqui para aprender y ayudarte a gestionar las comunicaciones con huespedes. Puedes entrenarme con respuestas especificas para tu hotel y yo las recordare para futuras consultas. Que te gustaria ensenarme?",
+        "default1": "Perfecto! Puedes decirme cual seria la respuesta correcta en ese caso? Asi la guardo para futuras consultas.",
+        "default2": "Anotado! He guardado esa informacion. Quieres que agregue una version mas corta para WhatsApp?",
+        "default3": "Entendido! La proxima vez que un huesped pregunte algo similar, usare esta respuesta. Hay algo mas que quieras ensenarme?",
+        "default4": "Gracias por la informacion! Ya lo tengo guardado. Quieres revisar como quedaria la respuesta automatica?"
+      },
+      "drawer": {
+        "title": "Historial de chats",
+        "newChat": "Nuevo chat",
+        "searchLabel": "Buscar",
+        "search": "Buscar conversaciones...",
+        "chats": "Chats",
+        "noChats": "No hay conversaciones anteriores"
+      }
+    },
+    "search": {
+      "placeholder": "Buscar",
+      "inConversation": "Buscar en la conversación",
+      "resultsCount": "{current} de {total}",
+      "noResults": "Sin resultados"
+    },
+    "empty": {
+      "noChats": "No hay conversaciones"
+    },
+    "filters": {
+      "all": "Todos",
+      "alerts": "Alertas",
+      "checkinPending": "Check-In pend."
+    },
+    "guestStatus": {
+      "arriving": "Por llegar",
+      "inHouse": "In house",
+      "checkedOut": "Finalizado"
+    },
+    "input": {
+      "placeholder": "Escribe un mensaje..."
+    },
+    "messages": {
+      "empty": "No hay mensajes en esta conversación"
+    },
+    "selectChat": {
+      "title": "Selecciona una conversación",
+      "description": "Elige un chat de la lista para ver los mensajes"
+    },
+    "viewReservation": "Ver reserva",
+    "reservation": {
+      "drawerTitle": "Detalle de reserva",
+      "notFound": "No se encontró la reserva"
+    },
+    "menu": {
+      "markUnread": "Marcar como no leído"
+    },
+    "dateSeparator": {
+      "today": "Hoy",
+      "yesterday": "Ayer"
+    },
+    "systemEvents": {
+      "aiAskedHelp": "El asistente interno pidió ayuda",
+      "bookaiDisabled": "Control manual activado",
+      "bookaiEnabled": "BookAI reactivado"
+    },
+    "aiAskedForHelp": "El asistente interno pidió ayuda",
+    "aiActiveMessage": "👋 Hola soy tu asistente interno y estoy gestionando esta conversación. Si quieres tomar el control solo tienes que desactivarme",
+    "manualControl": {
+      "title": "Control manual activado",
+      "message": "Tienes 24 horas para responder o deberás reiniciar la conversación con una plantilla"
+    },
+    "expiringBanner": {
+      "message": "La conversación está por expirar en {hours} hora, responde ahora o deberás reiniciar la conversación con una plantilla | La conversación está por expirar en {hours} horas, responde ahora o deberás reiniciar la conversación con una plantilla",
+      "lessThanOneHour": "La conversación está por expirar en menos de 1 hora, responde ahora o deberás reiniciar la conversación con una plantilla"
+    },
+    "expiredBanner": {
+      "message": "El contacto te envió un mensaje hace más de 24 horas. En este momento solo puedes",
+      "sendTemplates": "enviar plantillas de mensajes",
+      "toReactivate": "para reactivar la conversación."
+    },
+    "expiredPlaceholder": "Para reactivar la conversación envía una plantilla",
+    "templates": {
+      "title": "Enviar plantilla",
+      "searchPlaceholder": "Buscar por nombre, idioma o categoría",
+      "noResults": "No se encontraron plantillas",
+      "viewMore": "Ver más plantillas"
+    },
+    "templateConfirm": {
+      "title": "Enviar plantilla",
+      "confirmMessage": "Vas a enviar la plantilla",
+      "manageTemplate": "Administrar plantilla",
+      "confirmSend": "Confirmar envío"
+    }
+  },
   "sidebar": {
     "arrivals": "Entradas",
     "billing": "Facturación",
     "cashRegister": "Registro de caja",
     "changePassword": "Cambiar contraseña",
+    "chat": "Chats",
     "contacts": {
       "agencies": "Agencias",
       "all": "Todos",

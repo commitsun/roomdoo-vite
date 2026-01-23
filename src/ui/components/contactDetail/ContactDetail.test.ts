@@ -464,11 +464,6 @@ vi.mock('./ContactDetailInternalNotes.vue', () => ({
   },
 }));
 
-const confirmRequireSpy = vi.fn();
-vi.mock('primevue/useconfirm', () => ({
-  useConfirm: () => ({ require: confirmRequireSpy }),
-}));
-
 // ---- Stores mocks ----
 const fetches = {
   fetchDocumentTypes: vi.fn().mockResolvedValue(undefined),
@@ -660,7 +655,7 @@ describe('ContactDetailDialog', () => {
     await waitFor(() => expect(contactsStoreMock.updateContactFields).toHaveBeenCalledTimes(1));
     const args = (contactsStoreMock.updateContactFields as any).mock.calls[0];
     expect(args[0]).toBe(123);
-    expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved', contactId: 123 });
+    expect(dialogRef.value.close).toHaveBeenCalledWith({ action: 'saved' });
   });
 
   it('handleCancel closes the dialog', async () => {
@@ -775,13 +770,6 @@ describe('ContactDetailDialog', () => {
   });
 
   it('in edit mode, update contactType with the current selection.', async () => {
-    // Mock the confirmation dialog to auto-accept when changing contactType
-    confirmRequireSpy.mockImplementationOnce((config: { accept?: () => void }) => {
-      if (typeof config.accept === 'function') {
-        config.accept();
-      }
-    });
-
     const dialogRef = ref({
       close: vi.fn(),
       data: { contact: { id: 10, firstname: 'A', lastname: 'B', contactType: 'person' } },
@@ -1165,13 +1153,6 @@ describe('ContactDetailDialog', () => {
   });
 
   it('clearHiddenFields on non-person wipes person-only fields and documents', async () => {
-    // Mock the confirmation dialog to auto-accept when changing contactType
-    confirmRequireSpy.mockImplementationOnce((config: { accept?: () => void }) => {
-      if (typeof config.accept === 'function') {
-        config.accept();
-      }
-    });
-
     (vueuse as any).__setDesktop(true);
     renderWith();
 

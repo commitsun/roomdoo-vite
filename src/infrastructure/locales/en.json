@@ -19,13 +19,10 @@
     "clear": "Clear",
     "commission": "Commission",
     "company": "Company",
-    "confirm": "Confirm",
     "confirmMessage": "Do you want to view the contact? Unsaved changes will be lost.",
     "confirmTitle": "Confirm navigation",
     "contact": "Contact",
     "contactData": "Contact data",
-    "changeContactTypeMessage": "Switching will result in the loss of some {fromType}-specific data. Common data will be preserved.",
-    "changeContactTypeTitle": "Change from {fromType} to {toType}?",
     "country": "Country",
     "customers": "Customers",
     "datePicker": {
@@ -186,6 +183,8 @@
   },
   "error": {
     "accept": "Accept",
+    "connectionError": "Connection error",
+    "connectionErrorDetail": "Could not connect to Roomdoo. Check your connection and try again.",
     "internalError": "An internal error occurred.",
     "requestError": "A request error occurred.",
     "sessionExpiredContent": "Your session has expired. Please log in again.",
@@ -274,11 +273,154 @@
     "title": "Reset password",
     "unableToResetPassword": "Unable to reset password"
   },
+  "chat": {
+    "aiAssistant": "AI Assistant",
+    "aiAssistedLabel": "AI Assistant with Hotel Intervention",
+    "aiHelp": {
+      "cancel": "Cancel",
+      "deactivateHint": "If you prefer to respond directly, you can turn me off.",
+      "edit": "Edit",
+      "inputPlaceholder": "Write the information I need...",
+      "interventionRequired": "Hotel intervention required",
+      "noInfo": "I don't have enough information to respond to this query.",
+      "previewTitle": "Prepared response",
+      "send": "Send to guest",
+      "title": "I need your help",
+      "willPrepareResponse": "Once I know, I'll prepare the response to send to the guest."
+    },
+    "aiIndicator": {
+      "active": "Internal assistant is active"
+    },
+    "internalConversation": {
+      "divider": "Internal assistant is active",
+      "title": "I need your help",
+      "guestAsked": "The guest asked:",
+      "aiWelcome": "Tell me the answer and I will prepare a response for the guest.",
+      "inputPlaceholder": "Write the information I need...",
+      "proposedResponse": "Proposed response",
+      "resolved": "Conversation resolved",
+      "cancelled": "Conversation cancelled",
+      "messageSent": "The message has been sent to the guest.",
+      "sendToGuest": "Send to guest",
+      "editResponse": "Edit",
+      "cancelEdit": "Cancel",
+      "refinePlaceholder": "Write to refine the response..."
+    },
+    "internal": {
+      "needHelp": "I need your help",
+      "infoNotAvailable": "Information not available",
+      "aiSuggestionIntro": "Great, I suggest the following response for the guest. If you approve it, I'll send it:",
+      "edit": "Edit",
+      "sendToGuest": "Send to guest",
+      "inputPlaceholder": "Tell me the information to prepare the response"
+    },
+    "bookAI": {
+      "assistant": "BookAI",
+      "subtitle": "Your intelligent hotel assistant",
+      "online": "Online",
+      "inputPlaceholder": "Ask the internal assistant anything",
+      "settings": "Settings",
+      "responses": {
+        "welcome": "Hello! I am BookAI, your intelligent assistant. I can help you with:\n\n- Guest inquiries and reservation questions\n- Generating response suggestions\n- Analyzing conversation patterns\n- Providing recommendations\n\nHow can I assist you today?",
+        "reservation": "Perfect! Can you tell me what the correct response would be in that case? I will save it for future inquiries.",
+        "checkin": "Noted! From now on, when a guest asks about early check-in, I will respond with that information. Would you like me to add a shorter, friendlier version for WhatsApp?",
+        "guest": "Got it! I have saved that response. Next time a guest makes a similar inquiry, I will use this information. Is there anything else you need help with?",
+        "help": "I am here to learn and help you manage guest communications. You can train me with specific responses for your hotel and I will remember them for future inquiries. What would you like to teach me?",
+        "default1": "Perfect! Can you tell me what the correct response would be in that case? I will save it for future inquiries.",
+        "default2": "Noted! I have saved that information. Would you like me to add a shorter version for WhatsApp?",
+        "default3": "Got it! Next time a guest asks something similar, I will use this response. Is there anything else you would like to teach me?",
+        "default4": "Thank you for the information! I have saved it. Would you like to review how the automatic response would look?"
+      },
+      "drawer": {
+        "title": "Chat history",
+        "newChat": "New chat",
+        "searchLabel": "Search",
+        "search": "Search conversations...",
+        "chats": "Chats",
+        "noChats": "No previous conversations"
+      }
+    },
+    "search": {
+      "placeholder": "Search",
+      "inConversation": "Search in conversation",
+      "resultsCount": "{current} of {total}",
+      "noResults": "No results"
+    },
+    "empty": {
+      "noChats": "No conversations"
+    },
+    "filters": {
+      "all": "All",
+      "alerts": "Alerts",
+      "checkinPending": "Check-In pend."
+    },
+    "guestStatus": {
+      "arriving": "Arriving",
+      "inHouse": "In house",
+      "checkedOut": "Checked out"
+    },
+    "input": {
+      "placeholder": "Type a message..."
+    },
+    "messages": {
+      "empty": "No messages in this conversation"
+    },
+    "selectChat": {
+      "title": "Select a conversation",
+      "description": "Choose a chat from the list to view messages"
+    },
+    "viewReservation": "View reservation",
+    "reservation": {
+      "drawerTitle": "Reservation details",
+      "notFound": "Reservation not found"
+    },
+    "menu": {
+      "markUnread": "Mark as unread"
+    },
+    "dateSeparator": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "systemEvents": {
+      "aiAskedHelp": "The internal assistant asked for help",
+      "bookaiDisabled": "Manual control activated",
+      "bookaiEnabled": "BookAI reactivated"
+    },
+    "aiAskedForHelp": "The internal assistant asked for help",
+    "aiActiveMessage": "👋 Hi, I'm your internal assistant and I'm managing this conversation. If you want to take control, just turn me off",
+    "manualControl": {
+      "title": "Manual control activated",
+      "message": "You have 24 hours to respond or you will need to restart the conversation with a template"
+    },
+    "expiringBanner": {
+      "message": "The conversation will expire in {hours} hour, respond now or you will need to restart the conversation with a template | The conversation will expire in {hours} hours, respond now or you will need to restart the conversation with a template",
+      "lessThanOneHour": "The conversation will expire in less than 1 hour, respond now or you will need to restart the conversation with a template"
+    },
+    "expiredBanner": {
+      "message": "The contact sent you a message more than 24 hours ago. You can now only",
+      "sendTemplates": "send message templates",
+      "toReactivate": "to reactivate the conversation."
+    },
+    "expiredPlaceholder": "To reactivate the conversation send a template",
+    "templates": {
+      "title": "Send template",
+      "searchPlaceholder": "Search by name, language or category",
+      "noResults": "No templates found",
+      "viewMore": "View more templates"
+    },
+    "templateConfirm": {
+      "title": "Send template",
+      "confirmMessage": "You are about to send the template",
+      "manageTemplate": "Manage template",
+      "confirmSend": "Confirm send"
+    }
+  },
   "sidebar": {
     "arrivals": "Arrivals",
     "billing": "Billing",
     "cashRegister": "Cash register",
     "changePassword": "Change password",
+    "chat": "Chats",
     "contacts": {
       "agencies": "Agencies",
       "all": "All",

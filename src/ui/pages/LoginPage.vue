@@ -139,8 +139,8 @@ export default defineComponent({
       let redirect = '/';
       uiStore.startLoading();
       try {
-        await useLegacyStore().doVuexLogin(username.value, password.value);
         await userStore.login(username.value, password.value);
+        await useLegacyStore().doVuexLogin(username.value, password.value);
         await pmsPropertiesStore.fetchPmsProperties();
         if (userStore.user) {
           if (route.query.redirect !== undefined && route.query.redirect !== null) {

@@ -2,7 +2,7 @@
   <section class="documents-form" :class="{ 'is-empty': !hasDocuments && !hasDraftDoc }">
     <div class="no-documents-container" v-if="!hasDocuments && !hasDraftDoc">
       <div class="no-documents">
-        <IdCard :size="40" color="#64748B" stroke-width="1.5" />
+        <IdCard :size="40" color="#64748B" />
         <span class="no-documents-text">{{ t('contacts.noDocuments') }}</span>
         <Button
           :label="t('contacts.addDocument')"
@@ -230,7 +230,7 @@
       </Message>
     </div>
 
-    <ConfirmDialog group="documents" :style="{ maxWidth: '350px' }" />
+    <ConfirmDialog :style="{ maxWidth: '350px' }" />
   </section>
 </template>
 
@@ -499,7 +499,6 @@ export default defineComponent({
       }
 
       confirm.require({
-        group: 'documents',
         message: t('contacts.confirmMessage'),
         header: t('contacts.confirmTitle'),
         icon: 'pi pi-exclamation-triangle',

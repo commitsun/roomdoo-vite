@@ -31,6 +31,12 @@
       <span>{{ t('sidebar.contacts.title') }}</span>
     </router-link>
 
+    <!-- CHAT -->
+    <router-link to="/chat" class="nav-link" :class="{ 'is-active': isActive('chat') }">
+      <MessageCircle :size="18" class="nav-link-icon" />
+      <span>{{ t('sidebar.chat') }}</span>
+    </router-link>
+
     <!-- TRANSACTIONS -->
     <router-link
       :to="`/transactions${route.params.pmsPropertyId ? `/${route.params.pmsPropertyId}` : ''}`"
@@ -129,6 +135,7 @@ import {
   House,
   CalendarDays,
   Users,
+  MessageCircle,
   Wallet,
   ReceiptText,
   ChartNoAxesCombined,
@@ -149,6 +156,7 @@ export default defineComponent({
     House,
     CalendarDays,
     Users,
+    MessageCircle,
     Wallet,
     ReceiptText,
     ChartNoAxesCombined,
@@ -212,6 +220,7 @@ export default defineComponent({
       House,
       CalendarDays,
       Users,
+      MessageCircle,
       Wallet,
       ReceiptText,
       ChartNoAxesCombined,

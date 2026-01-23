@@ -17,7 +17,7 @@ export class UsersRepositoryImpl implements UserRepository {
     user.lastName = user.lastname;
     user.lastName2 = user.lastname2;
     user.avatar = user.image;
-    user.lang = user.lang.replace('_', '-');
+    user.lang = user.lang?.replace('_', '-') ?? 'es-ES';
     return user;
   }
 

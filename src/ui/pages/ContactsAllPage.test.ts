@@ -101,6 +101,10 @@ describe('ContactsAllPage (tabs)', () => {
         },
         stubs: {
           ContactList: { template: '<div />' },
+          CustomerList: { template: '<div />' },
+          GuestList: { template: '<div />' },
+          AgencyList: { template: '<div />' },
+          SupplierList: { template: '<div />' },
         },
       },
     });

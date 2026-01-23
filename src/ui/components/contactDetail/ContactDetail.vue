@@ -2,13 +2,11 @@
   <div class="contact-detail">
     <div class="contact-type">
       <SelectButton
-        :key="contactTypeKey"
-        :modelValue="contactType"
+        v-model="contactType"
         :options="contactTypeOptions"
         :allowEmpty="false"
         optionLabel="label"
         optionValue="value"
-        @update:modelValue="handleContactTypeChange"
       >
         <template #option="slotProps">
           <User v-if="slotProps.option.value === 'person'" :size="14" />
@@ -69,7 +67,6 @@
       </div>
     </div>
   </div>
-  <ConfirmDialog group="contactType" :style="{ maxWidth: '380px' }" />
 </template>
 
 <script lang="ts">
@@ -79,6 +76,7 @@ import {
   reactive,
   computed,
   onBeforeMount,
+  watch,
   inject,
   type Ref,
   type Component,
@@ -86,8 +84,6 @@ import {
 import SelectButton from 'primevue/selectbutton';
 import Button from 'primevue/button';
 import Badge from 'primevue/badge';
-import ConfirmDialog from 'primevue/confirmdialog';
-import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import {
   User,
@@ -138,7 +134,6 @@ export default defineComponent({
     NotebookPen,
     BookUser,
     Info,
-    ConfirmDialog,
   },
 
   setup() {
@@ -158,7 +153,6 @@ export default defineComponent({
     const uiStore = useUIStore();
     const useTextMessageStore = useTextMessagesStore();
     const { t } = useI18n();
-    const confirm = useConfirm();
 
     const dialogRef =
       inject<
@@ -166,7 +160,6 @@ export default defineComponent({
       >('dialogRef');
 
     const contactType = ref<'person' | 'company' | 'agency'>('person');
-    const contactTypeKey = ref(0);
     const billingAddressMode = ref<'residence' | 'other'>('residence');
 
     const contactTypeOptions = computed(() => [
@@ -405,15 +398,12 @@ export default defineComponent({
       }
       uiStore.startLoading();
       try {
-        let contactId = 0;
         if (contact.value !== null) {
           await contactsStore.updateContactFields(contact.value.id, contact.value, contactForm);
-          contactId = contact.value.id;
         } else {
-          const newContact = await contactsStore.createContact(contactForm);
-          contactId = newContact.id;
+          await contactsStore.createContact(contactForm);
         }
-        dialogRef?.value?.close({ action: 'saved', contactId });
+        dialogRef?.value?.close({ action: 'saved' });
       } catch (error) {
         useTextMessageStore.addTextMessage(t('error.somethingWentWrong'), (error as Error).message);
       } finally {
@@ -425,108 +415,18 @@ export default defineComponent({
       dialogRef?.value?.close({ action: 'cancel' });
     };
 
-    const updateContactType = (newType: 'person' | 'company' | 'agency'): void => {
-      contactType.value = newType;
-      contactForm.contactType = newType;
+    watch(contactType, () => {
       activeTab.value = '0';
       activePanel.value = null;
-
+      if (contactForm.id === 0) {
+        contactForm.firstname = '';
+        contactForm.lastname = '';
+        contactForm.lastname2 = '';
+        contactForm.name = '';
+      }
       resetUiErrors();
-    };
+    });
 
-    const hasPersonalDetails = (): boolean => {
-      return (
-        Boolean(contactForm.firstname) ||
-        Boolean(contactForm.lastname) ||
-        Boolean(contactForm.lastname2) ||
-        Boolean(contactForm.birthdate) ||
-        Boolean(contactForm.gender) ||
-        Boolean(contactForm.nationality) ||
-        Boolean(contactForm.lang)
-      );
-    };
-
-    const hasResidenceAddress = (): boolean => {
-      return (
-        Boolean(contactForm.residenceStreet) ||
-        Boolean(contactForm.residenceZip) ||
-        Boolean(contactForm.residenceCity) ||
-        Boolean(contactForm.residenceState) ||
-        Boolean(contactForm.residenceCountry)
-      );
-    };
-
-    const hasBillingAddress = (): boolean => {
-      return (
-        Boolean(contactForm.fiscalIdNumber) ||
-        Boolean(contactForm.fiscalIdNumberType) ||
-        Boolean(contactForm.street) ||
-        Boolean(contactForm.zipCode) ||
-        Boolean(contactForm.city) ||
-        Boolean(contactForm.state) ||
-        Boolean(contactForm.country)
-      );
-    };
-
-    const hasContactInfo = (): boolean => {
-      return Boolean(contactForm.email) || (contactForm.phones?.length ?? 0) > 0;
-    };
-
-    const hasCommercialInfo = (): boolean => {
-      return (
-        Boolean(contactForm.comercial) ||
-        Boolean(contactForm.saleChannel) ||
-        (contactForm.defaultCommission ?? 0) > 0
-      );
-    };
-
-    const hasContactSpecificData = (): boolean => {
-      return (
-        hasPersonalDetails() ||
-        hasResidenceAddress() ||
-        hasBillingAddress() ||
-        hasContactInfo() ||
-        hasCommercialInfo() ||
-        (contactForm.documents?.length ?? 0) > 0 ||
-        Boolean(contactForm.name)
-      );
-    };
-
-    const handleContactTypeChange = (val: string): void => {
-      if (val === contactType.value) {
-        return;
-      }
-      const value = val as 'person' | 'company' | 'agency';
-
-      if (hasContactSpecificData()) {
-        const fromTypeLabel =
-          contactTypeOptions.value
-            .find((opt) => opt.value === contactType.value)
-            ?.label.toLowerCase() ?? '';
-        const toTypeLabel =
-          contactTypeOptions.value.find((opt) => opt.value === value)?.label.toLowerCase() ?? '';
-
-        confirm.require({
-          group: 'contactType',
-          message: t('contacts.changeContactTypeMessage', { fromType: fromTypeLabel }),
-          header: t('contacts.changeContactTypeTitle', {
-            fromType: fromTypeLabel,
-            toType: toTypeLabel,
-          }),
-          icon: 'pi pi-exclamation-triangle',
-          rejectProps: { label: t('contacts.cancel'), severity: 'secondary', outlined: true },
-          acceptProps: { label: t('contacts.confirm') },
-          accept: () => {
-            updateContactType(value);
-          },
-          reject: () => {
-            contactTypeKey.value += 1;
-          },
-        });
-      } else {
-        updateContactType(value);
-      }
-    };
     onBeforeMount(async () => {
       const initialContact = dialogRef?.value?.data.contact as ContactDetail | null;
       try {
@@ -541,7 +441,6 @@ export default defineComponent({
     });
 
     return {
-      contactTypeKey,
       contactType,
       contactTypeOptions,
       isPerson,
@@ -562,7 +461,6 @@ export default defineComponent({
       handleSave,
       mergeIntoForm,
       changeContactForm,
-      handleContactTypeChange,
     };
   },
 });

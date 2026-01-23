@@ -78,54 +78,19 @@
       </TabList>
       <TabPanels>
         <TabPanel value="all">
-          <ContactList
-            type="contact"
-            :total="numContacts"
-            :isLoadingPage="isLoadingPage"
-            :contacts="contactsStore.contacts"
-            :numTotalRecords="contactsStore.contactsCount"
-            :fetchAction="contactsStore.fetchContacts"
-          />
+          <ContactList :total="numContacts" :isLoadingPage="isLoadingPage" />
         </TabPanel>
         <TabPanel value="customers">
-          <ContactList
-            type="customer"
-            :total="numCustomers"
-            :isLoadingPage="isLoadingPage"
-            :contacts="contactsStore.customers"
-            :numTotalRecords="contactsStore.customersCount"
-            :fetchAction="contactsStore.fetchCustomers"
-          />
+          <CustomerList :total="numCustomers" :isLoadingPage="isLoadingPage" />
         </TabPanel>
         <TabPanel value="guests">
-          <ContactList
-            type="guest"
-            :total="numGuests"
-            :isLoadingPage="isLoadingPage"
-            :contacts="contactsStore.guests"
-            :numTotalRecords="contactsStore.guestsCount"
-            :fetchAction="contactsStore.fetchGuests"
-          />
+          <GuestList :total="numGuests" :isLoadingPage="isLoadingPage" />
         </TabPanel>
         <TabPanel value="agencies">
-          <ContactList
-            type="agency"
-            :total="numAgencies"
-            :isLoadingPage="isLoadingPage"
-            :contacts="contactsStore.agencies"
-            :numTotalRecords="contactsStore.agenciesCount"
-            :fetchAction="contactsStore.fetchAgencies"
-          />
+          <AgencyList :total="numAgencies" :isLoadingPage="isLoadingPage" />
         </TabPanel>
         <TabPanel value="suppliers">
-          <ContactList
-            type="supplier"
-            :total="numSuppliers"
-            :isLoadingPage="isLoadingPage"
-            :contacts="contactsStore.suppliers"
-            :numTotalRecords="contactsStore.suppliersCount"
-            :fetchAction="contactsStore.fetchSuppliers"
-          />
+          <SupplierList :total="numSuppliers" :isLoadingPage="isLoadingPage" />
         </TabPanel>
       </TabPanels>
     </Tabs>
@@ -144,6 +109,10 @@ import { Users, UserCheck, BedDouble, Store, Package, Menu } from 'lucide-vue-ne
 import { useI18n } from 'vue-i18n';
 
 import ContactList from '@/ui/components/contactLists/ContactList.vue';
+import CustomerList from '@/ui/components/contactLists/CustomerList.vue';
+import GuestList from '@/ui/components/contactLists/GuestList.vue';
+import SupplierList from '@/ui/components/contactLists/SupplierList.vue';
+import AgencyList from '@/ui/components/contactLists/AgencyList.vue';
 import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useUserStore } from '@/infrastructure/stores/user';
@@ -161,6 +130,10 @@ export default defineComponent({
     TabPanel,
     Badge,
     ContactList,
+    CustomerList,
+    GuestList,
+    SupplierList,
+    AgencyList,
     Users,
     UserCheck,
     BedDouble,
@@ -278,8 +251,6 @@ export default defineComponent({
       numGuests,
       numAgencies,
       numSuppliers,
-      // Store to pass refs
-      contactsStore,
     };
   },
 });
