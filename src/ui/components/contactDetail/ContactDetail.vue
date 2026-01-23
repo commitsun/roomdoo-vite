@@ -49,16 +49,16 @@
     <div
       class="footer"
       :class="{
-        'justify-end': !badges.general && !badges.documents,
-        'justify-between': badges.general || badges.documents,
+        'justify-end': !badges.general && !badges.documents && !badges.billing,
+        'justify-between': badges.general || badges.documents || badges.billing,
       }"
     >
-      <div class="all-errors" v-if="badges.general || badges.documents">
+      <div class="all-errors" v-if="badges.general || badges.documents || badges.billing">
         <Info :size="16" />
         <span>
           {{
             t('contacts.errors.fieldErrors', {
-              count: badges.general + badges.documents,
+              count: badges.general + badges.documents + badges.billing,
             })
           }}
         </span>
@@ -142,7 +142,7 @@ export default defineComponent({
   },
 
   setup() {
-    type BadgeKey = 'general' | 'documents';
+    type BadgeKey = 'general' | 'documents' | 'billing';
     type FormPartId = 'general' | 'documents' | 'billing' | 'internalNotes';
 
     type FormPartConfig = {
@@ -218,6 +218,10 @@ export default defineComponent({
       state: undefined as CountryState | undefined,
     });
 
+    const hasDuplicateDocuments = ref(false);
+    const hasDuplicateFiscalDocument = ref(false);
+    const duplicateDocumentIndexes = ref<number[]>([]);
+
     const formParts = computed<FormPartConfig[]>(() => [
       {
         id: 'general',
@@ -241,6 +245,7 @@ export default defineComponent({
         icon: Banknote,
         labelKey: 'contacts.invoicing',
         show: true,
+        badgeKey: 'billing',
       },
       {
         id: 'internalNotes',
@@ -266,6 +271,9 @@ export default defineComponent({
       resetUiErrors,
       buildPayloadToValidate,
       mapVeeValidateErrors,
+      setDuplicateDocumentError,
+      setDuplicateFiscalError,
+      clearDuplicateErrors,
     } = useContactDetailErrors(contactType, contactForm);
 
     const { contact, activePanel, activeTab, changeContactForm, loadInitialData } =
@@ -298,6 +306,7 @@ export default defineComponent({
             modelValue: contactForm,
             billingAddress,
             billingAddressMode: billingAddressMode.value,
+            errors: uiErrors.billing,
           };
         case 'internalNotes':
           return {
@@ -318,6 +327,17 @@ export default defineComponent({
           return {
             'update:modelValue': mergeIntoForm,
             changeContactForm,
+            'update:hasDuplicates': (value: boolean): void => {
+              const hadDuplicates = hasDuplicateDocuments.value;
+              hasDuplicateDocuments.value = value;
+              if (!value) {
+                duplicateDocumentIndexes.value = [];
+                // Clear errors when duplicates are resolved
+                if (hadDuplicates) {
+                  clearDuplicateErrors();
+                }
+              }
+            },
           };
         case 'billing':
           return {
@@ -325,6 +345,14 @@ export default defineComponent({
             'update:billingAddress': (v: Address) => Object.assign(billingAddress, v),
             updateBillingAddressMode: (v: 'residence' | 'other'): void => {
               billingAddressMode.value = v;
+            },
+            'update:hasDuplicate': (value: boolean): void => {
+              const hadDuplicate = hasDuplicateFiscalDocument.value;
+              hasDuplicateFiscalDocument.value = value;
+              // Clear errors when duplicate is resolved
+              if (!value && hadDuplicate) {
+                clearDuplicateErrors();
+              }
             },
           };
         case 'internalNotes':
@@ -363,6 +391,20 @@ export default defineComponent({
       }
     };
 
+    const checkAndSetDuplicateErrors = (): void => {
+      clearDuplicateErrors();
+      if (hasDuplicateDocuments.value) {
+        const docs = contactForm.documents ?? [];
+        docs.forEach((_, index) => {
+          setDuplicateDocumentError(index);
+        });
+      }
+
+      if (hasDuplicateFiscalDocument.value) {
+        setDuplicateFiscalError();
+      }
+    };
+
     const handleSave = async (): Promise<void> => {
       resetUiErrors();
       clearHiddenFields();
@@ -371,6 +413,10 @@ export default defineComponent({
       setValues(payload);
       const { valid } = await validate();
       mapVeeValidateErrors();
+
+      // Check for duplicates and set errors
+      checkAndSetDuplicateErrors();
+
       if (!Boolean(valid) || badges.value.total > 0) {
         return;
       }

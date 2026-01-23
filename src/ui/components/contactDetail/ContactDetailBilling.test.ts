@@ -751,4 +751,202 @@ describe('ContactDetailBilling', () => {
 
     expect(onChange).toHaveBeenCalledWith(987);
   });
+
+  it('clears duplicate warning when user types in fiscal document number', async () => {
+    contactsStoreMock.checkContactDuplicateByFiscalDocument.mockResolvedValueOnce({
+      id: 999,
+      name: 'John Doe',
+    });
+
+    renderWithModels(
+      reactive({
+        id: 123,
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
+        street: '',
+        city: '',
+        zipCode: '',
+        country: { id: 34, code: 'ES', name: 'Spain' },
+        state: undefined,
+        fiscalIdNumberType: 'vat',
+        fiscalIdNumber: 'ES123',
+      }),
+    );
+
+    const num = screen.getByLabelText('Tax document number');
+    await userEvent.click(num);
+    await userEvent.tab();
+
+    // Duplicate warning should appear
+    expect(await screen.findByText(/isDuplicated/i)).toBeInTheDocument();
+
+    // Type in the input
+    await userEvent.clear(num);
+    await userEvent.type(num, 'ES456');
+
+    // Duplicate warning should disappear
+    expect(screen.queryByText(/isDuplicated/i)).not.toBeInTheDocument();
+  });
+
+  it('clears duplicate warning when user changes fiscal document type', async () => {
+    contactsStoreMock.checkContactDuplicateByFiscalDocument.mockResolvedValueOnce({
+      id: 999,
+      name: 'John Doe',
+    });
+
+    renderWithModels(
+      reactive({
+        id: 123,
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
+        street: '',
+        city: '',
+        zipCode: '',
+        country: { id: 34, code: 'ES', name: 'Spain' },
+        state: undefined,
+        fiscalIdNumberType: 'vat',
+        fiscalIdNumber: 'ES123',
+      }),
+    );
+
+    const num = screen.getByLabelText('Tax document number');
+    await userEvent.click(num);
+    await userEvent.tab();
+
+    // Duplicate warning should appear
+    expect(await screen.findByText(/isDuplicated/i)).toBeInTheDocument();
+
+    // Change document type
+    const selType = screen.getByTestId('fiscalIdNumberType');
+    const passportType = within(selType).getByTestId('fiscalIdNumberType-opt-passport');
+    await userEvent.click(passportType);
+
+    // Duplicate warning should disappear
+    expect(screen.queryByText(/isDuplicated/i)).not.toBeInTheDocument();
+  });
+
+  it('displays validation error message when errors prop contains duplicateFiscalDocument', async () => {
+    const { rerender } = render(Component, {
+      props: {
+        modelValue: reactive({
+          residenceStreet: '',
+          residenceCity: '',
+          residenceZip: '',
+          residenceCountry: undefined,
+          residenceState: undefined,
+          street: '',
+          city: '',
+          zipCode: '',
+          country: undefined,
+          state: undefined,
+          fiscalIdNumberType: 'vat',
+          fiscalIdNumber: 'ES123',
+        }),
+        billingAddress: { street: '', city: '', zipCode: '', country: undefined, state: undefined },
+        billingAddressMode: 'residence',
+        errors: {},
+      } as any,
+      global: {
+        plugins: [createTestingPinia()],
+        components: {
+          Select: SelectStub,
+          InputText: InputTextStub,
+          RadioButton: RadioButtonStub,
+          Message: MessageStub,
+          AutoComplete: AutoCompleteStub,
+          CountryFlag: CountryFlagStub,
+          Button: ButtonStub,
+        },
+      },
+    });
+
+    // No error message initially
+    expect(screen.queryByText('contacts.errors.duplicateFiscalDocument')).not.toBeInTheDocument();
+
+    // Rerender with error
+    await rerender({
+      modelValue: reactive({
+        residenceStreet: '',
+        residenceCity: '',
+        residenceZip: '',
+        residenceCountry: undefined,
+        residenceState: undefined,
+        street: '',
+        city: '',
+        zipCode: '',
+        country: undefined,
+        state: undefined,
+        fiscalIdNumberType: 'vat',
+        fiscalIdNumber: 'ES123',
+      }),
+      billingAddress: { street: '', city: '', zipCode: '', country: undefined, state: undefined },
+      billingAddressMode: 'residence',
+      errors: { duplicateFiscalDocument: 'contacts.errors.duplicateFiscalDocument' },
+    } as any);
+
+    // Error message should appear
+    expect(screen.getByText('contacts.errors.duplicateFiscalDocument')).toBeInTheDocument();
+  });
+
+  it('emits update:hasDuplicate event when duplicate status changes', async () => {
+    contactsStoreMock.checkContactDuplicateByFiscalDocument.mockResolvedValueOnce({
+      id: 999,
+      name: 'John Doe',
+    });
+
+    const onHasDuplicate = vi.fn();
+    render(Component, {
+      props: {
+        modelValue: reactive({
+          id: 123,
+          residenceStreet: '',
+          residenceCity: '',
+          residenceZip: '',
+          residenceCountry: undefined,
+          residenceState: undefined,
+          street: '',
+          city: '',
+          zipCode: '',
+          country: { id: 34, code: 'ES', name: 'Spain' },
+          state: undefined,
+          fiscalIdNumberType: 'vat',
+          fiscalIdNumber: 'ES123',
+        }),
+        billingAddress: { street: '', city: '', zipCode: '', country: undefined, state: undefined },
+        billingAddressMode: 'residence',
+        'onUpdate:hasDuplicate': onHasDuplicate,
+      } as any,
+      global: {
+        plugins: [createTestingPinia()],
+        components: {
+          Select: SelectStub,
+          InputText: InputTextStub,
+          RadioButton: RadioButtonStub,
+          Message: MessageStub,
+          AutoComplete: AutoCompleteStub,
+          CountryFlag: CountryFlagStub,
+          Button: ButtonStub,
+        },
+      },
+    });
+
+    // Initially should emit false
+    expect(onHasDuplicate).toHaveBeenCalledWith(false);
+
+    const num = screen.getByLabelText('Tax document number');
+    await userEvent.click(num);
+    await userEvent.tab();
+
+    // Wait for duplicate check
+    await screen.findByText(/isDuplicated/i);
+
+    // Should emit true when duplicate is found
+    expect(onHasDuplicate).toHaveBeenCalledWith(true);
+  });
 });

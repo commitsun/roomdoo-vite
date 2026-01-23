@@ -61,6 +61,8 @@
       "countryRequired": "The issue country is required",
       "documentNumberRequired": "Document number is required",
       "documentTypeRequired": "The document type is required",
+      "duplicateDocument": "This document is duplicated with another contact",
+      "duplicateFiscalDocument": "This fiscal document is duplicated with another contact",
       "fieldErrors": "{count} field with error | {count} fields with errors",
       "invalidDocument": "The {document} is not valid",
       "issueCountryRequired": "The issue country is required",

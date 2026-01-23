@@ -8,10 +8,12 @@ import { useDocumentTypesStore } from '@/infrastructure/stores/documentTypes';
 
 type GeneralErrors = { name?: string; saleChannelId?: string };
 type DocumentRowError = { country?: string; category?: string; number?: string };
+type BillingErrors = { duplicateFiscalDocument?: string };
 
 type ContactBadges = {
   general: number;
   documents: number;
+  billing: number;
   total: number;
 };
 
@@ -21,11 +23,15 @@ export interface UseContactDetailErrorsReturn {
   uiErrors: {
     general: GeneralErrors;
     documents: DocumentRowError[];
+    billing: BillingErrors;
   };
   badges: ComputedRef<ContactBadges>;
   resetUiErrors: () => void;
   buildPayloadToValidate: () => ContactInput;
   mapVeeValidateErrors: () => void;
+  setDuplicateDocumentError: (index: number) => void;
+  setDuplicateFiscalError: () => void;
+  clearDuplicateErrors: () => void;
 }
 
 export const useContactDetailErrors = (
@@ -42,9 +48,14 @@ export const useContactDetailErrors = (
     validationSchema: toTypedSchema(ContactSchema),
   });
 
-  const uiErrors = reactive<{ general: GeneralErrors; documents: DocumentRowError[] }>({
+  const uiErrors = reactive<{
+    general: GeneralErrors;
+    documents: DocumentRowError[];
+    billing: BillingErrors;
+  }>({
     general: {},
     documents: [],
+    billing: {},
   });
 
   const badges = computed<ContactBadges>(() => {
@@ -57,12 +68,14 @@ export const useContactDetailErrors = (
         (r.number !== undefined ? 1 : 0),
       0,
     );
-    return { general, documents, total: general + documents };
+    const billing = Object.keys(uiErrors.billing).length;
+    return { general, documents, billing, total: general + documents + billing };
   });
 
   const resetUiErrors = (): void => {
     uiErrors.general = {};
     uiErrors.documents = [];
+    uiErrors.billing = {};
   };
 
   const buildPayloadToValidate = (): ContactInput => ({
@@ -206,6 +219,37 @@ export const useContactDetailErrors = (
     { deep: false },
   );
 
+  const setDuplicateDocumentError = (index: number): void => {
+    while (uiErrors.documents.length <= index) {
+      uiErrors.documents.push({});
+    }
+    const prev = uiErrors.documents[index] ?? {};
+    uiErrors.documents.splice(index, 1, {
+      ...prev,
+      number: 'contacts.errors.duplicateDocument',
+    });
+  };
+
+  const setDuplicateFiscalError = (): void => {
+    uiErrors.billing.duplicateFiscalDocument = 'contacts.errors.duplicateFiscalDocument';
+  };
+
+  const clearDuplicateErrors = (): void => {
+    // Clear duplicate errors from documents
+    uiErrors.documents = uiErrors.documents.map((doc) => {
+      if (doc.number === 'contacts.errors.duplicateDocument') {
+        const { number: _number, ...rest } = doc;
+        return rest;
+      }
+      return doc;
+    });
+
+    // Clear duplicate fiscal document error
+    if (uiErrors.billing.duplicateFiscalDocument === 'contacts.errors.duplicateFiscalDocument') {
+      delete uiErrors.billing.duplicateFiscalDocument;
+    }
+  };
+
   return {
     validate,
     setValues,
@@ -214,5 +258,8 @@ export const useContactDetailErrors = (
     resetUiErrors,
     buildPayloadToValidate,
     mapVeeValidateErrors,
+    setDuplicateDocumentError,
+    setDuplicateFiscalError,
+    clearDuplicateErrors,
   };
 };
