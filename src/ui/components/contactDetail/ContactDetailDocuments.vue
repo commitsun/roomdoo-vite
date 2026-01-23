@@ -155,6 +155,11 @@
               !!getRowErrors(index).number &&
               getRowErrors(index).number !== 'contacts.errors.duplicateDocument'
             "
+            @input="
+              () => {
+                duplicatesByIndex[index] = null;
+              }
+            "
             @blur="onNumberBlur(index)"
           />
           <Message
@@ -198,18 +203,7 @@
           />
         </div>
       </div>
-
-      <div
-        class="flex gap-1 items-center mt-2"
-        v-if="getRowErrors(index).number === 'contacts.errors.duplicateDocument'"
-      >
-        <CircleAlert :size="16" color="#dc2626" />
-        <Message size="small" severity="error" variant="simple">
-          {{ t('contacts.duplicateDocument') }}
-        </Message>
-      </div>
-
-      <div class="mt-2 flex gap-1 items-center" v-else-if="duplicatesByIndex[index]">
+      <div class="mt-2 flex gap-1 items-center" v-if="duplicatesByIndex[index]">
         <CircleAlert :size="16" color="#dc2626" />
         <Message size="small" severity="error" variant="simple">
           {{ t('contacts.isDuplicated', { name: duplicatesByIndex[index]?.name }) }}
@@ -219,6 +213,15 @@
           >
             {{ t('contacts.seeContact') }}
           </span>
+        </Message>
+      </div>
+      <div
+        class="flex gap-1 items-center mt-2"
+        v-if="getRowErrors(index).number === 'contacts.errors.duplicateDocument'"
+      >
+        <CircleAlert :size="16" color="#dc2626" />
+        <Message size="small" severity="error" variant="simple">
+          {{ t('contacts.duplicateDocument') }}
         </Message>
       </div>
     </div>
@@ -277,7 +280,7 @@ export default defineComponent({
       default: () => [],
     },
   },
-  emits: ['update:modelValue', 'deleteDocumentId', 'changeContactForm'],
+  emits: ['update:modelValue', 'deleteDocumentId', 'changeContactForm', 'update:hasDuplicates'],
   setup(props, { emit }) {
     const { t } = useI18n();
     const confirm = useConfirm();
@@ -440,6 +443,8 @@ export default defineComponent({
       if (id !== null) {
         clearLocalError(index, 'category');
       }
+      // Clear duplicate when category changes
+      duplicatesByIndex.value[index] = null;
     };
 
     const docTypesFor = (doc: PersonalDocument): typeof documentTypes.value => {
@@ -528,6 +533,20 @@ export default defineComponent({
       { deep: true },
     );
 
+    const hasDuplicates = computed(() => {
+      return Object.values(duplicatesByIndex.value).some(
+        (dup) => dup !== null && dup !== undefined,
+      );
+    });
+
+    watch(
+      hasDuplicates,
+      (newValue) => {
+        emit('update:hasDuplicates', newValue);
+      },
+      { immediate: true },
+    );
+
     return {
       t,
       countries,
@@ -550,6 +569,7 @@ export default defineComponent({
       getDocumentLabel,
       showAddError,
       onNumberBlur,
+      hasDuplicates,
     };
   },
 });

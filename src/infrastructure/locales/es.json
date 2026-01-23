@@ -61,6 +61,8 @@
       "countryRequired": "El país de emisión es obligatorio",
       "documentNumberRequired": "El número de documento es obligatorio",
       "documentTypeRequired": "El tipo de documento es obligatorio",
+      "duplicateDocument": "Este documento está duplicado con otro contacto",
+      "duplicateFiscalDocument": "Este documento fiscal está duplicado con otro contacto",
       "fieldErrors": "{count} campo con error | {count} campos con errores",
       "invalidDocument": "El {document} no es válido",
       "issueCountryRequired": "El país de emisión es obligatorio",

@@ -334,7 +334,7 @@ export class ContactsRepositoryImpl implements ContactsRepository {
         (changed as Record<string, unknown>)[typedKey] = value;
       }
     }
-    await api.patch(`contacts/${contactId}`, payloadUpdated);
+    await api.patch(`contacts/${contactId}`, changed);
     if (updated.documents) {
       await Promise.all(
         updated.documents.map((document: PersonalDocument) => {

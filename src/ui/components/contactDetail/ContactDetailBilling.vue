@@ -12,6 +12,12 @@
           optionLabel="name"
           optionValue="id"
           :placeholder="t('contacts.select')"
+          @update:modelValue="
+            () => {
+              contactDuplicated.id = 0;
+              contactDuplicated.name = '';
+            }
+          "
           @blur="checkContactDuplicateByFiscalDocument()"
           class="w-full flex items-center h-[30px] lg:h-[35px]"
           :pt="{
@@ -31,11 +37,17 @@
           v-model="modelValue.fiscalIdNumber"
           class="field-control"
           :placeholder="t('contacts.fiscalDocumentNumberPlaceholder')"
+          @input="
+            () => {
+              contactDuplicated.id = 0;
+              contactDuplicated.name = '';
+            }
+          "
           @blur="checkContactDuplicateByFiscalDocument()"
         />
       </div>
 
-      <div class="mt-2 flex gap-1 items-center" v-if="contactDuplicated.id !== 0">
+      <div class="mt-2 flex gap-1 items-center col-span-2" v-if="contactDuplicated.id !== 0">
         <CircleAlert :size="16" color="#dc2626" />
         <Message size="small" severity="error" variant="simple">
           {{ t('contacts.isDuplicated', { name: contactDuplicated?.name }) }}
@@ -45,6 +57,13 @@
           >
             {{ t('contacts.seeContact') }}
           </span>
+        </Message>
+      </div>
+
+      <div class="mt-2 flex gap-1 items-center col-span-2" v-if="errors.duplicateFiscalDocument">
+        <CircleAlert :size="16" color="#dc2626" />
+        <Message size="small" severity="error" variant="simple">
+          {{ t(errors.duplicateFiscalDocument) }}
         </Message>
       </div>
 
@@ -449,12 +468,17 @@ export default defineComponent({
       type: String as PropType<'residence' | 'other'>,
       required: true,
     },
+    errors: {
+      type: Object as PropType<{ duplicateFiscalDocument?: string }>,
+      default: () => ({}),
+    },
   },
   emits: [
     'update:modelValue',
     'update:billingAddress',
     'updateBillingAddressMode',
     'changeContactForm',
+    'update:hasDuplicate',
   ],
 
   setup(props, context) {
@@ -725,6 +749,19 @@ export default defineComponent({
         billingAddressMode.value = 'other';
       }
     });
+
+    const hasDuplicate = computed(() => {
+      return contactDuplicated.value.id !== 0;
+    });
+
+    watch(
+      hasDuplicate,
+      (newValue) => {
+        context.emit('update:hasDuplicate', newValue);
+      },
+      { immediate: true },
+    );
+
     return {
       billingAddress,
       billingAddressMode,
@@ -741,6 +778,7 @@ export default defineComponent({
       handleBillingAddressZipOptionSelect,
       handleModelZipUpdate,
       handleModelZipOptionSelect,
+      hasDuplicate,
       t,
     };
   },

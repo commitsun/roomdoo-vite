@@ -32,7 +32,7 @@ import AccordionContent from 'primevue/accordioncontent';
 import Badge from 'primevue/badge';
 import { useI18n } from 'vue-i18n';
 
-type BadgeKey = 'general' | 'documents';
+type BadgeKey = 'general' | 'documents' | 'billing';
 
 type FormPartConfig = {
   id: 'general' | 'documents' | 'billing' | 'internalNotes';
