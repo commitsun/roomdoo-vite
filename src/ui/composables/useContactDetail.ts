@@ -109,7 +109,6 @@ export function useContactDetailLoader({
 
   const changeContactForm = async (id: number): Promise<void> => {
     resetUiErrors();
-
     const contactFetched = await contactsStore.fetchContactById(id);
     if (contactFetched) {
       applyContactToState(contactFetched);

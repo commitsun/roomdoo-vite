@@ -346,6 +346,7 @@ export default defineComponent({
             updateBillingAddressMode: (v: 'residence' | 'other'): void => {
               billingAddressMode.value = v;
             },
+            changeContactForm,
             'update:hasDuplicate': (value: boolean): void => {
               const hadDuplicate = hasDuplicateFiscalDocument.value;
               hasDuplicateFiscalDocument.value = value;

@@ -317,23 +317,28 @@ export class ContactsRepositoryImpl implements ContactsRepository {
     original: Partial<ContactDetail>,
     updated: Partial<ContactDetail>,
   ): Promise<void> {
-    const changed: Partial<ContactDetail> = {};
     const payloadOriginal = this.normalizeContactPayload(original);
     const payloadUpdated = this.normalizeContactPayload(updated);
+
     if (payloadOriginal.documents) {
       delete payloadOriginal.documents;
     }
     if (payloadUpdated.documents) {
       delete payloadUpdated.documents;
     }
-    for (const [key, value] of Object.entries(payloadUpdated)) {
-      const typedKey = key as keyof ContactDetail;
-      const originalValue = payloadOriginal[typedKey];
+    const changed = Object.entries(payloadUpdated).reduce<Record<string, unknown>>(
+      (acc, [key, value]) => {
+        const typedKey = key as keyof ContactDetail;
+        const originalValue = payloadOriginal[typedKey];
 
-      if (JSON.stringify(value) !== JSON.stringify(originalValue) && value !== null) {
-        (changed as Record<string, unknown>)[typedKey] = value;
-      }
-    }
+        if (value !== null && JSON.stringify(value) !== JSON.stringify(originalValue)) {
+          acc[typedKey] = value;
+        }
+        return acc;
+      },
+      {},
+    );
+
     await api.patch(`contacts/${contactId}`, changed);
     if (updated.documents) {
       await Promise.all(

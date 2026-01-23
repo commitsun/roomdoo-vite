@@ -12,12 +12,7 @@
           optionLabel="name"
           optionValue="id"
           :placeholder="t('contacts.select')"
-          @update:modelValue="
-            () => {
-              contactDuplicated.id = 0;
-              contactDuplicated.name = '';
-            }
-          "
+          @update:modelValue="resetContactDuplicated"
           @blur="checkContactDuplicateByFiscalDocument()"
           class="w-full flex items-center h-[30px] lg:h-[35px]"
           :pt="{
@@ -37,12 +32,7 @@
           v-model="modelValue.fiscalIdNumber"
           class="field-control"
           :placeholder="t('contacts.fiscalDocumentNumberPlaceholder')"
-          @input="
-            () => {
-              contactDuplicated.id = 0;
-              contactDuplicated.name = '';
-            }
-          "
+          @input="resetContactDuplicated"
           @blur="checkContactDuplicateByFiscalDocument()"
         />
       </div>
@@ -614,8 +604,12 @@ export default defineComponent({
       });
     };
 
-    const checkContactDuplicateByFiscalDocument = async (): Promise<void> => {
+    const resetContactDuplicated = (): void => {
       contactDuplicated.value = { id: 0, name: '' };
+    };
+
+    const checkContactDuplicateByFiscalDocument = async (): Promise<void> => {
+      resetContactDuplicated();
       if (
         props.modelValue.fiscalIdNumber === '' ||
         props.modelValue.fiscalIdNumber === undefined ||
@@ -772,6 +766,7 @@ export default defineComponent({
       addressItems,
       contactDuplicated,
       fetchAddressByZip,
+      resetContactDuplicated,
       checkContactDuplicateByFiscalDocument,
       confirmChangeContact,
       handleBillingAddressZipUpdate,
