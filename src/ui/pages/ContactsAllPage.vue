@@ -132,7 +132,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, ref, type Ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, ref, type Ref, watch } from 'vue';
 import Button from 'primevue/button';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -147,6 +147,7 @@ import ContactList from '@/ui/components/contactLists/ContactList.vue';
 import ContactDetail from '@/ui/components/contactDetail/ContactDetail.vue';
 import { useAppDialog } from '@/ui/composables/useAppDialog';
 import { useUserStore } from '@/infrastructure/stores/user';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 import { useContactsStore } from '@/infrastructure/stores/contacts';
 import { useUIStore } from '@/infrastructure/stores/ui';
 import { useTextMessagesStore } from '@/infrastructure/stores/textMessages';
@@ -174,6 +175,7 @@ export default defineComponent({
     const uiStore = useUIStore();
     const userStore = useUserStore();
     const contactsStore = useContactsStore();
+    const pmsPropertiesStore = usePmsPropertiesStore();
     const useTextMessageStore = useTextMessagesStore();
     const isLoadingPage = ref(false);
     const activeTab: Ref<string> = ref('all');
@@ -220,13 +222,20 @@ export default defineComponent({
         page: 1,
         pageSize: 50,
       };
+      const filters = {};
+
+      if (pmsPropertiesStore.currentPmsPropertyId !== null) {
+        Object.assign(filters, {
+          pmsPropertyId: pmsPropertiesStore.currentPmsPropertyId,
+        });
+      }
       // uiStore.startLoading();
       try {
         await Promise.all([
-          contactsStore.fetchContacts(initialPagination),
+          contactsStore.fetchContacts(initialPagination, filters),
           contactsStore.fetchAgencies(initialPagination),
           contactsStore.fetchCustomers(initialPagination),
-          contactsStore.fetchGuests(initialPagination),
+          contactsStore.fetchGuests(initialPagination, filters),
           contactsStore.fetchSuppliers(initialPagination),
         ]);
         numContacts.value = contactsStore.contactsCount;
@@ -264,6 +273,15 @@ export default defineComponent({
     onBeforeMount(async () => {
       await fetchAllContacts();
     });
+
+    watch(
+      () => pmsPropertiesStore.currentPmsPropertyId,
+      async (newId: number | null) => {
+        if (newId !== null) {
+          await fetchAllContacts();
+        }
+      },
+    );
 
     return {
       t,

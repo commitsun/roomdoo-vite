@@ -12,6 +12,7 @@ import { Users, UserCheck, BedDouble, Store, Package } from 'lucide-vue-next';
 
 import ContactsAllPage from '@/ui/pages/ContactsAllPage.vue';
 import primevuePlugin from '@/infrastructure/plugins/primevue';
+import { usePmsPropertiesStore } from '@/infrastructure/stores/pmsProperties';
 
 class RO {
   constructor(_cb?: (...args: any[]) => void) {}
@@ -79,6 +80,12 @@ vi.mock('@/infrastructure/stores/contacts', () => ({
   }),
 }));
 
+vi.mock('@/infrastructure/stores/pmsProperties', () => ({
+  usePmsPropertiesStore: vi.fn(() => ({
+    currentPmsPropertyId: null,
+  })),
+}));
+
 describe('ContactsAllPage (tabs)', () => {
   beforeEach(() => {
     const pinia = createTestingPinia();
@@ -125,5 +132,47 @@ describe('ContactsAllPage (tabs)', () => {
     expect(screen.getByText(/7,9K/)).toBeTruthy();
     expect(screen.getByText('12')).toBeTruthy();
     expect(screen.getByText('3')).toBeTruthy();
+  });
+});
+
+describe('ContactsAllPage (filtering)', () => {
+  it('calls fetchContacts with pmsPropertyId filter when property is selected', async () => {
+    (usePmsPropertiesStore as any).mockReturnValue({
+      currentPmsPropertyId: 999,
+    });
+
+    const pinia = createTestingPinia();
+
+    render(ContactsAllPage, {
+      global: {
+        plugins: [pinia, [primevuePlugin, { ripple: false }]],
+        components: {
+          Button,
+          Tabs,
+          TabList,
+          Tab,
+          TabPanel,
+          TabPanels,
+          Badge,
+          Users,
+          UserCheck,
+          BedDouble,
+          Store,
+          Package,
+        },
+        stubs: {
+          ContactList: { template: '<div />' },
+        },
+      },
+    });
+
+    expect(fetchContacts).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, pageSize: 50 }),
+      expect.objectContaining({ pmsPropertyId: 999 }),
+    );
+    expect(fetchGuests).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, pageSize: 50 }),
+      expect.objectContaining({ pmsPropertyId: 999 }),
+    );
   });
 });
