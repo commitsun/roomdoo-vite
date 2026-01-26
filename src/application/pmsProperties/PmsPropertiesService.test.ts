@@ -28,6 +28,7 @@ describe('PmsPropertiesService', () => {
           id: 1,
           name: 'Roomdoo Test Property',
           image: 'https://example.com/image1.jpg',
+          timezone: 'UTC',
           currency: {
             code: 'USD',
             id: 840,
@@ -38,6 +39,7 @@ describe('PmsPropertiesService', () => {
           id: 2,
           name: 'Another Property',
           image: 'https://example.com/image2.jpg',
+          timezone: 'UTC',
           currency: {
             code: 'EUR',
             id: 978,

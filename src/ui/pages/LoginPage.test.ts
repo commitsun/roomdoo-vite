@@ -152,6 +152,7 @@ describe('LoginPage', () => {
         id: 2,
         name: 'prop',
         image: '',
+        timezone: 'UTC',
         currency: {
           id: 1,
           code: 'USD',
@@ -187,6 +188,7 @@ describe('LoginPage', () => {
         id: 2,
         name: 'prop',
         image: '',
+        timezone: 'UTC',
         currency: { id: 1, code: 'USD', name: 'US Dollar' },
       },
       login: '',
@@ -218,6 +220,7 @@ describe('LoginPage', () => {
         id: 2,
         name: 'prop',
         image: '',
+        timezone: 'UTC',
         currency: { id: 1, code: 'USD', name: 'US Dollar' },
       },
       login: '',

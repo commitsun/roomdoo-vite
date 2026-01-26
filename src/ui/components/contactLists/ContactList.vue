@@ -1209,6 +1209,9 @@ export default defineComponent({
           Array.isArray(dates.value) && dates.value.length > 1 && dates.value[1] instanceof Date
             ? dates.value[1]
             : undefined,
+        timezone: pmsPropertiesStore.pmsProperties.find(
+          (p) => p.id === pmsPropertiesStore.currentPmsPropertyId,
+        )?.timezone,
         inHouseOnly: inHouseNow.value ? true : undefined,
         pmsPropertyId: pmsPropertiesStore.currentPmsPropertyId,
       };
