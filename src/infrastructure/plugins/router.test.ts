@@ -55,6 +55,7 @@ describe('router global beforeEach (with createTestingPinia)', () => {
         id: 2,
         name: 'prop',
         image: '',
+        timezone: 'UTC',
         currency: { code: 'USD', id: 840, name: 'US Dollar' },
       },
       login: '',
@@ -81,6 +82,7 @@ describe('router global beforeEach (with createTestingPinia)', () => {
         id: 2,
         name: 'prop',
         image: '',
+        timezone: 'UTC',
         currency: { code: 'USD', id: 840, name: 'US Dollar' },
       },
       login: '',
@@ -89,8 +91,20 @@ describe('router global beforeEach (with createTestingPinia)', () => {
     });
 
     vi.spyOn(usePmsPropertiesStore(), 'pmsProperties', 'get').mockReturnValue([
-      { id: 1, name: 'prop1', image: '', currency: { code: 'EUR', id: 978, name: 'Euro' } },
-      { id: 2, name: 'prop2', image: '', currency: { code: 'USD', id: 840, name: 'US Dollar' } },
+      {
+        id: 1,
+        name: 'prop1',
+        image: '',
+        timezone: 'UTC',
+        currency: { code: 'EUR', id: 978, name: 'Euro' },
+      },
+      {
+        id: 2,
+        name: 'prop2',
+        image: '',
+        timezone: 'UTC',
+        currency: { code: 'USD', id: 840, name: 'US Dollar' },
+      },
     ]);
 
     await router.push('/planning/2');

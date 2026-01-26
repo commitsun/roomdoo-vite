@@ -1,5 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// Mock timezone utility to avoid Pinia dependency
+vi.mock('@/ui/utils/timezone', () => ({
+  getActiveTimezone: vi.fn(() => 'UTC'),
+  formatDateToTimezone: vi.fn((date: Date, timezone: string) => {
+    // simple mock implementation for testing params logic
+    return new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(date);
+  }),
+}));
+
 // Mock axios api instance
 vi.mock('@/infrastructure/http/axios', () => {
   return {

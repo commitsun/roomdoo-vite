@@ -19,6 +19,7 @@ import type { ContactsRepository } from '@/domain/repositories/ContactsRepositor
 import type { EntityListResponse } from '@/domain/repositories/EntityListResponse';
 import type { Pagination } from '@/domain/repositories/Pagination';
 import { api } from '@/infrastructure/http/axios';
+import { formatDateToTimezone } from '@/ui/utils/timezone';
 
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
 
@@ -35,6 +36,7 @@ function buildQueryParamsFromFilters(opts: {
   inHouseOnly?: boolean;
   checkinDateFrom?: Date;
   checkinDateTo?: Date;
+  timezone?: string;
 }): URLSearchParams {
   const params = new URLSearchParams();
 
@@ -81,10 +83,10 @@ function buildQueryParamsFromFilters(opts: {
   }
   // Date range — include only if property is present
   if (opts.checkinDateFrom instanceof Date) {
-    params.set('checkinDateFrom', opts.checkinDateFrom.toISOString().split('T')[0]);
+    params.set('checkinDateFrom', formatDateToTimezone(opts.checkinDateFrom, opts.timezone));
   }
   if (opts.checkinDateTo instanceof Date) {
-    params.set('checkinDateTo', opts.checkinDateTo.toISOString().split('T')[0]);
+    params.set('checkinDateTo', formatDateToTimezone(opts.checkinDateTo, opts.timezone));
   }
   return params;
 }
