@@ -216,6 +216,7 @@
               :inputStyle="{ width: '100%' }"
               :showButtonBar="false"
               iconDisplay="input"
+              style="width: 260px"
               @value-change="fetchIfDatesCleared()"
             >
               <template #footer>
