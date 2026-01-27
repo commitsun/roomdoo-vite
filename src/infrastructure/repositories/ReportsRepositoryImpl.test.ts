@@ -35,6 +35,7 @@ describe('ReportsRepositoryImpl', () => {
     expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(api.get)).toHaveBeenCalledWith(
       '/reports/kelly-report?pmsPropertyId=1&dateFrom=2024-05-10',
+      { responseType: 'blob' },
     );
     expect(result).toBe(response);
   });
@@ -54,6 +55,7 @@ describe('ReportsRepositoryImpl', () => {
     expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(api.get)).toHaveBeenCalledWith(
       '/reports/arrivals-report?pmsPropertyId=2&dateFrom=2024-01-01',
+      { responseType: 'blob' },
     );
     expect(result).toBe(response);
   });
@@ -73,6 +75,7 @@ describe('ReportsRepositoryImpl', () => {
     expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(api.get)).toHaveBeenCalledWith(
       '/reports/departures-report?pmsPropertyId=3&dateFrom=2024-07-15',
+      { responseType: 'blob' },
     );
     expect(result).toBe(response);
   });
@@ -93,6 +96,7 @@ describe('ReportsRepositoryImpl', () => {
     expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(api.get)).toHaveBeenCalledWith(
       '/reports/services-report?pmsPropertyId=4&dateFrom=2024-04-01&dateTo=2024-04-30',
+      { responseType: 'blob' },
     );
     expect(result).toBe(response);
   });
@@ -113,6 +117,7 @@ describe('ReportsRepositoryImpl', () => {
     expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(api.get)).toHaveBeenCalledWith(
       '/reports/transactions-report?pmsPropertyId=5&dateFrom=2024-02-01&dateTo=2024-02-29',
+      { responseType: 'blob' },
     );
     expect(result).toBe(response);
   });
@@ -133,6 +138,7 @@ describe('ReportsRepositoryImpl', () => {
     expect(vi.mocked(api.get)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(api.get)).toHaveBeenCalledWith(
       '/reports/ine-report?pmsPropertyId=6&dateFrom=2024-09-01&dateTo=2024-09-30',
+      { responseType: 'blob' },
     );
     expect(result).toBe(response);
   });

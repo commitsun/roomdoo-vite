@@ -136,6 +136,8 @@ describe('ReportsGeneration', () => {
   beforeEach(() => {
     // Ensure all mocks are reset before each test run
     vi.clearAllMocks();
+    global.URL.createObjectURL = vi.fn(() => 'mock-url');
+    global.URL.revokeObjectURL = vi.fn();
   });
 
   // ---------- Per report type UI tests ----------
