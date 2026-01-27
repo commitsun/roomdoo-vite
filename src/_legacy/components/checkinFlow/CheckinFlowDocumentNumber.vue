@@ -183,6 +183,10 @@ export default defineComponent({
       type: Number,
       required: true,
     },
+    birthdate: {
+      type: Date,
+      required: true,
+    },
     currentIndexCheckin: {
       type: Number,
       required: true,
@@ -414,6 +418,8 @@ export default defineComponent({
         context.emit('setActiveCheckinPartner', {
           ...existingCheckinPartner.value,
           documentNumber: documentNumber.value,
+          birthdate: props.birthdate,
+          documentCountryId: props.documentCountryId,
         });
         if (existingCheckinPartner.value.countryId) {
           await store.dispatch(

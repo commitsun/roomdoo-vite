@@ -175,6 +175,7 @@
             v-model="activeCheckinPartner.documentNumber"
             :documentType="activeCheckinPartner.documentType"
             :documentCountryId="activeCheckinPartner.documentCountryId"
+            :birthdate="activeCheckinPartner.birthdate || new Date()"
             :currentIndexCheckin="currentIndexCheckin"
             :checkinPartnerId="activeCheckinPartner.id"
             :step="currentStepNumber"
