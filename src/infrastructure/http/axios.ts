@@ -1,23 +1,11 @@
-import axios, {
-  AxiosError,
-  type AxiosInstance,
-  AxiosHeaders,
-  type InternalAxiosRequestConfig,
-} from 'axios';
+import axios, { AxiosError, type AxiosInstance, AxiosHeaders } from 'axios';
 
 import { UnauthorizedError } from '@/application/shared/UnauthorizedError';
-import { useUserStore } from '@/infrastructure/stores/user';
 import { useTextMessagesStore } from '../stores/textMessages';
-import { useDynamicDialogsStore } from '../stores/dynamicDialogs';
 import { t, i18n } from '@/infrastructure/plugins/i18n';
-import router from '@/infrastructure/plugins/router';
 import { InternalServerError } from '@/application/shared/InternalServerError';
 import { UnknownError } from '@/application/shared/UnknownError';
 import { BadRequestError } from '@/application/shared/BadRequestError';
-
-interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-}
 
 let endPoint;
 if (import.meta.env.DEV) {
@@ -41,68 +29,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
-const processQueue = (error: AxiosError | null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve();
-    }
-  });
-  failedQueue = [];
-};
-
 api.interceptors.response.use(
-  (res) => res, // Simply return response on success
+  (res) => res,
   async (err: AxiosError) => {
-    const originalRequest = err.config as CustomAxiosRequestConfig;
-    if (
-      err.response?.status === 401 &&
-      originalRequest &&
-      !originalRequest._retry &&
-      originalRequest.url !== '/login' &&
-      originalRequest.url !== '/refresh-token' &&
-      originalRequest.url !== '/user/change-password'
-    ) {
-      originalRequest._retry = true;
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({
-            resolve: () => {
-              resolve(api(originalRequest));
-            },
-            reject: (error: AxiosError) => {
-              reject(error);
-            },
-          });
-        });
-      }
-      isRefreshing = true;
-      try {
-        await useUserStore().refreshToken();
-        processQueue(null);
-        return api(originalRequest);
-      } catch (refreshError: any) {
-        useUserStore().logout();
-        processQueue(refreshError as AxiosError);
-        useTextMessagesStore().addTextMessage(
-          t('error.sessionExpiredTitle'),
-          t('error.sessionExpiredContent'),
-        );
-        useDynamicDialogsStore().closeAndUnregisterAllDynamicDialogs();
-        const current = router.currentRoute.value;
-        const redirect = current?.fullPath || '/';
-        if (current?.name !== 'login') {
-          router.replace({ name: 'login', query: { redirect } });
-        }
-
-        throw new UnauthorizedError();
-      } finally {
-        isRefreshing = false;
-      }
-    }
     const errorDetail =
       err.response?.data && typeof err.response.data === 'object' && 'detail' in err.response.data
         ? (err.response.data as { detail?: string }).detail
