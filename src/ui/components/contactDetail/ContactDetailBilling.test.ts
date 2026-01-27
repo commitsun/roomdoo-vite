@@ -373,6 +373,7 @@ describe('ContactDetailBilling', () => {
   it('with residence: shows cards and switching to "other" emits updateBillingAddressMode', async () => {
     const { onUpdateMode, mode, rerender } = renderWithModels(
       reactive({
+        contactType: 'person',
         residenceStreet: 'Gran Via 1',
         residenceCity: 'Madrid',
         residenceZip: '28001',
@@ -403,6 +404,7 @@ describe('ContactDetailBilling', () => {
   it('other mode: editing street/city emits update:billingAddress', async () => {
     const { onUpdateBilling } = renderWithModels(
       reactive({
+        contactType: 'person',
         residenceStreet: 'R1',
         residenceCity: 'C1',
         residenceZip: 'Z1',
@@ -437,6 +439,7 @@ describe('ContactDetailBilling', () => {
   it('other mode: selecting country updates billingAddress and does not trigger fetch of states (watch listens to modelValue)', async () => {
     const { onUpdateBilling, rerender } = renderWithModels(
       reactive({
+        contactType: 'person',
         residenceStreet: 'R',
         residenceCity: 'R',
         residenceZip: 'R',
@@ -505,6 +508,7 @@ describe('ContactDetailBilling', () => {
 
     const { onUpdateBilling } = renderWithModels(
       reactive({
+        contactType: 'person',
         residenceStreet: 'R',
         residenceCity: 'R',
         residenceZip: 'R',

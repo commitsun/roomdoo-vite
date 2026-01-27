@@ -507,11 +507,12 @@ export default defineComponent({
 
     const residenceAddressText = computed(() => {
       if (
-        props.modelValue.residenceStreet === '' &&
-        props.modelValue.residenceCity === '' &&
-        props.modelValue.residenceZip === '' &&
-        props.modelValue.residenceState === undefined &&
-        props.modelValue.residenceCountry === undefined
+        props.modelValue.contactType !== 'person' ||
+        (props.modelValue.residenceStreet === '' &&
+          props.modelValue.residenceCity === '' &&
+          props.modelValue.residenceZip === '' &&
+          props.modelValue.residenceState === undefined &&
+          props.modelValue.residenceCountry === undefined)
       ) {
         return '';
       }
@@ -522,7 +523,6 @@ export default defineComponent({
         props.modelValue.residenceState?.name,
         props.modelValue.residenceCountry?.name,
       ].filter(Boolean);
-
       return parts.join(', ');
     });
 
