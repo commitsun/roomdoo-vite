@@ -1,34 +1,103 @@
 import type { User } from '@/domain/entities/User';
 
+type CookieOptions = {
+  days?: number;
+  path?: string;
+  domain?: string;
+  secure?: boolean;
+  sameSite?: 'Lax' | 'Strict' | 'None';
+};
+
+const DEFAULT_OPTIONS: Required<Pick<CookieOptions, 'days' | 'path' | 'sameSite'>> = {
+  days: 7,
+  path: '/',
+  sameSite: 'Lax',
+};
+
 export class CookieService {
-  private static setCookie(name: string, value: string, days: number = 7): void {
-    const expires = new Date();
-    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+  private static buildCookieString(name: string, value: string, options: CookieOptions): string {
+    const merged = { ...DEFAULT_OPTIONS, ...options };
+    const expires = new Date(Date.now() + merged.days * 24 * 60 * 60 * 1000).toUTCString();
+
+    const encodedName = encodeURIComponent(name);
+    const encodedValue = encodeURIComponent(value);
+
+    let cookie = `${encodedName}=${encodedValue}; Path=${merged.path}; Expires=${expires}; SameSite=${merged.sameSite}`;
+
+    if (typeof merged.domain === 'string' && merged.domain.length > 0) {
+      cookie += `; Domain=${merged.domain}`;
+    }
+
+    const shouldBeSecure =
+      merged.secure ?? (merged.sameSite === 'None' ? true : window.location.protocol === 'https:');
+
+    if (shouldBeSecure) {
+      cookie += '; Secure';
+    }
+
+    return cookie;
+  }
+
+  private static setCookie(
+    name: string,
+    value: string,
+    optionsOrDays: CookieOptions | number = {},
+  ): void {
+    const options: CookieOptions =
+      typeof optionsOrDays === 'number' ? { days: optionsOrDays } : optionsOrDays;
+
+    document.cookie = this.buildCookieString(name, value, options);
   }
 
   private static getCookie(name: string): string | null {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) {
-      const cookieValue = parts.pop()?.split(';').shift();
-      return cookieValue !== undefined ? cookieValue : null;
+    const target = `${encodeURIComponent(name)}=`;
+    const parts = document.cookie ? document.cookie.split(/;\s*/) : [];
+
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed.startsWith(target)) {
+        return decodeURIComponent(trimmed.slice(target.length));
+      }
     }
     return null;
   }
 
+  private static deleteCookie(
+    name: string,
+    options: Pick<CookieOptions, 'path' | 'domain'> = {},
+  ): void {
+    const encodedName = encodeURIComponent(name);
+    const path = options.path ?? DEFAULT_OPTIONS.path;
+
+    let cookie = `${encodedName}=; Path=${path}; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0`;
+
+    if (typeof options.domain === 'string' && options.domain.length > 0) {
+      cookie += `; Domain=${options.domain}`;
+    }
+
+    document.cookie = cookie;
+  }
+
+  private static readonly COOKIE_PATH = '/';
+
   static setUserCookies(user: User): void {
-    this.setCookie('id', user.id.toString());
-    this.setCookie('firstName', user.firstName);
-    this.setCookie('defaultPmsProperty', JSON.stringify(user.defaultPmsProperty));
-    this.setCookie('lastName', user.lastName);
-    this.setCookie('lastName2', user.lastName2 ?? '');
-    this.setCookie('lang', user.lang);
-    this.setCookie('email', user.email);
-    this.setCookie('phone', user.phone ?? '');
-    this.setCookie('avatar', user.avatar ?? '');
-    this.setCookie('login', user.login);
-    this.setCookie('availabilityRuleFields', JSON.stringify(user.availabilityRuleFields || []));
+    const opt: CookieOptions = { path: this.COOKIE_PATH };
+
+    this.setCookie('id', user.id.toString(), opt);
+    this.setCookie('firstName', user.firstName, opt);
+    this.setCookie('defaultPmsProperty', JSON.stringify(user.defaultPmsProperty), opt);
+    this.setCookie('lastName', user.lastName, opt);
+    this.setCookie('lastName2', user.lastName2 ?? '', opt);
+    this.setCookie('lang', user.lang, opt);
+    this.setCookie('email', user.email, opt);
+    this.setCookie('phone', user.phone ?? '', opt);
+    this.setCookie('avatar', user.avatar ?? '', opt);
+    this.setCookie('login', user.login, opt);
+    this.setCookie(
+      'availabilityRuleFields',
+      JSON.stringify(user.availabilityRuleFields || []),
+      opt,
+    );
   }
 
   private static readCookieField<T>(name: string, parser: (value: string | null) => T): T {
@@ -103,7 +172,7 @@ export class CookieService {
     ];
 
     cookies.forEach((cookie) => {
-      document.cookie = `${cookie}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+      this.deleteCookie(cookie, { path: this.COOKIE_PATH });
     });
   }
 }
