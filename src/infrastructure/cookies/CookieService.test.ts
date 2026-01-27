@@ -35,16 +35,22 @@ describe('CookieService', () => {
       .spyOn(document as any, 'cookie', 'set')
       .mockImplementation((val: string) => realSet(val));
 
+    vi.useFakeTimers();
     vi.setSystemTime(new Date('2025-01-01T00:00:00Z'));
-    (CookieService as any).setCookie('k', 'v', 10);
+
+    (CookieService as any).setCookie('k', 'v', { days: 10, path: '/' });
 
     expect(setSpy).toHaveBeenCalledTimes(1);
     const written = setSpy.mock.calls[0][0] as string;
     const expectedExpires = new Date(Date.UTC(2025, 0, 11, 0, 0, 0)).toUTCString();
+
     expect(written).toContain('k=v;');
-    expect(written).toContain(`expires=${expectedExpires}`);
-    expect(written).toContain('path=/');
+    expect(written).toContain(`Expires=${expectedExpires}`);
+    expect(written).toContain('Path=/');
+    expect(written).toContain('SameSite=Lax');
     expect(document.cookie).toContain('k=v');
+
+    vi.useRealTimers();
   });
 
   it('setUserCookies performs multiple sets and persists key values', () => {
@@ -281,34 +287,17 @@ describe('CookieService', () => {
 
     const arfWrite = writes.find((s) => s.startsWith('availabilityRuleFields='));
     expect(arfWrite).toBeTruthy();
-    expect(arfWrite!).toContain('availabilityRuleFields=[]');
+    // Value is encoded, so decode before asserting the JSON string
+    expect(decodeURIComponent(arfWrite!)).toContain('availabilityRuleFields=[]');
 
     expect(document.cookie).toContain('id=99');
   });
 
-  it('getCookie returns null if cookieValue is undefined even if there is a match (false branch of ternary)', () => {
-    const realSplit = String.prototype.split;
-
-    const name = 'weird';
-    const splitSpy = vi.spyOn(String.prototype, 'split').mockImplementation(function (
-      this: string,
-      sep: any,
-    ): string[] {
-      if (sep === `; ${name}=`) {
-        return ['prefix', 'tail'];
-      }
-      if (sep === ';') {
-        return [];
-      }
-      return realSplit.call(this, sep as any);
-    });
-
-    document.cookie = `a=1; ${name}=whatever; b=2;path=/`;
-
-    const res = (CookieService as any).getCookie(name);
-    expect(res).toBeNull();
-    splitSpy.mockRestore();
+  it('getCookie handles values containing "=" correctly', () => {
+    (CookieService as any).setCookie('eq', 'a=b=c', { path: '/' });
+    expect((CookieService as any).getCookie('eq')).toBe('a=b=c');
   });
+
   it('defaultPmsProperty malformed triggers catch and makes getUserCookies return null', () => {
     document.cookie = `id=77;path=/`;
     document.cookie = `email=bad@ex.com;path=/`;

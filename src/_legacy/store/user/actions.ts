@@ -1,6 +1,7 @@
+
 import type { ActionTree } from 'vuex';
 import { api } from '@/_legacy/http/axios';
-import { api as newApi}  from '@/infrastructure/http/axios';
+import { api as newApi } from '@/infrastructure/http/axios';
 import type { CredentialsInterface } from '@/_legacy/interfaces/UserInterfaces';
 import type { AxiosResponse } from 'axios';
 import type { ApiRestErrorInterface } from '@/_legacy/interfaces/ApiRestErrorInterface';
@@ -12,6 +13,7 @@ import type { StateInterface } from '../index';
 import type { UserStateInterface } from '.';
 import { dialogService } from '@/_legacy/services/DialogService';
 import { deleteCookie, getAllCookies, getCookie, setCookie } from '@/_legacy/utils/cookies';
+const COOKIE_PATH = '/';
 
 const actions: ActionTree<UserStateInterface, StateInterface> = {
   async login(context, payload: CredentialsInterface): Promise<void> {
@@ -27,19 +29,21 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
             (api.defaults.headers as any).common['Authorization'] = jwt;
             (newApi.defaults.headers as any).common['Authorization'] = jwt;
             context.commit('SET_CURRENT_USER', response.data);
-            setCookie('jwt', jwt);
-            setCookie('expirationDate', response.data.expirationDate.toString());
-            setCookie('defaultPropertyId', response.data.defaultPropertyId.toString());
-            setCookie('userId', response.data.userId.toString());
-            setCookie('userName', response.data.userName);
-            setCookie('userFirstName', response.data.userFirstName);
-            setCookie('userEmail', response.data.userEmail);
-            setCookie('userPhone', response.data.userPhone);
+            setCookie('jwt', jwt, { path: COOKIE_PATH });
+            setCookie('expirationDate', response.data.expirationDate.toString(), { path: COOKIE_PATH });
+            setCookie('defaultPropertyId', response.data.defaultPropertyId.toString(), { path: COOKIE_PATH });
+            setCookie('userId', response.data.userId.toString(), { path: COOKIE_PATH });
+            setCookie('userName', response.data.userName, { path: COOKIE_PATH });
+            setCookie('userFirstName', response.data.userFirstName, { path: COOKIE_PATH });
+            setCookie('userEmail', response.data.userEmail, { path: COOKIE_PATH });
+            setCookie('userPhone', response.data.userPhone, { path: COOKIE_PATH });
             setCookie(
               'availabilityRuleFields',
-              JSON.stringify(response.data.availabilityRuleFields)
+              JSON.stringify(response.data.availabilityRuleFields), {
+                path: COOKIE_PATH,
+              }
             );
-            setCookie('userImageUrl', response.data.userImageUrl);
+            setCookie('userImageUrl', response.data.userImageUrl, { path: COOKIE_PATH });
             localStorage.setItem('userImageBase64', response.data.userImageBase64 || '');
           }
         }
@@ -106,16 +110,16 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
   },
 
   reset(context) {
-    deleteCookie('jwt');
-    deleteCookie('userId');
-    deleteCookie('userName');
-    deleteCookie('userFirstName');
-    deleteCookie('userEmail');
-    deleteCookie('userPhone');
-    deleteCookie('defaultPropertyId');
-    deleteCookie('expirationDate');
-    deleteCookie('availabilityRuleFields');
-    deleteCookie('userImageUrl');
+    deleteCookie('jwt', { path: COOKIE_PATH });
+    deleteCookie('userId', { path: COOKIE_PATH });
+    deleteCookie('userName', { path: COOKIE_PATH });
+    deleteCookie('userFirstName', { path: COOKIE_PATH });
+    deleteCookie('userEmail', { path: COOKIE_PATH });
+    deleteCookie('userPhone', { path: COOKIE_PATH });
+    deleteCookie('defaultPropertyId', { path: COOKIE_PATH });
+    deleteCookie('expirationDate', { path: COOKIE_PATH });
+    deleteCookie('availabilityRuleFields', { path: COOKIE_PATH });
+    deleteCookie('userImageUrl', { path: COOKIE_PATH });
     localStorage.removeItem('userImageBase64');
     context.commit('CLEAR_CURRENT_USER');
   },
@@ -134,15 +138,15 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
 
   async updateUser(context, payload: UserInfoInterface) {
     return api.patch(`/users/p/${payload.userId}`, payload).then(() => {
-      setCookie('expirationDate', payload.expirationDate.toString());
-      setCookie('defaultPropertyId', payload.defaultPropertyId.toString());
-      setCookie('userId', payload.userId.toString());
-      setCookie('userName', payload.userName);
-      setCookie('userFirstName', payload.userFirstName);
-      setCookie('userEmail', payload.userEmail);
-      setCookie('userPhone', payload.userPhone);
-      setCookie('availabilityRuleFields', JSON.stringify(payload.availabilityRuleFields));
-      setCookie('userImageUrl', payload.userImageUrl);
+      setCookie('expirationDate', payload.expirationDate.toString(), { path: COOKIE_PATH });
+      setCookie('defaultPropertyId', payload.defaultPropertyId.toString(), { path: COOKIE_PATH });
+      setCookie('userId', payload.userId.toString(), { path: COOKIE_PATH });
+      setCookie('userName', payload.userName, { path: COOKIE_PATH });
+      setCookie('userFirstName', payload.userFirstName, { path: COOKIE_PATH });
+      setCookie('userEmail', payload.userEmail, { path: COOKIE_PATH });
+      setCookie('userPhone', payload.userPhone, { path: COOKIE_PATH });
+      setCookie('availabilityRuleFields', JSON.stringify(payload.availabilityRuleFields), { path: COOKIE_PATH });
+      setCookie('userImageUrl', payload.userImageUrl, { path: COOKIE_PATH });
       localStorage.setItem('userImageBase64', payload.userImageBase64 || '');
     });
   },
