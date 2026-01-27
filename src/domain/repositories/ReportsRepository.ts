@@ -1,12 +1,14 @@
+import type { AxiosResponse } from 'axios';
+
 export interface ReportsRepository {
-  kellyReport(pmsPropertyId: number, date: Date): Promise<{ data: string }>;
-  arrivalsReport(pmsPropertyId: number, date: Date): Promise<{ data: string }>;
-  departuresReport(pmsPropertyId: number, date: Date): Promise<{ data: string }>;
-  servicesReport(pmsPropertyId: number, dateFrom: Date, dateTo: Date): Promise<{ data: string }>;
+  kellyReport(pmsPropertyId: number, date: Date): Promise<AxiosResponse<Blob>>;
+  arrivalsReport(pmsPropertyId: number, date: Date): Promise<AxiosResponse<Blob>>;
+  departuresReport(pmsPropertyId: number, date: Date): Promise<AxiosResponse<Blob>>;
+  servicesReport(pmsPropertyId: number, dateFrom: Date, dateTo: Date): Promise<AxiosResponse<Blob>>;
   transactionsReport(
     pmsPropertyId: number,
     dateFrom: Date,
     dateTo: Date,
-  ): Promise<{ data: string }>;
-  ineReport(pmsPropertyId: number, dateFrom: Date, dateTo: Date): Promise<{ data: string }>;
+  ): Promise<AxiosResponse<Blob>>;
+  ineReport(pmsPropertyId: number, dateFrom: Date, dateTo: Date): Promise<AxiosResponse<Blob>>;
 }

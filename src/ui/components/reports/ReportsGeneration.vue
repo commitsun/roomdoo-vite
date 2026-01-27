@@ -193,14 +193,23 @@ export default defineComponent({
       ['services', 'transactions', 'ine'].includes(props.reportType),
     );
 
-    const convertResponseToReport = (response: { data: string }, fileName: string): void => {
-      const a: HTMLAnchorElement = document.createElement('a');
-      if (response.data) {
-        a.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${response.data}`;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-      }
+    const convertResponseToReport = (
+      response: { data: Blob; headers?: unknown },
+      fallbackFileName: string,
+    ): void => {
+      const headers = response.headers as Record<string, unknown> | undefined;
+      const disposition = (headers?.['content-disposition'] as string) ?? '';
+      const match = disposition.match(/filename="([^"]+)"/i);
+      const fileName = match?.[1] ?? fallbackFileName;
+
+      const url = URL.createObjectURL(response.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     };
 
     const generateReport = async (): Promise<void> => {
