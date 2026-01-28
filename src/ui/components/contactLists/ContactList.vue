@@ -1830,8 +1830,6 @@ export default defineComponent({
   flex-direction: column;
   height: 100%;
   width: 100%;
-  display: flex;
-  flex-direction: column;
   gap: 1rem;
   padding-top: 0.5rem;
 
