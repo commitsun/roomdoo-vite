@@ -114,7 +114,7 @@
                 :placeholder="t('contacts.globalSearch')"
                 @input="onGlobalQueryInput"
                 :aria-label="t('contacts.globalSearch')"
-                style="width: 100%"
+                class="input-global-search"
               />
               <InputIcon
                 class="pi pi-times"
@@ -1426,8 +1426,9 @@ export default defineComponent({
         vat: { value: null, matchMode: FilterMatchMode.CONTAINS },
         identificationDocuments: { value: null, matchMode: FilterMatchMode.CONTAINS },
       };
-
       await fetchNow();
+
+      isMobileFiltersOpen.value = false;
     };
 
     // clear global query
@@ -1568,10 +1569,10 @@ export default defineComponent({
 
     const applyDateRangeFilters = (): void => {
       void fetchNow();
-      if (datePickerRefMobile.value !== null) {
+      if (datePickerRefMobile.value !== undefined) {
         datePickerRefMobile.value.overlayVisible = false;
       }
-      if (datePickerRefDesktop.value !== null) {
+      if (datePickerRefDesktop.value !== undefined) {
         datePickerRefDesktop.value.overlayVisible = false;
       }
     };
@@ -1680,6 +1681,9 @@ export default defineComponent({
       }
       .global-search__field {
         margin-top: 7px;
+        .input-global-search {
+          width: 100%;
+        }
       }
     }
     .date-range-container-desktop {
@@ -1797,6 +1801,14 @@ export default defineComponent({
       flex-direction: row;
       gap: 1px;
       align-items: flex-end;
+      .global-search {
+        .global-search__field {
+          margin-top: 7px;
+          .input-global-search {
+            width: 265px;
+          }
+        }
+      }
       .date-range-container-desktop {
         display: block;
         margin-left: 1rem;
