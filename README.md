@@ -8,7 +8,7 @@
 
 Roomdoo is a modern Property Management System (PMS) web application built with **Vue 3**, **TypeScript**, and **Vite**. It leverages **PrimeVue** for UI components and **Pinia** for state management, providing a robust and responsive interface for managing properties, contacts, and reservations.
 
-## � Architecture
+## Architecture
 
 The project is designed following **Hexagonal Architecture (Ports and Adapters)** principles to promote decoupling, testability, and maintainability. The codebase is organized into four distinct layers:
 
@@ -17,7 +17,7 @@ The project is designed following **Hexagonal Architecture (Ports and Adapters)*
 - **Infrastructure**: Handles external communications and implementation details, such as API calls, state management (Pinia stores), and third-party library integrations.
 - **UI**: The presentation layer, responsible for rendering Vue 3 components and handling user interactions.
 
-## �🚀 Tech Stack
+## Tech Stack
 
 - **Framework:** [Vue 3](https://vuejs.org/) (Composition API, Script Setup)
 - **Build Tool:** [Vite](https://vitejs.dev/)
@@ -29,14 +29,14 @@ The project is designed following **Hexagonal Architecture (Ports and Adapters)*
 - **Testing:** [Vitest](https://vitest.dev/)
 - **Validation:** [Zod](https://zod.dev/) & [Vee-Validate](https://vee-validate.logaretm.com/v4/)
 
-## 🛠 Prerequisites
+## Prerequisites
 
 Ensure you have the following installed on your machine:
 
 - **Node.js**: `^24.8.0` (Recommended)
 - **npm**: `^11.6.0`
 
-## 📦 Installation
+## Installation
 
 1. Clone the repository:
 
@@ -50,7 +50,7 @@ Ensure you have the following installed on your machine:
    npm install
    ```
 
-## 💻 Development
+## Development
 
 Start the development server with hot-reload:
 
@@ -62,7 +62,7 @@ npm run dev
 
 The application will be accessible at `http://localhost:5173` (or the port shown in your terminal).
 
-## 🏗 Build
+## Build
 
 To build the application for production:
 
@@ -84,7 +84,7 @@ To preview the built application locally:
 npm run preview
 ```
 
-## ✅ Testing & Quality
+## Testing & Quality
 
 ### Unit Tests
 
@@ -126,7 +126,7 @@ Format code with Prettier:
 npm run prettier:write
 ```
 
-## 📂 Project Structure
+## Project Structure
 
 - `src/` - Source code key directories:
   - `ui/` - UI components and views.
