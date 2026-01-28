@@ -69,6 +69,7 @@
       "nameRequired": "Name is required",
       "saleChannelRequiredForAgency": "Sale channel is required for agencies"
     },
+    "filters": "Filters",
     "firstName": "First Name",
     "firstNamePlaceholder": "Enter the contact's first name",
     "fiscalAddress": "Fiscal address",
@@ -93,7 +94,7 @@
     },
     "generalInformation": "General information",
     "globalSearchLabel": "Search {entity}",
-    "globalSearch": "Search",
+    "globalSearch": "Type something...",
     "guests": "Guests",
     "inHouseGuests": "In-house now",
     "issueCountry": "Issue country",

@@ -69,6 +69,7 @@
       "nameRequired": "El nombre es obligatorio",
       "saleChannelRequiredForAgency": "El canal de venta es obligatorio para agencias"
     },
+    "filters": "Filtros",
     "firstName": "Nombre",
     "firstNamePlaceholder": "Introduce el nombre del contacto",
     "fiscalAddress": "Dirección fiscal",
@@ -93,7 +94,7 @@
     },
     "generalInformation": "Datos generales",
     "globalSearchLabel": "Buscar {entity}",
-    "globalSearch": "Buscar",
+    "globalSearch": "Escribe algo...",
     "guests": "Huéspedes",
     "inHouseGuests": "Alojados ahora",
     "issueCountry": "País de emisión",
