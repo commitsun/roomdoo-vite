@@ -64,7 +64,11 @@ function setAdapter(impl: AxiosAdapter) {
   api.defaults.adapter = impl;
 }
 
-function makeAxiosError(status: number, url: string, config: any) {
+function makeAxiosError(
+  status: number,
+  url: string,
+  config: Partial<InternalAxiosRequestConfig>,
+) {
   return new AxiosError(`Request failed with status code ${status}`, undefined, config, undefined, {
     data: { detail: 'detail' },
     status,
