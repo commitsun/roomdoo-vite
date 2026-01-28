@@ -4,6 +4,8 @@
 
 # Roomdoo
 
+![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen)
+
 Roomdoo is a modern Property Management System (PMS) web application built with **Vue 3**, **TypeScript**, and **Vite**. It leverages **PrimeVue** for UI components and **Pinia** for state management, providing a robust and responsive interface for managing properties, contacts, and reservations.
 
 ## � Architecture
