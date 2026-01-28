@@ -24,8 +24,8 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
         if (response.data && response.data.token) {
           if (!response.data.code) {
             const jwt = `Bearer ${response.data.token}`;
-            Object.assign(api.defaults, { headers: { Authorization: jwt } });
-            Object.assign(newApi.defaults, { headers: { Authorization: jwt } });
+            (api.defaults.headers as any).common['Authorization'] = jwt;
+            (newApi.defaults.headers as any).common['Authorization'] = jwt;
             context.commit('SET_CURRENT_USER', response.data);
             setCookie('jwt', jwt);
             setCookie('expirationDate', response.data.expirationDate.toString());
@@ -94,8 +94,10 @@ const actions: ActionTree<UserStateInterface, StateInterface> = {
           availabilityRuleFields,
           userImageUrl,
         });
-        Object.assign(api.defaults, { headers: { Authorization: jwt, 'Content-Type': 'application/json' } });
-        Object.assign(newApi.defaults, { headers: { Authorization: jwt, 'Content-Type': 'application/json' } });
+        (api.defaults.headers as any).common['Authorization'] = jwt;
+        (api.defaults.headers as any).common['Content-Type'] = 'application/json';
+        (newApi.defaults.headers as any).common['Authorization'] = jwt;
+        (newApi.defaults.headers as any).common['Content-Type'] = 'application/json';
       } else {
         context.commit('CLEAR_CURRENT_USER');
         void context.dispatch('properties/reset', {}, { root: true });
