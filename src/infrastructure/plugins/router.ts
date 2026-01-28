@@ -24,7 +24,12 @@ export function attachGlobalGuards(router: Router): Router {
 
     // lazy hydrate user from cookies if missing
     if (!auth.user) {
-      auth.hydrateFromCookies?.();
+      if (typeof auth.hydrateFromCookies === 'function') {
+        auth.hydrateFromCookies();
+      }
+      // RECOVER LEGACY COOKIES (SETS AXIOS HEADERS)
+      const { useLegacyStore } = await import('@/_legacy/utils/useLegacyStore');
+      await useLegacyStore().recoverCookies();
     }
 
     // enforce auth when required
