@@ -28,7 +28,14 @@
       :pt="{
         thead: { style: { zIndex: 5 } },
         headerRow: { style: { zIndex: 5 } },
-        header: { style: { zIndex: 6, border: 'none' } },
+        header: {
+          style: {
+            zIndex: 6,
+            border: 'none',
+            paddingTop: '17.5px',
+            paddingBottom: '17.5px',
+          },
+        },
         headerCell: {
           style: {
             zIndex: 5,
@@ -107,6 +114,7 @@
                 :placeholder="t('contacts.globalSearch')"
                 @input="onGlobalQueryInput"
                 :aria-label="t('contacts.globalSearch')"
+                style="width: 100%"
               />
               <InputIcon
                 class="pi pi-times"
@@ -117,84 +125,155 @@
           </div>
 
           <!-- Guest specific date picker -->
-          <div class="date-range-container" v-if="type === 'guest'">
-            <DatePicker
-              ref="datePickerRefMobile"
-              v-model="dates"
-              class="datepicker-mobile"
-              :placeholder="t('contacts.datePicker.placeHolder')"
-              selectionMode="range"
-              :manualInput="true"
-              :showHeader="false"
-              showIcon
-              :showClear="true"
-              :minDate="minDate"
-              :maxDate="maxDate"
-              appendTo="body"
-              :numberOfMonths="1"
-              :inputStyle="{ width: '100%' }"
-              inputClass="datepicker-input-mobile"
-              :showButtonBar="false"
-              @value-change="fetchIfDatesCleared()"
-            >
-              <template #footer>
-                <div class="calendar-footer">
-                  <span class="title-calendar-footer">
-                    {{ t('contacts.datePicker.presetRanges') }}
-                  </span>
-                  <div class="first-row">
-                    <div class="first-row-filters-1">
-                      <Button
-                        class="button"
-                        size="small"
-                        :label="t('contacts.datePicker.today')"
-                        severity="secondary"
-                        @click="setToday()"
-                      />
-                      <Button
-                        class="button"
-                        size="small"
-                        :label="t('contacts.datePicker.last7Days')"
-                        severity="secondary"
-                        @click="setLast7Days()"
-                      />
+          <div class="guest-mobile-filters" v-if="type === 'guest'">
+            <Button
+              type="button"
+              :label="t('contacts.filters')"
+              icon="pi pi-filter"
+              severity="secondary"
+              variant="outlined"
+              @click="isMobileFiltersOpen = true"
+              :badge="activeGuestFiltersCount > 0 ? String(activeGuestFiltersCount) : undefined"
+              badgeSeverity="primary"
+            />
+            <Button
+              icon="pi pi-filter"
+              v-if="(isFilter || isSorting) && numTotalRecords > 0"
+              type="button"
+              :label="isFilter ? t('contacts.restoreFilters') : t('contacts.restoreSorting')"
+              :aria-label="t('contacts.clear') + ' ' + t('contacts.globalSearch')"
+              severity="secondary"
+              variant="outlined"
+              class="btn-clear-filters-sort-mobile"
+              @click="clearAll"
+              :pt="{
+                label: {
+                  style: {
+                    marginLeft: '7px',
+                  },
+                },
+              }"
+            />
+          </div>
+
+          <!-- Dialog for Mobile Filters -->
+          <Dialog
+            v-model:visible="isMobileFiltersOpen"
+            modal
+            :header="t('contacts.filters')"
+            :style="{ width: '100vw', height: '100vh', maxHeight: '100%' }"
+            class="mobile-filters-dialog"
+            :pt="{
+              root: {
+                style: {
+                  overflowY: 'hidden',
+                },
+              },
+              footer: {
+                style: {
+                  position: 'absolute',
+                  bottom: '0',
+                  right: '0',
+                },
+              },
+            }"
+          >
+            <div class="main-dialog">
+              <div class="first">
+                <label> {{ t('contacts.datePicker.label') }} </label>
+                <DatePicker
+                  ref="datePickerRefMobile"
+                  v-model="dates"
+                  class="w-full"
+                  :placeholder="t('contacts.datePicker.placeHolder')"
+                  selectionMode="range"
+                  :manualInput="true"
+                  :showHeader="false"
+                  showIcon
+                  iconDisplay="input"
+                  :showClear="true"
+                  :minDate="minDate"
+                  :maxDate="maxDate"
+                  appendTo="body"
+                  :numberOfMonths="1"
+                  :inputStyle="{ width: '100%' }"
+                  inputClass="datepicker-input-mobile"
+                  :showButtonBar="false"
+                >
+                  <template #footer>
+                    <div class="calendar-footer p-2">
+                      <div class="flex flex-col gap-2">
+                        <span class="font-bold text-sm">{{
+                          t('contacts.datePicker.presetRanges')
+                        }}</span>
+                        <div class="grid grid-cols-2 gap-2">
+                          <Button
+                            size="small"
+                            :label="t('contacts.datePicker.today')"
+                            severity="secondary"
+                            @click="setToday()"
+                          />
+                          <Button
+                            size="small"
+                            :label="t('contacts.datePicker.last7Days')"
+                            severity="secondary"
+                            @click="setLast7Days()"
+                          />
+                          <Button
+                            size="small"
+                            :label="t('contacts.datePicker.last30Days')"
+                            severity="secondary"
+                            @click="setLast30Days()"
+                          />
+                          <Button
+                            size="small"
+                            :label="t('contacts.datePicker.thisMonth')"
+                            severity="secondary"
+                            @click="setThisMonth()"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div class="first-row-filters-2">
-                      <Button
-                        class="button"
-                        size="small"
-                        :label="t('contacts.datePicker.last30Days')"
-                        severity="secondary"
-                        @click="setLast30Days()"
-                      />
-                      <Button
-                        class="button"
-                        size="small"
-                        :label="t('contacts.datePicker.thisMonth')"
-                        severity="secondary"
-                        @click="setThisMonth()"
-                      />
-                    </div>
-                  </div>
-                  <div class="second-row">
-                    <Button
-                      class="button"
-                      size="small"
-                      :label="t('contacts.datePicker.clear')"
-                      severity="secondary"
-                      @click="clearDateFilter()"
-                    />
-                    <Button
-                      class="button"
-                      size="small"
-                      :label="t('contacts.datePicker.apply')"
-                      severity="primary"
-                      @click="applyDateRangeFilters()"
-                    />
-                  </div>
+                  </template>
+                </DatePicker>
+              </div>
+
+              <div class="second">
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{
+                  t('contacts.quickFilter')
+                }}</label>
+                <div>
+                  <ToggleButton
+                    v-model="inHouseNowMobile"
+                    :onLabel="t('contacts.inHouseGuests')"
+                    :offLabel="t('contacts.inHouseGuests')"
+                    :style="{ width: 'auto' }"
+                  >
+                    <template #icon>
+                      <House :size="14" />
+                    </template>
+                  </ToggleButton>
                 </div>
-              </template>
-            </DatePicker>
+              </div>
+            </div>
+            <template #footer>
+              <div class="flex justify-end gap-4 w-full">
+                <Button
+                  :label="t('contacts.restoreFilters')"
+                  severity="secondary"
+                  text
+                  @click="resetGuestFilters"
+                />
+                <Button
+                  :label="t('contacts.apply')"
+                  severity="primary"
+                  @click="applyMobileFilters"
+                />
+              </div>
+            </template>
+          </Dialog>
+
+          <div class="date-range-container-desktop" v-if="type === 'guest'">
             <label for="datepicker-range" class="date-range__label">
               {{ t('contacts.datePicker.label') }}
             </label>
@@ -216,7 +295,7 @@
               :inputStyle="{ width: '100%' }"
               :showButtonBar="false"
               iconDisplay="input"
-              style="width: 260px"
+              style="width: 265px"
               @value-change="fetchIfDatesCleared()"
             >
               <template #footer>
@@ -279,8 +358,8 @@
             </DatePicker>
           </div>
 
-          <div class="fast-filter" v-if="type === 'guest'">
-            <label for="in-house-select" class="fast-filter__label">
+          <div class="fast-filter-desktop" v-if="type === 'guest'">
+            <label for="in-house-select">
               {{ t('contacts.quickFilter') }}
             </label>
 
@@ -298,15 +377,22 @@
           </div>
 
           <Button
-            icon="pi pi-filter-slash"
+            icon="pi pi-filter"
             v-if="(isFilter || isSorting) && numTotalRecords > 0"
             type="button"
             :label="isFilter ? t('contacts.restoreFilters') : t('contacts.restoreSorting')"
             :aria-label="t('contacts.clear') + ' ' + t('contacts.globalSearch')"
             severity="secondary"
             variant="outlined"
-            class="button"
+            class="btn-clear-filters-sort-desktop"
             @click="clearAll"
+            :pt="{
+              label: {
+                style: {
+                  marginLeft: '7px',
+                },
+              },
+            }"
           />
         </div>
       </template>
@@ -946,6 +1032,8 @@ import InputIcon from 'primevue/inputicon';
 import DatePicker from 'primevue/datepicker';
 import { FilterMatchMode } from '@primevue/core/api';
 import { Phone, Smartphone, House } from 'lucide-vue-next';
+import Dialog from 'primevue/dialog';
+import Badge from 'primevue/badge';
 
 import { CONTACT_TYPES } from '@/domain/types/ContactType';
 import { useCountriesStore } from '@/infrastructure/stores/countries';
@@ -982,6 +1070,8 @@ export default defineComponent({
     Avatar,
     DatePicker,
     CountryFlag,
+    Dialog,
+    Badge,
   },
   props: {
     type: {
@@ -1071,6 +1161,22 @@ export default defineComponent({
     const maxDate = ref();
 
     const inHouseNow = ref(false);
+    const inHouseNowMobile = ref(false);
+
+    // Mobile filters state
+    const isMobileFiltersOpen = ref(false);
+
+    // active guest filters count
+    const activeGuestFiltersCount = computed(() => {
+      let count = 0;
+      if (dates.value && dates.value.length > 0) {
+        count++;
+      }
+      if (inHouseNow.value) {
+        count++;
+      }
+      return count;
+    });
 
     const currency = computed(
       () =>
@@ -1476,6 +1582,17 @@ export default defineComponent({
       }
     };
 
+    const resetGuestFilters = (): void => {
+      inHouseNowMobile.value = false;
+      dates.value = null;
+    };
+
+    const applyMobileFilters = (): void => {
+      inHouseNow.value = inHouseNowMobile.value;
+      void fetchNow();
+      isMobileFiltersOpen.value = false;
+    };
+
     onMounted(async () => {
       await Promise.all([countriesStore.fetchCountries(), fetchNow()]);
     });
@@ -1527,7 +1644,15 @@ export default defineComponent({
       setThisMonth,
       clearDateFilter,
       applyDateRangeFilters,
+
       fetchIfDatesCleared,
+
+      // Mobile filters
+      isMobileFiltersOpen,
+      activeGuestFiltersCount,
+      inHouseNowMobile,
+      resetGuestFilters,
+      applyMobileFilters,
 
       // components prime
       datePickerRefMobile,
@@ -1552,33 +1677,25 @@ export default defineComponent({
       label {
         margin-left: var(--p-inputtext-padding-x);
         font-size: var(--floatlabel-active-font-size, 10.5px);
-        margin-bottom: 7px;
-        display: none;
+      }
+      .global-search__field {
+        margin-top: 7px;
       }
     }
-    .date-range-container {
+    .date-range-container-desktop {
+      display: none;
       label {
         margin-left: var(--p-inputtext-padding-x);
         font-size: var(--floatlabel-active-font-size, 10.5px);
         margin-bottom: 7px;
-        display: none;
-      }
-      .datepicker-desktop {
-        display: none;
-      }
-      .datepicker-mobile {
-        margin-top: 1rem;
       }
     }
-    .fast-filter {
+    .fast-filter-desktop {
+      display: none;
       label {
         margin-left: var(--p-inputtext-padding-x);
         font-size: var(--floatlabel-active-font-size, 10.5px);
         margin-bottom: 7px;
-        display: none;
-      }
-      .select {
-        width: 100%;
       }
     }
     .global-search,
@@ -1587,10 +1704,21 @@ export default defineComponent({
         cursor: pointer;
       }
     }
-    .button {
+
+    .guest-mobile-filters {
       margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+      .btn-clear-filters-sort-mobile {
+        display: block;
+      }
+    }
+
+    .btn-clear-filters-sort-desktop {
+      display: none;
     }
   }
+
   .tag-contact-type {
     display: flex;
     align-items: center;
@@ -1667,15 +1795,10 @@ export default defineComponent({
   .table-main-content {
     .table-header {
       flex-direction: row;
-
       gap: 1px;
       align-items: flex-end;
-      .global-search {
-        label {
-          display: block;
-        }
-      }
-      .date-range-container {
+      .date-range-container-desktop {
+        display: block;
         margin-left: 1rem;
         label {
           display: block;
@@ -1683,22 +1806,47 @@ export default defineComponent({
         .datepicker-desktop {
           display: flex;
         }
-        .datepicker-mobile {
-          display: none;
-        }
       }
-      .fast-filter {
+      .fast-filter-desktop {
+        display: block;
         margin-left: 1rem;
         label {
           display: block;
         }
       }
-
-      .button {
-        margin-top: 0;
+      .guest-mobile-filters {
+        display: none;
+      }
+      .btn-clear-filters-sort-desktop {
         margin-left: 1rem;
+        display: block;
       }
     }
+  }
+}
+
+.main-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 0.5rem;
+
+  .first,
+  .second {
+    display: flex;
+    flex-direction: column;
+  }
+
+  label {
+    margin-left: var(--p-inputtext-padding-x);
+    font-size: var(--floatlabel-active-font-size, 10.5px);
+    margin-bottom: 7px;
+    font-weight: 500;
+    color: #4b5563;
   }
 }
 </style>
