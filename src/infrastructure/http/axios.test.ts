@@ -64,18 +64,30 @@ function setAdapter(impl: AxiosAdapter) {
   api.defaults.adapter = impl;
 }
 
-function makeAxiosError(
-  status: number,
-  url: string,
-  config: Partial<InternalAxiosRequestConfig>,
-) {
-  return new AxiosError(`Request failed with status code ${status}`, undefined, config, undefined, {
-    data: { detail: 'detail' },
-    status,
-    statusText: 'ERR',
-    headers: {},
-    config,
-  });
+function makeAxiosError(status: number, url: string, config: Partial<InternalAxiosRequestConfig>) {
+  // Ensure config is fully typed and headers is always defined
+  const fullConfig: InternalAxiosRequestConfig = {
+    // Provide required properties with defaults if missing
+    ...config,
+    headers: config.headers ?? new AxiosHeaders(),
+    method: config.method ?? 'get',
+    url: config.url ?? url,
+    // Add any other required properties with defaults as needed
+  } as InternalAxiosRequestConfig;
+
+  return new AxiosError(
+    `Request failed with status code ${status}`,
+    undefined,
+    fullConfig,
+    undefined,
+    {
+      data: { detail: 'detail' },
+      status,
+      statusText: 'ERR',
+      headers: {},
+      config: fullConfig,
+    },
+  );
 }
 
 describe('endpoint selection by import.meta.env', () => {
