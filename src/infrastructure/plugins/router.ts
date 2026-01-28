@@ -11,6 +11,16 @@ export function attachGlobalGuards(router: Router): Router {
     // allow login unconditionally
     if (to.name === 'login') return true;
 
+    // lazy hydrate user from cookies if missing
+    if (!auth.user) {
+      if (typeof auth.hydrateFromCookies === 'function') {
+        auth.hydrateFromCookies();
+      }
+      // RECOVER LEGACY COOKIES (SETS AXIOS HEADERS)
+      const { useLegacyStore } = await import('@/_legacy/utils/useLegacyStore');
+      await useLegacyStore().recoverCookies();
+    }
+
     // validate pmsPropertyId (fetch if needed)
     if (to.params.pmsPropertyId) {
       const pmsPropertiesStore = usePmsPropertiesStore();
@@ -20,16 +30,6 @@ export function attachGlobalGuards(router: Router): Router {
       const id = Number(to.params.pmsPropertyId);
       const exists = pmsPropertiesStore.pmsProperties.find((p) => p.id === id);
       if (!exists) return { name: '404-not-found' };
-    }
-
-    // lazy hydrate user from cookies if missing
-    if (!auth.user) {
-      if (typeof auth.hydrateFromCookies === 'function') {
-        auth.hydrateFromCookies();
-      }
-      // RECOVER LEGACY COOKIES (SETS AXIOS HEADERS)
-      const { useLegacyStore } = await import('@/_legacy/utils/useLegacyStore');
-      await useLegacyStore().recoverCookies();
     }
 
     // enforce auth when required
